@@ -1,0 +1,14 @@
+let _ = Bisect.Runtime.init "expr_binding.ml"
+  
+let x = (Bisect.Runtime.mark "expr_binding.ml" 0; 3)
+  
+let f x = (Bisect.Runtime.mark "expr_binding.ml" 1; print_endline x)
+  
+let f' x =
+  (Bisect.Runtime.mark "expr_binding.ml" 3;
+   let x' = String.uppercase x
+   in (Bisect.Runtime.mark "expr_binding.ml" 2; print_endline x'))
+  
+let g x y z = (Bisect.Runtime.mark "expr_binding.ml" 4; (x + y) * z)
+  
+

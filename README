@@ -1,0 +1,4 @@
+Bisect is a coverage tool for the Objective Caml language.
+Bisect is Copyright (C) 2008 Xavier Clerc and released under the GPL v3.
+The official website of Bisect is <http://bisect.x9c.fr>.
+Version 1.0-alpha.

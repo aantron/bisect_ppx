@@ -1,0 +1,9 @@
+let _ = Bisect.Runtime.init "expr_ifthen.ml"
+  
+let () =
+  (Bisect.Runtime.mark "expr_ifthen.ml" 2;
+   if true
+   then (Bisect.Runtime.mark "expr_ifthen.ml" 1; print_endline "abc")
+   else (Bisect.Runtime.mark "expr_ifthen.ml" 0; print_endline "def"))
+  
+
