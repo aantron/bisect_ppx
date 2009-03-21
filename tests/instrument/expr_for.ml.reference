@@ -15,4 +15,13 @@ let () =
    Bisect.Runtime.mark "expr_for.ml" 3;
    print_endline "after")
   
+let () =
+  (Bisect.Runtime.mark "expr_for.ml" 9;
+   print_endline "before";
+   Bisect.Runtime.mark "expr_for.ml" 8;
+   for i = 1 to 3 do Bisect.Runtime.mark "expr_for.ml" 6; print_endline "abc"
+   done;
+   Bisect.Runtime.mark "expr_for.ml" 7;
+   print_endline "after")
+  
 

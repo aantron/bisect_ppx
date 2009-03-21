@@ -6,3 +6,10 @@ let () =
     print_endline "ghi"
   done;
   print_endline "after"
+
+let () =
+  print_endline "before";
+  for i = 1 to 3 do
+    print_endline "abc"
+  done;
+  print_endline "after"

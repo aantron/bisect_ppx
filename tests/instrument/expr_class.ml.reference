@@ -16,4 +16,32 @@ class c =
   
 let i = (Bisect.Runtime.mark "expr_class.ml" 5; new c)
   
+class c' =
+  object val mutable x = (Bisect.Runtime.mark "expr_class.ml" 6; 0)
+           
+    method get_x = (Bisect.Runtime.mark "expr_class.ml" 7; x)
+      
+    method set_x =
+      fun x' ->
+        (Bisect.Runtime.mark "expr_class.ml" 9;
+         print_endline "modified";
+         Bisect.Runtime.mark "expr_class.ml" 8;
+         x <- x')
+      
+    method print =
+      (Bisect.Runtime.mark "expr_class.ml" 11;
+       print_int x;
+       Bisect.Runtime.mark "expr_class.ml" 10;
+       print_newline ())
+      
+    initializer
+      (Bisect.Runtime.mark "expr_class.ml" 13;
+       print_string "created";
+       Bisect.Runtime.mark "expr_class.ml" 12;
+       print_newline ())
+      
+  end
+  
+let i = (Bisect.Runtime.mark "expr_class.ml" 14; new c)
+  
 

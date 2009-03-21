@@ -12,4 +12,40 @@ let f =
   | 1 -> (Bisect.Runtime.mark "expr_match.ml" 4; print_endline "def")
   | _ -> (Bisect.Runtime.mark "expr_match.ml" 5; print_endline "ghi")
   
+let () =
+  match x with
+  | 0 ->
+      (Bisect.Runtime.mark "expr_match.ml" 7;
+       print_string "abc";
+       Bisect.Runtime.mark "expr_match.ml" 6;
+       print_newline ())
+  | 1 ->
+      (Bisect.Runtime.mark "expr_match.ml" 9;
+       print_string "def";
+       Bisect.Runtime.mark "expr_match.ml" 8;
+       print_newline ())
+  | _ ->
+      (Bisect.Runtime.mark "expr_match.ml" 11;
+       print_string "ghi";
+       Bisect.Runtime.mark "expr_match.ml" 10;
+       print_newline ())
+  
+let f =
+  function
+  | 0 ->
+      (Bisect.Runtime.mark "expr_match.ml" 13;
+       print_string "abc";
+       Bisect.Runtime.mark "expr_match.ml" 12;
+       print_newline ())
+  | 1 ->
+      (Bisect.Runtime.mark "expr_match.ml" 15;
+       print_string "def";
+       Bisect.Runtime.mark "expr_match.ml" 14;
+       print_newline ())
+  | _ ->
+      (Bisect.Runtime.mark "expr_match.ml" 17;
+       print_string "ghi";
+       Bisect.Runtime.mark "expr_match.ml" 16;
+       print_newline ())
+  
 
