@@ -94,10 +94,13 @@ runtime: $(RUNTIME_FILES)
 	mv *.cm* *.a $(PATH_BIN)
 	rm *.o
 
+ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
 	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -I $(PATH_SRC) -pack -o $(LIBRARY).cmj $(PATH_SRC)/common.cmj $(PATH_SRC)/runtime.cmj
 	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -a -o $(LIBRARY).cmja $(LIBRARY).cmj
 	mv *.cm* *.jar $(PATH_BIN)
 	rm *.jo
+else
+endif
 
 instrument:
 	$(OCAMLC) -c -pp camlp4oof -I +camlp4 -I $(PATH_SRC) $(PATH_SRC)/$(INSTRUMENT_MODULE).ml
@@ -108,7 +111,10 @@ instrument:
 report:
 	$(OCAMLC) $(OCAML_COMPILE_FLAGS) $(CMA_FILES) -o $(PATH_BIN)/$(EXECUTABLE) $(PATH_SRC)/common.cmo $(PATH_SRC)/$(REPORT_MODULE).ml
 	$(OCAMLOPT) $(OCAML_COMPILE_FLAGS) $(CMXA_FILES) -o $(PATH_BIN)/$(EXECUTABLE).opt $(PATH_SRC)/common.cmx $(PATH_SRC)/$(REPORT_MODULE).ml
+ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
 	$(OCAMLJAVA) $(OCAML_COMPILE_FLAGS) $(OCAML_JAVA_FLAGS) $(CMJA_FILES) -standalone -o $(PATH_BIN)/$(EXECUTABLE).jar $(PATH_SRC)/common.cmj $(PATH_SRC)/$(REPORT_MODULE).ml
+else
+endif
 
 html-doc:
 	$(OCAMLDOC) -sort -html -t '$(OCAML_DOC_TITLE)' -d $(PATH_DOC) -I $(PATH_SRC) $(PATH_SRC)/*.mli
@@ -130,8 +136,13 @@ clean-doc:
 
 install:
 	mkdir -p $(INSTALL_DIR)
-	cp $(PATH_BIN)/$(EXECUTABLE) $(PATH_BIN)/$(EXECUTABLE).opt $(PATH_BIN)/$(EXECUTABLE).jar $(INSTALL_DIR_EXEC)
-	cp $(PATH_BIN)/*.cm* $(PATH_BIN)/$(LIBRARY).a $(PATH_BIN)/$(LIBRARY).jar $(INSTALL_DIR)
+	cp $(PATH_BIN)/$(EXECUTABLE) $(PATH_BIN)/$(EXECUTABLE).opt $(INSTALL_DIR_EXEC)
+	cp $(PATH_BIN)/*.cm* $(PATH_BIN)/$(LIBRARY).a $(INSTALL_DIR)
+ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
+	cp $(PATH_BIN)/$(EXECUTABLE).jar $(INSTALL_DIR_EXEC)
+	cp $(PATH_BIN)/$(LIBRARY).jar $(INSTALL_DIR)
+else
+endif
 	if test `grep -s -c '$(INSTALL_DIR)$$' $(INSTALL_DIR_BASE)/ld.conf` = 0; \
 	then echo '$(INSTALL_DIR)' >> $(INSTALL_DIR_BASE)/ld.conf; fi
 
