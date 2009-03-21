@@ -79,6 +79,7 @@ default:
 	@echo "  clean-doc   deletes documentation files"
 	@echo "  install     copies executable and library files"
 	@echo "  tests       runs the tests"
+	@echo "installation is usually done by: 'make all' and 'sudo make install'"
 
 all: clean-all common runtime instrument report html-doc
 
