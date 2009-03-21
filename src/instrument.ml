@@ -58,33 +58,6 @@ let rec ident_of_app e =
   | Ast.ExApp (_, e', _) -> ident_of_app e'
   | _ -> ""
 
-(* Returns the offset of the passed expression.
-   This is a best-effort try to overcome bug #0004521
-   url: http://caml.inria.fr/mantis/view.php?id=4521 *)
-let rec offset_of_expr = function
-  | Ast.ExApp (_, e', e'') ->
-      let ident = ident_of_app e' in
-      let first_char = if (String.length ident) > 0 then ident.[0] else 'a' in
-      (match first_char with
-      | 'a' .. 'z' | 'A' .. 'Z' | '_' ->
-          (match e' with
-          | Ast.ExApp (_, e1, e2) -> offset_of_expr e1
-          | _ -> Loc.start_off (Ast.loc_of_expr e'))
-      | _ ->
-          (match e' with
-          | Ast.ExApp (_, e1, e2) -> offset_of_expr e2
-          | _ -> offset_of_expr e'))
-  | Ast.ExAcc (_, e', _)
-  | Ast.ExAre (_, e', _)
-  | Ast.ExSem (_, e', _)
-  | Ast.ExAss (_, e', _)
-  | Ast.ExSnd (_, e', _)
-  | Ast.ExSte (_, e', _)
-  | Ast.ExTup (_, e')
-  | Ast.ExCom (_, e', _) -> offset_of_expr e'
-  | e ->
-      Loc.start_off (Ast.loc_of_expr e)
-
 (* Tests whether the passed expression is a bare mapping.
    Used to avoid unnecessary marking. *)
 let rec bare_mapping = function
@@ -119,9 +92,10 @@ let wrap_expr k e =
   else
     try
       let loc = Ast.loc_of_expr e in
+      let ofs = Loc.start_off loc in
       Ast.ExSeq (loc,
                  Ast.ExSem (loc,
-                            (marker (Loc.file_name loc) (offset_of_expr e) k),
+                            (marker (Loc.file_name loc) ofs k),
                             e))
     with Already_marked -> e
 
