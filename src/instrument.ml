@@ -105,6 +105,13 @@ let rec wrap_binding = function
   | Ast.BiEq (loc, p, e) -> Ast.BiEq (loc, p, (wrap_expr Common.Binding e))
   | b -> b
 
+(* Wraps a sequence. *)
+let rec wrap_seq k = function
+  | Ast.ExSem (loc, e1, e2) ->
+      Ast.ExSem (loc, (wrap_seq k e1), (wrap_seq Common.Sequence e2))
+  | Ast.ExNil loc -> Ast.ExNil loc
+  | x -> (wrap_expr k x)
+
 (* The actual "instrumenter" object, marking expressions. *)
 let instrument =
   object
@@ -132,15 +139,13 @@ let instrument =
                                           (wrap_expr Common.IfThen e2))),
                                (wrap_expr Common.IfThen e3))
           | _ -> e')
-      | Ast.ExSem (loc, e1, e2) ->
-          Ast.ExSem (loc, e1, (wrap_expr Common.Sequence e2))
-      | Ast.ExFor (loc, id, e1, e2, dir, e3) -> Ast.ExFor (loc, id, e1, e2, dir, (wrap_expr Common.For e3))
+      | Ast.ExFor (loc, id, e1, e2, dir, e3) -> Ast.ExFor (loc, id, e1, e2, dir, (wrap_seq Common.For e3))
       | Ast.ExIfe (loc, e1, e2, e3) ->
           Ast.ExIfe (loc, e1, (wrap_expr Common.IfThen e2), (wrap_expr Common.IfThen e3))
       | Ast.ExLet (loc, r, bnd, e1) -> Ast.ExLet (loc, r, bnd, (wrap_expr Common.Binding e1))
-      | Ast.ExSeq (loc, e1) -> Ast.ExSeq (loc, (wrap_expr Common.Sequence e1))
-      | Ast.ExTry (loc, e1, h) -> Ast.ExTry (loc, (wrap_expr Common.Try e1), h)
-      | Ast.ExWhi (loc, e1, e2) -> Ast.ExWhi (loc, e1, (wrap_expr Common.While e2))
+      | Ast.ExSeq (loc, e) -> Ast.ExSeq (loc, (wrap_seq Common.Sequence e))
+      | Ast.ExTry (loc, e1, h) -> Ast.ExTry (loc, (wrap_seq Common.Try e1), h)
+      | Ast.ExWhi (loc, e1, e2) -> Ast.ExWhi (loc, e1, (wrap_seq Common.While e2))
       | _ -> e'
     method match_case mc =
       let mc' = super#match_case mc in
