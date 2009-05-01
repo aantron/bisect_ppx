@@ -12,7 +12,7 @@
       <tr><td>binding</td><td width="16px">&nbsp;</td><td>3 / 3 (100 %)</td></tr>
       <tr><td>sequence</td><td width="16px">&nbsp;</td><td>5 / 5 (100 %)</td></tr>
       <tr><td>for</td><td width="16px">&nbsp;</td><td>1 / 1 (100 %)</td></tr>
-      <tr><td>if/then</td><td width="16px">&nbsp;</td><td>2 / 2 (100 %)</td></tr>
+      <tr><td>if/then</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
       <tr><td>try</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
       <tr><td>while</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
       <tr><td>match/function</td><td width="16px">&nbsp;</td><td>2 / 2 (100 %)</td></tr>
@@ -21,6 +21,7 @@
       <tr><td>class method</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
       <tr><td>class value</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
       <tr><td>toplevel expression</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+      <tr><td>lazy operator</td><td width="16px">&nbsp;</td><td>2 / 2 (100 %)</td></tr>
     </table>
     <hr class="codeSep"/>
     <h4>Source:</h4>

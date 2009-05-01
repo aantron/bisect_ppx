@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-let table : (string, (int array)) Hashtbl.t = Hashtbl.create 32
+let table : (string, (int array)) Hashtbl.t = Hashtbl.create 17
 
 let init fn =
   if not (Hashtbl.mem table fn) then
@@ -44,9 +44,10 @@ let mark fn pt =
 
 let verbose =
   try
-    let env = String.uppercase (Sys.getenv "BISECT_SILENT") in
-    (env <> "YES") && (env <> "ON")
-  with Not_found -> true
+    match String.uppercase (Sys.getenv "BISECT_SILENT") with
+    | "YES" | "ON" -> ignore
+    | _ -> prerr_endline
+  with Not_found -> prerr_endline
 
 let file_channel =
   let base_name =
@@ -69,7 +70,7 @@ let file_channel =
   try
     Some (open_out_bin !actual_name)
   with _ ->
-    if verbose then prerr_endline "Bisect runtime was unable to create file.";
+    verbose " *** Bisect runtime was unable to create file.";
     None
 
 let dump () =
@@ -80,7 +81,7 @@ let dump () =
       (try
         Common.write_runtime_data channel content;
       with _ ->
-        if verbose then prerr_endline "Bisect runtime was unable to write file.");
-      (try close_out channel with _ -> ())
+        verbose " *** Bisect runtime was unable to write file.");
+      close_out_noerr channel
 
 let () = at_exit dump

@@ -23,25 +23,47 @@
 (** {6 Point kinds} *)
 
 type point_kind =
-  | Binding (** point kind for bindings (let ... in, as well as toplevel bindings. *)
+  | Binding (** point kind for bindings (let ... in, as well as toplevel bindings). *)
   | Sequence (** point kind for sequences. *)
   | For (** point kind for for loops. *)
-  | IfThen (** point kind for if/then constructs. *)
+  | If_then (** point kind for if/then constructs. *)
   | Try (** point kind for try/catch constructs. *)
   | While (** point kind for while loops.*)
   | Match (** point kind for matches, and functions. *)
-  | ClassExpr (** point kind for class expressions. *)
-  | ClassInit (** point kind for class initialiazers. *)
-  | ClassMeth (** point kind for class methods. *)
-  | ClassVal (** point kind for class values. *)
-  | TopLevelExpr (** point kind for toplevel expressions. *)
-(** The type of point kinds.*)
+  | Class_expr (** point kind for class expressions. *)
+  | Class_init (** point kind for class initialiazers. *)
+  | Class_meth (** point kind for class methods. *)
+  | Class_val (** point kind for class values. *)
+  | Toplevel_expr (** point kind for toplevel expressions. *)
+  | Lazy_operator (** point kind for lazy operators. *)
+(** The type of point kinds, characterizing the various places where
+    Bisect will check for code execution.*)
 
 val all_point_kinds : point_kind list
 (** The list of all point kinds, in ascending order. *)
 
 val string_of_point_kind : point_kind -> string
 (** Conversion from point kind into string. *)
+
+
+(** {6 Utility functions} *)
+
+val try_finally : 'a -> ('a -> 'b) -> ('a -> unit) -> 'b
+(** [try_finally x f h] implements the try/finally logic.
+    [f] is the body of the try clause, while [h] is the finally handler.
+    Errors raised by handler are silently ignored. *)
+
+val try_in_channel : bool -> string -> (in_channel -> 'a) -> 'a
+(** [try_in_channel bin filename f] is equivalent to [try_finally x f h] where:
+    - [x] is an input channel for file [filename],
+          (opened in binary mode iff [bin] is [true]);
+    - [h] just closes the input channel. *)
+
+val try_out_channel : bool -> string -> (out_channel -> 'a) -> 'a
+(** [try_out_channel bin filename f] is equivalent to [try_finally x f h] where:
+    - [x] is an output channel for file [filename],
+          (opened in binary mode iff [bin] is [true]);
+    - [h] just closes the output channel. *)
 
 
 (** {6 I/O functions} *)
@@ -51,32 +73,38 @@ exception Invalid_file of string
     format. The parameter is the name of the incriminated file. *)
 
 exception Unsupported_version of string
-(** Exception to be raised when a read file has an unsupported version.
-    The parameter is the name of the incriminated file. *)
+(** Exception to be raised when a read file has a format whose version is
+    unsupported. The parameter is the name of the incriminated file. *)
 
 exception Modified_file of string
 (** Exception to be raised when the source file has been modified since
     instrumentation. The parameter is the name of the incriminated file. *)
 
 val cmp_file_of_ml_file : string -> string
-(** [cmp_file_of_ml_file f] returns the name of the cmp file associated with
-    the ml file named [f]. *)
+(** [cmp_file_of_ml_file f] returns the name of the {i cmp} file associated with
+    the {i ml} file named [f]. *)
 
 val write_runtime_data : out_channel -> (string * (int array)) list -> unit
 (** [write_runtime_data oc d] writes the runtime data [d] to the output channel
     [oc] using the Bisect file format. The runtime data list [d] encodes a map
-    from files to array of integers (the value at index {i i} being the number
-    of times point {i i} has been visited). *)
+    (through an association list) from files to arrays of integers (the value
+    at index {i i} being the number of times point {i i} has been visited).
+    Raises [Sys_error] if an i/o error occurs. *)
 
 val write_points : out_channel -> (int * int * point_kind) list -> string -> unit
 (** [write_points oc pts f] writes the point definitions [pts] to the output
     channel [oc] using the Bisect file format. A point definition is a
     (offset, identifier, kind) triple. [f] is the name of the source file
-    related to point definitions, whose digest is written to the output channel. *)
+    related to point definitions, whose digest is written to the output channel.
+    Raises [Sys_error] if an i/o error occurs. *)
+
+val read_runtime_data : string ->  (string * (int array)) list
+(** [read_runtime_data f] reads the runtime data from file [f].
+    Raises [Sys_error] if an i/o error occurs, may also raise
+    [Invalid_file], [Unsupported_version], or [Modified_file]. *)
 
 val read_points : string -> (int * int * point_kind) list
 (** [read_points f] reads the point definitions associated with the source file
-    named [f]. *)
-
-val read_runtime_data : string ->  (string * (int array)) list
-(** [read_runtime_data f] reads the runtime data from file [f]. *)
+    named [f].
+    Raises [Sys_error] if an i/o error occurs, may also raise
+    [Invalid_file], [Unsupported_version], or [Modified_file]. *)

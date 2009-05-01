@@ -23,44 +23,68 @@ type point_kind =
   | Binding
   | Sequence
   | For
-  | IfThen
+  | If_then
   | Try
   | While
   | Match
-  | ClassExpr
-  | ClassInit
-  | ClassMeth
-  | ClassVal
-  | TopLevelExpr
+  | Class_expr
+  | Class_init
+  | Class_meth
+  | Class_val
+  | Toplevel_expr
+  | Lazy_operator
 
 let all_point_kinds = [
   Binding ;
   Sequence ;
   For ;
-  IfThen ;
+  If_then ;
   Try ;
   While ;
   Match ;
-  ClassExpr ;
-  ClassInit ;
-  ClassMeth ;
-  ClassVal ;
-  TopLevelExpr
+  Class_expr ;
+  Class_init ;
+  Class_meth ;
+  Class_val ;
+  Toplevel_expr ;
+  Lazy_operator
 ]
 
 let string_of_point_kind = function
   | Binding -> "binding"
   | Sequence -> "sequence"
   | For -> "for"
-  | IfThen -> "if/then"
+  | If_then -> "if/then"
   | Try -> "try"
   | While -> "while"
   | Match -> "match/function"
-  | ClassExpr -> "class expression"
-  | ClassInit -> "class initializer"
-  | ClassMeth -> "class method"
-  | ClassVal -> "class value"
-  | TopLevelExpr -> "toplevel expression"
+  | Class_expr -> "class expression"
+  | Class_init -> "class initializer"
+  | Class_meth -> "class method"
+  | Class_val -> "class value"
+  | Toplevel_expr -> "toplevel expression"
+  | Lazy_operator -> "lazy operator"
+
+
+(* Utility functions *)
+
+let try_finally x f h =
+  let res =
+    try
+      f x
+    with e ->
+      (try h x with _ -> ());
+      raise e in
+  (try h x with _ -> ());
+  res
+
+let try_in_channel bin x f =
+  let open_ch = if bin then open_in_bin else open_in in
+  try_finally (open_ch x) f (close_in_noerr)
+
+let try_out_channel bin x f =
+  let open_ch = if bin then open_out_bin else open_out in
+  try_finally (open_ch x) f (close_out_noerr)
 
 
 (* I/O functions *)
@@ -97,56 +121,46 @@ let write_points channel content file =
   Array.sort compare arr;
   output_value channel arr
 
-let open_in_with_checks filename magic version check_digest =
-  let channel = open_in_bin filename in
-  try
-    let magic_length = String.length magic in
-    let file_magic = String.create magic_length in
-    really_input channel file_magic 0 magic_length;
-    if file_magic = magic then
-      let file_version : (int * int) = input_value channel in
-      if file_version <> version then
-        raise (Unsupported_version filename)
-      else
-        ()
+let check_channel channel filename magic version check_digest =
+  let magic_length = String.length magic in
+  let file_magic = String.create magic_length in
+  really_input channel file_magic 0 magic_length;
+  if file_magic = magic then
+    let file_version : (int * int) = input_value channel in
+    if file_version <> version then
+      raise (Unsupported_version filename)
     else
-      raise (Invalid_file filename);
-    match check_digest with
-    | Some file ->
-        let file_digest : string = input_value channel in
-        let digest = Digest.file file in
-        if file_digest = digest then
-          channel
-        else
-          raise (Modified_file filename)
-    | None -> channel
-  with e ->
-    (try close_in channel with _ -> ());
-    raise e
+      ()
+  else
+    raise (Invalid_file filename);
+  match check_digest with
+  | Some file ->
+      let file_digest : string = input_value channel in
+      let digest = Digest.file file in
+      if file_digest <> digest then raise (Modified_file filename)
+  | None -> ()
+
+let read_runtime_data filename =
+  try_in_channel
+    true
+    filename
+    (fun channel ->
+      check_channel channel filename magic_number_rtd format_version None;
+      let file_content : (string * (int array)) array = input_value channel in
+      Array.to_list file_content)
 
 let read_points filename =
   let offset (o, _, _) = o in
-  let channel = open_in_with_checks (cmp_file_of_ml_file filename) magic_number_pts format_version (Some filename) in
-  try
-    let arr : (int * int * point_kind) array = input_value channel in
-    Array.sort compare arr;
-    for i = 1 to (pred (Array.length arr)) do
-      if (offset arr.(i)) = (offset arr.(pred i)) then raise (Invalid_file filename);
-    done;
-    let content = Array.to_list arr in
-    (try close_in channel with _ -> ());
-    content
-  with e ->
-    (try close_in channel with _ -> ());
-    raise e
-
-let read_runtime_data filename =
-  let channel = open_in_with_checks filename magic_number_rtd format_version None in
-  try
-    let file_content : (string * (int array)) array = input_value channel in
-    let res = Array.to_list file_content in
-    (try close_in channel with _ -> ());
-    res
-  with e ->
-    (try close_in channel with _ -> ());
-    raise e
+  let filename' = cmp_file_of_ml_file filename in
+  try_in_channel
+    true
+    filename'
+    (fun channel ->
+      check_channel channel filename' magic_number_pts format_version (Some filename);
+      let arr : (int * int * point_kind) array = input_value channel in
+      Array.sort compare arr;
+      for i = 1 to (pred (Array.length arr)) do
+        if (offset arr.(i)) = (offset arr.(pred i)) then
+          raise (Invalid_file filename);
+      done;
+      Array.to_list arr)

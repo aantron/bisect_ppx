@@ -23,7 +23,7 @@ let files = ref []
 
 (* Map from file name to list of points.
    Each point is a (offset, identifier, kind) triple. *)
-let points : (string, ((int * int * Common.point_kind) list)) Hashtbl.t = Hashtbl.create 32
+let points : (string, ((int * int * Common.point_kind) list)) Hashtbl.t = Hashtbl.create 17
 
 (* Dumps the points to their respective files. *)
 let () = at_exit
@@ -35,14 +35,11 @@ let () = at_exit
         !files;
       Hashtbl.iter
         (fun file points ->
-          let filename = Common.cmp_file_of_ml_file file in
-          let channel = open_out_bin filename in
-          (try
-            Common.write_points channel points file
-          with e ->
-            (try close_out channel with _ -> ());
-            raise e);
-          (try close_out channel with _ -> ()))
+          Common.try_out_channel
+            true
+            (Common.cmp_file_of_ml_file file)
+            (fun channel ->
+              Common.write_points channel points file))
         points)
 
 (* Returns the identifier of an application, as a string. *)
@@ -58,7 +55,8 @@ let rec ident_of_app e =
   | Ast.ExApp (_, e', _) -> ident_of_app e'
   | _ -> ""
 
-(* Tests whether the passed expression is a bare mapping.
+(* Tests whether the passed expression is a bare mapping,
+   or starts with a bare mapping (if the expression is a sequence).
    Used to avoid unnecessary marking. *)
 let rec bare_mapping = function
   | Ast.ExFun _ -> true
@@ -83,9 +81,8 @@ let marker file ofs kind =
     let _loc = Loc.ghost in
     <:expr< (Bisect.Runtime.mark $str:file$ $int:string_of_int idx$) >>
 
-(* Wraps an expression with a marker.
-   Returns the passed expression unmodified,
-   if the expression is already marked. *)
+(* Wraps an expression with a marker, returning the passed expression
+   unmodified if the expression is already marked of is a bare mapping. *)
 let wrap_expr k e =
   if bare_mapping e then
     e
@@ -117,17 +114,15 @@ let instrument =
   object
     inherit Ast.map as super
     method class_expr ce =
-      let ce' = super#class_expr ce in
-      match ce' with
-      | Ast.CeApp (loc, ce1, e1) -> Ast.CeApp (loc, ce1, (wrap_expr Common.ClassExpr e1))
-      | _ -> ce'
+      match super#class_expr ce with
+      | Ast.CeApp (loc, ce, e) -> Ast.CeApp (loc, ce, (wrap_expr Common.Class_expr e))
+      | x -> x
     method class_str_item csi =
-      let csi' = super#class_str_item csi in
-      match csi' with
-      | Ast.CrIni (loc, e1) -> Ast.CrIni (loc, (wrap_expr Common.ClassInit e1))
-      | Ast.CrMth (loc, id, priv, e1, ct) -> Ast.CrMth (loc, id, priv, (wrap_expr Common.ClassMeth e1), ct)
-      | Ast.CrVal (loc, id, mut, e1) -> Ast.CrVal (loc, id, mut, (wrap_expr Common.ClassVal e1))
-      | _ -> csi'
+      match super#class_str_item csi with
+      | Ast.CrIni (loc, e) -> Ast.CrIni (loc, (wrap_expr Common.Class_init e))
+      | Ast.CrMth (loc, id, priv, e, ct) -> Ast.CrMth (loc, id, priv, (wrap_expr Common.Class_meth e), ct)
+      | Ast.CrVal (loc, id, mut, e) -> Ast.CrVal (loc, id, mut, (wrap_expr Common.Class_val e))
+      | x -> x
     method expr e =
       let e' = super#expr e in
       match e' with
@@ -136,30 +131,28 @@ let instrument =
           | "&&" | "&" | "||" | "or" ->
               Ast.ExApp (loc, (Ast.ExApp (loc',
                                           e1,
-                                          (wrap_expr Common.IfThen e2))),
-                               (wrap_expr Common.IfThen e3))
+                                          (wrap_expr Common.Lazy_operator e2))),
+                               (wrap_expr Common.Lazy_operator e3))
           | _ -> e')
       | Ast.ExFor (loc, id, e1, e2, dir, e3) -> Ast.ExFor (loc, id, e1, e2, dir, (wrap_seq Common.For e3))
       | Ast.ExIfe (loc, e1, e2, e3) ->
-          Ast.ExIfe (loc, e1, (wrap_expr Common.IfThen e2), (wrap_expr Common.IfThen e3))
+          Ast.ExIfe (loc, e1, (wrap_expr Common.If_then e2), (wrap_expr Common.If_then e3))
       | Ast.ExLet (loc, r, bnd, e1) -> Ast.ExLet (loc, r, bnd, (wrap_expr Common.Binding e1))
       | Ast.ExSeq (loc, e) -> Ast.ExSeq (loc, (wrap_seq Common.Sequence e))
       | Ast.ExTry (loc, e1, h) -> Ast.ExTry (loc, (wrap_seq Common.Try e1), h)
       | Ast.ExWhi (loc, e1, e2) -> Ast.ExWhi (loc, e1, (wrap_seq Common.While e2))
-      | _ -> e'
+      | x -> x
     method match_case mc =
-      let mc' = super#match_case mc in
-      match mc' with
+      match super#match_case mc with
       | Ast.McArr (loc, p1, e1, e2) ->
           Ast.McArr (loc, p1, e1, (wrap_expr Common.Match e2))
-      | _ -> mc'
+      | x -> x
     method str_item si =
-      let si' = super#str_item si in
-      let res = match si' with
-      | Ast.StDir (loc, id, e1) -> Ast.StDir (loc, id, (wrap_expr Common.TopLevelExpr e1))
-      | Ast.StExp (loc, e1) -> Ast.StExp (loc, (wrap_expr Common.TopLevelExpr e1))
+      let res = match super#str_item si with
+      | Ast.StDir (loc, id, e) -> Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
+      | Ast.StExp (loc, e) -> Ast.StExp (loc, (wrap_expr Common.Toplevel_expr e))
       | Ast.StVal (loc, rc, bnd) -> Ast.StVal (loc, rc, (wrap_binding bnd))
-      | _ -> si' in
+      | x -> x in
       let loc = Ast.loc_of_str_item si in
       let file = Loc.file_name loc in
       if not (List.mem file !files) && not (Loc.is_ghost loc) then
