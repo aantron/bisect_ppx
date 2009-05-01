@@ -32,7 +32,7 @@ OCAMLC=$(PATH_OCAML_BIN)/ocamlc
 OCAMLOPT=$(PATH_OCAML_BIN)/ocamlopt
 OCAMLJAVA=$(PATH_OCAML_BIN)/ocamljava
 OCAMLDOC=$(PATH_OCAML_BIN)/ocamldoc
-OCAML_COMPILE_FLAGS=-w Ael -I $(PATH_SRC)
+OCAML_COMPILE_FLAGS=-w Ael -I $(PATH_SRC) -for-pack Bisect
 OCAML_JAVA_FLAGS=-java-package fr.x9c.bisect
 OCAML_LIBRARIES=unix
 
@@ -54,10 +54,11 @@ INSTRUMENT_MODULE=instrument
 REPORT_MODULE=report
 
 ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
-	EXTENSIONS=cmi cmo cmx cmj
+	IMPLEMENTATION_EXTENSIONS=cmo cmx cmj
 else
-	EXTENSIONS=cmi cmo cmx
+	IMPLEMENTATION_EXTENSIONS=cmo cmx
 endif
+EXTENSIONS=cmi $(IMPLEMENTATION_EXTENSIONS)
 
 RUNTIME_FILES=$(patsubst %,$(PATH_SRC)/$(RUNTIME_MODULE).%,$(EXTENSIONS))
 COMMON_FILES=$(patsubst %,$(PATH_SRC)/$(COMMON_MODULE).%,$(EXTENSIONS))
@@ -149,7 +150,7 @@ endif
 
 tests::
 	@echo ' *** running instrument tests'
-	@cd tests/instrument && $(MAKE) && cd ../..
+	@cd tests/instrument && $(MAKE) EXE_SUFFIX='' LIB_EXT=cma && cd ../..
 	@echo ' *** running report tests (bytecode)'
 	@cd tests/report && $(MAKE) COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma REPORT=../../bin/bisect-report && cd ../..
 	@echo ' *** running report tests (native)'
@@ -172,7 +173,7 @@ endif
 	$(OCAMLC) $(OCAML_COMPILE_FLAGS) -c $<
 
 .ml.cmx:
-	$(OCAMLOPT) -for-pack Bisect $(OCAML_COMPILE_FLAGS) -c $<
+	$(OCAMLOPT) $(OCAML_COMPILE_FLAGS) -c $<
 
 .ml.cmj:
-	$(OCAMLJAVA) -for-pack Bisect $(OCAML_JAVA_FLAGS) $(OCAML_COMPILE_FLAGS) -c $<
+	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) $(OCAML_COMPILE_FLAGS) -c $<
