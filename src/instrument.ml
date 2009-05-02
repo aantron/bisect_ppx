@@ -82,9 +82,10 @@ let marker file ofs kind =
     <:expr< (Bisect.Runtime.mark $str:file$ $int:string_of_int idx$) >>
 
 (* Wraps an expression with a marker, returning the passed expression
-   unmodified if the expression is already marked of is a bare mapping. *)
+   unmodified if the expression is already marked, is a bare mapping,
+   or has a ghost location. *)
 let wrap_expr k e =
-  if bare_mapping e then
+  if (bare_mapping e) || (Loc.is_ghost (Ast.loc_of_expr e)) then
     e
   else
     try
