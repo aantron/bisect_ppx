@@ -42,10 +42,10 @@ let css =  [
   "    width: 75%;" ;
   "}" ;
   "" ;
-  ".lineNone { white-space: nowrap; background: white; }" ;
-  ".lineAllVisited { white-space: nowrap; background: green; }" ;
-  ".lineAllUnvisited { white-space: nowrap; background: red; }" ;
-  ".lineMixed { white-space: nowrap; background: yellow; }" ;
+  ".lineNone { white-space: nowrap; background: white; font-family: monospace; }" ;
+  ".lineAllVisited { white-space: nowrap; background: green; font-family: monospace; }" ;
+  ".lineAllUnvisited { white-space: nowrap; background: red; font-family: monospace; }" ;
+  ".lineMixed { white-space: nowrap; background: yellow; font-family: monospace; }" ;
   "" ;
   "table.simple {" ;
   "    border-width: 1px;" ;
