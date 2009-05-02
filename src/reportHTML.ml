@@ -195,6 +195,7 @@ let output_html_index verbose title filename l =
               "in_file", in_file ]
             channel)
         l;
+      gauge stats "<i>total</i>";
       output_strings
         [ "      </table>" ;
           "    </center>" ;
