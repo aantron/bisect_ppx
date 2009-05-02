@@ -156,8 +156,6 @@ ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
 	cp $(PATH_BIN)/$(LIBRARY).jar $(INSTALL_DIR)
 else
 endif
-	if test `grep -s -c '$(INSTALL_DIR)$$' $(INSTALL_DIR_BASE)/ld.conf` = 0; \
-	then echo '$(INSTALL_DIR)' >> $(INSTALL_DIR_BASE)/ld.conf; fi
 
 tests::
 	@echo ' *** running instrument tests'
