@@ -19,8 +19,8 @@
 (** This module defines the output to HTML. *)
 
 
-val output : (string -> unit) -> string -> int -> (string, int array) Hashtbl.t -> unit
-(** [output verbose dir tab_size data] writes all the HTML files for [data]
-    in the directory [dir]. [verbose] is used for verbose output, and
-    [tab_size] is the number of space character to use as a replacement for
-    tabulations. *)
+val output : (string -> unit) -> string -> int -> string -> (string, int array) Hashtbl.t -> unit
+(** [output verbose dir tab_size title data] writes all the HTML files for [data]
+    in the directory [dir]. [verbose] is used for verbose output, [tab_size]
+    is the number of space character to use as a replacement for tabulations,
+    and [title] is the title for generated pages. *)

@@ -126,7 +126,7 @@ let html_of_stats s =
      s) @
   [ "$(tabs)</table>" ]
 
-let output_html_index verbose filename l =
+let output_html_index verbose title filename l =
   verbose "Writing index file ...";
   Common.try_out_channel
     false
@@ -140,15 +140,15 @@ let output_html_index verbose filename l =
       output_strings
         [  "<html>" ;
            "  <head>" ;
-           "    <title>Bisect report</title>" ;
+           "    <title>$(title)</title>" ;
            "    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">" ;
            "  </head>" ;
            "  <body>" ;
-           "    <h1>Bisect report</h1>" ;
+           "    <h1>$(title)</h1>" ;
            "    <hr class=\"indexSep\"/>" ;
            "    <center>" ;
            "    <h3>Overall statistics</h3>" ]
-        []
+        [ "title", title ]
         channel;
       output_strings
         (html_of_stats  stats)
@@ -207,7 +207,7 @@ let output_html_index verbose filename l =
         ["footer", html_footer]
         channel)
 
-let output_html verbose tab_size in_file out_file visited =
+let output_html verbose tab_size title in_file out_file visited =
   verbose (Printf.sprintf "Processing file '%s' ..." in_file);
   let cmp_content = Common.read_points in_file in
   verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
@@ -224,14 +224,15 @@ let output_html verbose tab_size in_file out_file visited =
     output_strings
       [ "<html>" ;
         "  <head>" ;
-        "    <title>Bisect report</title>" ;
+        "    <title>$(title)</title>" ;
         "    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">" ;
         "  </head>" ;
         "  <body>" ;
         "    <h3>File: $(in_file) (<a href=\"index.html\">return to index</a>)</h3>" ;
         "    <hr class=\"codeSep\"/>" ;
         "    <h4>Statistics:</h4>" ]
-      [ "in_file", in_file ]
+      [ "in_file", in_file ;
+        "title", title ]
       out_channel;
     output_strings
       (html_of_stats stats)
@@ -288,15 +289,15 @@ let output_html verbose tab_size in_file out_file visited =
   close_out_noerr out_channel;
   stats
 
-let output verbose dir tab_size data =
+let output verbose dir tab_size title data =
   let files = Hashtbl.fold
       (fun in_file visited acc ->
         let l = List.length acc in
         let basename = Printf.sprintf "file%04d.html" l in
         let out_file = Filename.concat dir basename in
-        let stats = output_html verbose tab_size in_file out_file visited in
+        let stats = output_html verbose tab_size title in_file out_file visited in
         (in_file, basename, stats) :: acc)
       data
       [] in
-  output_html_index verbose (Filename.concat dir "index.html") (List.sort compare files);
+  output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);
   output_css (Filename.concat dir "style.css")

@@ -26,6 +26,8 @@ let verbose = ref false
 
 let tab_size = ref 8
 
+let title = ref "Bisect report"
+
 let files = ref []
 
 let add_file f =
@@ -41,6 +43,9 @@ let options = [
   ("-tab-size",
    Arg.Set_int tab_size,
    "<int>  Set tabulation size in output") ;
+  ("-title",
+   Arg.Set_string title,
+   "<string>  Set the title for generated output") ;
   ("-html",
    Arg.String (fun s -> output := Html_output s),
    "<dir>  Set output to html, files being written in given directory")
@@ -68,7 +73,7 @@ let main () =
         prerr_endline " *** warning: no input file"
       else begin
         mkdirs dir;
-        ReportHTML.output verbose dir !tab_size data
+        ReportHTML.output verbose dir !tab_size !title data
       end
 
 let () =
