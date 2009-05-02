@@ -90,6 +90,7 @@ default:
 	@echo "  clean-doc   deletes documentation files"
 	@echo "  install     copies executable and library files"
 	@echo "  tests       runs the tests"
+	@echo "  depend      generates dependency files"
 	@echo "installation is usually done by: 'make all' and 'sudo make install'"
 
 all: clean-all common runtime instrument report html-doc
@@ -187,3 +188,13 @@ endif
 
 .ml.cmj:
 	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) $(OCAML_COMPILE_FLAGS) -c $<
+
+
+# DEPENDENCIES
+
+depend::
+	$(OCAMLDEP) -I $(PATH_SRC) $(PATH_SRC)/*.ml* > depend
+	$(OCAMLDEP) -I $(PATH_SRC) $(PATH_SRC)/*.ml* | sed 's/\.cmx/\.cmj/g'> depend.cafesterol
+
+include depend
+include depend.cafesterol
