@@ -245,7 +245,7 @@ let output_html_index verbose title filename l =
         ["footer", html_footer]
         channel)
 
-let output_html verbose tab_size title in_file out_file visited =
+let output_html verbose tab_size title no_navbar in_file out_file visited =
   verbose (Printf.sprintf "Processing file '%s' ..." in_file);
   let cmp_content = Common.read_points in_file in
   verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
@@ -259,21 +259,39 @@ let output_html verbose tab_size title in_file out_file visited =
                     cmp_content) in
   let in_channel, out_channel = open_both in_file out_file in
   (try
+    let navbar_script =
+      if no_navbar then
+        []
+      else
+        [ "    <script type=\"text/javascript\">" ;
+          "      <!--" ;
+          "        function jump(id) {" ;
+          "          document.body.scrollTop = document.all[id].offsetTop;" ;
+          "        }" ;
+          "        function move() {" ;
+          "          document.all[\"navigator\"].style.top = document.body.scrollTop + 10;" ;
+          "          document.all[\"navigator\"].style.height = document.body.clientHeight - 20;" ;
+          "          setTimeout(\"move()\", 100)" ;
+          "        }" ;
+          "        setTimeout(\"move()\", 100)" ;
+          "      -->" ;
+          "    </script>" ] in
     output_strings
-      [ "<html>" ;
-        "  <head>" ;
-        "    <title>$(title)</title>" ;
-        "    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">" ;
-        "  </head>" ;
-        "  <body>" ;
-        "    <div class=\"section\">File: $(in_file) (<a href=\"index.html\">return to index</a>)</div>" ;
-        "    <br/>" ;
-        "    <hr class=\"codeSep\"/>" ;
-        "    <br/>" ;
-        "    <table>" ;
-        "      <tr>" ;
-        "        <td valign=\"top\" class=\"section\">Statistics:&nbsp;&nbsp;</td>" ;
-        "        <td valign=\"top\">" ]
+      ([ "<html>" ;
+         "  <head>" ;
+         "    <title>$(title)</title>" ;
+         "    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">" ] @
+       navbar_script @
+       [ "  </head>" ;
+         "  <body>" ;
+         "    <div class=\"section\">File: $(in_file) (<a href=\"index.html\">return to index</a>)</div>" ;
+         "    <br/>" ;
+         "    <hr class=\"codeSep\"/>" ;
+         "    <br/>" ;
+         "    <table>" ;
+         "      <tr>" ;
+         "        <td valign=\"top\" class=\"section\">Statistics:&nbsp;&nbsp;</td>" ;
+         "        <td valign=\"top\">" ])
       [ "in_file", in_file ;
         "title", title ]
       out_channel;
@@ -304,6 +322,7 @@ let output_html verbose tab_size title in_file out_file visited =
       []
       out_channel;
     let line_no = ref 0 in
+    let navigator = ref [] in
     (try
       while true do
         incr line_no;
@@ -318,13 +337,22 @@ let output_html verbose tab_size title in_file out_file visited =
               ((v || (nb > 0)), (u || (nb = 0))))
             (false, false)
             before in
-        let cls = match visited, unvisited with
-        | false, false -> "lineNone"
-        | true, false -> "lineAllVisited"
-        | false, true -> "lineAllUnvisited"
-        | true, true -> "lineMixed" in
+        let jump =
+          Printf.sprintf " style=\"cursor: pointer;\" onclick=\"javascript:jump('line%06d');\" title=\"jump to line %d\""
+            !line_no
+            !line_no in
+        let cls, nav_color, nav_elements = match visited, unvisited with
+        | false, false -> "lineNone", "gray", ""
+        | true, false -> "lineAllVisited", "gray", ""
+        | false, true -> "lineAllUnvisited", "red", jump
+        | true, true -> "lineMixed", "yellow", jump in
+        let nav_line =
+          Printf.sprintf "        <tr><td bgcolor=\"%s\"%s></td></tr>"
+            nav_color
+            nav_elements in
+        navigator := nav_line :: !navigator;
         output_strings
-          [ "      <div class=\"$(cls)\">$(line_no)| $(line)</div>" ]
+          [ "      <div id=\"line$(line_no)\" class=\"$(cls)\">$(line_no)| $(line)</div>" ]
           [ "cls", cls ;
             "line_no", (Printf.sprintf "%06d" !line_no) ;
             "line", (if line' = "" then "&nbsp;" else line') ]
@@ -332,19 +360,29 @@ let output_html verbose tab_size title in_file out_file visited =
         pts := after
       done
     with End_of_file -> ());
+    let navigator_div =
+      if no_navbar then
+        []
+      else
+        [ "    <div id=\"navigator\" style=\"border: solid black 1px; position: absolute; z-index:100; right: 10px; top: 10px; bottom: 10px; width: 16px;\">" ;
+          "      <table width=\"100%\" height=\"100%\" border=\"0\" cellspacing=\"0\">" ] @
+        (List.rev !navigator) @
+        [ "      </table>" ;
+          "    </div>" ] in
     output_strings
-      [ "    </code>" ;
-        "    <br/>" ;
-        "    <div class=\"section\">Legend:</div>" ;
-        "    &nbsp;&nbsp;&nbsp;<span class=\"lineNone\">some code</span>&nbsp;-&nbsp;line containing no point<br/>" ;
-        "    &nbsp;&nbsp;&nbsp;<span class=\"lineAllVisited\">some code</span>&nbsp;-&nbsp;line containing only visited points<br/>" ;
-        "    &nbsp;&nbsp;&nbsp;<span class=\"lineAllUnvisited\">some code</span>&nbsp;-&nbsp;line containing only unvisited points<br/>" ;
-        "    &nbsp;&nbsp;&nbsp;<span class=\"lineMixed\">some code</span>&nbsp;-&nbsp;line containing both visited and unvisited points<br/>" ;
-        "    <br/>" ;
-        "    <hr class=\"codeSep\"/>" ;
-        "    <p class=\"footer\">$(html_footer)</p>" ;
-        "  </body>" ;
-        "</html>" ]
+      ([ "    </code>" ;
+         "    <br/>" ] @
+       navigator_div @
+       [ "    <div class=\"section\">Legend:</div>" ;
+         "    &nbsp;&nbsp;&nbsp;<span class=\"lineNone\">some code</span>&nbsp;-&nbsp;line containing no point<br/>" ;
+         "    &nbsp;&nbsp;&nbsp;<span class=\"lineAllVisited\">some code</span>&nbsp;-&nbsp;line containing only visited points<br/>" ;
+         "    &nbsp;&nbsp;&nbsp;<span class=\"lineAllUnvisited\">some code</span>&nbsp;-&nbsp;line containing only unvisited points<br/>" ;
+         "    &nbsp;&nbsp;&nbsp;<span class=\"lineMixed\">some code</span>&nbsp;-&nbsp;line containing both visited and unvisited points<br/>" ;
+         "    <br/>" ;
+         "    <hr class=\"codeSep\"/>" ;
+         "    <p class=\"footer\">$(html_footer)</p>" ;
+         "  </body>" ;
+         "</html>" ])
       [ "html_footer", html_footer ]
       out_channel;
   with e ->
@@ -355,13 +393,13 @@ let output_html verbose tab_size title in_file out_file visited =
   close_out_noerr out_channel;
   stats
 
-let output verbose dir tab_size title data =
+let output verbose dir tab_size title no_navbar data =
   let files = Hashtbl.fold
       (fun in_file visited acc ->
         let l = List.length acc in
         let basename = Printf.sprintf "file%04d.html" l in
         let out_file = Filename.concat dir basename in
-        let stats = output_html verbose tab_size title in_file out_file visited in
+        let stats = output_html verbose tab_size title no_navbar in_file out_file visited in
         (in_file, basename, stats) :: acc)
       data
       [] in

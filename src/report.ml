@@ -28,6 +28,8 @@ let tab_size = ref 8
 
 let title = ref "Bisect report"
 
+let no_navbar = ref false
+
 let files = ref []
 
 let add_file f =
@@ -48,7 +50,10 @@ let options = [
    "<string>  Set the title for generated output") ;
   ("-html",
    Arg.String (fun s -> output := Html_output s),
-   "<dir>  Set output to html, files being written in given directory")
+   "<dir>  Set output to html, files being written in given directory") ;
+  ("-no-navbar",
+   Arg.Set no_navbar,
+   " Disable the navigation bar (HTML only)")
 ]
 
 let main () =
@@ -73,7 +78,7 @@ let main () =
         prerr_endline " *** warning: no input file"
       else begin
         mkdirs dir;
-        ReportHTML.output verbose dir !tab_size !title data
+        ReportHTML.output verbose dir !tab_size !title !no_navbar data
       end
 
 let () =
