@@ -245,7 +245,7 @@ let output_html_index verbose title filename l =
         ["footer", html_footer]
         channel)
 
-let output_html verbose tab_size title no_navbar in_file out_file visited =
+let output_html verbose tab_size title no_navbar no_folding in_file out_file script_file script_file_basename visited =
   verbose (Printf.sprintf "Processing file '%s' ..." in_file);
   let cmp_content = Common.read_points in_file in
   verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
@@ -282,6 +282,10 @@ let output_html verbose tab_size title no_navbar in_file out_file visited =
          "    <title>$(title)</title>" ;
          "    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">" ] @
        navbar_script @
+       (if no_folding then
+         []
+       else
+         [ "    <script language=\"javascript\" src=\"$(script_file)\"></script>" ]) @
        [ "  </head>" ;
          "  <body>" ;
          "    <div class=\"section\">File: $(in_file) (<a href=\"index.html\">return to index</a>)</div>" ;
@@ -293,7 +297,8 @@ let output_html verbose tab_size title no_navbar in_file out_file visited =
          "        <td valign=\"top\" class=\"section\">Statistics:&nbsp;&nbsp;</td>" ;
          "        <td valign=\"top\">" ])
       [ "in_file", in_file ;
-        "title", title ]
+        "title", title ;
+        "script_file", script_file_basename ]
       out_channel;
     let st1, st2 = html_of_stats stats in
     output_strings
@@ -309,20 +314,31 @@ let output_html verbose tab_size title no_navbar in_file out_file visited =
       st2
       ["tabs", "          "]
       out_channel;
+    let fold_links =
+      if no_folding then
+        []
+      else
+        [ "<div style=\"font-size: smaller;\">" ^
+          "<a href=\"javascript:foldAll()\">fold all</a> " ^
+          "<a href=\"javascript:unfoldAll()\">unfold all</a>" ^
+          "</div>" ] in
     output_strings
-      [ "        </td>" ;
-        "      </tr>" ;
-        "    </table>" ;
-        "    <br/>" ;
-        "    <hr class=\"codeSep\"/>" ;
-        "    <br/>" ;
-        "    <div class=\"section\">Source:</div>" ;
-        "    <br/>" ;
-        "    <code>" ]
+      ([ "        </td>" ;
+         "      </tr>" ;
+         "    </table>" ;
+         "    <br/>" ;
+         "    <hr class=\"codeSep\"/>" ;
+         "    <br/>" ;
+         "    <div class=\"section\">Source:</div>" ;
+         "    <br/>" ] @
+       fold_links @
+       [ "    <code>" ])
       []
       out_channel;
     let line_no = ref 0 in
     let navigator = ref [] in
+    let fold_starts = ref [] in
+    let fold_ends = ref [] in
     (try
       while true do
         incr line_no;
@@ -341,25 +357,61 @@ let output_html verbose tab_size title no_navbar in_file out_file visited =
           Printf.sprintf " style=\"cursor: pointer;\" onclick=\"javascript:jump('line%06d');\" title=\"jump to line %d\""
             !line_no
             !line_no in
-        let cls, nav_color, nav_elements = match visited, unvisited with
-        | false, false -> "lineNone", "gray", ""
-        | true, false -> "lineAllVisited", "gray", ""
-        | false, true -> "lineAllUnvisited", "red", jump
-        | true, true -> "lineMixed", "yellow", jump in
+        let cls, nav_color, nav_elements, foldable = match visited, unvisited with
+        | false, false -> "lineNone", "gray", "", true
+        | true, false -> "lineAllVisited", "gray", "", true
+        | false, true -> "lineAllUnvisited", "red", jump, false
+        | true, true -> "lineMixed", "yellow", jump, false in
+        let starting_fold =
+          if foldable && (List.length !fold_starts) = (List.length !fold_ends) then begin
+            fold_starts := !line_no :: !fold_starts;
+            output_strings
+              [ "      <div id=\"fold$(line_no)\">" ]
+              [ "line_no", (Printf.sprintf "%06d" !line_no) ]
+              out_channel;
+            true
+          end else
+            false in
+        if (not foldable) && (List.length !fold_starts) <> (List.length !fold_ends) then begin
+          fold_ends := (pred !line_no) :: !fold_ends;
+          output_strings
+            [ "      </div>" ]
+            [ ]
+            out_channel
+        end;
         let nav_line =
           Printf.sprintf "        <tr><td bgcolor=\"%s\"%s></td></tr>"
             nav_color
             nav_elements in
         navigator := nav_line :: !navigator;
+        let icon =
+          if no_folding then
+            ""
+          else if starting_fold then
+            Printf.sprintf
+              "<a href=\"javascript:fold('fold%06d');\"><img border=\"0\" height=\"10\" width=\"10\" src=\"minus.png\" title=\"fold code\"/></a>"
+              !line_no
+          else if foldable then
+            "<img border=\"0\" height=\"10\" width=\"10\"src=\"dash.png\"/>"
+          else
+            "<img border=\"0\" height=\"10\" width=\"10\"src=\"blank.png\"/>" in
         output_strings
-          [ "      <div id=\"line$(line_no)\" class=\"$(cls)\">$(line_no)| $(line)</div>" ]
+          [ "      <div id=\"line$(line_no)\" class=\"$(cls)\">$(icon)$(line_no)| $(line)</div>" ]
           [ "cls", cls ;
             "line_no", (Printf.sprintf "%06d" !line_no) ;
-            "line", (if line' = "" then "&nbsp;" else line') ]
+            "line", (if line' = "" then "&nbsp;" else line') ;
+            "icon", icon ]
           out_channel;
         pts := after
       done
     with End_of_file -> ());
+    if (List.length !fold_starts) <> (List.length !fold_ends) then begin
+      fold_ends := (pred !line_no) :: !fold_ends;
+      output_strings
+        [ "      </div>" ]
+        [ ]
+        out_channel
+    end;
     let navigator_div =
       if no_navbar then
         []
@@ -385,6 +437,57 @@ let output_html verbose tab_size title no_navbar in_file out_file visited =
          "</html>" ])
       [ "html_footer", html_footer ]
       out_channel;
+    Common.try_out_channel
+      false
+      script_file
+      (fun channel ->
+        output_strings
+          [ "var texts = new Array();" ;
+            "var states = new Array();" ;
+            "" ]
+          []
+          channel;
+        List.iter2
+          (fun fstart fend ->
+            output_strings
+              [ "texts['$(id)'] = '$(icon)<i>&nbsp;&nbsp;code folded from line $(start) to line $(end)</i>';" ;
+                "states['$(id)'] = false;" ]
+              [ "id", (Printf.sprintf "fold%06d" fstart) ;
+                "icon",
+                (Printf.sprintf
+                   "<a href=\"javascript:fold(\\'fold%06d\\');\"><img border=\"0\" height=\"10\" width=\"10\" src=\"plus.png\" title=\"unfold code\"/></a>"
+                   fstart) ;
+                "start", string_of_int fstart ;
+                "end", string_of_int fend ]
+              channel)
+          (List.rev !fold_starts)
+          (List.rev !fold_ends);
+        output_strings
+          [ "" ;
+            "function fold(id) {" ;
+            "  tmp = document.all[id].innerHTML;" ;
+            "  document.all[id].innerHTML = texts[id];" ;
+            "  texts[id] = tmp;" ;
+            "  states[id] = !(states[id]);" ;
+            "}" ;
+            "" ;
+            "function unfoldAll() {" ;
+            "  for (key in states) {" ;
+            "    if (states[key]) {" ;
+            "      fold(key);" ;
+            "    }" ;
+            "  }" ;
+            "}" ;
+            "" ;
+            "function foldAll() {" ;
+            "  for (key in states) {" ;
+            "    if (!(states[key])) {" ;
+            "      fold(key);" ;
+            "    }" ;
+            "  }" ;
+            "}" ]
+          []
+          channel)
   with e ->
     close_in_noerr in_channel;
     close_out_noerr out_channel;
@@ -393,15 +496,108 @@ let output_html verbose tab_size title no_navbar in_file out_file visited =
   close_out_noerr out_channel;
   stats
 
-let output verbose dir tab_size title no_navbar data =
+let blank_png = [|
+  0x89; 0x50; 0x4e; 0x47; 0x0d; 0x0a; 0x1a; 0x0a;
+  0x00; 0x00; 0x00; 0x0d; 0x49; 0x48; 0x44; 0x52;
+  0x00; 0x00; 0x00; 0x0a; 0x00; 0x00; 0x00; 0x0a;
+  0x08; 0x06; 0x00; 0x00; 0x00; 0x8d; 0x32; 0xcf;
+  0xbd; 0x00; 0x00; 0x00; 0x01; 0x73; 0x52; 0x47;
+  0x42; 0x00; 0xae; 0xce; 0x1c; 0xe9; 0x00; 0x00;
+  0x00; 0x06; 0x62; 0x4b; 0x47; 0x44; 0x00; 0xff;
+  0x00; 0xff; 0x00; 0xff; 0xa0; 0xbd; 0xa7; 0x93;
+  0x00; 0x00; 0x00; 0x09; 0x70; 0x48; 0x59; 0x73;
+  0x00; 0x00; 0x0b; 0x13; 0x00; 0x00; 0x0b; 0x13;
+  0x01; 0x00; 0x9a; 0x9c; 0x18; 0x00; 0x00; 0x00;
+  0x07; 0x74; 0x49; 0x4d; 0x45; 0x07; 0xd9; 0x05;
+  0x03; 0x0e; 0x18; 0x19; 0xcf; 0x5e; 0xda; 0x4a;
+  0x00; 0x00; 0x00; 0x0e; 0x49; 0x44; 0x41; 0x54;
+  0x18; 0xd3; 0x63; 0x60; 0x18; 0x05; 0x83; 0x13;
+  0x00; 0x00; 0x01; 0x9a; 0x00; 0x01; 0x0b; 0xa2;
+  0x9d; 0x1f; 0x00; 0x00; 0x00; 0x00; 0x49; 0x45;
+  0x4e; 0x44; 0xae; 0x42; 0x60; 0x82
+|]
+
+let dash_png = [|
+  0x89; 0x50; 0x4e; 0x47; 0x0d; 0x0a; 0x1a; 0x0a;
+  0x00; 0x00; 0x00; 0x0d; 0x49; 0x48; 0x44; 0x52;
+  0x00; 0x00; 0x00; 0x0a; 0x00; 0x00; 0x00; 0x0a;
+  0x08; 0x06; 0x00; 0x00; 0x00; 0x8d; 0x32; 0xcf;
+  0xbd; 0x00; 0x00; 0x00; 0x01; 0x73; 0x52; 0x47;
+  0x42; 0x00; 0xae; 0xce; 0x1c; 0xe9; 0x00; 0x00;
+  0x00; 0x06; 0x62; 0x4b; 0x47; 0x44; 0x00; 0xff;
+  0x00; 0xff; 0x00; 0xff; 0xa0; 0xbd; 0xa7; 0x93;
+  0x00; 0x00; 0x00; 0x09; 0x70; 0x48; 0x59; 0x73;
+  0x00; 0x00; 0x0b; 0x13; 0x00; 0x00; 0x0b; 0x13;
+  0x01; 0x00; 0x9a; 0x9c; 0x18; 0x00; 0x00; 0x00;
+  0x07; 0x74; 0x49; 0x4d; 0x45; 0x07; 0xd9; 0x05;
+  0x03; 0x0e; 0x1b; 0x28; 0xb5; 0xad; 0x89; 0xb3;
+  0x00; 0x00; 0x00; 0x1e; 0x49; 0x44; 0x41; 0x54;
+  0x18; 0xd3; 0x63; 0x60; 0xa0; 0x39; 0x70; 0x71;
+  0x71; 0xf9; 0xef; 0xe2; 0xe2; 0xf2; 0x1f; 0x5d;
+  0x9c; 0x89; 0x58; 0x03; 0x86; 0x82; 0x42; 0xea;
+  0x03; 0x00; 0x56; 0x54; 0x03; 0xa1; 0x79; 0x35;
+  0xf3; 0x91; 0x00; 0x00; 0x00; 0x00; 0x49; 0x45;
+  0x4e; 0x44; 0xae; 0x42; 0x60; 0x82
+|]
+
+let minus_png = [|
+  0x89; 0x50; 0x4e; 0x47; 0x0d; 0x0a; 0x1a; 0x0a;
+  0x00; 0x00; 0x00; 0x0d; 0x49; 0x48; 0x44; 0x52;
+  0x00; 0x00; 0x00; 0x0a; 0x00; 0x00; 0x00; 0x0a;
+  0x08; 0x02; 0x00; 0x00; 0x00; 0x02; 0x50; 0x58;
+  0xea; 0x00; 0x00; 0x00; 0x01; 0x73; 0x52; 0x47;
+  0x42; 0x00; 0xae; 0xce; 0x1c; 0xe9; 0x00; 0x00;
+  0x00; 0x2e; 0x49; 0x44; 0x41; 0x54; 0x18; 0xd3;
+  0x63; 0x60; 0xc0; 0x0b; 0x18; 0x19; 0x18; 0x18;
+  0xfe; 0xff; 0xff; 0x8f; 0x5d; 0x8e; 0x91; 0x91;
+  0x09; 0xbf; 0x6e; 0x02; 0xd2; 0x0c; 0xb8; 0x0c;
+  0x87; 0x08; 0x12; 0xd0; 0xcd; 0x82; 0xc7; 0x00;
+  0xc2; 0xba; 0x89; 0x70; 0x1a; 0x1e; 0x00; 0x00;
+  0x96; 0x20; 0x0c; 0x07; 0xfb; 0x84; 0xbf; 0x6c;
+  0x00; 0x00; 0x00; 0x00; 0x49; 0x45; 0x4e; 0x44;
+  0xae; 0x42; 0x60; 0x82
+|]
+
+let plus_png = [|
+  0x89; 0x50; 0x4e; 0x47; 0x0d; 0x0a; 0x1a; 0x0a;
+  0x00; 0x00; 0x00; 0x0d; 0x49; 0x48; 0x44; 0x52;
+  0x00; 0x00; 0x00; 0x0a; 0x00; 0x00; 0x00; 0x0a;
+  0x08; 0x02; 0x00; 0x00; 0x00; 0x02; 0x50; 0x58;
+  0xea; 0x00; 0x00; 0x00; 0x01; 0x73; 0x52; 0x47;
+  0x42; 0x00; 0xae; 0xce; 0x1c; 0xe9; 0x00; 0x00;
+  0x00; 0x37; 0x49; 0x44; 0x41; 0x54; 0x18; 0xd3;
+  0x63; 0x60; 0xc0; 0x0b; 0x18; 0x19; 0x18; 0x18;
+  0xfe; 0xff; 0xff; 0x8f; 0x5d; 0x8e; 0x91; 0x91;
+  0x09; 0x8d; 0xcf; 0xc8; 0xc8; 0x88; 0x2c; 0xc2;
+  0xc4; 0x40; 0x10; 0x60; 0x35; 0x1c; 0x22; 0x48;
+  0x40; 0x37; 0x0b; 0xb2; 0x5a; 0x88; 0xc5; 0xc8;
+  0x86; 0x11; 0xa7; 0x1b; 0x8f; 0x23; 0xf0; 0x01;
+  0x00; 0x63; 0xaf; 0x12; 0x0c; 0x9b; 0x01; 0xf8;
+  0x13; 0x00; 0x00; 0x00; 0x00; 0x49; 0x45; 0x4e;
+  0x44; 0xae; 0x42; 0x60; 0x82
+|]
+
+let output_png_files dir =
+  List.iter
+    (fun (file, data) ->
+      output_bytes data (Filename.concat dir file))
+    [ "blank.png", blank_png ;
+      "dash.png", dash_png ;
+      "minus.png", minus_png ;
+      "plus.png", plus_png ]
+
+let output verbose dir tab_size title no_navbar no_folding data =
   let files = Hashtbl.fold
       (fun in_file visited acc ->
         let l = List.length acc in
-        let basename = Printf.sprintf "file%04d.html" l in
-        let out_file = Filename.concat dir basename in
-        let stats = output_html verbose tab_size title no_navbar in_file out_file visited in
-        (in_file, basename, stats) :: acc)
+        let basename = Printf.sprintf "file%04d" l in
+        let out_file = (Filename.concat dir basename) ^ ".html" in
+        let script_file = (Filename.concat dir basename) ^ ".js" in
+        let script_file_basename = basename ^ ".js" in
+        let stats = output_html verbose tab_size title no_navbar no_folding in_file out_file script_file script_file_basename visited in
+        (in_file, (basename ^ ".html"), stats) :: acc)
       data
       [] in
+  output_png_files dir;
   output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);
   output_css (Filename.concat dir "style.css")

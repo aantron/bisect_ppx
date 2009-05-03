@@ -58,6 +58,10 @@ val output_strings : string list -> (string * string) list -> out_channel -> uni
     by [Buffer.add_substitute]. The substitution is based on the association
     list [mapping]. *)
 
+val output_bytes : int array -> string -> unit
+(** [output_bytes data filename] creates the file [filename] and writes
+    the bytes from [data] to it. *)
+
 val escape_line : int -> string -> int -> (int * int) list -> string
 (** [escape_line tab_size line offset points] escape the string [line],
     in such a way it can be used in HTML/XML. [tab_size] is the number

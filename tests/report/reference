@@ -42,28 +42,30 @@
     <div class="section">Source:</div>
     <br/>
     <code>
-      <div class="lineAllVisited">000001| let&nbsp;inf&nbsp;=&nbsp;(*[2]*)ref&nbsp;0</div>
-      <div class="lineAllVisited">000002| let&nbsp;sup&nbsp;=&nbsp;(*[2]*)ref&nbsp;3</div>
-      <div class="lineNone">000003| &nbsp;</div>
-      <div class="lineNone">000004| let&nbsp;args&nbsp;=&nbsp;[</div>
-      <div class="lineAllVisited">000005| &nbsp;&nbsp;(*[2]*)(&quot;-inf&quot;,&nbsp;(Arg.Set_int&nbsp;inf),&nbsp;&quot;inferior&nbsp;bound&quot;)&nbsp;;</div>
-      <div class="lineNone">000006| &nbsp;&nbsp;(&quot;-sup&quot;,&nbsp;(Arg.Set_int&nbsp;sup),&nbsp;&quot;superior&nbsp;bound&quot;)</div>
-      <div class="lineNone">000007| ]</div>
-      <div class="lineNone">000008| &nbsp;</div>
-      <div class="lineNone">000009| let&nbsp;kind&nbsp;=&nbsp;function</div>
-      <div class="lineAllVisited">000010| &nbsp;&nbsp;|&nbsp;x&nbsp;when&nbsp;(*[9]*)x&nbsp;&gt;&nbsp;9&nbsp;||&nbsp;(*[7]*)x&nbsp;&lt;&nbsp;0&nbsp;-&gt;&nbsp;(*[2]*)print_endline&nbsp;&quot;not&nbsp;a&nbsp;digit&quot;</div>
-      <div class="lineAllVisited">000011| &nbsp;&nbsp;|&nbsp;_&nbsp;-&gt;&nbsp;(*[7]*)print_endline&nbsp;&quot;digit&quot;</div>
-      <div class="lineNone">000012| &nbsp;</div>
-      <div class="lineNone">000013| let&nbsp;print&nbsp;x&nbsp;=</div>
-      <div class="lineAllVisited">000014| &nbsp;&nbsp;(*[9]*)print_int&nbsp;x;</div>
-      <div class="lineAllVisited">000015| &nbsp;&nbsp;(*[9]*)print_newline&nbsp;()</div>
-      <div class="lineNone">000016| &nbsp;</div>
-      <div class="lineNone">000017| let&nbsp;()&nbsp;=</div>
-      <div class="lineAllVisited">000018| &nbsp;&nbsp;(*[2]*)Arg.parse&nbsp;args&nbsp;ignore&nbsp;&quot;report&nbsp;test&quot;;</div>
-      <div class="lineAllVisited">000019| &nbsp;&nbsp;(*[2]*)for&nbsp;i&nbsp;=&nbsp;!inf&nbsp;to&nbsp;!sup&nbsp;do</div>
-      <div class="lineAllVisited">000020| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)kind&nbsp;i;</div>
-      <div class="lineAllVisited">000021| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)print&nbsp;i</div>
-      <div class="lineNone">000022| &nbsp;&nbsp;done</div>
+      <div id="fold000001">
+      <div id="line000001" class="lineAllVisited">000001| let&nbsp;inf&nbsp;=&nbsp;(*[2]*)ref&nbsp;0</div>
+      <div id="line000002" class="lineAllVisited">000002| let&nbsp;sup&nbsp;=&nbsp;(*[2]*)ref&nbsp;3</div>
+      <div id="line000003" class="lineNone">000003| &nbsp;</div>
+      <div id="line000004" class="lineNone">000004| let&nbsp;args&nbsp;=&nbsp;[</div>
+      <div id="line000005" class="lineAllVisited">000005| &nbsp;&nbsp;(*[2]*)(&quot;-inf&quot;,&nbsp;(Arg.Set_int&nbsp;inf),&nbsp;&quot;inferior&nbsp;bound&quot;)&nbsp;;</div>
+      <div id="line000006" class="lineNone">000006| &nbsp;&nbsp;(&quot;-sup&quot;,&nbsp;(Arg.Set_int&nbsp;sup),&nbsp;&quot;superior&nbsp;bound&quot;)</div>
+      <div id="line000007" class="lineNone">000007| ]</div>
+      <div id="line000008" class="lineNone">000008| &nbsp;</div>
+      <div id="line000009" class="lineNone">000009| let&nbsp;kind&nbsp;=&nbsp;function</div>
+      <div id="line000010" class="lineAllVisited">000010| &nbsp;&nbsp;|&nbsp;x&nbsp;when&nbsp;(*[9]*)x&nbsp;&gt;&nbsp;9&nbsp;||&nbsp;(*[7]*)x&nbsp;&lt;&nbsp;0&nbsp;-&gt;&nbsp;(*[2]*)print_endline&nbsp;&quot;not&nbsp;a&nbsp;digit&quot;</div>
+      <div id="line000011" class="lineAllVisited">000011| &nbsp;&nbsp;|&nbsp;_&nbsp;-&gt;&nbsp;(*[7]*)print_endline&nbsp;&quot;digit&quot;</div>
+      <div id="line000012" class="lineNone">000012| &nbsp;</div>
+      <div id="line000013" class="lineNone">000013| let&nbsp;print&nbsp;x&nbsp;=</div>
+      <div id="line000014" class="lineAllVisited">000014| &nbsp;&nbsp;(*[9]*)print_int&nbsp;x;</div>
+      <div id="line000015" class="lineAllVisited">000015| &nbsp;&nbsp;(*[9]*)print_newline&nbsp;()</div>
+      <div id="line000016" class="lineNone">000016| &nbsp;</div>
+      <div id="line000017" class="lineNone">000017| let&nbsp;()&nbsp;=</div>
+      <div id="line000018" class="lineAllVisited">000018| &nbsp;&nbsp;(*[2]*)Arg.parse&nbsp;args&nbsp;ignore&nbsp;&quot;report&nbsp;test&quot;;</div>
+      <div id="line000019" class="lineAllVisited">000019| &nbsp;&nbsp;(*[2]*)for&nbsp;i&nbsp;=&nbsp;!inf&nbsp;to&nbsp;!sup&nbsp;do</div>
+      <div id="line000020" class="lineAllVisited">000020| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)kind&nbsp;i;</div>
+      <div id="line000021" class="lineAllVisited">000021| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)print&nbsp;i</div>
+      <div id="line000022" class="lineNone">000022| &nbsp;&nbsp;done</div>
+      </div>
     </code>
     <br/>
     <div class="section">Legend:</div>

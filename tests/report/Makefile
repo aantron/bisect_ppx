@@ -15,7 +15,7 @@ run::
 
 report::
 	@rm -fr report
-	@$(REPORT) -html report *.out
+	@$(REPORT) -no-navbar -no-folding -html report *.out
 	@grep -v 'class="footer"' report/file0000.html > result
 	@diff -q result reference
 	@rm -fr report

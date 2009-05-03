@@ -89,6 +89,15 @@ let output_strings lines mapping ch =
       output_string ch (Buffer.contents buff))
     lines
 
+let output_bytes data filename =
+  let ch = open_out_bin filename in
+  try
+    Array.iter (output_byte ch) data;
+    close_out_noerr ch
+  with e ->
+    close_out_noerr ch;
+    raise e
+
 let escape_line tab_size line offset points =
   let buff = Buffer.create (String.length line) in
   let ofs = ref offset in
