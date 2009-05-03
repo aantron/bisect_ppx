@@ -44,6 +44,9 @@ val split : ('a -> bool) -> ('a list) -> 'a list * 'a list
 (** [split p [e1; ...; en]] returns [([e1; ...; e(i-1)], [ei; ...; en])]
     where is is the lowest index such that [(p ei)] evaluates to false. *)
 
+val split_after : int -> ('a list) -> 'a list * 'a list
+(** [split_after k [e1; ...; en]] returns [([e1; ...; ek], [e(k+1); ...; en])]. *)
+
 val open_both : string -> string -> in_channel * out_channel
 (** [open_both in_file out_file] return a [(i, o)] couple where:
     - [i] is an input channel for [in_file];

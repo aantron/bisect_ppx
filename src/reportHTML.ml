@@ -24,6 +24,16 @@ let css =  [
   "    white-space: nowrap;" ;
   "}" ;
   "" ;
+  ".title {" ;
+  "    font-size: xx-large;" ;
+  "    font-weight: bold;" ;
+  "}" ;
+  "" ;
+  ".section {" ;
+  "    font-size: larger;" ;
+  "    font-weight: bold;" ;
+  "}" ;
+  "" ;
   ".footer {" ;
   "    font-size: smaller;" ;
   "    text-align: center;" ;
@@ -53,6 +63,7 @@ let css =  [
   "    border-top-style: solid;" ;
   "    border-bottom-style: solid;" ;
   "    border-color: black;" ;
+  "    font-size: smaller;" ;
   "}" ;
   "" ;
   "table.simple th {" ;
@@ -76,6 +87,7 @@ let css =  [
   "    padding: 0px;" ;
   "    border-style: none;" ;
   "    border-collapse: collapse;" ;
+  "    font-size: smaller;" ;
   "}" ;
   "" ;
   "table.gauge td {" ;
@@ -88,6 +100,7 @@ let css =  [
   "" ;
   ".gaugeOK { background: green; }" ;
   ".gaugeKO { background: red; }" ;
+  ".gaugeNO { background: gray; }" ;
   ""
 ]
 
@@ -111,20 +124,24 @@ let html_footer =
     now.Unix.tm_sec
 
 let html_of_stats s =
-  [ "$(tabs)<table class=\"simple\">" ;
-    "$(tabs)  <tr><th>kind</th><th width=\"16px\">&nbsp;</th><th>coverage</th></tr>" ] @
-  (List.map
-     (fun (k, r) ->
-       Printf.sprintf "$(tabs)  <tr><td>%s</td><td width=\"16px\">&nbsp;</td><td>%d / %d (%s %%)</td></tr>"
-         (Common.string_of_point_kind k)
-         r.ReportStat.count
-         r.ReportStat.total
-         (if r.ReportStat.total <> 0 then
-           string_of_int ((r.ReportStat.count * 100) / r.ReportStat.total)
-         else
-           "-"))
-     s) @
-  [ "$(tabs)</table>" ]
+  let len = List.length s in
+  let s1, s2 = split_after ((succ len) / 2) s in
+  let hos s =
+    [ "$(tabs)<table class=\"simple\">" ;
+      "$(tabs)  <tr><th>kind</th><th width=\"16px\">&nbsp;</th><th>coverage</th></tr>" ] @
+    (List.map
+       (fun (k, r) ->
+         Printf.sprintf "$(tabs)  <tr><td>%s</td><td width=\"16px\">&nbsp;</td><td>%d / %d (%s %%)</td></tr>"
+           (Common.string_of_point_kind k)
+           r.ReportStat.count
+           r.ReportStat.total
+           (if r.ReportStat.total <> 0 then
+             string_of_int ((r.ReportStat.count * 100) / r.ReportStat.total)
+           else
+             "-"))
+       s) @
+    [ "$(tabs)</table>" ] in
+  (hos s1), (hos s2)
 
 let output_html_index verbose title filename l =
   verbose "Writing index file ...";
@@ -144,23 +161,42 @@ let output_html_index verbose title filename l =
            "    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">" ;
            "  </head>" ;
            "  <body>" ;
-           "    <h1>$(title)</h1>" ;
+           "    <div class=\"title\">$(title)</div>" ;
+           "    <br/>" ;
            "    <hr class=\"indexSep\"/>" ;
            "    <center>" ;
-           "    <h3>Overall statistics</h3>" ]
+           "    <br/>" ;
+           "    <div class=\"section\">Overall statistics</div>" ;
+           "    <table>" ;
+           "      <tr>" ;
+           "        <td valign=\"top\">" ]
         [ "title", title ]
         channel;
+      let st1, st2 = html_of_stats stats in
       output_strings
-        (html_of_stats  stats)
-        ["tabs", "    "]
+        st1
+        ["tabs", "          "]
         channel;
       output_strings
-        [ "    <br/>" ;
+        [  "        </td>" ;
+           "        <td valign=\"top\">" ]
+        []
+        channel;
+      output_strings
+        st2
+        ["tabs", "          "]
+        channel;
+      output_strings
+        [ "        </td>" ;
+          "      </tr>" ;
+          "    </table>" ;
+          "    <br/>" ;
           "    </center>" ;
+          "    <br/>" ;
           "    <hr class=\"indexSep\"/>" ;
           "    <center>" ;
           "    <br/>" ;
-          "    <h3>Per-file coverage</h3>" ;
+          "    <div class=\"section\">Per-file coverage</div>" ;
           "      <table class=\"simple\">" ;
           "        <tr>" ;
           "          <th>coverage</th>" ;
@@ -169,37 +205,38 @@ let output_html_index verbose title filename l =
           "        </tr>" ]
         []
         channel;
+      let gauge stats name =
+        let a, b = ReportStat.summarize stats in
+        let x = if b = 0 then 100 else (100 * a) / b in
+        let y = 100 - x in
+        output_strings
+          [ "        <tr>" ;
+            "          <td>" ;
+            "            <table class=\"gauge\">" ;
+            "              <tr>" ;
+            "                <td class=\"$(g)\" width=\"$(x)px\"/>" ;
+            "                <td class=\"gaugeKO\" width=\"$(y)px\"/>" ;
+            "                <td>&nbsp;$(p)%</td>" ;
+            "              </tr>" ;
+            "            </table>" ;
+            "          </td>" ;
+            "          <td width=\"16px\">&nbsp;</td>" ;
+            "          <td>$(name)</td>";
+            "        </tr>" ]
+          [ "g", (if b = 0 then "gaugeNO" else "gaugeOK");
+            "x", string_of_int x ;
+            "y", string_of_int y ;
+            "p", (if b = 0 then "-" else string_of_int x) ;
+            "name", name ]
+          channel in
       List.iter
         (fun (in_file, out_file, stats) ->
-          let a, b = ReportStat.summarize stats in
-          let x = if b = 0 then 100 else (100 * a) / b in
-          let y = 100 - x in
-          output_strings
-            [ "        <tr>" ;
-              "          <td>" ;
-              "            <table class=\"gauge\">" ;
-              "              <tr>" ;
-              "                <td class=\"gaugeOK\" width=\"$(x)px\"/>" ;
-              "                <td class=\"gaugeKO\" width=\"$(y)px\"/>" ;
-              "                <td>&nbsp;$(p)%</td>" ;
-              "              </tr>" ;
-              "            </table>" ;
-              "          </td>" ;
-              "          <td width=\"16px\">&nbsp;</td>" ;
-              "          <td><a href=\"$(out_file)\">$(in_file)</a></td>";
-              "        </tr>" ]
-            [ "x", string_of_int x ;
-              "y", string_of_int y ;
-              "p", (if b = 0 then "-" else string_of_int x) ;
-              "out_file", out_file ;
-              "in_file", in_file ]
-            channel)
+          gauge stats (Printf.sprintf "<a href=\"%s\">%s</a>" out_file in_file))
         l;
       gauge stats "<i>total</i>";
       output_strings
         [ "      </table>" ;
           "    </center>" ;
-          "    <br/>" ;
           "    <br/>" ;
           "    <hr class=\"indexSep\"/>" ;
           "    <p class=\"footer\">$(footer)</p>" ;
@@ -229,19 +266,40 @@ let output_html verbose tab_size title in_file out_file visited =
         "    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">" ;
         "  </head>" ;
         "  <body>" ;
-        "    <h3>File: $(in_file) (<a href=\"index.html\">return to index</a>)</h3>" ;
+        "    <div class=\"section\">File: $(in_file) (<a href=\"index.html\">return to index</a>)</div>" ;
+        "    <br/>" ;
         "    <hr class=\"codeSep\"/>" ;
-        "    <h4>Statistics:</h4>" ]
+        "    <br/>" ;
+        "    <table>" ;
+        "      <tr>" ;
+        "        <td valign=\"top\" class=\"section\">Statistics:&nbsp;&nbsp;</td>" ;
+        "        <td valign=\"top\">" ]
       [ "in_file", in_file ;
         "title", title ]
       out_channel;
+    let st1, st2 = html_of_stats stats in
     output_strings
-      (html_of_stats stats)
-      [ "tabs", "    " ]
+      st1
+      ["tabs", "          "]
       out_channel;
     output_strings
-      [ "    <hr class=\"codeSep\"/>" ;
-        "    <h4>Source:</h4>" ;
+      [  "        </td>" ;
+         "        <td valign=\"top\">" ]
+      []
+      out_channel;
+    output_strings
+      st2
+      ["tabs", "          "]
+      out_channel;
+    output_strings
+      [ "        </td>" ;
+        "      </tr>" ;
+        "    </table>" ;
+        "    <br/>" ;
+        "    <hr class=\"codeSep\"/>" ;
+        "    <br/>" ;
+        "    <div class=\"section\">Source:</div>" ;
+        "    <br/>" ;
         "    <code>" ]
       []
       out_channel;
@@ -276,6 +334,13 @@ let output_html verbose tab_size title in_file out_file visited =
     with End_of_file -> ());
     output_strings
       [ "    </code>" ;
+        "    <br/>" ;
+        "    <div class=\"section\">Legend:</div>" ;
+        "    &nbsp;&nbsp;&nbsp;<span class=\"lineNone\">some code</span>&nbsp;-&nbsp;line containing no point<br/>" ;
+        "    &nbsp;&nbsp;&nbsp;<span class=\"lineAllVisited\">some code</span>&nbsp;-&nbsp;line containing only visited points<br/>" ;
+        "    &nbsp;&nbsp;&nbsp;<span class=\"lineAllUnvisited\">some code</span>&nbsp;-&nbsp;line containing only unvisited points<br/>" ;
+        "    &nbsp;&nbsp;&nbsp;<span class=\"lineMixed\">some code</span>&nbsp;-&nbsp;line containing both visited and unvisited points<br/>" ;
+        "    <br/>" ;
         "    <hr class=\"codeSep\"/>" ;
         "    <p class=\"footer\">$(html_footer)</p>" ;
         "  </body>" ;

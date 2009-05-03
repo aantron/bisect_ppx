@@ -4,27 +4,43 @@
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
-    <h3>File: source.ml (<a href="index.html">return to index</a>)</h3>
+    <div class="section">File: source.ml (<a href="index.html">return to index</a>)</div>
+    <br/>
     <hr class="codeSep"/>
-    <h4>Statistics:</h4>
-    <table class="simple">
-      <tr><th>kind</th><th width="16px">&nbsp;</th><th>coverage</th></tr>
-      <tr><td>binding</td><td width="16px">&nbsp;</td><td>3 / 3 (100 %)</td></tr>
-      <tr><td>sequence</td><td width="16px">&nbsp;</td><td>5 / 5 (100 %)</td></tr>
-      <tr><td>for</td><td width="16px">&nbsp;</td><td>1 / 1 (100 %)</td></tr>
-      <tr><td>if/then</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
-      <tr><td>try</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
-      <tr><td>while</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
-      <tr><td>match/function</td><td width="16px">&nbsp;</td><td>2 / 2 (100 %)</td></tr>
-      <tr><td>class expression</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
-      <tr><td>class initializer</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
-      <tr><td>class method</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
-      <tr><td>class value</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
-      <tr><td>toplevel expression</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
-      <tr><td>lazy operator</td><td width="16px">&nbsp;</td><td>2 / 2 (100 %)</td></tr>
+    <br/>
+    <table>
+      <tr>
+        <td valign="top" class="section">Statistics:&nbsp;&nbsp;</td>
+        <td valign="top">
+          <table class="simple">
+            <tr><th>kind</th><th width="16px">&nbsp;</th><th>coverage</th></tr>
+            <tr><td>binding</td><td width="16px">&nbsp;</td><td>3 / 3 (100 %)</td></tr>
+            <tr><td>sequence</td><td width="16px">&nbsp;</td><td>5 / 5 (100 %)</td></tr>
+            <tr><td>for</td><td width="16px">&nbsp;</td><td>1 / 1 (100 %)</td></tr>
+            <tr><td>if/then</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+            <tr><td>try</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+            <tr><td>while</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+            <tr><td>match/function</td><td width="16px">&nbsp;</td><td>2 / 2 (100 %)</td></tr>
+          </table>
+        </td>
+        <td valign="top">
+          <table class="simple">
+            <tr><th>kind</th><th width="16px">&nbsp;</th><th>coverage</th></tr>
+            <tr><td>class expression</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+            <tr><td>class initializer</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+            <tr><td>class method</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+            <tr><td>class value</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+            <tr><td>toplevel expression</td><td width="16px">&nbsp;</td><td>0 / 0 (- %)</td></tr>
+            <tr><td>lazy operator</td><td width="16px">&nbsp;</td><td>2 / 2 (100 %)</td></tr>
+          </table>
+        </td>
+      </tr>
     </table>
+    <br/>
     <hr class="codeSep"/>
-    <h4>Source:</h4>
+    <br/>
+    <div class="section">Source:</div>
+    <br/>
     <code>
       <div class="lineAllVisited">000001| let&nbsp;inf&nbsp;=&nbsp;(*[2]*)ref&nbsp;0</div>
       <div class="lineAllVisited">000002| let&nbsp;sup&nbsp;=&nbsp;(*[2]*)ref&nbsp;3</div>
@@ -49,6 +65,13 @@
       <div class="lineAllVisited">000021| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)print&nbsp;i</div>
       <div class="lineNone">000022| &nbsp;&nbsp;done</div>
     </code>
+    <br/>
+    <div class="section">Legend:</div>
+    &nbsp;&nbsp;&nbsp;<span class="lineNone">some code</span>&nbsp;-&nbsp;line containing no point<br/>
+    &nbsp;&nbsp;&nbsp;<span class="lineAllVisited">some code</span>&nbsp;-&nbsp;line containing only visited points<br/>
+    &nbsp;&nbsp;&nbsp;<span class="lineAllUnvisited">some code</span>&nbsp;-&nbsp;line containing only unvisited points<br/>
+    &nbsp;&nbsp;&nbsp;<span class="lineMixed">some code</span>&nbsp;-&nbsp;line containing both visited and unvisited points<br/>
+    <br/>
     <hr class="codeSep"/>
   </body>
 </html>

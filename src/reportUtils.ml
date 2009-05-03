@@ -58,6 +58,17 @@ let split p l =
     | [] -> (List.rev acc), [] in
   spl [] l
 
+let split_after n l =
+  let rec spl n acc l =
+    match l with
+    | hd :: tl ->
+        if n > 0 then
+          spl (pred n) (hd :: acc) tl
+        else
+          (List.rev acc), l
+    | [] -> (List.rev acc), [] in
+  spl n [] l
+
 let open_both in_file out_file =
   let in_channel = open_in in_file in
   try
