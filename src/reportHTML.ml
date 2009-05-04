@@ -598,6 +598,6 @@ let output verbose dir tab_size title no_navbar no_folding data =
         (in_file, (basename ^ ".html"), stats) :: acc)
       data
       [] in
-  output_png_files dir;
+  if not no_folding then output_png_files dir;
   output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);
   output_css (Filename.concat dir "style.css")
