@@ -117,7 +117,7 @@ let html_footer =
     url
     version
     (1900 + now.Unix.tm_year)
-    (1 + now.Unix.tm_mon)
+    (succ now.Unix.tm_mon)
     now.Unix.tm_mday
     now.Unix.tm_hour
     now.Unix.tm_min
@@ -245,6 +245,36 @@ let output_html_index verbose title filename l =
         ["footer", html_footer]
         channel)
 
+let escape_line tab_size line offset points =
+  let buff = Buffer.create (String.length line) in
+  let ofs = ref offset in
+  let pts = ref points in
+  let marker n =
+    Buffer.add_string buff "(*[";
+    Buffer.add_string buff (string_of_int n);
+    Buffer.add_string buff "]*)" in
+  let marker_if_any () =
+    match !pts with
+    | (o, n) :: tl when o = !ofs ->
+        marker n;
+        pts := tl
+    | _ -> () in
+  String.iter
+    (fun ch ->
+      marker_if_any ();
+      (match ch with
+      | '<' -> Buffer.add_string buff "&lt;"
+      | '>' -> Buffer.add_string buff "&gt;"
+      | ' ' -> Buffer.add_string buff "&nbsp;"
+      | '\"' -> Buffer.add_string buff "&quot;"
+      | '&' -> Buffer.add_string buff "&amp;"
+      | '\t' -> for i = 1 to tab_size do Buffer.add_string buff "&nbsp;" done
+      | _ -> Buffer.add_char buff ch);
+      incr ofs)
+    line;
+  List.iter (fun (_, n) -> marker n) !pts;
+  Buffer.contents buff
+
 let output_html verbose tab_size title no_navbar no_folding in_file out_file script_file script_file_basename visited =
   verbose (Printf.sprintf "Processing file '%s' ..." in_file);
   let cmp_content = Common.read_points in_file in
@@ -319,8 +349,8 @@ let output_html verbose tab_size title no_navbar no_folding in_file out_file scr
         []
       else
         [ "<div style=\"font-size: smaller;\">" ^
-          "<a href=\"javascript:foldAll()\">fold all</a> " ^
-          "<a href=\"javascript:unfoldAll()\">unfold all</a>" ^
+          "<a href=\"javascript:foldAll();\">fold all</a> " ^
+          "<a href=\"javascript:unfoldAll();\">unfold all</a>" ^
           "</div>" ] in
     output_strings
       ([ "        </td>" ;
@@ -582,9 +612,9 @@ let output_png_files dir =
     (fun (file, data) ->
       output_bytes data (Filename.concat dir file))
     [ "blank.png", blank_png ;
-      "dash.png", dash_png ;
+      "dash.png",  dash_png ;
       "minus.png", minus_png ;
-      "plus.png", plus_png ]
+      "plus.png",  plus_png ]
 
 let output verbose dir tab_size title no_navbar no_folding data =
   let files = Hashtbl.fold

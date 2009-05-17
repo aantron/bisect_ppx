@@ -16,12 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-(** This module defines the types and functions related to statistics. *)
+(** This module defines the types and functions related to statistics.
+    All operations gracefully handle overflows by ensuring that:
+    - a value above [max_int] is encoded by [max_int];
+    - a value below [min_int] is encoded by [min_int]. *)
 
 
 type single = {
-    mutable count : int; (** The number of points actually visited. *)
-    mutable total : int (** The total number of points. *)
+    mutable count : int; (** Number of points actually visited. *)
+    mutable total : int (** Total number of points. *)
   }
 (** The type of statistics for a single point kind. *)
 
@@ -30,7 +33,7 @@ type all = (Common.point_kind * single) list
     list containing all points kinds in ascending order. *)
 
 val make : unit -> all
-(** Returns statistics for all point kinds.
+(** Returns {i empty} statistics for all point kinds.
     All element have both [count] and [total] set to zero. *)
 
 val update : all -> Common.point_kind -> bool -> unit

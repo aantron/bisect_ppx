@@ -23,19 +23,19 @@
 (** {6 Point kinds} *)
 
 type point_kind =
-  | Binding (** point kind for bindings (let ... in, as well as toplevel bindings). *)
-  | Sequence (** point kind for sequences. *)
-  | For (** point kind for for loops. *)
-  | If_then (** point kind for if/then constructs. *)
-  | Try (** point kind for try/catch constructs. *)
-  | While (** point kind for while loops.*)
-  | Match (** point kind for matches, and functions. *)
-  | Class_expr (** point kind for class expressions. *)
-  | Class_init (** point kind for class initialiazers. *)
-  | Class_meth (** point kind for class methods. *)
-  | Class_val (** point kind for class values. *)
-  | Toplevel_expr (** point kind for toplevel expressions. *)
-  | Lazy_operator (** point kind for lazy operators. *)
+  | Binding (** Point kind for bindings (let ... in, as well as toplevel bindings). *)
+  | Sequence (** Point kind for sequences. *)
+  | For (** Point kind for for loops. *)
+  | If_then (** Point kind for if/then constructs. *)
+  | Try (** Point kind for try/catch constructs. *)
+  | While (** Point kind for while loops.*)
+  | Match (** Point kind for matches, and functions. *)
+  | Class_expr (** Point kind for class expressions. *)
+  | Class_init (** Point kind for class initialiazers. *)
+  | Class_meth (** Point kind for class methods. *)
+  | Class_val (** Point kind for class values. *)
+  | Toplevel_expr (** Point kind for toplevel expressions. *)
+  | Lazy_operator (** Point kind for lazy operators. *)
 (** The type of point kinds, characterizing the various places where
     Bisect will check for code execution.*)
 
@@ -57,13 +57,15 @@ val try_in_channel : bool -> string -> (in_channel -> 'a) -> 'a
 (** [try_in_channel bin filename f] is equivalent to [try_finally x f h] where:
     - [x] is an input channel for file [filename],
           (opened in binary mode iff [bin] is [true]);
-    - [h] just closes the input channel. *)
+    - [h] just closes the input channel.
+    Raises an exception if any error occurs. *)
 
 val try_out_channel : bool -> string -> (out_channel -> 'a) -> 'a
 (** [try_out_channel bin filename f] is equivalent to [try_finally x f h] where:
     - [x] is an output channel for file [filename],
           (opened in binary mode iff [bin] is [true]);
-    - [h] just closes the output channel. *)
+    - [h] just closes the output channel.
+    Raises an exception if any error occurs. *)
 
 
 (** {6 I/O functions} *)

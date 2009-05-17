@@ -23,7 +23,7 @@ val version : string
 (** The Bisect version, as a string. *)
 
 val url : string
-(** The Bisect version, as a string. *)
+(** The Bisect URL, as a string. *)
 
 val (++) : int -> int -> int
 (** Similar to [(+)] except that overflow is handled by returning:
@@ -50,21 +50,19 @@ val split_after : int -> ('a list) -> 'a list * 'a list
 val open_both : string -> string -> in_channel * out_channel
 (** [open_both in_file out_file] return a [(i, o)] couple where:
     - [i] is an input channel for [in_file];
-    - [o] is an output channel for [out_file]. *)
+    - [o] is an output channel for [out_file].
+    Raises an exception if an error occurs; ensures that either both files
+    are either opened or closed. *)
 
 val output_strings : string list -> (string * string) list -> out_channel -> unit
 (** [output_strings lines mapping ch] writes the elements of [lines]
-    to the channel [ch]. Also substitutes {i $(xyz)} sequence as described
-    by [Buffer.add_substitute]. The substitution is based on the association
-    list [mapping]. *)
+    to the channel [ch]. Each line is written after substituting {i $(xyz)}
+    sequences as described by [Buffer.add_substitute]. The substitution is
+    based on the association list [mapping].
+    Raises en exception if an error occurs. *)
 
 val output_bytes : int array -> string -> unit
 (** [output_bytes data filename] creates the file [filename] and writes
-    the bytes from [data] to it. *)
-
-val escape_line : int -> string -> int -> (int * int) list -> string
-(** [escape_line tab_size line offset points] escape the string [line],
-    in such a way it can be used in HTML/XML. [tab_size] is the number
-    of space character to use as a replacement for tabulations. [offset]
-    is the offset of the start of the line, inside the file. [points] is
-    a list of (offset, visits) couples. *)
+    the bytes from [data] to it. Each array element is considered as a
+    byte value.
+    Raises en exception if an error occurs. *)

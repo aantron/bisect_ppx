@@ -22,7 +22,7 @@
 val output : (string -> unit) -> string -> int -> string -> bool -> bool -> (string, int array) Hashtbl.t -> unit
 (** [output verbose dir tab_size title no_navbar no_folding data] writes all the
     HTML files for [data] in the directory [dir]. [verbose] is used for verbose
-    output, [tab_size] is the number of space character to use as a replacement
+    output, [tab_size] is the number of space characters to use as a replacement
     for tabulations, [no_navbar] indicates whether navigation bar should be
     disabled, [no_folding] indicates whether code folding should be disabled,
     and [title] is the title for generated pages. *)

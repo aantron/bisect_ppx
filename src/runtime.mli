@@ -30,8 +30,8 @@
     digits (i.e. "0001", "0002", and so on).
 
     Another environment variable can be used to customize the behaviour of
-    Bisect: "BISECT_SILENT". If this variable is set to "YES" or "ON" then
-    Bisect will not output any message (its default value is "OFF").
+    Bisect: "BISECT_SILENT". If this variable is set to "YES" or "ON" (ignoring
+    case) then Bisect will not output any message (its default value is "OFF").
     If not silent, Bisect will output a message on the standard error in two
     situations:
     - the file cannot be created at program initialization;
@@ -42,7 +42,8 @@
     the output file for coverage data, the value of the current working
     directory may be used (if "BISECT_FILE" is not set, or if "BISECT_FILE"
     designates a relative path). As a consequence, the instrumented program
-    should not modify the current directory before Bisect uses this value. *)
+    should not modify the current directory before Bisect uses this value,
+    or should modify it purposely. *)
 
 
 val init : string -> unit

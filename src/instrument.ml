@@ -38,8 +38,7 @@ let () = at_exit
           Common.try_out_channel
             true
             (Common.cmp_file_of_ml_file file)
-            (fun channel ->
-              Common.write_points channel points file))
+            (fun channel -> Common.write_points channel points file))
         points)
 
 (* Returns the identifier of an application, as a string. *)
@@ -97,7 +96,7 @@ let wrap_expr k e =
                             e))
     with Already_marked -> e
 
-(* Wraps the "top-level" expressions of a binding, using "wrap_expr". *)
+(* Wraps the "toplevel" expressions of a binding, using "wrap_expr". *)
 let rec wrap_binding = function
   | Ast.BiAnd (loc, b1, b2) -> Ast.BiAnd (loc, (wrap_binding b1), (wrap_binding b2))
   | Ast.BiEq (loc, p, e) -> Ast.BiEq (loc, p, (wrap_expr Common.Binding e))
