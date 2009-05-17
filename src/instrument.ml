@@ -110,6 +110,14 @@ let rec wrap_seq k = function
   | Ast.ExNil loc -> Ast.ExNil loc
   | x -> (wrap_expr k x)
 
+(* Tests whether the passed expression is an if/then construct,
+   and has an else branch. *)
+let has_no_else_branch e =
+  match e with
+  | <:expr< if $_$ then $_$ else $(<:expr< () >> as e')$ >> ->
+      Ast.loc_of_expr e = Ast.loc_of_expr e'
+  | _ -> false
+
 (* The actual "instrumenter" object, marking expressions. *)
 let instrument =
   object
@@ -137,7 +145,10 @@ let instrument =
           | _ -> e')
       | Ast.ExFor (loc, id, e1, e2, dir, e3) -> Ast.ExFor (loc, id, e1, e2, dir, (wrap_seq Common.For e3))
       | Ast.ExIfe (loc, e1, e2, e3) ->
-          Ast.ExIfe (loc, e1, (wrap_expr Common.If_then e2), (wrap_expr Common.If_then e3))
+          if has_no_else_branch e then
+            Ast.ExIfe (loc, e1, (wrap_expr Common.If_then e2), e3)
+          else
+            Ast.ExIfe (loc, e1, (wrap_expr Common.If_then e2), (wrap_expr Common.If_then e3))
       | Ast.ExLet (loc, r, bnd, e1) -> Ast.ExLet (loc, r, bnd, (wrap_expr Common.Binding e1))
       | Ast.ExSeq (loc, e) -> Ast.ExSeq (loc, (wrap_seq Common.Sequence e))
       | Ast.ExTry (loc, e1, h) -> Ast.ExTry (loc, (wrap_seq Common.Try e1), h)
