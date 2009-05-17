@@ -1,10 +1,11 @@
 COMPILE_FLAGS=-I ../../bin -pp 'camlp4o -I ../../bin instrument.cma' bisect.$(LIB_EXT) $(FLAGS)
+XMLLINT=$(shell which xmllint)
 
 default: clean compile run report
 
 clean::
 	@rm -fr report
-	@rm -f *.cm* *.out *.o *.jo result $(EXECUTABLE)
+	@rm -f *.cm* *.out *.o *.jo result.* $(EXECUTABLE)
 
 compile::
 	@$(COMPILER) $(COMPILE_FLAGS) -o $(EXECUTABLE) source.ml
@@ -15,8 +16,19 @@ run::
 
 report::
 	@rm -fr report
+	@$(REPORT) -csv result.csv *.out
+	@$(REPORT) -dump-dtd result.dtd *.out
+	@$(REPORT) -text result.text *.out
+	@$(REPORT) -xml result.xml *.out
 	@$(REPORT) -no-navbar -no-folding -html report *.out
-	@grep -v 'class="footer"' report/file0000.html > result
-	@diff -q result reference
+	@grep -v 'class="footer"' report/file0000.html > result.html
+	@(for ext in csv dtd html text xml; do \
+		echo "     testing '$$ext' format ..."; \
+		diff -q result.$$ext reference.$$ext; \
+	done || exit 0)
+ifeq ($(findstring xmllint,$(XMLLINT)),xmllint)
+	@$(XMLLINT) --noout --dtdvalid result.dtd result.xml
+else
+endif
 	@rm -fr report
-	@rm -f *.cm* *.out *.o *.jo result $(EXECUTABLE)
+	@rm -f *.cm* *.out *.o *.jo result.* $(EXECUTABLE)

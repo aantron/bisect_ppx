@@ -1,0 +1,17 @@
+<!ELEMENT bisect-report (summary,file*)>
+
+<!ELEMENT file (summary,point*)>
+<!ATTLIST file path CDATA #REQUIRED>
+
+<!ELEMENT summary (element*)>
+
+<!ELEMENT element EMPTY>
+<!ATTLIST element kind CDATA #REQUIRED>
+<!ATTLIST element count CDATA #REQUIRED>
+<!ATTLIST element total CDATA #REQUIRED>
+
+<!ELEMENT point EMPTY>
+<!ATTLIST point offset CDATA #REQUIRED>
+<!ATTLIST point count CDATA #REQUIRED>
+<!ATTLIST point kind CDATA #REQUIRED>
+
