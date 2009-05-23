@@ -298,12 +298,6 @@ let output_html verbose tab_size title no_navbar no_folding in_file out_file scr
           "        function jump(id) {" ;
           "          document.body.scrollTop = document.all[id].offsetTop;" ;
           "        }" ;
-          "        function move() {" ;
-          "          document.all[\"navigator\"].style.top = document.body.scrollTop + 10;" ;
-          "          document.all[\"navigator\"].style.height = document.body.clientHeight - 20;" ;
-          "          setTimeout(\"move()\", 100)" ;
-          "        }" ;
-          "        setTimeout(\"move()\", 100)" ;
           "      -->" ;
           "    </script>" ] in
     output_strings
@@ -446,7 +440,7 @@ let output_html verbose tab_size title no_navbar no_folding in_file out_file scr
       if no_navbar then
         []
       else
-        [ "    <div id=\"navigator\" style=\"border: solid black 1px; position: absolute; z-index:100; right: 10px; top: 10px; bottom: 10px; width: 16px;\">" ;
+        [ "    <div id=\"navigator\" style=\"border: solid black 1px; position: fixed; z-index:100; right: 10px; top: 10px; bottom: 10px; width: 16px;\">" ;
           "      <table width=\"100%\" height=\"100%\" border=\"0\" cellspacing=\"0\">" ] @
         (List.rev !navigator) @
         [ "      </table>" ;
