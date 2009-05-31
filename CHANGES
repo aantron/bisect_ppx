@@ -1,3 +1,18 @@
+Version 1.0-beta (2009-05-31):
+------------------------------
+  - switch to OCaml 3.11.0
+  - bug #30: incorrect detection of ocamljava
+  - bug #31: default make target
+  - bug #32: incorrect source rendering under Firefox
+  - bug #33: information about global coverage missing
+  - bug #34: bare text mode added
+  - bug #35: introduction of navigation bar and code folding
+  - bug #36: instrumentation with -unsafe switch
+  - bug #37: incorrect handling of array literals
+  - unreported bug regarding the handling of if/then construct with no else
+  - introduction of CSV, XML modes
+  - major code refactoring and improvement
+
 Version 1.0-alpha (2008-07-06):
 -------------------------------
   - first public version
