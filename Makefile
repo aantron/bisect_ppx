@@ -32,7 +32,7 @@ OCAMLC=$(PATH_OCAML_BIN)/ocamlc
 OCAMLOPT=$(PATH_OCAML_BIN)/ocamlopt
 OCAMLJAVA=$(PATH_OCAML_BIN)/ocamljava
 OCAMLDOC=$(PATH_OCAML_BIN)/ocamldoc
-OCAML_COMPILE_FLAGS=-w Ael -I $(PATH_SRC) -for-pack Bisect
+OCAML_COMPILE_FLAGS=-w Ael -warn-error A -I $(PATH_SRC) -for-pack Bisect
 OCAML_JAVA_FLAGS=-java-package fr.x9c.bisect
 OCAML_LIBRARIES=unix
 
