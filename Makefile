@@ -79,7 +79,7 @@ endif
 
 default:
 	@echo "available targets:"
-	@echo "  all         compiles all files"
+	@echo "  all         compiles all files, and generates html documentation"
 	@echo "  common      compiles the 'Common' module"
 	@echo "  runtime     compiles the 'Runtime' module"
 	@echo "  instrument  compiles the 'Instrument' module"
@@ -90,7 +90,7 @@ default:
 	@echo "  clean-doc   deletes documentation files"
 	@echo "  install     copies executable and library files"
 	@echo "  tests       runs the tests"
-	@echo "  depend      generates dependency files"
+	@echo "  depend      populates the dependency files (they are initially empty)"
 	@echo "installation is usually done by: 'make all' and 'sudo make install'"
 
 all: clean-all common runtime instrument report html-doc
