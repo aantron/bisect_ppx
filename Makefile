@@ -34,6 +34,11 @@ endif
 OCAMLC=$(PATH_OCAML_BIN)/ocamlc
 OCAMLOPT=$(PATH_OCAML_BIN)/ocamlopt
 OCAMLJAVA=$(PATH_OCAML_BIN)/ocamljava
+ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
+OCAMLJAVA_AVAILABLE=yes
+else
+OCAMLJAVA_AVAILABLE=no
+endif
 OCAMLDOC=$(PATH_OCAML_BIN)/ocamldoc
 OCAML_COMPILE_FLAGS=-w Ael -warn-error A -I $(PATH_SRC) -for-pack Bisect
 OCAML_JAVA_FLAGS=-java-package fr.x9c.bisect
@@ -57,7 +62,7 @@ INSTRUMENT_MODULE=instrument
 REPORT_MODULES=reportUtils reportStat reportHTML reportGeneric
 REPORT_MAIN_MODULE=report
 
-ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
+ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	IMPLEMENTATION_EXTENSIONS=cmo cmx cmj
 else
 	IMPLEMENTATION_EXTENSIONS=cmo cmx
@@ -66,13 +71,12 @@ EXTENSIONS=cmi $(IMPLEMENTATION_EXTENSIONS)
 
 RUNTIME_FILES=$(patsubst %,$(PATH_SRC)/$(RUNTIME_MODULE).%,$(EXTENSIONS))
 COMMON_FILES=$(patsubst %,$(PATH_SRC)/$(COMMON_MODULE).%,$(EXTENSIONS))
-INSTRUMENT_FILES=$(PATH_SRC)/$(INSTRUMENT_MODULE).cmo
 REPORT_CMI=$(patsubst %,$(PATH_SRC)/%.cmi,$(REPORT_MODULES))
 REPORT_CMO=$(patsubst %,$(PATH_SRC)/%.cmo,$(REPORT_MODULES))
 REPORT_CMX=$(patsubst %,$(PATH_SRC)/%.cmx,$(REPORT_MODULES))
 REPORT_CMJ=$(patsubst %,$(PATH_SRC)/%.cmj,$(REPORT_MODULES))
 REPORT_FILES=$(REPORT_CMI) $(REPORT_CMO) $(REPORT_CMX)
-ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
+ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	REPORT_FILES+=$(REPORT_CMJ)
 else
 endif
@@ -110,7 +114,7 @@ runtime: $(RUNTIME_FILES)
 	mv *.cm* *.a $(PATH_BIN)
 	rm *.o
 
-ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
+ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -I $(PATH_SRC) -pack -o $(LIBRARY).cmj $(PATH_SRC)/common.cmj $(PATH_SRC)/runtime.cmj
 	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -a -o $(LIBRARY).cmja $(LIBRARY).cmj
 	mv *.cm* *.jar $(PATH_BIN)
@@ -127,7 +131,7 @@ instrument:
 report: $(REPORT_FILES)
 	$(OCAMLC) $(OCAML_COMPILE_FLAGS) $(CMA_FILES) -o $(PATH_BIN)/$(EXECUTABLE) $(PATH_SRC)/common.cmo $(REPORT_CMO) $(PATH_SRC)/$(REPORT_MAIN_MODULE).ml
 	$(OCAMLOPT) $(OCAML_COMPILE_FLAGS) $(CMXA_FILES) -o $(PATH_BIN)/$(EXECUTABLE).opt $(PATH_SRC)/common.cmx $(REPORT_CMX) $(PATH_SRC)/$(REPORT_MAIN_MODULE).ml
-ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
+ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	$(OCAMLJAVA) $(OCAML_COMPILE_FLAGS) $(OCAML_JAVA_FLAGS) $(CMJA_FILES) -standalone -o $(PATH_BIN)/$(EXECUTABLE).jar $(PATH_SRC)/common.cmj $(REPORT_CMJ) $(PATH_SRC)/$(REPORT_MAIN_MODULE).ml
 else
 endif
@@ -154,7 +158,7 @@ install:
 	mkdir -p $(INSTALL_DIR)
 	cp $(PATH_BIN)/$(EXECUTABLE) $(PATH_BIN)/$(EXECUTABLE).opt $(INSTALL_DIR_EXEC)
 	cp $(PATH_BIN)/*.cm* $(PATH_BIN)/$(LIBRARY).a $(INSTALL_DIR)
-ifeq ($(findstring $(OCAMLJAVA),$(wildcard $(OCAMLJAVA))),$(OCAMLJAVA))
+ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	cp $(PATH_BIN)/$(EXECUTABLE).jar $(INSTALL_DIR_EXEC)
 	cp $(PATH_BIN)/$(LIBRARY).jar $(INSTALL_DIR)
 else
