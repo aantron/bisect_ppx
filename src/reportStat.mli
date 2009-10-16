@@ -50,4 +50,5 @@ val add : all -> all -> all
 (** [add x y] returns the sum of statistics [x] and [y]. *)
 
 val sum : all list -> all
-(** [sum l] is a fold over [l] elements with function [add]. *)
+(** [sum l] is a fold over [l] elements with function [add],
+    using the value returned by [make] as the initial value. *)
