@@ -141,26 +141,21 @@ let magic_number_pts = "BISECT-PTS"
 
 let format_version = (1, 0)
 
-let write_runtime_data channel content =
-  output_string channel magic_number_rtd;
+let write_channel channel magic write_digest x =
+  output_string channel magic;
   output_value channel format_version;
-  output_value channel (Array.of_list content)
+  (match write_digest with
+  | Some file -> output_value channel (Digest.file file)
+  | None -> ());
+  output_value channel x
 
-let write_points channel content file =
-  output_string channel magic_number_pts;
-  output_value channel format_version;
-  output_value channel (Digest.file file);
-  let arr = Array.of_list content in
-  Array.sort compare arr;
-  output_value channel arr
-
-let check_channel channel filename magic version check_digest =
+let check_channel channel filename magic check_digest =
   let magic_length = String.length magic in
   let file_magic = String.create magic_length in
   really_input channel file_magic 0 magic_length;
   if file_magic = magic then
     let file_version : (int * int) = input_value channel in
-    if file_version <> version then
+    if file_version <> format_version then
       raise (Unsupported_version filename)
     else
       ()
@@ -173,12 +168,20 @@ let check_channel channel filename magic version check_digest =
       if file_digest <> digest then raise (Modified_file filename)
   | None -> ()
 
+let write_runtime_data channel content =
+  write_channel channel magic_number_rtd None (Array.of_list content)
+
+let write_points channel content file =
+  let arr = Array.of_list content in
+  Array.sort compare arr;
+  write_channel channel magic_number_pts (Some file) arr
+
 let read_runtime_data filename =
   try_in_channel
     true
     filename
     (fun channel ->
-      check_channel channel filename magic_number_rtd format_version None;
+      check_channel channel filename magic_number_rtd None;
       let file_content : (string * (int array)) array = input_value channel in
       Array.to_list file_content)
 
@@ -189,7 +192,7 @@ let read_points filename =
     true
     filename'
     (fun channel ->
-      check_channel channel filename' magic_number_pts format_version (Some filename);
+      check_channel channel filename' magic_number_pts (Some filename);
       let arr : point_definition array = input_value channel in
       Array.sort compare arr;
       for i = 1 to (pred (Array.length arr)) do
