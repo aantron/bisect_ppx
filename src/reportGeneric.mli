@@ -29,13 +29,13 @@ type converter =
 
 val output : (string -> unit) -> string -> converter -> (string, int array) Hashtbl.t -> unit
 (** [output verbose file conv data] writes the element for [data] to file
-    [file] using [conv] for data conversion and [verbose] for verbose output.
+    [file] using [conv] for data conversion, and [verbose] for verbose output.
     The methods of the [conv] instance are used as follows:
     - [header] should return the overall header for output;
     - [footer] should return the overall footer for output;
     - [summary] should return the overall summary for passed statistics;
-    - [file_header] should return the overall header for passed file;
-    - [file_footer] should return the overall footer for passed file;
+    - [file_header] should return the header for passed file;
+    - [file_footer] should return the footer for passed file;
     - [file_summary] should return the file summary for passed statistics;
-    - [point] shoudl return the output for a given point, the parameters
+    - [point] should return the output for a given point, the parameters
     being: offset, number of visits, and point kind. *)
