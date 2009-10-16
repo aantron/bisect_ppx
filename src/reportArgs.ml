@@ -17,13 +17,15 @@
  *)
 
 type output_kind =
-  | No_output
   | Html_output of string
   | Xml_output of string
   | Csv_output of string
   | Text_output of string
 
-let output = ref No_output
+let outputs = ref []
+
+let add_output o =
+  outputs := o :: !outputs
 
 let verbose = ref false
 
@@ -44,7 +46,7 @@ let add_file f =
 
 let options = [
   ("-csv",
-   Arg.String (fun s -> output := Csv_output s),
+   Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Set output to csv, data being written to given file") ;
   ("-dump-dtd",
    Arg.String
@@ -60,7 +62,7 @@ let options = [
            exit 0),
    "<file>  Dump the DTD to the given file") ;
   ("-html",
-   Arg.String (fun s -> output := Html_output s),
+   Arg.String (fun s -> add_output (Html_output s)),
    "<dir>  Set output to html, files being written in given directory") ;
   ("-no-folding",
    Arg.Set no_folding,
@@ -80,7 +82,7 @@ let options = [
          tab_size := x),
    "<int>  Set tabulation size in output (HTML only)") ;
   ("-text",
-   Arg.String (fun s -> output := Text_output s),
+   Arg.String (fun s -> add_output (Text_output s)),
    "<file>  Set output to text, data being written to given file") ;
   ("-title",
    Arg.Set_string title,
@@ -92,7 +94,7 @@ let options = [
    Arg.Unit (fun () -> print_endline ReportUtils.version; exit 0),
    " Print version and exit") ;
   ("-xml",
-   Arg.String (fun s -> output := Xml_output s),
+   Arg.String (fun s -> add_output (Xml_output s)),
    "<file>  Set output to xml, data being written to given file")
 ]
 

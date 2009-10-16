@@ -21,6 +21,14 @@ open ReportUtils
 
 let main () =
   ReportArgs.parse ();
+  if !ReportArgs.files = [] then begin
+    prerr_endline " *** warning: no input file";
+    exit 0
+  end;
+  if !ReportArgs.outputs = [] then begin
+    prerr_endline " *** warning: no output requested";
+    exit 0
+  end;
   let data =
     List.fold_right
       (fun s acc ->
@@ -33,27 +41,18 @@ let main () =
       !ReportArgs.files
       (Hashtbl.create 17) in
   let verbose = if !ReportArgs.verbose then print_endline else ignore in
-  let generic_output file conv =
-    if (Hashtbl.length data) = 0 then
-      prerr_endline " *** warning: no input file"
-    else
-      ReportGeneric.output verbose file conv data in
-  match !ReportArgs.output with
-  | ReportArgs.No_output ->
-      prerr_endline " *** warning: no output requested"
-  | ReportArgs.Html_output dir ->
-      if (Hashtbl.length data) = 0 then
-        prerr_endline " *** warning: no input file"
-      else begin
-        mkdirs dir;
-        ReportHTML.output verbose dir !ReportArgs.tab_size !ReportArgs.title !ReportArgs.no_navbar !ReportArgs.no_folding data
-      end
-  | ReportArgs.Xml_output file ->
-      generic_output file (ReportXML.make ())
-  | ReportArgs.Csv_output file ->
-      generic_output file (ReportCSV.make !ReportArgs.separator)
-  | ReportArgs.Text_output file ->
-      generic_output file (ReportText.make ())
+  let generic_output file conv = ReportGeneric.output verbose file conv data in
+  let write_output = function
+    | ReportArgs.Html_output dir ->
+	mkdirs dir;
+	ReportHTML.output verbose dir !ReportArgs.tab_size !ReportArgs.title !ReportArgs.no_navbar !ReportArgs.no_folding data
+    | ReportArgs.Xml_output file ->
+	generic_output file (ReportXML.make ())
+    | ReportArgs.Csv_output file ->
+	generic_output file (ReportCSV.make !ReportArgs.separator)
+    | ReportArgs.Text_output file ->
+	generic_output file (ReportText.make ()) in
+  List.iter write_output (List.rev !ReportArgs.outputs)
 
 let () =
   try

@@ -20,15 +20,14 @@
 
 
 type output_kind =
-  | No_output
   | Html_output of string
   | Xml_output of string
   | Csv_output of string
   | Text_output of string
 (** The type of output kinds. *)
 
-val output : output_kind ref
-(** Selected output kind. *)
+val outputs : output_kind list ref
+(** Selected output kinds. *)
 
 val verbose : bool ref
 (** Whether verbose mode is activated. *)
