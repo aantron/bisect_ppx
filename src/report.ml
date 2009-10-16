@@ -38,88 +38,8 @@ let dtd = [
   ""
 ]
 
-type output_kind =
-  | No_output
-  | Html_output of string
-  | Xml_output of string
-  | Csv_output of string
-  | Text_output of string
-
-let output = ref No_output
-
-let verbose = ref false
-
-let tab_size = ref 8
-
-let title = ref "Bisect report"
-
-let separator = ref ";"
-
-let no_navbar = ref false
-
-let no_folding = ref false
-
-let files = ref []
-
-let add_file f =
-  files := f :: !files
-
-let options = [
-  ("-csv",
-   Arg.String (fun s -> output := Csv_output s),
-   "<file>  Set output to csv, data being written to given file") ;
-  ("-dump-dtd",
-   Arg.String
-     (function
-       | "-" ->
-           output_strings dtd [] stdout;
-           exit 0
-       | s ->
-           Common.try_out_channel
-             false
-             s
-             (output_strings dtd []);
-           exit 0),
-   "<file>  Dump the DTD to the given file") ;
-  ("-html",
-   Arg.String (fun s -> output := Html_output s),
-   "<dir>  Set output to html, files being written in given directory") ;
-  ("-no-folding",
-   Arg.Set no_folding,
-   " Disable code folding (HTML only)") ;
-  ("-no-navbar",
-   Arg.Set no_navbar,
-   " Disable navigation bar (HTML only)") ;
-  ("-separator",
-   Arg.Set_string separator,
-   "<string>  Set the seprator for generated output (CSV only)") ;
-  ("-tab-size",
-   Arg.Int
-     (fun x ->
-       if x < 0 then
-         (print_endline " *** error: tab size should be positive"; exit 1)
-       else
-         tab_size := x),
-   "<int>  Set tabulation size in output (HTML only)") ;
-  ("-text",
-   Arg.String (fun s -> output := Text_output s),
-   "<file>  Set output to text, data being written to given file") ;
-  ("-title",
-   Arg.Set_string title,
-   "<string>  Set the title for generated output (HTML only)") ;
-  ("-verbose",
-   Arg.Set verbose,
-   " Set verbose mode") ;
-  ("-version",
-   Arg.Unit (fun () -> print_endline version; exit 0),
-   " Print version and exit") ;
-  ("-xml",
-   Arg.String (fun s -> output := Xml_output s),
-   "<file>  Set output to xml, data being written to given file")
-]
-
 let main () =
-  Arg.parse options add_file "Usage: bisect <options> <files>\nOptions are:";
+  ReportArgs.parse ();
   let data =
     List.fold_right
       (fun s acc ->
@@ -129,25 +49,25 @@ let main () =
             Hashtbl.replace acc k arr')
           (Common.read_runtime_data s);
         acc)
-      !files
+      !ReportArgs.files
       (Hashtbl.create 17) in
-  let verbose = if !verbose then print_endline else ignore in
+  let verbose = if !ReportArgs.verbose then print_endline else ignore in
   let generic_output file conv =
     if (Hashtbl.length data) = 0 then
       prerr_endline " *** warning: no input file"
     else
       ReportGeneric.output verbose file conv data in
-  match !output with
-  | No_output ->
+  match !ReportArgs.output with
+  | ReportArgs.No_output ->
       prerr_endline " *** warning: no output requested"
-  | Html_output dir ->
+  | ReportArgs.Html_output dir ->
       if (Hashtbl.length data) = 0 then
         prerr_endline " *** warning: no input file"
       else begin
         mkdirs dir;
-        ReportHTML.output verbose dir !tab_size !title !no_navbar !no_folding data
+        ReportHTML.output verbose dir !ReportArgs.tab_size !ReportArgs.title !ReportArgs.no_navbar !ReportArgs.no_folding data
       end
-  | Xml_output file ->
+  | ReportArgs.Xml_output file ->
       let conv = object (self)
         method header = "<bisect-report>\n"
         method footer = "</bisect-report>\n"
@@ -171,12 +91,12 @@ let main () =
           "\n" ^ tabs ^ "</summary>\n"
       end in
       generic_output file conv
-  | Csv_output file ->
+  | ReportArgs.Csv_output file ->
       let conv = object (self)
         method header = ""
         method footer = ""
-        method summary s = "-" ^ !separator ^ (self#sum s)
-        method file_header f = f ^ !separator
+        method summary s = "-" ^ !ReportArgs.separator ^ (self#sum s)
+        method file_header f = f ^ !ReportArgs.separator
         method file_footer _ = ""
         method file_summary s = self#sum s
         method point _ _ _ = ""
@@ -186,15 +106,15 @@ let main () =
               (fun (_, v) ->
                 Printf.sprintf "%d%s%d"
                   v.ReportStat.count
-                  !separator
+                  !ReportArgs.separator
                   v.ReportStat.total)
               s in
           let x, y = ReportStat.summarize s in
-          (String.concat !separator elems) ^
-          (Printf.sprintf "%s%d%s%d\n" !separator x !separator y)
+          (String.concat !ReportArgs.separator elems) ^
+          (Printf.sprintf "%s%d%s%d\n" !ReportArgs.separator x !ReportArgs.separator y)
       end in
       generic_output file conv
-  | Text_output file ->
+  | ReportArgs.Text_output file ->
       let conv = object (self)
         method header = ""
         method footer = ""
