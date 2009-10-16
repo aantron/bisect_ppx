@@ -28,6 +28,7 @@ let make () =
     Common.all_point_kinds
 
 let update s k p =
+  assert (List.mem_assoc k s);
   let r = List.assoc k s in
   if p then r.count <- r.count ++ 1;
   r.total <- r.total ++ 1
