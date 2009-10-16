@@ -19,6 +19,11 @@
 (** This module provides runtime support for Bisect. Instrumented programs
     should hence be linked with this module.
 
+    This stateful module maintains counters associated with the various points
+    of the instrumented program. Points are places in the source code, and
+    associated counters indicate how many times the control flow of the program
+    passed at the place.
+
     At initialization, this module determines the output file for coverage
     information and creates this file. It also registers a function using
     [Pervasives.at_exit] to dump coverage information at program exit.
@@ -38,12 +43,12 @@
     - the data cannot be written at program termination.
 
     Because of the initialization part of Bisect, one is advised to link
-    this module as one of the first ones of the program. Indeed, when determining
-    the output file for coverage data, the value of the current working
-    directory may be used (if "BISECT_FILE" is not set, or if "BISECT_FILE"
-    designates a relative path). As a consequence, the instrumented program
-    should not modify the current directory before Bisect uses this value,
-    or should modify it purposely. *)
+    this module as one of the first ones of the program. Indeed, when
+    determining the output file for coverage data, the value of the current
+    working directory may be used (if "BISECT_FILE" is not set, or if
+    "BISECT_FILE" designates a relative path). As a consequence, the
+    instrumented program should not modify the current directory before Bisect
+    uses this value, or should modify it purposely. *)
 
 
 val init : string -> unit
