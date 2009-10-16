@@ -18,25 +18,6 @@
 
 open ReportUtils
 
-let dtd = [
-  "<!ELEMENT bisect-report (summary,file*)>" ;
-  "" ;
-  "<!ELEMENT file (summary,point*)>" ;
-  "<!ATTLIST file path CDATA #REQUIRED>" ;
-  "" ;
-  "<!ELEMENT summary (element*)>" ;
-  "" ;
-  "<!ELEMENT element EMPTY>" ;
-  "<!ATTLIST element kind CDATA #REQUIRED>" ;
-  "<!ATTLIST element count CDATA #REQUIRED>" ;
-  "<!ATTLIST element total CDATA #REQUIRED>" ;
-  "" ;
-  "<!ELEMENT point EMPTY>" ;
-  "<!ATTLIST point offset CDATA #REQUIRED>" ;
-  "<!ATTLIST point count CDATA #REQUIRED>" ;
-  "<!ATTLIST point kind CDATA #REQUIRED>" ;
-  ""
-]
 
 let main () =
   ReportArgs.parse ();
@@ -68,80 +49,11 @@ let main () =
         ReportHTML.output verbose dir !ReportArgs.tab_size !ReportArgs.title !ReportArgs.no_navbar !ReportArgs.no_folding data
       end
   | ReportArgs.Xml_output file ->
-      let conv = object (self)
-        method header = "<bisect-report>\n"
-        method footer = "</bisect-report>\n"
-        method summary s = self#sum "  " s
-        method file_header f = Printf.sprintf "  <file path=\"%s\">\n" f
-        method file_footer _ = Printf.sprintf "  </file>\n"
-        method file_summary s = self#sum "    " s
-        method point ofs nb k = Printf.sprintf "    <point offset=\"%d\" count=\"%d\" kind=\"%s\"/>\n" ofs nb (Common.string_of_point_kind k)
-        method private sum tabs s =
-          let line k x y =
-            Printf.sprintf "<element kind=\"%s\" count=\"%d\" total=\"%d\"/>" k x y in
-          let lines =
-            List.map
-              (fun (k, v) ->
-                line (Common.string_of_point_kind k) v.ReportStat.count v.ReportStat.total)
-              s in
-          let x, y = ReportStat.summarize s in
-          tabs ^ "<summary>\n  " ^ tabs ^
-          (String.concat ("\n  " ^ tabs) lines) ^
-          "\n  " ^ tabs ^ (line "total" x y) ^
-          "\n" ^ tabs ^ "</summary>\n"
-      end in
-      generic_output file conv
+      generic_output file (ReportXML.make ())
   | ReportArgs.Csv_output file ->
-      let conv = object (self)
-        method header = ""
-        method footer = ""
-        method summary s = "-" ^ !ReportArgs.separator ^ (self#sum s)
-        method file_header f = f ^ !ReportArgs.separator
-        method file_footer _ = ""
-        method file_summary s = self#sum s
-        method point _ _ _ = ""
-        method private sum s =
-          let elems =
-            List.map
-              (fun (_, v) ->
-                Printf.sprintf "%d%s%d"
-                  v.ReportStat.count
-                  !ReportArgs.separator
-                  v.ReportStat.total)
-              s in
-          let x, y = ReportStat.summarize s in
-          (String.concat !ReportArgs.separator elems) ^
-          (Printf.sprintf "%s%d%s%d\n" !ReportArgs.separator x !ReportArgs.separator y)
-      end in
-      generic_output file conv
+      generic_output file (ReportCSV.make !ReportArgs.separator)
   | ReportArgs.Text_output file ->
-      let conv = object (self)
-        method header = ""
-        method footer = ""
-        method summary s = "Summary:\n" ^ (self#sum s)
-        method file_header f = Printf.sprintf "File '%s':\n" f
-        method file_footer _ = ""
-        method file_summary s = self#sum s
-        method point _ _ _ = ""
-        method private sum s =
-          let numbers x y =
-            if y > 0 then
-              let p = ((float_of_int x) *. 100.) /. (float_of_int y) in
-              Printf.sprintf "%d/%d (%.2f %%)" x y p
-            else
-              "none" in
-          let lines =
-            List.map
-              (fun (k, v) ->
-                Printf.sprintf " - '%s' points: %s"
-                  (Common.string_of_point_kind k)
-                  (numbers v.ReportStat.count v.ReportStat.total))
-              s in
-          let x, y = ReportStat.summarize s in
-          (String.concat "\n" lines) ^ "\n" ^
-          " - total: " ^ (numbers x y) ^ "\n"
-      end in
-      generic_output file conv
+      generic_output file (ReportText.make ())
 
 let () =
   try

@@ -59,7 +59,7 @@ CMJA_FILES=$(patsubst %,%.cmja,$(OCAML_LIBRARIES))
 RUNTIME_MODULE=runtime
 COMMON_MODULE=common
 INSTRUMENT_MODULE=instrument
-REPORT_MODULES=reportUtils reportStat reportHTML reportGeneric
+REPORT_MODULES=reportUtils reportStat reportHTML reportGeneric reportCSV reportText reportXML reportArgs
 REPORT_MAIN_MODULE=report
 
 ifeq ($(OCAMLJAVA_AVAILABLE),yes)

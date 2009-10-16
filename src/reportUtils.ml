@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-let version = "1.0-beta"
+let version = "1.0"
 
 let url = "http://bisect.x9c.fr"
 

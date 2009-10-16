@@ -50,13 +50,13 @@ let options = [
    Arg.String
      (function
        | "-" ->
-           ReportUtils.output_strings dtd [] stdout;
+           ReportUtils.output_strings ReportXML.dtd [] stdout;
            exit 0
        | s ->
            Common.try_out_channel
              false
              s
-             (ReportUtils.output_strings dtd []);
+             (ReportUtils.output_strings ReportXML.dtd []);
            exit 0),
    "<file>  Dump the DTD to the given file") ;
   ("-html",
