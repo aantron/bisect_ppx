@@ -109,8 +109,7 @@ let rec wrap_seq k = function
   | Ast.ExNil loc -> Ast.ExNil loc
   | x -> (wrap_expr k x)
 
-(* Tests whether the passed expression is an if/then construct,
-   and has an else branch. *)
+(* Tests whether the passed expression is an if/then construct that has no else branch. *)
 let has_no_else_branch e =
   match e with
   | <:expr< if $_$ then $_$ else $(<:expr< () >> as e')$ >> ->
