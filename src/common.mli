@@ -23,27 +23,38 @@
 (** {6 Point kinds} *)
 
 type point_kind =
-  | Binding (** Point kind for bindings (let ... in, as well as toplevel bindings). *)
+  | Binding (** Point kind for bindings ([let ... in ...], as well as toplevel bindings). *)
   | Sequence (** Point kind for sequences. *)
-  | For (** Point kind for for loops. *)
-  | If_then (** Point kind for if/then constructs. *)
-  | Try (** Point kind for try/catch constructs. *)
+  | For (** Point kind for [for] loops. *)
+  | If_then (** Point kind for [if/then] constructs. *)
+  | Try (** Point kind for [try/with] constructs. *)
   | While (** Point kind for while loops.*)
-  | Match (** Point kind for matches, and functions. *)
+  | Match (** Point kind for [match] constructs, and functions. *)
   | Class_expr (** Point kind for class expressions. *)
   | Class_init (** Point kind for class initialiazers. *)
   | Class_meth (** Point kind for class methods. *)
   | Class_val (** Point kind for class values. *)
   | Toplevel_expr (** Point kind for toplevel expressions. *)
-  | Lazy_operator (** Point kind for lazy operators. *)
+  | Lazy_operator (** Point kind for lazy operators ({i i.e.} [&&] and [||]). *)
 (** The type of point kinds, characterizing the various places where
-    Bisect will check for code execution.*)
+    Bisect will check for code execution. *)
+
+type point_definition = int * int * point_kind
+(** The type of point definitions, that is (offset, identifier, kind) triplets. *)
 
 val all_point_kinds : point_kind list
 (** The list of all point kinds, in ascending order. *)
 
 val string_of_point_kind : point_kind -> string
 (** Conversion from point kind into string. *)
+
+val char_of_point_kind : point_kind -> char
+(** Conversion from point kind into character. *)
+
+val point_kind_of_char : char -> point_kind
+(** Conversion from character into point kind.
+    Raises [Invalid_argument] if the passed character does not designate a
+    point kind. *)
 
 
 (** {6 Utility functions} *)
@@ -93,20 +104,20 @@ val write_runtime_data : out_channel -> (string * (int array)) list -> unit
     at index {i i} being the number of times point {i i} has been visited).
     Raises [Sys_error] if an i/o error occurs. *)
 
-val write_points : out_channel -> (int * int * point_kind) list -> string -> unit
+val write_points : out_channel -> point_definition list -> string -> unit
 (** [write_points oc pts f] writes the point definitions [pts] to the output
-    channel [oc] using the Bisect file format. A point definition is a
-    (offset, identifier, kind) triple. [f] is the name of the source file
-    related to point definitions, whose digest is written to the output channel.
+    channel [oc] using the Bisect file format. [f] is the name of the source
+    file related to point definitions, whose digest is written to the output
+    channel.
     Raises [Sys_error] if an i/o error occurs. *)
 
 val read_runtime_data : string ->  (string * (int array)) list
 (** [read_runtime_data f] reads the runtime data from file [f].
-    Raises [Sys_error] if an i/o error occurs, may also raise
+    Raises [Sys_error] if an i/o error occurs. May also raise
     [Invalid_file], [Unsupported_version], or [Modified_file]. *)
 
-val read_points : string -> (int * int * point_kind) list
+val read_points : string -> point_definition list
 (** [read_points f] reads the point definitions associated with the source file
     named [f].
-    Raises [Sys_error] if an i/o error occurs, may also raise
+    Raises [Sys_error] if an i/o error occurs. May also raise
     [Invalid_file], [Unsupported_version], or [Modified_file]. *)

@@ -34,6 +34,8 @@ type point_kind =
   | Toplevel_expr
   | Lazy_operator
 
+type point_definition = int * int * point_kind
+
 let all_point_kinds = [
   Binding ;
   Sequence ;
@@ -64,6 +66,37 @@ let string_of_point_kind = function
   | Class_val -> "class value"
   | Toplevel_expr -> "toplevel expression"
   | Lazy_operator -> "lazy operator"
+
+let char_of_point_kind = function
+  | Binding -> 'b'
+  | Sequence -> 's'
+  | For -> 'f'
+  | If_then -> 'i'
+  | Try -> 't'
+  | While -> 'w'
+  | Match -> 'm'
+  | Class_expr -> 'c'
+  | Class_init -> 'd'
+  | Class_meth -> 'e'
+  | Class_val -> 'v'
+  | Toplevel_expr -> 'p'
+  | Lazy_operator -> 'l'
+
+let point_kind_of_char = function
+  | 'b' -> Binding
+  | 's' -> Sequence
+  | 'f' -> For
+  | 'i' -> If_then
+  | 't' -> Try
+  | 'w' -> While
+  | 'm' -> Match
+  | 'c' -> Class_expr
+  | 'd' -> Class_init
+  | 'e' -> Class_meth
+  | 'v' -> Class_val
+  | 'p' -> Toplevel_expr
+  | 'l' -> Lazy_operator
+  | _ -> invalid_arg "Bisect.Common.point_kind_of_char"
 
 
 (* Utility functions *)
@@ -157,7 +190,7 @@ let read_points filename =
     filename'
     (fun channel ->
       check_channel channel filename' magic_number_pts format_version (Some filename);
-      let arr : (int * int * point_kind) array = input_value channel in
+      let arr : point_definition array = input_value channel in
       Array.sort compare arr;
       for i = 1 to (pred (Array.length arr)) do
         if (offset arr.(i)) = (offset arr.(pred i)) then
