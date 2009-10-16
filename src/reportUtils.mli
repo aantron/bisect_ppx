@@ -36,9 +36,11 @@ val (+|) : int array -> int array -> int array
     the passed arrays, missing elements from the smallest array are
     supposed to be equal to [0]. *)
 
-val mkdirs : string -> unit
+val mkdirs : ?perm:Unix.file_perm -> string -> unit
 (** Creates the directory whose path is passed, and all necessary parent
-    directories. Raises [Unix.Unix_error] if creation fails. *)
+    directories. The optional [perms] parameter indicates the permissions used
+    for directory creation(s), defaulting to [0o755].
+    Raises [Unix.Unix_error] if creation fails. *)
 
 val split : ('a -> bool) -> ('a list) -> 'a list * 'a list
 (** [split p [e1; ...; en]] returns [([e1; ...; e(i-1)], [ei; ...; en])]

@@ -40,12 +40,13 @@ let rec (+|) x y =
   end else
     y +| x
 
-let rec mkdirs dir =
-  let perm = 0o755 in
-  if not (Sys.file_exists dir) then begin
-    mkdirs (Filename.dirname dir);
-    Unix.mkdir dir perm
-  end
+let mkdirs ?(perm=0o755) dir =
+  let rec mk dir =
+    if not (Sys.file_exists dir) then begin
+      mk (Filename.dirname dir);
+      Unix.mkdir dir perm
+    end in
+  mk dir
 
 let split p l =
   let rec spl acc l =
