@@ -57,10 +57,10 @@ let rec ident_of_app e =
 (* Tests whether the passed expression is a bare mapping,
    or starts with a bare mapping (if the expression is a sequence).
    Used to avoid unnecessary marking. *)
-let rec bare_mapping = function
+let rec is_bare_mapping = function
   | Ast.ExFun _ -> true
   | Ast.ExMat _ -> true
-  | Ast.ExSeq (_, e') -> bare_mapping e'
+  | Ast.ExSeq (_, e') -> is_bare_mapping e'
   | _ -> false
 
 (* To be raised when an offset is already marked. *)
@@ -84,7 +84,7 @@ let marker file ofs kind =
    unmodified if the expression is already marked, is a bare mapping,
    or has a ghost location. *)
 let wrap_expr k e =
-  if (bare_mapping e) || (Loc.is_ghost (Ast.loc_of_expr e)) then
+  if (is_bare_mapping e) || (Loc.is_ghost (Ast.loc_of_expr e)) then
     e
   else
     try
