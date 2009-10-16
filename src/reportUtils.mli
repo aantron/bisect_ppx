@@ -33,7 +33,7 @@ val (++) : int -> int -> int
 val (+|) : int array -> int array -> int array
 (** Returns the sum of the passed arrays, using [(++)] to sum elements.
     The length of the returned array is the maximum of the lengths of
-    the passed arrays, missing elements from the smallest array are
+    the passed arrays, missing elements from the smallest array being
     supposed to be equal to [0]. *)
 
 val mkdirs : ?perm:Unix.file_perm -> string -> unit
@@ -44,7 +44,7 @@ val mkdirs : ?perm:Unix.file_perm -> string -> unit
 
 val split : ('a -> bool) -> ('a list) -> 'a list * 'a list
 (** [split p [e1; ...; en]] returns [([e1; ...; e(i-1)], [ei; ...; en])]
-    where is is the lowest index such that [(p ei)] evaluates to false. *)
+    where [i] is the lowest index such that [p ei] evaluates to false. *)
 
 val split_after : int -> ('a list) -> 'a list * 'a list
 (** [split_after k [e1; ...; en]] returns [([e1; ...; ek], [e(k+1); ...; en])]. *)
@@ -60,11 +60,11 @@ val output_strings : string list -> (string * string) list -> out_channel -> uni
 (** [output_strings lines mapping ch] writes the elements of [lines]
     to the channel [ch]. Each line is written after substituting {i $(xyz)}
     sequences as described by [Buffer.add_substitute]. The substitution is
-    based on the association list [mapping].
-    Raises en exception if an error occurs. *)
+    based on the association list [mapping]; if no mapping is found, [""] is used.
+    Raises an exception if an error occurs. *)
 
 val output_bytes : int array -> string -> unit
 (** [output_bytes data filename] creates the file [filename] and writes
     the bytes from [data] to it. Each array element is considered as a
     byte value.
-    Raises en exception if an error occurs. *)
+    Raises an exception if an error occurs. *)
