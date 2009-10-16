@@ -18,6 +18,29 @@
 
 open Camlp4.PreCast
 
+(* Association list mapping points kinds to whether they are activated. *)
+let kinds = List.map (fun x -> (x, ref true)) Common.all_point_kinds
+
+let () =
+  let set_kinds v s =
+    String.iter
+      (fun ch ->
+	try
+	  let k = Common.point_kind_of_char ch in
+	  (List.assoc k kinds) := v
+	with _ -> raise (Arg.Bad (Printf.sprintf "unknown point kind: '%c'" ch)))
+      s in
+  let lines =
+    List.map
+      (fun k ->
+	Printf.sprintf "\n     %c %s"
+	  (Common.char_of_point_kind k)
+	  (Common.string_of_point_kind k))
+      Common.all_point_kinds in
+  let desc = String.concat "" lines in
+  Camlp4.Options.add "-enable" (Arg.String (set_kinds true)) ("<kinds>  Enable point kinds:" ^ desc);
+  Camlp4.Options.add "-disable" (Arg.String (set_kinds false)) ("<kinds>  Disable point kinds:" ^ desc)
+
 (* Contains the list of files with a call to "Bisect.Runtime.init" *)
 let files = ref []
 
@@ -84,7 +107,8 @@ let marker file ofs kind =
    unmodified if the expression is already marked, is a bare mapping,
    or has a ghost location. *)
 let wrap_expr k e =
-  if (is_bare_mapping e) || (Loc.is_ghost (Ast.loc_of_expr e)) then
+  let enabled = List.assoc k kinds in
+  if (is_bare_mapping e) || (Loc.is_ghost (Ast.loc_of_expr e)) || (not !enabled) then
     e
   else
     try
