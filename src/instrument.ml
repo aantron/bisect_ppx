@@ -23,7 +23,7 @@ let files = ref []
 
 (* Map from file name to list of points.
    Each point is a (offset, identifier, kind) triple. *)
-let points : (string, ((int * int * Common.point_kind) list)) Hashtbl.t = Hashtbl.create 17
+let points : (string, (Common.point_definition list)) Hashtbl.t = Hashtbl.create 17
 
 (* Dumps the points to their respective files. *)
 let () = at_exit
@@ -90,10 +90,8 @@ let wrap_expr k e =
     try
       let loc = Ast.loc_of_expr e in
       let ofs = Loc.start_off loc in
-      Ast.ExSeq (loc,
-                 Ast.ExSem (loc,
-                            (marker (Loc.file_name loc) ofs k),
-                            e))
+      let file = Loc.file_name loc in
+      Ast.ExSeq (loc, Ast.ExSem (loc, (marker file ofs k), e))
     with Already_marked -> e
 
 (* Wraps the "toplevel" expressions of a binding, using "wrap_expr". *)
