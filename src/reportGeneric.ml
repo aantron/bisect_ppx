@@ -16,14 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-type converter =
-    < header : string;
-      footer : string;
-      summary : ReportStat.all -> string;
-      file_header : string -> string;
-      file_footer : string -> string;      
-      file_summary : ReportStat.all -> string; 
-      point : int -> int -> Common.point_kind -> string >
+class type converter =
+  object
+    method header : string
+    method footer : string
+    method summary : ReportStat.all -> string
+    method file_header : string -> string
+    method file_footer : string -> string
+    method file_summary : ReportStat.all -> string
+    method point : int -> int -> Common.point_kind -> string
+  end
 
 let output_file verbose in_file conv resolver visited =
   verbose (Printf.sprintf "Processing file '%s' ..." in_file);

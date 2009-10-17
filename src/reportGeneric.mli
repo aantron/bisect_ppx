@@ -18,25 +18,32 @@
 
 (** This module defines a generic output mode parametrized by functions. *)
 
-type converter =
-    < header : string;
-      footer : string;
-      summary : ReportStat.all -> string;
-      file_header : string -> string;
-      file_footer : string -> string;      
-      file_summary : ReportStat.all -> string; 
-      point : int -> int -> Common.point_kind -> string >
+class type converter =
+  object
+    method header : string
+    (** Should return the overall header for output. *)
+
+    method footer : string
+    (** Should return the overall footer for output. *)
+
+    method summary : ReportStat.all -> string
+    (** Should return the overall summary for passed statistics. *)
+
+    method file_header : string -> string
+    (** Should return the header for passed file. *)
+
+    method file_footer : string -> string
+    (** Should return the footer for passed file. *)
+
+    method file_summary : ReportStat.all -> string
+    (** Should return the file summary for passed statistics. *)
+
+    method point : int -> int -> Common.point_kind -> string
+    (** [point o n k] should return the output for a given point, [o] being the
+	offset, [n] the number of visits, and [k] the point kind. *)
+  end
 
 val output : (string -> unit) -> string -> converter -> (string -> string) -> (string, int array) Hashtbl.t -> unit
 (** [output verbose file conv resolver data] writes the element for [data] to
     file [file] using [conv] for data conversion, [verbose] for verbose output,
-    and [resolver] associates the actual path to a given filename.
-    The methods of the [conv] instance are used as follows:
-    - [header] should return the overall header for output;
-    - [footer] should return the overall footer for output;
-    - [summary] should return the overall summary for passed statistics;
-    - [file_header] should return the header for passed file;
-    - [file_footer] should return the footer for passed file;
-    - [file_summary] should return the file summary for passed statistics;
-    - [point] should return the output for a given point, the parameters
-    being: offset, number of visits, and point kind. *)
+    and [resolver] associates the actual path to a given filename. *)
