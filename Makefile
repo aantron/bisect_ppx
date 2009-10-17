@@ -57,6 +57,7 @@ CMXA_FILES=$(patsubst %,%.cmxa,$(OCAML_LIBRARIES))
 CMJA_FILES=$(patsubst %,%.cmja,$(OCAML_LIBRARIES))
 
 RUNTIME_MODULE=runtime
+THREAD_MODULE=bisectThread
 COMMON_MODULE=common
 INSTRUMENT_MODULE=instrument
 REPORT_MODULES=reportUtils reportStat reportHTML reportGeneric reportCSV reportText reportXML reportArgs
@@ -108,17 +109,25 @@ runtime: $(RUNTIME_FILES)
 	$(OCAMLC) -I $(PATH_SRC) -pack -o $(LIBRARY).cmo $(PATH_SRC)/common.cmo $(PATH_SRC)/runtime.cmo
 	$(OCAMLC) -a -o $(LIBRARY).cma $(LIBRARY).cmo
 	mv *.cm* $(PATH_BIN)
+	$(OCAMLC) -c -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).mli
+	cp $(PATH_SRC)/$(THREAD_MODULE).cmi $(PATH_BIN)
+	$(OCAMLC) -c -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
+	mv $(PATH_SRC)/$(THREAD_MODULE).cmo $(PATH_BIN)
 
 	$(OCAMLOPT) -I $(PATH_SRC) -pack -o $(LIBRARY).cmx $(PATH_SRC)/common.cmx $(PATH_SRC)/runtime.cmx
 	$(OCAMLOPT) -a -o $(LIBRARY).cmxa $(LIBRARY).cmx
 	mv *.cm* *.a $(PATH_BIN)
 	rm *.o
+	$(OCAMLOPT) -c -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
+	mv $(PATH_SRC)/$(THREAD_MODULE).cmx $(PATH_SRC)/$(THREAD_MODULE).o $(PATH_BIN)
 
 ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -I $(PATH_SRC) -pack -o $(LIBRARY).cmj $(PATH_SRC)/common.cmj $(PATH_SRC)/runtime.cmj
 	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -a -o $(LIBRARY).cmja $(LIBRARY).cmj
 	mv *.cm* *.jar $(PATH_BIN)
 	rm *.jo
+	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -c -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
+	mv $(PATH_SRC)/$(THREAD_MODULE).cmj $(PATH_SRC)/$(THREAD_MODULE).jo $(PATH_BIN)
 else
 endif
 
@@ -157,10 +166,10 @@ clean-doc:
 install:
 	mkdir -p $(INSTALL_DIR)
 	cp $(PATH_BIN)/$(EXECUTABLE) $(PATH_BIN)/$(EXECUTABLE).opt $(INSTALL_DIR_EXEC)
-	cp $(PATH_BIN)/*.cm* $(PATH_BIN)/$(LIBRARY).a $(INSTALL_DIR)
+	cp $(PATH_BIN)/*.cm* $(PATH_BIN)/*.o $(PATH_BIN)/$(LIBRARY).a $(INSTALL_DIR)
 ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	cp $(PATH_BIN)/$(EXECUTABLE).jar $(INSTALL_DIR_EXEC)
-	cp $(PATH_BIN)/$(LIBRARY).jar $(INSTALL_DIR)
+	cp $(PATH_BIN)/*.jo $(PATH_BIN)/$(LIBRARY).jar $(INSTALL_DIR)
 else
 endif
 

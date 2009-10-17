@@ -18,11 +18,18 @@
 
 let table : (string, (int array)) Hashtbl.t = Hashtbl.create 17
 
+let hook_before = ref (fun () -> ())
+
+let hook_after = ref (fun () -> ())
+
 let init fn =
+  !hook_before ();
   if not (Hashtbl.mem table fn) then
-    Hashtbl.add table fn [| |]
+    Hashtbl.add table fn [| |];
+  !hook_after ()
 
 let mark fn pt =
+  !hook_before ();
   let enlarge n = if n = 0 then 1 else if n < 1024 then n * 2 else n + 1024 in
   let arr =
     try
@@ -40,7 +47,12 @@ let mark fn pt =
       Array.make (succ pt) 0 in
   let curr = arr.(pt) in
   arr.(pt) <- if curr < max_int then (succ curr) else curr;
-  Hashtbl.replace table fn arr
+  Hashtbl.replace table fn arr;
+  !hook_after ()
+
+let register_hooks f1 f2 =
+  hook_before := f1;
+  hook_after := f2
 
 let verbose =
   try

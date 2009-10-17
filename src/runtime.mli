@@ -59,3 +59,9 @@ val mark : string -> int -> unit
 (** [mark file point] indicates that the point identified by the integer
     [point] in the file [file] has been {i visited}. Its associated counter
     is thus incremented, except if its value is already equal to [max_int]. *)
+
+(**/**)
+
+val register_hooks : (unit -> unit) -> (unit -> unit) -> unit
+(** [register_hooks f1 f2] registers [f1] and [f2] to be the hooks respectively
+    called before and after execution of either [init] or [mark]. *)
