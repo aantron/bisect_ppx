@@ -296,7 +296,7 @@ let output_html verbose tab_size title no_navbar no_folding in_file out_file scr
         [ "    <script type=\"text/javascript\">" ;
           "      <!--" ;
           "        function jump(id) {" ;
-          "          document.body.scrollTop = document.all[id].offsetTop;" ;
+          "          document.body.scrollTop = document.getElementById(id).offsetTop;" ;
           "        }" ;
           "      -->" ;
           "    </script>" ] in
@@ -489,8 +489,8 @@ let output_html verbose tab_size title no_navbar no_folding in_file out_file scr
         output_strings
           [ "" ;
             "function fold(id) {" ;
-            "  tmp = document.all[id].innerHTML;" ;
-            "  document.all[id].innerHTML = texts[id];" ;
+            "  tmp = document.getElementById(id).innerHTML;" ;
+            "  document.getElementById(id).innerHTML = texts[id];" ;
             "  texts[id] = tmp;" ;
             "  states[id] = !(states[id]);" ;
             "}" ;
