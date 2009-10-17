@@ -53,9 +53,9 @@ let css =  [
   "}" ;
   "" ;
   ".lineNone { white-space: nowrap; background: white; font-family: monospace; }" ;
-  ".lineAllVisited { white-space: nowrap; background: green; font-family: monospace; }" ;
-  ".lineAllUnvisited { white-space: nowrap; background: red; font-family: monospace; }" ;
-  ".lineMixed { white-space: nowrap; background: yellow; font-family: monospace; }" ;
+  ".lineAllVisited { white-space: nowrap; background: #30FF6A; font-family: monospace; }" ;
+  ".lineAllUnvisited { white-space: nowrap; background: #FF4423; font-family: monospace; }" ;
+  ".lineMixed { white-space: nowrap; background: #E4FF5B; font-family: monospace; }" ;
   "" ;
   "table.simple {" ;
   "    border-width: 1px;" ;
