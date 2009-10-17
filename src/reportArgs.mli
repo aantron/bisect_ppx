@@ -47,6 +47,9 @@ val no_navbar : bool ref
 val no_folding : bool ref
 (** Whether folding is disabled (HTML only). *)
 
+val search_path : string list ref
+(** Search path for files. *)
+
 val files : string list ref
 (** Files to gather (runtime data). *)
 

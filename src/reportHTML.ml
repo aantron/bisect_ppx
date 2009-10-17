@@ -275,9 +275,9 @@ let escape_line tab_size line offset points =
   List.iter (fun (_, n) -> marker n) !pts;
   Buffer.contents buff
 
-let output_html verbose tab_size title no_navbar no_folding in_file out_file script_file script_file_basename visited =
+let output_html verbose tab_size title no_navbar no_folding in_file out_file script_file script_file_basename resolver visited =
   verbose (Printf.sprintf "Processing file '%s' ..." in_file);
-  let cmp_content = Common.read_points in_file in
+  let cmp_content = Common.read_points (resolver in_file) in
   verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
   let len = Array.length visited in
   let stats = ReportStat.make () in
@@ -610,7 +610,7 @@ let output_png_files dir =
       "minus.png", minus_png ;
       "plus.png",  plus_png ]
 
-let output verbose dir tab_size title no_navbar no_folding data =
+let output verbose dir tab_size title no_navbar no_folding resolver data =
   let files = Hashtbl.fold
       (fun in_file visited acc ->
         let l = List.length acc in
@@ -618,7 +618,7 @@ let output verbose dir tab_size title no_navbar no_folding data =
         let out_file = (Filename.concat dir basename) ^ ".html" in
         let script_file = (Filename.concat dir basename) ^ ".js" in
         let script_file_basename = basename ^ ".js" in
-        let stats = output_html verbose tab_size title no_navbar no_folding in_file out_file script_file script_file_basename visited in
+        let stats = output_html verbose tab_size title no_navbar no_folding in_file out_file script_file script_file_basename resolver visited in
         (in_file, (basename ^ ".html"), stats) :: acc)
       data
       [] in

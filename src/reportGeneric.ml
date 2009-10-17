@@ -25,9 +25,9 @@ type converter =
       file_summary : ReportStat.all -> string; 
       point : int -> int -> Common.point_kind -> string >
 
-let output_file verbose in_file conv visited =
+let output_file verbose in_file conv resolver visited =
   verbose (Printf.sprintf "Processing file '%s' ..." in_file);
-  let cmp_content = Common.read_points in_file in
+  let cmp_content = Common.read_points (resolver in_file) in
   verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
   let len = Array.length visited in
   let stats = ReportStat.make () in
@@ -47,10 +47,10 @@ let output_file verbose in_file conv visited =
   Buffer.add_string buffer (conv#file_footer in_file);
   Buffer.contents buffer, stats
 
-let output verbose file conv data =
+let output verbose file conv resolver data =
   let files, stats = Hashtbl.fold
       (fun file visited (files, summary) ->
-        let text, stats = output_file verbose file conv visited in
+        let text, stats = output_file verbose file conv resolver visited in
         ((file, text) :: files, (ReportStat.add summary stats)))
       data
       ([], (ReportStat.make ())) in

@@ -19,10 +19,11 @@
 (** This module defines the output to HTML. *)
 
 
-val output : (string -> unit) -> string -> int -> string -> bool -> bool -> (string, int array) Hashtbl.t -> unit
-(** [output verbose dir tab_size title no_navbar no_folding data] writes all the
-    HTML files for [data] in the directory [dir]. [verbose] is used for verbose
-    output, [tab_size] is the number of space characters to use as a replacement
-    for tabulations, [no_navbar] indicates whether navigation bar should be
-    disabled, [no_folding] indicates whether code folding should be disabled,
-    and [title] is the title for generated pages. *)
+val output : (string -> unit) -> string -> int -> string -> bool -> bool -> (string -> string) -> (string, int array) Hashtbl.t -> unit
+(** [output verbose dir tab_size title no_navbar no_folding resolver data]
+    writes all the HTML files for [data] in the directory [dir]. [verbose] is
+    used for verbose output, [tab_size] is the number of space characters to
+    use as a replacement for tabulations, [no_navbar] indicates whether
+    navigation bar should be disabled, [no_folding] indicates whether code
+    folding should be disabled, [title] is the title for generated pages, and
+    [resolver] associates the actual path to a given filename. *)

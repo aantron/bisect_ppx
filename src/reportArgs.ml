@@ -39,6 +39,11 @@ let no_navbar = ref false
 
 let no_folding = ref false
 
+let search_path = ref [""]
+
+let add_search_path sp =
+  search_path := sp :: !search_path
+
 let files = ref []
 
 let add_file f =
@@ -64,6 +69,9 @@ let options = [
   ("-html",
    Arg.String (fun s -> add_output (Html_output s)),
    "<dir>  Set output to html, files being written in given directory") ;
+  ("-I",
+   Arg.String add_search_path,
+   "<dir>  Add the directory to the search path") ;
   ("-no-folding",
    Arg.Set no_folding,
    " Disable code folding (HTML only)") ;

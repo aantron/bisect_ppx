@@ -27,9 +27,10 @@ type converter =
       file_summary : ReportStat.all -> string; 
       point : int -> int -> Common.point_kind -> string >
 
-val output : (string -> unit) -> string -> converter -> (string, int array) Hashtbl.t -> unit
-(** [output verbose file conv data] writes the element for [data] to file
-    [file] using [conv] for data conversion, and [verbose] for verbose output.
+val output : (string -> unit) -> string -> converter -> (string -> string) -> (string, int array) Hashtbl.t -> unit
+(** [output verbose file conv resolver data] writes the element for [data] to
+    file [file] using [conv] for data conversion, [verbose] for verbose output,
+    and [resolver] associates the actual path to a given filename.
     The methods of the [conv] instance are used as follows:
     - [header] should return the overall header for output;
     - [footer] should return the overall footer for output;

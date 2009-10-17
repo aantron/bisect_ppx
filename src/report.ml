@@ -41,11 +41,25 @@ let main () =
       !ReportArgs.files
       (Hashtbl.create 17) in
   let verbose = if !ReportArgs.verbose then print_endline else ignore in
-  let generic_output file conv = ReportGeneric.output verbose file conv data in
+  let search_file l f =
+    let fail () = raise (Sys_error (f ^ ": No such file or directory")) in
+    let rec search = function
+      | hd :: tl ->
+	  let f' = Filename.concat hd f in
+	  if Sys.file_exists f' then f' else search tl
+      | [] -> fail () in
+    if Filename.is_implicit f then
+      search l
+    else if Sys.file_exists f then
+      f
+    else
+      fail () in
+  let search_in_path = search_file !ReportArgs.search_path in
+  let generic_output file conv = ReportGeneric.output verbose file conv search_in_path data in
   let write_output = function
     | ReportArgs.Html_output dir ->
 	mkdirs dir;
-	ReportHTML.output verbose dir !ReportArgs.tab_size !ReportArgs.title !ReportArgs.no_navbar !ReportArgs.no_folding data
+	ReportHTML.output verbose dir !ReportArgs.tab_size !ReportArgs.title !ReportArgs.no_navbar !ReportArgs.no_folding search_in_path data
     | ReportArgs.Xml_output file ->
 	generic_output file (ReportXML.make ())
     | ReportArgs.Csv_output file ->
