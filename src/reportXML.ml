@@ -36,9 +36,11 @@ let dtd = [
   ""
 ]
 
+let xml_header = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
+
 let make () =
   object (self)
-    method header = "<bisect-report>\n"
+    method header = xml_header ^ "\n<bisect-report>\n"
     method footer = "</bisect-report>\n"
     method summary s = self#sum "  " s
     method file_header f = Printf.sprintf "  <file path=\"%s\">\n" f
