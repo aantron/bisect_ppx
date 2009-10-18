@@ -22,13 +22,13 @@ report::
 	@$(REPORT) -xml result.xml *.out
 	@$(REPORT) -no-navbar -no-folding -html report *.out
 	@grep -v 'class="footer"' report/file0000.html > result.html
-	@(for ext in csv dtd html text xml; do \
-		echo "     testing '$$ext' format ..."; \
-		diff -q result.$$ext reference.$$ext; \
-	done || exit 0)
 ifeq ($(findstring xmllint,$(XMLLINT)),xmllint)
 	@$(XMLLINT) --noout --dtdvalid result.dtd result.xml
 else
 endif
+	@(for ext in csv dtd html text xml; do \
+		echo "     testing '$$ext' format ..."; \
+		diff -q result.$$ext reference.$$ext && rm -f result.$$ext; \
+	done || exit 0)
 	@rm -fr report
-	@rm -f *.cm* *.out *.o *.jo result.* $(EXECUTABLE)
+	@rm -f *.cm* *.out *.o *.jo $(EXECUTABLE)
