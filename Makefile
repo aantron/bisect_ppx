@@ -46,7 +46,7 @@ OCAML_LIBRARIES=unix
 
 EXECUTABLE=bisect-report
 LIBRARY=bisect
-OCAML_DOC_TITLE=Bisect
+OCAML_DOC_TITLE=Bisect $(shell cat VERSION)
 
 INSTALL_DIR_BASE=$(shell $(OCAMLC) -where)
 INSTALL_DIR=$(INSTALL_DIR_BASE)/bisect
