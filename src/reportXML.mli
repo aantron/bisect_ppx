@@ -24,3 +24,11 @@ val dtd : string list
 
 val make : unit -> ReportGeneric.converter
 (** Returns a converter for XML output. *)
+
+val make_emma : unit -> ReportGeneric.converter
+(** Returns a converter for XML output, using EMMA format.
+
+    EMMA is a Java code coverage available at {i http://emma.sourceforge.net/}.
+    The returned converter only outputs overall statistics, and generated files
+    are intended to be used by reporintg tools like the EMMA plugin for the
+    Hudson continuous integration server (available at {i http://hudson-ci.org/}). *)

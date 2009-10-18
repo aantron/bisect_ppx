@@ -19,6 +19,7 @@
 type output_kind =
   | Html_output of string
   | Xml_output of string
+  | Xml_emma_output of string
   | Csv_output of string
   | Text_output of string
 
@@ -103,7 +104,10 @@ let options = [
    " Print version and exit") ;
   ("-xml",
    Arg.String (fun s -> add_output (Xml_output s)),
-   "<file>  Set output to xml, data being written to given file")
+   "<file>  Set output to xml, data being written to given file") ;
+  ("-xml-emma",
+   Arg.String (fun s -> add_output (Xml_emma_output s)),
+   "<file>  Set output to EMMA xml, data being written to given file")
 ]
 
 let parse () =
