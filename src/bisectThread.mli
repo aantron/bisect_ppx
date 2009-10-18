@@ -16,4 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
+(** Link with this module to make Bisect thread-safe. *)
+
 (* This file is intentionally empty. *)
