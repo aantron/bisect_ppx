@@ -68,3 +68,7 @@ val output_bytes : int array -> string -> unit
     the bytes from [data] to it. Each array element is considered as a
     byte value.
     Raises an exception if an error occurs. *)
+
+val current_time : unit -> string
+(** Returns the current time as a string, using the following format:
+    ["2001-01-01 01:01:01"]. *)

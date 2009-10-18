@@ -95,3 +95,13 @@ let output_bytes data filename =
     true
     filename
     (fun channel -> Array.iter (output_byte channel) data)
+
+let current_time () =
+  let now = Unix.localtime (Unix.time ()) in
+  Printf.sprintf "%d-%02d-%02d %02d:%02d:%02d"
+    (1900 + now.Unix.tm_year)
+    (succ now.Unix.tm_mon)
+    now.Unix.tm_mday
+    now.Unix.tm_hour
+    now.Unix.tm_min
+    now.Unix.tm_sec
