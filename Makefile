@@ -135,7 +135,6 @@ endif
 instrument:
 	$(OCAMLC) -c -pp camlp4oof -I +camlp4 -I $(PATH_SRC) $(PATH_SRC)/$(INSTRUMENT_MODULE).ml
 	$(OCAMLC) -I $(PATH_SRC) -pack -o $(INSTRUMENT_MODULE).cmo $(PATH_SRC)/common.cmo $(PATH_SRC)/$(INSTRUMENT_MODULE).cmo
-	$(OCAMLC) -a -o $(INSTRUMENT_MODULE).cma $(INSTRUMENT_MODULE).cmo
 	mv *.cm* $(PATH_BIN)
 
 report: $(REPORT_FILES)
@@ -194,7 +193,7 @@ endif
 
 tests::
 	@echo ' *** running instrument tests'
-	@cd tests/instrument && $(MAKE) EXE_SUFFIX='' LIB_EXT=cma && cd ../..
+	@cd tests/instrument && $(MAKE) EXE_SUFFIX='' LIB_EXT=cmo && cd ../..
 	@echo ' *** running report tests (bytecode)'
 	@cd tests/report && $(MAKE) COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma REPORT=../../bin/bisect-report && cd ../..
 	@echo ' *** running report tests (native)'

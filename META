@@ -2,7 +2,7 @@ description="coverage tool"
 requires="camlp4"
 version="1.0"
 
-archive(syntax,preprocessor)="instrument.cma"
+archive(syntax,preprocessor)="instrument.cmo"
 
 archive(byte)="bisect.cma"
 archive(native)="bisect.cmxa"

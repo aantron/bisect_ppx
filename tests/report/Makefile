@@ -1,4 +1,4 @@
-COMPILE_FLAGS=-I ../../bin -pp 'camlp4o -I ../../bin instrument.cma' bisect.$(LIB_EXT) $(FLAGS)
+COMPILE_FLAGS=-I ../../bin -pp 'camlp4o -I ../../bin instrument.cmo' bisect.$(LIB_EXT) $(FLAGS)
 XMLLINT=$(shell which xmllint)
 
 default: clean compile run report
