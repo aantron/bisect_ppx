@@ -135,7 +135,8 @@ endif
 instrument:
 	$(OCAMLC) -c -pp camlp4oof -I +camlp4 -I $(PATH_SRC) $(PATH_SRC)/$(INSTRUMENT_MODULE).ml
 	$(OCAMLC) -I $(PATH_SRC) -pack -o $(INSTRUMENT_MODULE).cmo $(PATH_SRC)/common.cmo $(PATH_SRC)/$(INSTRUMENT_MODULE).cmo
-	mv *.cm* $(PATH_BIN)
+	rm $(INSTRUMENT_MODULE).cmi
+	mv $(INSTRUMENT_MODULE).cmo $(PATH_BIN)
 
 report: $(REPORT_FILES)
 	$(OCAMLC) $(OCAML_COMPILE_FLAGS) $(CMA_FILES) -o $(PATH_BIN)/$(EXECUTABLE) $(PATH_SRC)/common.cmo $(REPORT_CMO) $(PATH_SRC)/$(REPORT_MAIN_MODULE).ml
