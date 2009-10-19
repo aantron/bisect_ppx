@@ -97,6 +97,7 @@ default:
 	@echo "  clean       deletes all produced files (excluding documentation)"
 	@echo "  clean-doc   deletes documentation files"
 	@echo "  install     copies executable and library files"
+	@echo "  ocamlfind   installs through ocamlfind"
 	@echo "  tests       runs the tests"
 	@echo "  depend      populates the dependency files (they are initially empty)"
 	@echo "installation is usually done by: 'make all' and 'sudo make install'"
@@ -171,6 +172,24 @@ ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	cp $(PATH_BIN)/$(EXECUTABLE).jar $(INSTALL_DIR_EXEC)
 	cp $(PATH_BIN)/*.jo $(PATH_BIN)/$(LIBRARY).jar $(INSTALL_DIR)
 else
+endif
+
+ocamlfind:
+	ocamlfind query bisect && ocamlfind remove bisect || echo ''
+ifeq ($(OCAMLJAVA_AVAILABLE),yes)
+	ocamlfind install bisect META \
+	  $(PATH_BIN)/$(EXECUTABLE)* \
+	  $(PATH_BIN)/$(LIBRARY).a \
+	  $(PATH_BIN)/$(LIBRARY).jar \
+	  $(PATH_BIN)/*.cm* \
+	  $(PATH_BIN)/*.o \
+	  $(PATH_BIN)/*.jo
+else
+	ocamlfind install bisect META \
+	  $(PATH_BIN)/$(EXECUTABLE)* \
+	  $(PATH_BIN)/$(LIBRARY).a \
+	  $(PATH_BIN)/*.cm* \
+	  $(PATH_BIN)/*.o
 endif
 
 tests::
