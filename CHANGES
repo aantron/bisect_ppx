@@ -1,3 +1,14 @@
+Version 1.0 (2009-12-17):
+-------------------------
+  - switch to OCaml 3.11.1
+  - multiple outputs now allowed at once
+  - '-enable' / '-disable' command-line switches to control instrumentation
+  - support for multithread applications
+  - new output mode: EMMA-compatible XML
+  - support for ocamlfind installation
+  - major code refactoring and improvement
+  - bug #41: '-I' command-line switch to specify search path
+
 Version 1.0-beta (2009-05-31):
 ------------------------------
   - switch to OCaml 3.11.0
