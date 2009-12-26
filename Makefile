@@ -23,7 +23,7 @@ PATH_SRC=$(PATH_BASE)/src
 PATH_BIN=$(PATH_BASE)/bin
 PATH_DOC=$(PATH_BASE)/ocamldoc
 PATH_TESTS=$(PATH_BASE)/tests
-PATH_OCAML_BIN=$(shell which -s ocamlc && dirname `which ocamlc` || echo '')
+PATH_OCAML_BIN=$(shell which ocamlc > /dev/null && dirname `which ocamlc` || echo '')
 ifeq ($(PATH_OCAML_BIN),)
 $(error cannot find path of OCaml compilers)
 endif
