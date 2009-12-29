@@ -112,14 +112,14 @@ runtime: $(RUNTIME_FILES)
 	mv *.cm* $(PATH_BIN)
 	$(OCAMLC) -c -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).mli
 	cp $(PATH_SRC)/$(THREAD_MODULE).cmi $(PATH_BIN)
-	$(OCAMLC) -c -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
+	$(OCAMLC) -c -thread -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
 	mv $(PATH_SRC)/$(THREAD_MODULE).cmo $(PATH_BIN)
 
 	$(OCAMLOPT) -I $(PATH_SRC) -pack -o $(LIBRARY).cmx $(PATH_SRC)/common.cmx $(PATH_SRC)/runtime.cmx
 	$(OCAMLOPT) -a -o $(LIBRARY).cmxa $(LIBRARY).cmx
 	mv *.cm* *.a $(PATH_BIN)
 	rm *.o
-	$(OCAMLOPT) -c -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
+	$(OCAMLOPT) -c -thread -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
 	mv $(PATH_SRC)/$(THREAD_MODULE).cmx $(PATH_SRC)/$(THREAD_MODULE).o $(PATH_BIN)
 
 ifeq ($(OCAMLJAVA_AVAILABLE),yes)
@@ -127,7 +127,7 @@ ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -a -o $(LIBRARY).cmja $(LIBRARY).cmj
 	mv *.cm* *.jar $(PATH_BIN)
 	rm *.jo
-	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -c -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
+	$(OCAMLJAVA) $(OCAML_JAVA_FLAGS) -c -thread -I $(PATH_BIN) $(PATH_SRC)/$(THREAD_MODULE).ml
 	mv $(PATH_SRC)/$(THREAD_MODULE).cmj $(PATH_SRC)/$(THREAD_MODULE).jo $(PATH_BIN)
 else
 endif
