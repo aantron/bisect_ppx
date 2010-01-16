@@ -194,14 +194,14 @@ endif
 
 tests::
 	@echo ' *** running instrument tests'
-	@cd tests/instrument && $(MAKE) EXE_SUFFIX='' LIB_EXT=cmo && cd ../..
+	@$(MAKE) -s -C tests/instrument EXE_SUFFIX='' LIB_EXT=cmo
 	@echo ' *** running report tests (bytecode)'
-	@cd tests/report && $(MAKE) COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma REPORT=../../bin/bisect-report && cd ../..
+	@$(MAKE) -s -C tests/report COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma REPORT=../../bin/bisect-report
 	@echo ' *** running report tests (native)'
-	@cd tests/report && $(MAKE) COMPILER=ocamlopt EXECUTABLE=native RUN=./ LIB_EXT=cmxa REPORT=../../bin/bisect-report.opt && cd ../..
+	@$(MAKE) -s -C tests/report COMPILER=ocamlopt EXECUTABLE=native RUN=./ LIB_EXT=cmxa REPORT=../../bin/bisect-report.opt
 ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	@echo ' *** running report tests (java)'
-	@cd tests/report && $(MAKE) COMPILER=ocamljava FLAGS=-standalone EXECUTABLE=prog.jar RUN='java -jar ' LIB_EXT=cmja REPORT='java -jar ../../bin/bisect-report.jar' && cd ../..
+	@$(MAKE) -s -C tests/report COMPILER=ocamljava FLAGS=-standalone EXECUTABLE=prog.jar RUN='java -jar ' LIB_EXT=cmja REPORT='java -jar ../../bin/bisect-report.jar'
 else
 endif
 
