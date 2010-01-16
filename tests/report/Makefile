@@ -1,4 +1,4 @@
-COMPILE_FLAGS=-I ../../bin -pp 'camlp4o -I ../../bin instrument.cmo' bisect.$(LIB_EXT) $(FLAGS)
+COMPILE_FLAGS=-I ../../bin -pp '$(PATH_OCAML_BIN)/camlp4o -I ../../bin instrument.cmo' bisect.$(LIB_EXT) $(FLAGS)
 XMLLINT=$(shell which xmllint)
 
 default: clean compile run report
@@ -8,7 +8,7 @@ clean::
 	@rm -f *.cm* *.out *.o *.jo result.* $(EXECUTABLE)
 
 compile::
-	@$(COMPILER) $(COMPILE_FLAGS) -o $(EXECUTABLE) source.ml
+	@$(PATH_OCAML_BIN)/$(COMPILER) $(COMPILE_FLAGS) -o $(EXECUTABLE) source.ml
 
 run::
 	@$(RUN)$(EXECUTABLE) -inf 0 -sup 3 > /dev/null

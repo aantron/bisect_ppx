@@ -194,14 +194,14 @@ endif
 
 tests::
 	@echo ' *** running instrument tests'
-	@$(MAKE) -s -C tests/instrument EXE_SUFFIX='' LIB_EXT=cmo
+	@$(MAKE) -s -C tests/instrument PATH_OCAML_BIN=$(PATH_OCAML_BIN) EXE_SUFFIX='' LIB_EXT=cmo
 	@echo ' *** running report tests (bytecode)'
-	@$(MAKE) -s -C tests/report COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma REPORT=../../bin/bisect-report
+	@$(MAKE) -s -C tests/report PATH_OCAML_BIN=$(PATH_OCAML_BIN) COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma REPORT=../../bin/bisect-report
 	@echo ' *** running report tests (native)'
-	@$(MAKE) -s -C tests/report COMPILER=ocamlopt EXECUTABLE=native RUN=./ LIB_EXT=cmxa REPORT=../../bin/bisect-report.opt
+	@$(MAKE) -s -C tests/report PATH_OCAML_BIN=$(PATH_OCAML_BIN) COMPILER=ocamlopt EXECUTABLE=native RUN=./ LIB_EXT=cmxa REPORT=../../bin/bisect-report.opt
 ifeq ($(OCAMLJAVA_AVAILABLE),yes)
 	@echo ' *** running report tests (java)'
-	@$(MAKE) -s -C tests/report COMPILER=ocamljava FLAGS=-standalone EXECUTABLE=prog.jar RUN='java -jar ' LIB_EXT=cmja REPORT='java -jar ../../bin/bisect-report.jar'
+	@$(MAKE) -s -C tests/report PATH_OCAML_BIN=$(PATH_OCAML_BIN) COMPILER=ocamljava FLAGS=-standalone EXECUTABLE=prog.jar RUN='java -jar ' LIB_EXT=cmja REPORT='java -jar ../../bin/bisect-report.jar'
 else
 endif
 
