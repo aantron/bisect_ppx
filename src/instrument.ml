@@ -149,8 +149,8 @@ let instrument =
     method class_str_item csi =
       match super#class_str_item csi with
       | Ast.CrIni (loc, e) -> Ast.CrIni (loc, (wrap_expr Common.Class_init e))
-      | Ast.CrMth (loc, id, priv, e, ct) -> Ast.CrMth (loc, id, priv, (wrap_expr Common.Class_meth e), ct)
-      | Ast.CrVal (loc, id, mut, e) -> Ast.CrVal (loc, id, mut, (wrap_expr Common.Class_val e))
+      | Ast.CrMth (loc, id, ovr, priv, e, ct) -> Ast.CrMth (loc, id, ovr, priv, (wrap_expr Common.Class_meth e), ct)
+      | Ast.CrVal (loc, id, ovr, mut, e) -> Ast.CrVal (loc, id, ovr, mut, (wrap_expr Common.Class_val e))
       | x -> x
     method expr e =
       let e' = super#expr e in
