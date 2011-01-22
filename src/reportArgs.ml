@@ -81,7 +81,7 @@ let options = [
    " Disable navigation bar (HTML only)") ;
   ("-separator",
    Arg.Set_string separator,
-   "<string>  Set the seprator for generated output (CSV only)") ;
+   "<string>  Set the separator for generated output (CSV only)") ;
   ("-tab-size",
    Arg.Int
      (fun x ->
