@@ -50,8 +50,8 @@ let () =
   write_lines ["Common"; "Runtime"] mlpack_file;
   write_lines ["Common"; "Instrument"] mlpack_pp
 
-let version_tag = "src_version_ml"
-let version_ml = "src/version.ml"
+let version_tag = "src_library_version_ml"
+let version_ml = "src/library/version.ml"
 let version_file = "../VERSION"
 
 let () =

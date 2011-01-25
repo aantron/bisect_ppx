@@ -74,8 +74,8 @@ veryclean: clean
 	rm -f $(PATH_OCAMLDOC)/*.html $(PATH_OCAMLDOC)/*.css
 
 install: all
-	cp $(PATH_BUILD)/src/report.byte $(PATH_OCAML_PREFIX)/bin/bisect-report; \
-	(test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && cp $(PATH_BUILD)/src/report.native $(PATH_OCAML_PREFIX)/bin/bisect-report.opt || true); \
+	cp $(PATH_BUILD)/src/report/report.byte $(PATH_OCAML_PREFIX)/bin/bisect-report; \
+	(test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && cp $(PATH_BUILD)/src/report/report.native $(PATH_OCAML_PREFIX)/bin/bisect-report.opt || true); \
 	if [ -x "$(PATH_OCAMLFIND)" ]; then \
 	  $(PATH_OCAMLFIND) query $(PROJECT_NAME) && $(PATH_OCAMLFIND) remove $(PROJECT_NAME) || true; \
 	  $(PATH_OCAMLFIND) install $(PROJECT_NAME) META \

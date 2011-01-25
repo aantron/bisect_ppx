@@ -22,11 +22,11 @@ true: -traverse
 
 # Options
 <src/**>: use_unix
-<src/**> and not "src/bisectThread.ml": for-pack(Bisect)
-"src/instrument.ml": pp(camlp4of), use_camlp4
-"src/bisectThread.ml": thread
+<src/**> and not "src/threads/bisectThread.ml": for-pack(Bisect)
+"src/syntax/instrument.ml": pp(camlp4of), use_camlp4
+"src/threads/bisectThread.ml": thread
 <src/**/*.ml{,i}>: warn_Ae
 <src/**/*.ml{,i}>: warn_error_A
 
 # Generation of version file
-"src/version.mli": src_version_ml
+"src/library/version.mli": src_library_version_ml

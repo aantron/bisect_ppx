@@ -40,7 +40,7 @@ one: FORCE
 	@cd $(NAME) && \
 	  $(MAKE) PATH_OCAML_BIN=$(PATH_OCAML_PREFIX)/bin \
 	  COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma EXE_SUFFIX='' \
-	  REPORT=../../_build/src/report.byte && \
+	  REPORT=../../_build/src/report/report.byte && \
 	cd ..
 
 clean: FORCE
