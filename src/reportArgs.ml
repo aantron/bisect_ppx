@@ -100,7 +100,7 @@ let options = [
    Arg.Set verbose,
    " Set verbose mode") ;
   ("-version",
-   Arg.Unit (fun () -> print_endline ReportUtils.version; exit 0),
+   Arg.Unit (fun () -> print_endline Version.value; exit 0),
    " Print version and exit") ;
   ("-xml",
    Arg.String (fun s -> add_output (Xml_output s)),

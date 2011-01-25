@@ -1,0 +1,5 @@
+Installation steps:
+-------------------
+sh configure [-ocaml-prefix <path>] # same path as passed to OCaml ./configure
+make all
+make install # may require root privileges, use 'sudo make install'

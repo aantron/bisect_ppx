@@ -19,9 +19,6 @@
 (** This module defines utility functions for the report program. *)
 
 
-val version : string
-(** The Bisect version, as a string. *)
-
 val url : string
 (** The Bisect URL, as a string. *)
 
