@@ -16,9 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-let mutex = Mutex.create ()
-
 let () =
+  let mutex = Mutex.create () in
   Bisect.Runtime.register_hooks
     (fun () -> Mutex.lock mutex)
     (fun () -> Mutex.unlock mutex)
