@@ -45,8 +45,8 @@ let main () =
     let fail () = raise (Sys_error (f ^ ": No such file or directory")) in
     let rec search = function
       | hd :: tl ->
-	  let f' = Filename.concat hd f in
-	  if Sys.file_exists f' then f' else search tl
+          let f' = Filename.concat hd f in
+          if Sys.file_exists f' then f' else search tl
       | [] -> fail () in
     if Filename.is_implicit f then
       search l
@@ -55,19 +55,23 @@ let main () =
     else
       fail () in
   let search_in_path = search_file !ReportArgs.search_path in
-  let generic_output file conv = ReportGeneric.output verbose file conv search_in_path data in
+  let generic_output file conv =
+    ReportGeneric.output verbose file conv search_in_path data in
   let write_output = function
     | ReportArgs.Html_output dir ->
-	mkdirs dir;
-	ReportHTML.output verbose dir !ReportArgs.tab_size !ReportArgs.title !ReportArgs.no_navbar !ReportArgs.no_folding search_in_path data
+        mkdirs dir;
+        ReportHTML.output verbose dir
+          !ReportArgs.tab_size !ReportArgs.title
+          !ReportArgs.no_navbar !ReportArgs.no_folding
+          search_in_path data
     | ReportArgs.Xml_output file ->
-	generic_output file (ReportXML.make ())
+        generic_output file (ReportXML.make ())
     | ReportArgs.Xml_emma_output file ->
-	generic_output file (ReportXMLEmma.make ())
+        generic_output file (ReportXMLEmma.make ())
     | ReportArgs.Csv_output file ->
-	generic_output file (ReportCSV.make !ReportArgs.separator)
+        generic_output file (ReportCSV.make !ReportArgs.separator)
     | ReportArgs.Text_output file ->
-	generic_output file (ReportText.make ()) in
+        generic_output file (ReportText.make ()) in
   List.iter write_output (List.rev !ReportArgs.outputs)
 
 let () =
