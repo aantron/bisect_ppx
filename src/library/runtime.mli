@@ -55,6 +55,12 @@ val init : string -> unit
 (** [init file] indicates that the file [file] is part of the application that
     has been instrumented. *)
 
+val init_with_array : string -> int array -> bool -> unit
+(** [init file marks unsafe] indicates that the file [file] is part of the
+    application that has been instrumented, passing the array [marks]
+    containing marks. [unsafe] indicates whether [file] was compiled in
+    unsafe mode. *)
+
 val mark : string -> int -> unit
 (** [mark file point] indicates that the point identified by the integer
     [point] in the file [file] has been {i visited}. Its associated counter
@@ -64,4 +70,8 @@ val mark : string -> int -> unit
 
 val register_hooks : (unit -> unit) -> (unit -> unit) -> unit
 (** [register_hooks f1 f2] registers [f1] and [f2] to be the hooks respectively
+    called before and after execution of either [init] or [mark]. *)
+
+val get_hooks : unit -> (unit -> unit) * (unit -> unit)
+(** Returns [(f1, f2)] that are respectively the hooks
     called before and after execution of either [init] or [mark]. *)

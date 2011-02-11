@@ -18,9 +18,23 @@
 
 open Camlp4.PreCast
 
+(* Instrumentation modes. *)
+type mode =
+  | Safe
+  | Fast
+  | Faster
+
+let modes =
+  ["safe", Safe;
+   "fast", Fast;
+   "faster", Faster]
+
+let mode = ref Safe
+
 (* Association list mapping points kinds to whether they are activated. *)
 let kinds = List.map (fun x -> (x, ref true)) Common.all_point_kinds
 
+(* Registers the various command-line options of the instrumenter. *)
 let () =
   let set_kinds v s =
     String.iter
@@ -39,7 +53,12 @@ let () =
       Common.all_point_kinds in
   let desc = String.concat "" lines in
   Camlp4.Options.add "-enable" (Arg.String (set_kinds true)) ("<kinds>  Enable point kinds:" ^ desc);
-  Camlp4.Options.add "-disable" (Arg.String (set_kinds false)) ("<kinds>  Disable point kinds:" ^ desc)
+  Camlp4.Options.add "-disable" (Arg.String (set_kinds false)) ("<kinds>  Disable point kinds:" ^ desc);
+  let mode_names = List.map fst modes in
+  Camlp4.Options.add
+    "-mode"
+    (Arg.Symbol (mode_names, (fun s -> mode := List.assoc s modes)))
+    "  Set instrumentation mode"
 
 (* Contains the list of files with a call to "Bisect.Runtime.init" *)
 let files = ref []
@@ -101,7 +120,12 @@ let marker file ofs kind =
     let idx = List.length lst in
     Hashtbl.replace points file ((ofs, idx, kind) :: lst);
     let _loc = Loc.ghost in
-    <:expr< (Bisect.Runtime.mark $str:file$ $int:string_of_int idx$) >>
+    match !mode with
+    | Safe ->
+        <:expr< (Bisect.Runtime.mark $str:file$ $int:string_of_int idx$) >>
+    | Fast
+    | Faster ->
+        <:expr< (___bisect_mark___ $int:string_of_int idx$) >>
 
 (* Wraps an expression with a marker, returning the passed expression
    unmodified if the expression is already marked, is a bare mapping,
@@ -180,21 +204,68 @@ let instrument =
           Ast.McArr (loc, p1, e1, (wrap_expr Common.Match e2))
       | x -> x
     method str_item si =
-      let res = match super#str_item si with
+      match super#str_item si with
       | Ast.StDir (loc, id, e) -> Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
       | Ast.StExp (loc, e) -> Ast.StExp (loc, (wrap_expr Common.Toplevel_expr e))
       | Ast.StVal (loc, rc, bnd) -> Ast.StVal (loc, rc, (wrap_binding bnd))
-      | x -> x in
+      | x -> x
+  end
+
+let instrument' =
+  object (self)
+    inherit Ast.map as super
+    method safe file si =
+      let _loc = Loc.ghost in
+      let e = <:expr< (Bisect.Runtime.init $str:file$) >> in
+      let s = <:str_item< let () = $e$ >> in
+      files := file :: !files;
+      Ast.StSem (Loc.ghost, s, si)
+    method fast file si =
+      let _loc = Loc.ghost in
+      let nb = List.length (Hashtbl.find points file) in
+      let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks false) >> in
+      let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
+      let func = <:expr<
+        fun idx ->
+          hook_before ();
+          let curr = marks.(idx) in
+          marks.(idx) <- if curr < max_int then (succ curr) else curr;
+          hook_after () >> in
+      let e = <:expr<
+        let marks = $make$ in
+        let hook_before, hook_after = Bisect.Runtime.get_hooks () in
+        ($init$; $func$) >> in
+      let s = <:str_item< let ___bisect_mark___ = $e$ >> in
+      files := file :: !files;
+      Ast.StSem (Loc.ghost, s, si)
+    method faster file si =
+      let _loc = Loc.ghost in
+      let nb = List.length (Hashtbl.find points file) in
+      let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks true) >> in
+      let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
+      let func = <:expr<
+        fun idx ->
+          let curr = marks.(idx) in
+          marks.(idx) <- if curr < max_int then (succ curr) else curr >> in
+      let e = <:expr<
+        let marks = $make$ in
+        ($init$; $func$) >> in
+      let s = <:str_item< let ___bisect_mark___ = $e$ >> in
+      files := file :: !files;
+      Ast.StSem (Loc.ghost, s, si)
+    method str_item si =
       let loc = Ast.loc_of_str_item si in
       let file = Loc.file_name loc in
       if not (List.mem file !files) && not (Loc.is_ghost loc) then
-        let _loc = Loc.ghost in
-        let e = <:expr< (Bisect.Runtime.init $str:file$) >> in
-        (files := file :: !files;
-         Ast.StSem (Loc.ghost, (Ast.StExp (Loc.ghost, e)), res))
-      else
-        res
+        let impl = match !mode with
+        | Safe -> self#safe
+        | Fast -> self#fast
+        | Faster -> self#faster in
+        impl file si
+      else si
   end
 
 (* Registers the "instrumenter". *)
-let () = AstFilters.register_str_item_filter instrument#str_item
+let () =
+  AstFilters.register_str_item_filter instrument#str_item;
+  AstFilters.register_str_item_filter instrument'#str_item

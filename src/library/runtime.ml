@@ -16,16 +16,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
+let verbose =
+  try
+    match String.uppercase (Sys.getenv "BISECT_SILENT") with
+    | "YES" | "ON" -> ignore
+    | _ -> prerr_endline
+  with Not_found -> prerr_endline
+
+let no_hook = fun () -> ()
+
+let hook_before = ref no_hook
+
+let hook_after = ref no_hook
+
+let registered_hook () =
+  (!hook_before != no_hook) || (!hook_after != no_hook)
+
+let register_hooks f1 f2 =
+  hook_before := f1;
+  hook_after := f2
+
+let get_hooks () =
+  !hook_before, !hook_after
+
 let table : (string, (int array)) Hashtbl.t = Hashtbl.create 17
-
-let hook_before = ref (fun () -> ())
-
-let hook_after = ref (fun () -> ())
 
 let init fn =
   !hook_before ();
   if not (Hashtbl.mem table fn) then
     Hashtbl.add table fn [| |];
+  !hook_after ()
+
+let init_with_array fn arr unsafe =
+  !hook_before ();
+  if not (Hashtbl.mem table fn) then
+    Hashtbl.add table fn arr;
+  if unsafe && (registered_hook ()) then
+    verbose (Printf.sprintf " *** Bisect: %S was compiled in unsafe mode." fn);
   !hook_after ()
 
 let mark fn pt =
@@ -49,17 +76,6 @@ let mark fn pt =
   arr.(pt) <- if curr < max_int then (succ curr) else curr;
   Hashtbl.replace table fn arr;
   !hook_after ()
-
-let register_hooks f1 f2 =
-  hook_before := f1;
-  hook_after := f2
-
-let verbose =
-  try
-    match String.uppercase (Sys.getenv "BISECT_SILENT") with
-    | "YES" | "ON" -> ignore
-    | _ -> prerr_endline
-  with Not_found -> prerr_endline
 
 let file_channel =
   let base_name =
