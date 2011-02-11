@@ -16,11 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-(** This module defines the output to XML. *)
+(** This module defines the output to XML (EMMA-compatible). *)
 
-
-val dtd : string list
-(** The dtd defining the XML output. *)
 
 val make : unit -> ReportGeneric.converter
-(** Returns a converter for XML output. *)
+(** Returns a converter for XML output, using EMMA format.
+
+    EMMA is a Java code coverage available at {i http://emma.sourceforge.net/}.
+    The returned converter only outputs overall statistics, and generated files
+    are intended to be used by reporintg tools like the EMMA plugin for the
+    Hudson continuous integration server (available at {i http://hudson-ci.org/}). *)
