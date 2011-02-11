@@ -49,10 +49,10 @@ val string_of_point_kind : point_kind -> string
 (** Conversion from point kind into string. *)
 
 val char_of_point_kind : point_kind -> char
-(** Conversion from point kind into character. *)
+(** Conversion from point kind into (lowercase) character. *)
 
 val point_kind_of_char : char -> point_kind
-(** Conversion from character into point kind.
+(** Conversion from (lowercase) character into point kind.
     Raises [Invalid_argument] if the passed character does not designate a
     point kind. *)
 
