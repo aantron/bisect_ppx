@@ -34,6 +34,20 @@ let mode = ref Safe
 (* Association list mapping points kinds to whether they are activated. *)
 let kinds = List.map (fun x -> (x, ref true)) Common.all_point_kinds
 
+(* Exluded functions. *)
+let exluded = ref []
+let function_separator = Str.regexp "[ \t]*,[ \t]*"
+let add_excluded s =
+  let patterns = Str.split function_separator s in
+  let patterns = List.map Str.regexp patterns in
+  exluded := patterns @ !exluded
+let is_excluded name =
+  List.exists
+    (fun patt ->
+      (Str.string_match patt name 0)
+        && ((Str.match_end ()) = (String.length name)))
+    !exluded
+
 (* Registers the various command-line options of the instrumenter. *)
 let () =
   let set_kinds v s =
@@ -53,6 +67,7 @@ let () =
       Common.all_point_kinds in
   let desc = String.concat "" lines in
   Camlp4.Options.add "-enable" (Arg.String (set_kinds true)) ("<kinds>  Enable point kinds:" ^ desc);
+  Camlp4.Options.add "-exclude" (Arg.String add_excluded) "<pattern>  Exclude functions matching pattern";
   Camlp4.Options.add "-disable" (Arg.String (set_kinds false)) ("<kinds>  Disable point kinds:" ^ desc);
   let mode_names = List.map fst modes in
   Camlp4.Options.add
@@ -83,14 +98,16 @@ let () = at_exit
             (fun channel -> Common.write_points channel points file))
         points)
 
+(* Returns the identifier  as a string. *)
+let rec string_of_ident = function
+  | Ast.IdAcc (_, _, id) -> string_of_ident id
+  | Ast.IdApp (_, id, _) -> string_of_ident id
+  | Ast.IdLid (_, s) -> s
+  | Ast.IdUid (_, s) -> s
+  | Ast.IdAnt (_, s) -> s
+
 (* Returns the identifier of an application, as a string. *)
 let rec ident_of_app e =
-  let rec string_of_ident = function
-    | Ast.IdAcc (_, _, id) -> string_of_ident id
-    | Ast.IdApp (_, id, _) -> string_of_ident id
-    | Ast.IdLid (_, s) -> s
-    | Ast.IdUid (_, s) -> s
-    | Ast.IdAnt (_, s) -> s in
   match e with
   | Ast.ExId (_, id) -> string_of_ident id
   | Ast.ExApp (_, e', _) -> ident_of_app e'
@@ -204,11 +221,14 @@ let instrument =
           Ast.McArr (loc, p1, e1, (wrap_expr Common.Match e2))
       | x -> x
     method str_item si =
-      match super#str_item si with
-      | Ast.StDir (loc, id, e) -> Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
-      | Ast.StExp (loc, e) -> Ast.StExp (loc, (wrap_expr Common.Toplevel_expr e))
-      | Ast.StVal (loc, rc, bnd) -> Ast.StVal (loc, rc, (wrap_binding bnd))
-      | x -> x
+      match si with
+      | Ast.StVal (loc, rc, Ast.BiEq (_, (Ast.PaId (_, x)), _))
+        when is_excluded (string_of_ident x) -> si
+      | _ -> (match super#str_item si with
+        | Ast.StDir (loc, id, e) -> Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
+        | Ast.StExp (loc, e) -> Ast.StExp (loc, (wrap_expr Common.Toplevel_expr e))
+        | Ast.StVal (loc, rc, bnd) -> Ast.StVal (loc, rc, (wrap_binding bnd))
+        | x -> x)
   end
 
 let instrument' =
