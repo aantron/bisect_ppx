@@ -1,0 +1,413 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+            "http://www.w3.org/TR/REC-html40/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>Bisect -- version 1.1
+</TITLE>
+
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<META name="GENERATOR" content="hevea 1.10">
+<STYLE type="text/css">
+.li-itemize{margin:1ex 0ex;}
+.li-enumerate{margin:1ex 0ex;}
+.thefootnotes{text-align:left;margin:0ex;}
+.dt-thefootnotes{margin:0em;}
+.dd-thefootnotes{margin:0em 0em 0em 2em;}
+.caption{padding-left:2ex; padding-right:2ex; margin-left:auto; margin-right:auto}
+.title{margin:2ex auto;text-align:center}
+DIV TABLE{margin-left:inherit;margin-right:inherit;}
+PRE{text-align:left;margin-left:0ex;margin-right:auto;}
+BLOCKQUOTE{margin-left:4ex;margin-right:4ex;text-align:left;}
+TD P{margin:0px;}
+.figure{border-top: thin solid black; border-bottom: thin solid black;}
+.caption{border-bottom: thin solid black;}
+BODY{background:white;}
+.title{padding:1ex;background:white;}
+.titlemain{padding:1ex;background:white;}
+.titlerest{padding:1ex;background:white;}
+.section{padding:.5ex;background:#7F7F7F;}
+.subsection{padding:0.3ex;background:#B2B2B2;}
+.subsubsection{padding:0.5ex;background:#E5E5E5;}
+.ffootnoterule{border:none;margin:1em auto 1em 0px;width:50%;background:#7F7F7F;}
+</STYLE>
+</HEAD>
+<BODY >
+<!--HEVEA command line is: hevea -fix -O -exec /usr/local/lib/hevea/xxdate.exe -o bisect.html article.hva fancysection.hva bisect.tex -->
+<!--CUT DEF section 1 --><TABLE CLASS="title"><TR><TD><H1 CLASS="titlemain">Bisect &#X2013; version 1.1</H1><H3 CLASS="titlerest">Copyright &#XA9; 2008-2011 Xavier Clerc &#X2013; <A HREF="mailto:bisect@x9c.fr">bisect@x9c.fr</A><BR>
+Released under the GPL v3</H3><H3 CLASS="titlerest">February&#XA0;12, 2011</H3></TD></TR>
+</TABLE><!--TOC section Introduction-->
+<H2 CLASS="section"><!--SEC ANCHOR -->Introduction</H2><!--SEC END --><P>
+Bisect is a code coverage tool for the Objective Caml language<SUP><A NAME="text1" HREF="#note1">1</A></SUP>. Its name stems from the following acronym: <I>Bisect is an Insanely Short-sized and Elementary Coverage Tool</I>. The shortness of the source files can be seen as a tribute to the camlp4 tool and API bundled with the standard Objective Caml distribution.<BR>
+
+Code coverage is a mean of software testing. Associated with for example unit or functional testing, the goal of code coverage is to measure the portion of the application source code that has actually been tested. To achieve this goal, the code coverage tool defines <I>points</I> in the source code and memorizes at runtime (that is, when tests are run) if the execution path of the program passes at these <I>points</I>. The so-called <I>points</I> are places of interest in the source code (as an example, the branches of an <I>if</I> or <I>match</I> construct are interesting <I>points</I>), to ensure that all alternatives have been tested. In practice, code coverage is often performed in three steps:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+first, the application is <I>instrumented</I>: this means that (the compiled form of) the application is enhanced in such a way that it will count at runtime how many times the application passed at a given <I>point</I>;
+</LI><LI CLASS="li-itemize">then, the tests are actually run, producing some runtime data about code coverage;
+</LI><LI CLASS="li-itemize">finally, a report is generated from the data produced at the previous step; this report shows which points were actually passed through during tests.
+</LI></UL><P>Bisect can be seen as an improved version of the <TT>ocamlcp</TT>/<TT>ocamlprof</TT> couple (both of these tools being part of the standard Objective Caml distribution). In this respect, Bisect performs statement and condition coverage, but not path coverage. This means that it only counts how many times the application passed at each <I>point</I>, independently of which was the statement previously executed (that is, the previously visited point). At the opposite, path coverage is not only interested in <I>points</I> but also in <I>paths</I>, the goal being to ensure that every possible execution path has been followed.<BR>
+
+Code coverage is a useful software metric but, being based on tests, it cannot ensure that a program is correct. For program correction, one should consider more involved tools and formalisms such as <I>model checking</I>, or <I>proof systems</I>. Code coverage is still convenient in practice because it is a much simpler method that require no particular knowledge from the developer. Bisect provides several output (ranging from bare text to Hudson<SUP><A NAME="text2" HREF="#note2">2</A></SUP>-compatible <SPAN STYLE="font-variant:small-caps">xml</SPAN>) modes in order to allow easy integration with an existing toolchain.<BR>
+
+Bisect, in its 1.1&#XA0; version, is designed to work with version 3.12.0&#XA0; of Objective Caml. Bisect is released under the GPL version 3. This licensing scheme should not cause any problem, as instrumented applications are intended to be used during developement but should not be released publicly. The GPL contamination has thus no consequence here.<BR>
+Bugs should be reported at <TT><A HREF="http://bugs.x9c.fr">http://bugs.x9c.fr</A></TT>.</P><!--TOC section Building Bisect-->
+<H2 CLASS="section"><!--SEC ANCHOR -->Building Bisect</H2><!--SEC END --><P>
+Bolt can be built from sources using <TT>make</TT> (in its <TT>GNU Make
+3.81</TT> flavor), and Objective Caml version 3.12.0. No other
+dependency is needed. Following the classical Unix convention, the
+build and installation process consists in these three steps:
+</P><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">
+<TT>sh configure</TT>
+</LI><LI CLASS="li-enumerate"><TT>make all</TT>
+</LI><LI CLASS="li-enumerate"><TT>make install</TT>
+</LI></OL><P>
+During the first step, one can specify elements if they are not
+correctly inferred by the <TT>./configure</TT> script; the following
+switches are available:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+<TT>-ocaml-prefix</TT> to specify the prefix path to the Objective
+Caml installation (usually <TT>/usr/local</TT>);
+</LI><LI CLASS="li-itemize"><TT>-ocamlfind</TT> to specify the path to the <TT>ocamlfind</TT>
+executable (notice that the presence of
+<TT>ocamlfind</TT><SUP><A NAME="text3" HREF="#note3">3</A></SUP> is
+optional, and that the tool is used only at installation if
+present);
+</LI><LI CLASS="li-itemize"><TT>-no-native-dynlink</TT> to disable dynamic linking.
+</LI></UL><P>One may notice that the <TT>instrument</TT> module will be compiled into Ojective Caml bytecode only, while the other modules will be compiled into bytecode as well as native formats (and even Java format if the <TT>ocamljava</TT><SUP><A NAME="text4" HREF="#note4">4</A></SUP> compiler is present).</P><!--TOC section Running Bisect-->
+<H2 CLASS="section"><!--SEC ANCHOR -->Running Bisect</H2><!--SEC END --><P>
+As previously stated, using a code coverage tool usually requires to follow three steps: instrumentation, execution, and report. Bisect is no exception in this respect; the following sections discuss each of these three steps.</P><!--TOC subsection Instrumenting the application-->
+<H3 CLASS="subsection"><!--SEC ANCHOR -->Instrumenting the application</H3><!--SEC END --><P>
+Bisect instruments the application at compile-time using a camlp4-based preprocessor. It allows the user to choose exactly which module (<I>i.e.&#XA0;</I>source file) of the application should be instrumented. Code sample&#XA0;<A HREF="#compiling-instrumenting">1</A> shows how to instrument a file named <TT>source.ml</TT> during compilation (the very same effect can be achieved using either <TT>ocamlopt</TT> or <TT>ocamljava</TT> as a replacement of <TT>ocamlc</TT>). Code sample&#XA0;<A HREF="#compiling-instrumenting-ocamlfind">2</A> does the same through <TT>ocamlfind</TT>. During this step, Bisect will produce a file named <TT>source.cmp</TT><SUP><A NAME="text5" HREF="#note5">5</A></SUP>. Files with the <TT>cmp</TT> extension contain <I>point</I> information for a given source file, that is: identifiers, positions, and kinds of <I>points</I>. Of course, the usual <TT>cmi</TT>, <TT>cmo</TT>, <TT>cmx</TT>, and <TT>cmj</TT> files are also produced, depending on the compiler acutally invoked. It is necessary to pass the <TT>-I +bisect</TT> option to the compiler because instrumentation adds calls to functions defined in the runtime modules of Bisect.</P><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 1: <A NAME="compiling-instrumenting"></A> Compiling and instrumenting a file.</TD></TR>
+</TABLE></DIV>
+<PRE CLASS="verbatim">
+  ocamlc -c -I +bisect -pp 'camlp4o str.cma /path/to/bisect_pp.cmo' source.ml
+</PRE></BLOCKQUOTE><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 2: <A NAME="compiling-instrumenting-ocamlfind"></A>Compiling and instrumenting a file through <TT>ocamlfind</TT>.</TD></TR>
+</TABLE></DIV>
+<PRE CLASS="verbatim">
+  ocamlfind ocamlc -package bisect -syntax camlp4o -c source.ml
+</PRE></BLOCKQUOTE><!--TOC subsubsection Instrumentation mode-->
+<H4 CLASS="subsubsection"><!--SEC ANCHOR -->Instrumentation mode</H4><!--SEC END --><P>
+Since version 1.1, it is possible to select an instrumentation <I>mode</I> through the <TT>-mode</TT> command-line switch followed by one these values:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+<TT>safe</TT>, that will perform instrumentation as done in version 1.0;
+</LI><LI CLASS="li-itemize"><TT>fast</TT>, that will perform instrumentation in order to allow instrumented code to run faster (by approximately an order of magnitude, relatively to <TT>safe</TT>);
+</LI><LI CLASS="li-itemize"><TT>faster</TT>, that will perform instrumentation in order to allow instrumented code to run even slightly faster but will not be thread-safe, even if linked with the <TT>BisectThread</TT> module (see below).
+</LI></UL><!--TOC subsubsection Controlling instrumentation-->
+<H4 CLASS="subsubsection"><!--SEC ANCHOR -->Controlling instrumentation</H4><!--SEC END --><P>
+It is possible to choose which language constructs should actually be instrumented by passing <TT>-enable</TT> and/or <TT>-disable</TT> command-line switches to <TT>bisect_pp.cmo</TT>. Both switches are followed by a string describing the kinds of points the user wants to either enable or disable. The possible characters are:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+<TT>b</TT> for <I>binding</I>
+</LI><LI CLASS="li-itemize"><TT>s</TT> for <I>sequence</I>
+</LI><LI CLASS="li-itemize"><TT>f</TT> for <I>for</I>
+</LI><LI CLASS="li-itemize"><TT>i</TT> for <I>if/then</I>
+</LI><LI CLASS="li-itemize"><TT>t</TT> for <I>try</I>
+</LI><LI CLASS="li-itemize"><TT>w</TT> for <I>while</I>
+</LI><LI CLASS="li-itemize"><TT>m</TT> for <I>match/function</I>
+</LI><LI CLASS="li-itemize"><TT>c</TT> for <I>class expression</I>
+</LI><LI CLASS="li-itemize"><TT>d</TT> for <I>class initializer</I>
+</LI><LI CLASS="li-itemize"><TT>e</TT> for <I>class method</I>
+</LI><LI CLASS="li-itemize"><TT>v</TT> for <I>class value</I>
+</LI><LI CLASS="li-itemize"><TT>p</TT> for <I>toplevel expression</I>
+</LI><LI CLASS="li-itemize"><TT>l</TT> for <I>lazy operator</I>
+</LI></UL><P>
+By default, all point kinds are enabled. As an example, <TT>-disable cdev</TT> will disable instrumentation of all class constructs.<BR>
+
+Since version 1.1, another command-line switch allows to exclude top-level functions from instrumentation: <TT>-exclude</TT> should be followed by a comma-separated list of patterns<SUP><A NAME="text6" HREF="#note6">6</A></SUP>. Any top-level function matching one of the patterns will not be instrumented.<BR>
+
+Since version 1.1, it is also possible to use <I>special</I> comments in order to precisely control instrumentation on a code area basis. The following comments are recognized:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+<TT>(*BISECT-MARK*)</TT> and <TT>(*BISECT-VISIT*)</TT> allow to consider (all the points of) a line as visited even if not at runtime<SUP><A NAME="text7" HREF="#note7">7</A></SUP>;
+</LI><LI CLASS="li-itemize"><TT>(*BISECT-IGNORE*)</TT> allows to ignore the line, that is generate no point for the whole line;
+</LI><LI CLASS="li-itemize"><TT>(*BISECT-IGNORE-BEGIN*)</TT> and <TT>(*BISECT-IGNORE-END*)</TT> (that should be correctly parenthesized) allow to exclude whole parts of the source from being instrumented (equivalent to have the <TT>(*BISECT-IGNORE*)</TT> comment on each line from <TT>(*BISECT-IGNORE-BEGIN*)</TT> to <TT>(*BISECT-IGNORE-END*)</TT>, both inclusive).
+</LI></UL><!--TOC subsubsection Unsafe compilation mode-->
+<H4 CLASS="subsubsection"><!--SEC ANCHOR -->Unsafe compilation mode</H4><!--SEC END --><P>
+When compiling in <I>unsafe</I> mode<SUP><A NAME="text8" HREF="#note8">8</A></SUP>, the <TT>-unsafe</TT> switch should be passed to camlp4 instead of the compiler. Indeed, as camlp4 is building a syntax tree that is passed to the compiler, issuing the <TT>-unsafe</TT> switch to the compiler has no effect because it is too late: the code has been built by camlp4 in <I>safe</I> mode. In such a case, the compiler warns the user with the following message: <TT>Warning: option -unsafe used with a preprocessor returning a syntax tree</TT>. The correct command-line invocations are shown by code samples&#XA0;<A HREF="#compiling-instrumenting-unsafe">3</A> and <A HREF="#compiling-instrumenting-unsafe-ocamlfind">4</A>.</P><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 3: <A NAME="compiling-instrumenting-unsafe"></A>Compiling and instrumenting a file using unsafe mode.</TD></TR>
+</TABLE></DIV>
+<PRE CLASS="verbatim">
+  ocamlc -c -I +bisect -pp 'camlp4o str.cma -unsafe /path/to/bisect_pp.cmo' source.ml
+</PRE></BLOCKQUOTE><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 4: <A NAME="compiling-instrumenting-unsafe-ocamlfind"></A>Compiling and instrumenting a file using unsafe mode through <TT>ocamlfind</TT>.</TD></TR>
+</TABLE></DIV>
+<PRE CLASS="verbatim">
+  ocamlfind ocamlc -package bisect -syntax camlp4o -ppopt -unsafe -c source.ml
+</PRE></BLOCKQUOTE><!--TOC subsubsection Linking-->
+<H4 CLASS="subsubsection"><!--SEC ANCHOR -->Linking</H4><!--SEC END --><P>
+Linking a program containing instrumented modules is not different from <I>classical</I> linking, except that one should link the Bisect library to the produced executable. This is usually done by adding one of the following to the linking command-line:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+<TT>-I +bisect bisect.cma</TT> (for <TT>ocamlc</TT> version);
+</LI><LI CLASS="li-itemize"><TT>-I +bisect bisect.cmxa</TT> (for <TT>ocamlopt</TT> version);
+</LI><LI CLASS="li-itemize"><TT>-I +bisect bisect.cmja</TT> (for <TT>ocamljava</TT> version).
+</LI></UL><P>
+In order, to use Bisect in multithread applications, it is necessary to also link with the <TT>BisectThread</TT> module. This also implies to pass the <TT>-linkall</TT> option to the compiler.</P><!--TOC subsection Running the instrumented application-->
+<H3 CLASS="subsection"><!--SEC ANCHOR -->Running the instrumented application</H3><!--SEC END --><P>
+Running an instrumented application is not different from running any application compiled with an Objective Caml compiler. However, Bisect will produce runtime data in a file each time the application is run. A new file will be created at each invocation, the first one being <TT>bisect0001.out</TT>, the second one <TT>bisect0002.out</TT>, and so on. It is also possible to define the scheme used for file names by setting the <TT>BISECT_FILE</TT> environment variable. If <TT>BISECT_FILE</TT> is equal to <I>file</I>, files will be named <I>file<B>n</B>.out</I> where <B><I>n</I></B> is a natural value padded with zeroes to 4 digits (<I>i.e.&#XA0;</I>&#X201C;0001&#X201D;, &#X201C;0002&#X201D;, and so on).<BR>
+
+Bisect can also be parametrized using another environment variable: <TT>BISECT_SILENT</TT>. If this variable is set to either &#X201C;YES&#X201D; or &#X201C;ON&#X201D; (defaulting to &#X201C;OFF&#X201D;, case being ignored), then Bisect will not output any message at runtime. If not silent, Bisect will output a message on the standard error in two situations:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+the output file for runtime data cannot be created at program initialization;
+</LI><LI CLASS="li-itemize">the runtime data cannnot be written at program termination.
+</LI></UL><!--TOC subsection Generating the coverage report-->
+<H3 CLASS="subsection"><!--SEC ANCHOR -->Generating the coverage report</H3><!--SEC END --><P>
+In order to generate the coverage report for the instrumented application, it is sufficient to invoke the <TT>bisect-report</TT> executable (alternatively either <TT>bisect-report.opt</TT>, or <TT>bisect-report.jar</TT>). This program recognizes the following command-line switches:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+ <TT>-csv &lt;file&gt;</TT> Set output to csv, data being written to given file
+</LI><LI CLASS="li-itemize"><TT>-dump-dtd &lt;file&gt;</TT> Dump the DTD to the given file
+</LI><LI CLASS="li-itemize"><TT>-html &lt;dir&gt;</TT> Set output to html, files being written in given directory
+</LI><LI CLASS="li-itemize"><TT>-I &lt;dir&gt;</TT> Add the directory to the search path
+</LI><LI CLASS="li-itemize"><TT>-no-folding</TT> Disable code folding (HTML only)
+</LI><LI CLASS="li-itemize"><TT>-no-navbar</TT> Disable navigation bar (HTML only)
+</LI><LI CLASS="li-itemize"><TT>-separator &lt;string&gt;</TT> Set the separator for generated output (CSV only)
+</LI><LI CLASS="li-itemize"><TT>-tab-size &lt;int&gt;</TT> Set tabulation size in output (HTML only)
+</LI><LI CLASS="li-itemize"><TT>-text &lt;file&gt;</TT> Set output to text, data being written to given file
+</LI><LI CLASS="li-itemize"><TT>-title &lt;string&gt;</TT> Set the title for generated output (HTML only)
+</LI><LI CLASS="li-itemize"><TT>-verbose</TT> Set verbose mode
+</LI><LI CLASS="li-itemize"><TT>-version</TT> Print version and exit
+</LI><LI CLASS="li-itemize"><TT>-xml &lt;file&gt;</TT> Set output to xml, data being written to given file
+</LI><LI CLASS="li-itemize"><TT>-xml-emma &lt;file&gt;</TT> Set output to EMMA xml, data being written to given file
+</LI><LI CLASS="li-itemize"><TT>-help</TT> Display this list of options
+</LI><LI CLASS="li-itemize"><TT>--help</TT> Display this list of options
+
+</LI></UL><P>
+Wherever a destination file is waited, the use of <TT>-</TT> (<I>i.e.&#XA0;</I>minus sign) is interpreted as the standard output. The user should also provide on the command-line the list of the runtime data files that should be used to produce the report. As a result, a typical invocation is: <TT>bisect-report -html report bisect*.out</TT> to process all data files in the current directory and generate an <SPAN STYLE="font-variant:small-caps">html</SPAN> report into the <TT>report</TT> directory.<BR>
+
+If relative file paths are used at the instrumentation step, the report executable should be launched from the same directory. Another option is of course to use absolute paths. Using absolute path is also useful when playing with the <TT>-pack</TT> option. Indeed, it is possible in this case to have several source files with the same name in different directories and packed to different enclosing modules. In the case of packed modules, absolute paths allows to avoid ambiguities but are not necessary. It is in fact sufficient to have <I>discriminating</I> paths, that is: paths that always allow to distinguish files packed in different enclosing modules.<BR>
+It is also possible to use the <TT>-I</TT> command-line switch to specify a search path for source files.</P><P>When the <SPAN STYLE="font-variant:small-caps">html</SPAN> output mode is chosen, a bunch a files is produced: one <TT>index.html</TT> file, and one <SPAN STYLE="font-variant:small-caps">html</SPAN> file per instrumented module. The <TT>index.html</TT> file provides application-wide statistics about coverage, as well as links to the other files. The module files provide module-wide statistics, as well as a duplicate of the module source, enhanced with <I>point</I> information. <I>Points</I> are represented in the source as special comments having the form <TT>(*[<I>n</I>]*)</TT> where <I>n</I> indicates how many times the <I>point</I> was passed at runtime. For easier appreciation, colors are also used to annotate source lines:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+a line will be green-colored if it contains <I>points</I> whose values are all strictly positive;
+</LI><LI CLASS="li-itemize">a line will be red-colored if it contains <I>points</I> whose values are all equal to zero;
+</LI><LI CLASS="li-itemize">a line will be yellow-colored if it contains some <I>points</I> whose values are all equal to zero, and some others whose values are strictly positive;
+</LI><LI CLASS="li-itemize">a line will not be colored at all if it contains no <I>point</I>.
+</LI></UL><P>
+When another output mode is chosen, only one file is produced (or none, if <TT>-</TT> is used) containing the whole coverage information. The appendix details the various file formats.</P><!--TOC subsection Example-->
+<H3 CLASS="subsection"><!--SEC ANCHOR -->Example</H3><!--SEC END --><P>
+Code sample&#XA0;<A HREF="#makefile">5</A> shows the makefile used for the compilation (with instrumentation), run, and report phases for a one-file application: <TT>source.ml</TT>. Code sample&#XA0;<A HREF="#makefile-ocamlfind">6</A> shows the same information when relying on <TT>ocamlfind</TT>.
+</P><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 5: <A NAME="makefile"></A>Example makefile.</TD></TR>
+</TABLE></DIV>
+<PRE CLASS="verbatim">
+default: clean compile run report
+
+clean:
+        rm -fr report
+        rm -f *.cm* *.out bytecode
+
+compile:
+        ocamlc -c -I +bisect \
+            -pp 'camlp4o str.cma path/to/bisect/bisect_pp.cmo' source.ml
+        ocamlc -o bytecode -I +bisect bisect.cma source.cmo
+
+run:
+        ./bytecode
+
+report:
+        bisect-report -html report bisect*.out
+</PRE>
+</BLOCKQUOTE><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 6: <A NAME="makefile-ocamlfind"></A>Example makefile (<TT>ocamlfind</TT>-based).</TD></TR>
+</TABLE></DIV>
+<PRE CLASS="verbatim">
+default: clean compile run report
+
+clean:
+        rm -fr report
+        rm -f *.cm* *.out bytecode
+
+compile:
+        ocamlfind ocamlc \
+            -package bisect -linkpkg -syntax camlp4o -o bytecode source.ml
+
+run:
+        ./bytecode
+
+report:
+        ocamlfind bisect/bisect-report -html report bisect*.out
+</PRE>
+</BLOCKQUOTE><!--TOC section Known issues-->
+<H2 CLASS="section"><!--SEC ANCHOR -->Known issues</H2><!--SEC END --><P>
+Bisect suffers from the following issues:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+Bisect, being based on camlp4, performs a purely syntactic treatment. It can thus sometimes produce unaccurate results due to semantics subtleties. For a concrete example consider lazy operators: in expressions such as <TT>e1 &amp;&amp; e2</TT> or <TT>e1 || e2</TT>, Bisect adds <I>points</I> to both <I>e1</I> and <I>e2</I> to allow the user to know which parts of the whole expression were actually evaluated. However, it is possible that the programmer redefined one of these operator in such a way that its new semantics is no more lazy (<I>e.g.&#XA0;</I><TT>let (&amp;&amp;) = (+)</TT>). In this case, Bisect will still add points to subexpressions even if they appear useless<SUP><A NAME="text9" HREF="#note9">9</A></SUP>. A dual issue would occur if a programmer defined a new operator with lazy semantics (<I>e.g.&#XA0;</I><TT>external (++) : bool -&gt; bool -&gt; = "%sequor"</TT>), in this case Bisect will not define <I>points</I> for subexpressions while they would clearly be of interest.
+</LI><LI CLASS="li-itemize">when linking the tested application, the <TT>Bisect</TT> module should be linked as (one of) the first ones; indeed, the Bisect runtime performs some operations at initialization, such as determining the target file for runtime information: the current working directory should hence not have been modified by another module or should have been modified purposely (it is also possible to use <TT>BISECT_FILE</TT> to specify an absolute path);
+</LI><LI CLASS="li-itemize">for performance reasons, Objective Caml <TT>int</TT>s are used store store <I>point</I> data; it implies that one should not use the report executable on a 32-bit architecture if the tested application has been instrumented and run on a 64-bit architecture<SUP><A NAME="text10" HREF="#note10">10</A></SUP>.
+</LI></UL><!--TOC section Appendix: file formats-->
+<H2 CLASS="section"><!--SEC ANCHOR -->Appendix: file formats</H2><!--SEC END --><!--TOC subsection CSV file format-->
+<H3 CLASS="subsection"><!--SEC ANCHOR -->CSV file format</H3><!--SEC END --><P>
+The CSV mode outputs statistics line by line: first for the whole application, and then for each file. Each line has the following format: first the path of the source file (<TT>-</TT> being used for the overall application), then 14 &#XD7; 2 integer values (13 for the various point kinds, plus one for the total). Each integer couple consists, for each point kind, of (<I>i</I>) the number of visited points and (<I>ii</I>) the total number of points. The point kinds are output in the following order: <I>let bindings</I>, <I>sequence</I>, <I>for loops</I>, <I>if/then constructs</I>, <I>try/with constructs</I>, <I>while loops</I>, <I>match/function constructs</I>, <I>class expressions</I>, <I>class initializers</I>, <I>class methods</I>, <I>class values</I>, <I>top level expressions</I>, <I>lazy operators</I>. Listing&#XA0;<A HREF="#csv-output">7</A> shows such an output.
+</P><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 7: <A NAME="csv-output"></A>CSV file format.</TD></TR>
+</TABLE></DIV>
+
+<PRE CLASS="verbatim">
+-;3;3;5;5;1;1;0;0;0;0;0;0;2;2;0;0;0;0;0;0;0;0;0;0;2;2;13;13
+source.ml;3;3;5;5;1;1;0;0;0;0;0;0;2;2;0;0;0;0;0;0;0;0;0;0;2;2;13;13
+</PRE>
+</BLOCKQUOTE><!--TOC subsection Text file format-->
+<H3 CLASS="subsection"><!--SEC ANCHOR -->Text file format</H3><!--SEC END --><P>
+The text mode outputs statistics first for the overall application, and then for each file. The statistics always take the same form, that is the ratio <I>number of visited points over total number of points</I> for each point kind, followed by the ratio for all point kind. Listing&#XA0;<A HREF="#text-output">8</A> shows such an output.
+</P><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 8: <A NAME="text-output"></A>Text file format.</TD></TR>
+</TABLE></DIV>
+
+<PRE CLASS="verbatim">
+Summary:
+ - 'binding' points: 3/3 (100.00 %)
+ - 'sequence' points: 5/5 (100.00 %)
+ - 'for' points: 1/1 (100.00 %)
+ - 'if/then' points: none
+ - 'try' points: none
+ - 'while' points: none
+ - 'match/function' points: 2/2 (100.00 %)
+ - 'class expression' points: none
+ - 'class initializer' points: none
+ - 'class method' points: none
+ - 'class value' points: none
+ - 'toplevel expression' points: none
+ - 'lazy operator' points: 2/2 (100.00 %)
+ - total: 13/13 (100.00 %)
+File 'source.ml':
+ - 'binding' points: 3/3 (100.00 %)
+ - 'sequence' points: 5/5 (100.00 %)
+ - 'for' points: 1/1 (100.00 %)
+ - 'if/then' points: none
+ - 'try' points: none
+ - 'while' points: none
+ - 'match/function' points: 2/2 (100.00 %)
+ - 'class expression' points: none
+ - 'class initializer' points: none
+ - 'class method' points: none
+ - 'class value' points: none
+ - 'toplevel expression' points: none
+ - 'lazy operator' points: 2/2 (100.00 %)
+ - total: 13/13 (100.00 %)
+</PRE>
+</BLOCKQUOTE><!--TOC subsection XML file format-->
+<H3 CLASS="subsection"><!--SEC ANCHOR -->XML file format</H3><!--SEC END --><P>
+The <SPAN STYLE="font-variant:small-caps">xml</SPAN> mode outputs both statistics and information for each of the points in the source files. Listing&#XA0;<A HREF="#dtd">9</A> shows the DTD for produced <SPAN STYLE="font-variant:small-caps">xml</SPAN> files (it can be generated using the <TT>-dump-dtd</TT> command-line option). Statistics are output for the whole application and for each file inside <TT>&lt;summary</TT> elements, while information relative to each point is encoded into <TT>&lt;point</TT> elements. Listing&#XA0;<A HREF="#xml-output">10</A> shows an <SPAN STYLE="font-variant:small-caps">xml</SPAN> output.
+</P><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 9: <A NAME="dtd"></A>DTD for produced XML files.</TD></TR>
+</TABLE></DIV>
+
+<PRE CLASS="verbatim">
+&lt;!ELEMENT bisect-report (summary,file*)&gt;
+
+&lt;!ELEMENT file (summary,point*)&gt;
+&lt;!ATTLIST file path CDATA #REQUIRED&gt;
+
+&lt;!ELEMENT summary (element*)&gt;
+
+&lt;!ELEMENT element EMPTY&gt;
+&lt;!ATTLIST element kind CDATA #REQUIRED&gt;
+&lt;!ATTLIST element count CDATA #REQUIRED&gt;
+&lt;!ATTLIST element total CDATA #REQUIRED&gt;
+
+&lt;!ELEMENT point EMPTY&gt;
+&lt;!ATTLIST point offset CDATA #REQUIRED&gt;
+&lt;!ATTLIST point count CDATA #REQUIRED&gt;
+&lt;!ATTLIST point kind CDATA #REQUIRED&gt;
+
+</PRE>
+
+</BLOCKQUOTE><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 10: <A NAME="xml-output"></A>XML file format.</TD></TR>
+</TABLE></DIV>
+
+<PRE CLASS="verbatim">
+&lt;?xml version="1.0" encoding="iso-8859-1"?&gt;
+&lt;bisect-report&gt;
+  &lt;summary&gt;
+    &lt;element kind="binding" count="1" total="1"/&gt;
+    &lt;element kind="sequence" count="0" total="0"/&gt;
+    &lt;element kind="for" count="0" total="0"/&gt;
+    &lt;element kind="if/then" count="0" total="0"/&gt;
+    &lt;element kind="try" count="0" total="0"/&gt;
+    &lt;element kind="while" count="0" total="0"/&gt;
+    &lt;element kind="match/function" count="0" total="0"/&gt;
+    &lt;element kind="class expression" count="0" total="0"/&gt;
+    &lt;element kind="class initializer" count="0" total="0"/&gt;
+    &lt;element kind="class method" count="0" total="0"/&gt;
+    &lt;element kind="class value" count="0" total="0"/&gt;
+    &lt;element kind="toplevel expression" count="0" total="0"/&gt;
+    &lt;element kind="lazy operator" count="0" total="0"/&gt;
+    &lt;element kind="total" count="1" total="1"/&gt;
+  &lt;/summary&gt;
+  &lt;file path="source.ml"&gt;
+    &lt;summary&gt;
+      &lt;element kind="binding" count="1" total="1"/&gt;
+      &lt;element kind="sequence" count="0" total="0"/&gt;
+      &lt;element kind="for" count="0" total="0"/&gt;
+      &lt;element kind="if/then" count="0" total="0"/&gt;
+      &lt;element kind="try" count="0" total="0"/&gt;
+      &lt;element kind="while" count="0" total="0"/&gt;
+      &lt;element kind="match/function" count="0" total="0"/&gt;
+      &lt;element kind="class expression" count="0" total="0"/&gt;
+      &lt;element kind="class initializer" count="0" total="0"/&gt;
+      &lt;element kind="class method" count="0" total="0"/&gt;
+      &lt;element kind="class value" count="0" total="0"/&gt;
+      &lt;element kind="toplevel expression" count="0" total="0"/&gt;
+      &lt;element kind="lazy operator" count="0" total="0"/&gt;
+      &lt;element kind="total" count="1" total="1"/&gt;
+    &lt;/summary&gt;
+    &lt;point offset="11" count="1" kind="binding"/&gt;
+  &lt;/file&gt;
+&lt;/bisect-report&gt;
+</PRE>
+</BLOCKQUOTE><!--TOC subsection XML EMMA-compatible format-->
+<H3 CLASS="subsection"><!--SEC ANCHOR -->XML EMMA-compatible format</H3><!--SEC END --><P>
+This mode outputs only overall statistics, in a format that is compatible with EMMA<SUP><A NAME="text11" HREF="#note11">11</A></SUP>. This compatibility allows to use Bisect output in tools that provide support for EMMA, notably giving an easy way to use Bisect with continuous integration servers like Hudson.<BR>
+
+EMMA defines only four categories for coverage: classes, methods, blocks, and lines. Bisect defining more point kinds, the following mapping is used:
+</P><UL CLASS="itemize"><LI CLASS="li-itemize">
+<I>class expressions</I>, <I>class initializers</I>, and <I>class values</I> are merged into the <I>class</I> category;
+</LI><LI CLASS="li-itemize"><I>class methods</I> are mapped to the <I>method</I> category;
+</LI><LI CLASS="li-itemize"><I>let bindings</I>, <I>sequence</I>, <I>for loops</I>, <I>if/then constructs</I>, <I>try/with constructs</I>, <I>while loops</I>, <I>match/function constructs</I>, and<I>lazy operators</I> are merged into the <I>block</I> category;
+</LI><LI CLASS="li-itemize"><I>top level expressions</I> are mapped to the <I>line</I> category.
+</LI></UL><P>Another point should be noted regarding this output mode: for all the categories, any 0/0 value is replaced by a 1/1 value. This replacement is justified by the fact that 0/0 results in 0% while 1/1 results in 100%, and one would not want to have a build failure in Hudson due to low coverage.<BR>
+Listing&#XA0;<A HREF="#emma-output">11</A> shows an EMMA-compatible <SPAN STYLE="font-variant:small-caps">xml</SPAN> output.</P><BLOCKQUOTE CLASS="figure">
+<DIV CLASS="caption"><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left>Code sample 11: <A NAME="emma-output"></A>XML EMMA file format.</TD></TR>
+</TABLE></DIV>
+
+<PRE CLASS="verbatim">
+&lt;?xml version="1.0" encoding="iso-8859-1"?&gt;
+&lt;report&gt;
+  &lt;stats&gt;
+    &lt;packages value="1"/&gt;
+    &lt;classes value="1"/&gt;
+    &lt;methods value="1"/&gt;
+    &lt;srcfiles value="1"/&gt;
+    &lt;srclines value="1"/&gt;
+  &lt;/stats&gt;
+  &lt;data&gt;
+    &lt;all name="all classes"&gt;
+      &lt;coverage type="class, %" value="100% (1/1)"/&gt;
+      &lt;coverage type="method, %" value="100% (1/1)"/&gt;
+      &lt;coverage type="block, %" value="100% (1/1)"/&gt;
+      &lt;coverage type="line, %" value="100% (1/1)"/&gt;
+    &lt;/all&gt;
+  &lt;/data&gt;
+&lt;/report&gt;
+</PRE>
+</BLOCKQUOTE><!--BEGIN NOTES document-->
+<HR CLASS="ffootnoterule"><DL CLASS="thefootnotes"><DT CLASS="dt-thefootnotes">
+<A NAME="note1" HREF="#text1">1</A></DT><DD CLASS="dd-thefootnotes">The official Caml website can be reached at <TT><A HREF="http://caml.inria.fr">http://caml.inria.fr</A></TT> and contains the full development suite (compilers, tools, virtual machine, <I>etc.</I>) as well as links to third-party contributions.
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note2" HREF="#text2">2</A></DT><DD CLASS="dd-thefootnotes">Continuous integration engine available at <TT><A HREF="http://hudson-ci.org/">http://hudson-ci.org/</A></TT>
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note3" HREF="#text3">3</A></DT><DD CLASS="dd-thefootnotes">Findlib, a library manager for
+Objective Caml, is available at <TT><A HREF="http://projects.camlcity.org/projects/findlib.html">http://projects.camlcity.org/projects/findlib.html</A></TT>
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note4" HREF="#text4">4</A></DT><DD CLASS="dd-thefootnotes">OCaml compiler generating Java bytecode, by the same author&#XA0;&#X2013;&#XA0;<TT><A HREF="http://ocamljava.x9c.fr">http://ocamljava.x9c.fr</A></TT>
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note5" HREF="#text5">5</A></DT><DD CLASS="dd-thefootnotes">This file will be strored in the very same directory as the <TT>cmo</TT>, <TT>cmx</TT>, or <TT>cmj</TT> file produced by the compiler.
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note6" HREF="#text6">6</A></DT><DD CLASS="dd-thefootnotes">These patterns should follow the conventions set by the <TT>Str</TT> module.
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note7" HREF="#text7">7</A></DT><DD CLASS="dd-thefootnotes">It may be useful to avoid a lower coverage due to a line containing <I>e.g.&#XA0;</I> <TT>assert false</TT>.
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note8" HREF="#text8">8</A></DT><DD CLASS="dd-thefootnotes">One should keep in mind that the usefulness of using the <I>unsafe</I> mode in an instrumented application is questionable, as the instrumentation of an application results in very degraded performances.
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note9" HREF="#text9">9</A></DT><DD CLASS="dd-thefootnotes">One may notice that it could not be possible to overcome this problem by keeping track of local (<I>i.e.&#XA0;</I>file) redefinitions, as the redefinition may occur in another module that has been opened.
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note10" HREF="#text10">10</A></DT><DD CLASS="dd-thefootnotes">This is indeed an over-cautious recommendation, as the Objective Caml gracefully handles platforms differences; one should only get unaccurate results (but not false results: neither an unvisited will be considered as visited, nor the opposite) when working at the 32-bit limit.
+</DD><DT CLASS="dt-thefootnotes"><A NAME="note11" HREF="#text11">11</A></DT><DD CLASS="dd-thefootnotes">EMMA is a code coverage tool for Java - <TT><A HREF="http://emma.sourceforge.net/">http://emma.sourceforge.net/</A></TT>
+</DD></DL>
+<!--END NOTES-->
+<!--CUT END -->
+<!--HTMLFOOT-->
+<!--ENDHTML-->
+<!--FOOTER-->
+<HR SIZE=2><BLOCKQUOTE CLASS="quote"><EM>This document was translated from L<sup>A</sup>T<sub>E</sub>X by
+<A HREF="http://hevea.inria.fr/index.html">H<FONT SIZE=2><sup>E</sup></FONT>V<FONT SIZE=2><sup>E</sup></FONT>A</A>.</EM></BLOCKQUOTE></BODY>
+</HTML>

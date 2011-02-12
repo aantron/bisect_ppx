@@ -1,6 +1,6 @@
 description="coverage tool"
 requires="camlp4"
-version="1.0"
+version="1.1"
 
 archive(syntax,preprocessor)="bisect_pp.cmo"
 

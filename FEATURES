@@ -1,5 +1,6 @@
 - code coverage for Objective Caml programs
+- flexible control of covered areas
 - support for threads
 - reports in bare text, CSV, HTML, and XML
-- support for Objective Caml version 3.11.1
+- support for Objective Caml version 3.12.0
 - support for ocamlfind
