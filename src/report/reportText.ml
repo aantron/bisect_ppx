@@ -29,7 +29,7 @@ let make () =
       let numbers x y =
         if y > 0 then
           let p = ((float_of_int x) *. 100.) /. (float_of_int y) in
-          Printf.sprintf "%d/%d (%.2f %%)" x y p
+          Printf.sprintf "%d/%d (%.2f%%)" x y p
         else
           "none" in
       let lines =

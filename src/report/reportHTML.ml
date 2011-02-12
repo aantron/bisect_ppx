@@ -125,7 +125,7 @@ let html_of_stats s =
       "$(tabs)  <tr><th>kind</th><th width=\"16px\">&nbsp;</th><th>coverage</th></tr>" ] @
     (List.map
        (fun (k, r) ->
-         Printf.sprintf "$(tabs)  <tr><td>%s</td><td width=\"16px\">&nbsp;</td><td>%d / %d (%s %%)</td></tr>"
+         Printf.sprintf "$(tabs)  <tr><td>%s</td><td width=\"16px\">&nbsp;</td><td>%d / %d (%s%%)</td></tr>"
            (Common.string_of_point_kind k)
            r.ReportStat.count
            r.ReportStat.total
