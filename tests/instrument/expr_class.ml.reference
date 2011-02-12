@@ -1,4 +1,4 @@
-let _ = Bisect.Runtime.init "expr_class.ml"
+let () = Bisect.Runtime.init "expr_class.ml"
   
 class c =
   object val mutable x = (Bisect.Runtime.mark "expr_class.ml" 0; 0)

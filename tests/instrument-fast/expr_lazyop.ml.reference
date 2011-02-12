@@ -1,0 +1,21 @@
+let ___bisect_mark___ =
+  let marks = Array.make 6 0 in
+  let (hook_before, hook_after) = Bisect.Runtime.get_hooks ()
+  in
+    (Bisect.Runtime.init_with_array "expr_lazyop.ml" marks false;
+     fun idx ->
+       (hook_before ();
+        let curr = marks.(idx)
+        in
+          (marks.(idx) <- if curr < max_int then succ curr else curr;
+           hook_after ())))
+  
+let f x y =
+  (___bisect_mark___ 2;
+   (___bisect_mark___ 1; x > 0) && (___bisect_mark___ 0; y > 0))
+  
+let g x y =
+  (___bisect_mark___ 5;
+   (___bisect_mark___ 4; x > 0) || (___bisect_mark___ 3; y > 0))
+  
+

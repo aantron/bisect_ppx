@@ -1,4 +1,4 @@
-COMPILE_FLAGS=-I ../../_build -pp '$(PATH_OCAML_BIN)/camlp4o -I ../../_build bisect_pp.cmo' bisect.$(LIB_EXT) $(FLAGS)
+COMPILE_FLAGS=-I ../../_build -pp '$(PATH_OCAML_BIN)/camlp4o str.cma -I ../../_build bisect_pp.cmo' bisect.$(LIB_EXT) $(FLAGS)
 XMLLINT=$(shell which xmllint)
 
 default: clean compile run report

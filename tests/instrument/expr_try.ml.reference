@@ -1,4 +1,4 @@
-let _ = Bisect.Runtime.init "expr_try.ml"
+let () = Bisect.Runtime.init "expr_try.ml"
   
 let () =
   (Bisect.Runtime.mark "expr_try.ml" 6;

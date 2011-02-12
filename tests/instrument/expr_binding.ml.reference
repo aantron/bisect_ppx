@@ -1,4 +1,4 @@
-let _ = Bisect.Runtime.init "expr_binding.ml"
+let () = Bisect.Runtime.init "expr_binding.ml"
   
 let x = (Bisect.Runtime.mark "expr_binding.ml" 0; 3)
   
