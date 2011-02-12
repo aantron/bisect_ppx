@@ -78,7 +78,7 @@ install: all
 	(test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && cp $(PATH_BUILD)/src/report/report.native $(PATH_OCAML_PREFIX)/bin/bisect-report.opt || true); \
 	if [ -x "$(PATH_OCAMLFIND)" ]; then \
 	  $(PATH_OCAMLFIND) query $(PROJECT_NAME) && $(PATH_OCAMLFIND) remove $(PROJECT_NAME) || true; \
-	  $(PATH_OCAMLFIND) install $(PROJECT_NAME) META \
+	  $(PATH_OCAMLFIND) install $(PROJECT_NAME) META -optional \
 	    $(PATH_BUILD)/$(PROJECT_NAME)_pp.cmo \
 	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.cm* \
 	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.o \
