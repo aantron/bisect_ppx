@@ -56,7 +56,7 @@ let () =
 	try
 	  let k = Common.point_kind_of_char ch in
 	  (List.assoc k kinds) := v
-	with _ -> raise (Arg.Bad (Printf.sprintf "unknown point kind: '%c'" ch)))
+	with _ -> raise (Arg.Bad (Printf.sprintf "unknown point kind: %C" ch)))
       s in
   let lines =
     List.map
@@ -75,11 +75,66 @@ let () =
     (Arg.Symbol (mode_names, (fun s -> mode := List.assoc s modes)))
     "  Set instrumentation mode"
 
+(* Bare lexer, used for 'special' comments. *)
+type comments = {
+    mutable ignored_intervals : (int * int) list;
+    mutable marked_lines : int list;
+  }
+let comments_cache : (string, comments) Hashtbl.t = Hashtbl.create 17
+let marked_points = ref []
+module LexerLoc = Camlp4.Struct.Loc
+module LexerToken = Camlp4.Struct.Token.Make (LexerLoc)
+module Lexer = Camlp4.Struct.Lexer.Make (LexerToken)
+let read_comments filename =
+  try
+    Hashtbl.find comments_cache filename
+  with Not_found ->
+    let comments = { ignored_intervals = []; marked_lines = [] } in
+    Hashtbl.add comments_cache filename comments;
+    let loc = LexerLoc.mk filename in
+    let chan = open_in filename in
+    let stream = Stream.of_channel chan in
+    let lexer = Lexer.from_stream ~quotations:false loc stream in
+    let stack = Stack.create () in
+    let rec lex () =
+      match Stream.peek lexer with
+      | Some (Camlp4.Sig.EOI, _) -> ()
+      | Some (Camlp4.Sig.COMMENT comment, loc) ->
+          let line = LexerLoc.start_line loc in
+          (match comment with
+          | "(*BISECT-IGNORE-BEGIN*)" ->
+              Stack.push line stack
+          | "(*BISECT-IGNORE-END*)" ->
+              (try
+                let bib = Stack.pop stack in
+                comments.ignored_intervals <- (bib, line) :: comments.ignored_intervals
+              with Stack.Empty ->
+                Printf.eprintf "%s:\n%s"
+                  (LexerLoc.to_string loc)
+                  "unmatched '(*BISECT-IGNORE-END*)' comment")
+          | "(*BISECT-IGNORE*)" ->
+              comments.ignored_intervals <- (line, line) :: comments.ignored_intervals
+          | "(*BISECT-VISIT*)" | "(*BISECT-MARK*)" ->
+              comments.marked_lines <- line :: comments.marked_lines
+          | _ -> ());
+          Stream.junk lexer;
+          lex ()
+      | Some _ ->
+          Stream.junk lexer;
+          lex ()
+      | None -> () in
+    lex ();
+    if not (Stack.is_empty stack) then
+      Printf.eprintf "File %s:\n%s"
+        filename
+        "unmatched '(*BISECT-IGNORE-BEGIN*)' and '(*BISECT-IGNORE-END*)' comment";
+    close_in_noerr chan;
+    comments
+
 (* Contains the list of files with a call to "Bisect.Runtime.init" *)
 let files = ref []
 
-(* Map from file name to list of points.
-   Each point is a (offset, identifier, kind) triple. *)
+(* Map from file name to list of point definitions. *)
 let points : (string, (Common.point_definition list)) Hashtbl.t = Hashtbl.create 17
 
 (* Dumps the points to their respective files. *)
@@ -129,12 +184,13 @@ exception Already_marked
    Populates the 'points' global variables.
    Raises 'Already_marked' when the passed file is already marked for the
    passed offset. *)
-let marker file ofs kind =
+let marker file ofs kind marked =
   let lst = try Hashtbl.find points file with Not_found -> [] in
   if List.exists (fun (o, _, _) -> o = ofs) lst then
     raise Already_marked
   else
     let idx = List.length lst in
+    if marked then marked_points := idx :: !marked_points;
     Hashtbl.replace points file ((ofs, idx, kind) :: lst);
     let _loc = Loc.ghost in
     match !mode with
@@ -156,7 +212,13 @@ let wrap_expr k e =
       let loc = Ast.loc_of_expr e in
       let ofs = Loc.start_off loc in
       let file = Loc.file_name loc in
-      Ast.ExSeq (loc, Ast.ExSem (loc, (marker file ofs k), e))
+      let line = Loc.start_line loc in
+      let comments = read_comments file in
+      if List.exists (fun (lo, hi) -> line >= lo && line <= hi) comments.ignored_intervals then
+        e
+      else
+        let marked = List.mem line comments.marked_lines in
+        Ast.ExSeq (loc, Ast.ExSem (loc, (marker file ofs k marked), e))
     with Already_marked -> e
 
 (* Wraps the "toplevel" expressions of a binding, using "wrap_expr". *)
@@ -237,6 +299,13 @@ let instrument' =
     method safe file si =
       let _loc = Loc.ghost in
       let e = <:expr< (Bisect.Runtime.init $str:file$) >> in
+      let e =
+        List.fold_left
+          (fun acc idx ->
+            let mark = <:expr< (Bisect.Runtime.mark $str:file$ $int:string_of_int idx$) >> in
+            Ast.ExSeq (_loc, Ast.ExSem (_loc, acc, mark)))
+          e
+          !marked_points in
       let s = <:str_item< let () = $e$ >> in
       files := file :: !files;
       Ast.StSem (Loc.ghost, s, si)
@@ -245,6 +314,13 @@ let instrument' =
       let nb = List.length (Hashtbl.find points file) in
       let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks false) >> in
       let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
+      let marks =
+        List.fold_left
+          (fun acc idx ->
+            let mark = <:expr< (Array.set marks $int:string_of_int idx$ 1) >> in
+            Ast.ExSeq (_loc, Ast.ExSem (_loc, acc, mark)))
+          init
+          !marked_points in
       let func = <:expr<
         fun idx ->
           hook_before ();
@@ -254,7 +330,7 @@ let instrument' =
       let e = <:expr<
         let marks = $make$ in
         let hook_before, hook_after = Bisect.Runtime.get_hooks () in
-        ($init$; $func$) >> in
+        ($marks$; $func$) >> in
       let s = <:str_item< let ___bisect_mark___ = $e$ >> in
       files := file :: !files;
       Ast.StSem (Loc.ghost, s, si)
@@ -263,13 +339,20 @@ let instrument' =
       let nb = List.length (Hashtbl.find points file) in
       let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks true) >> in
       let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
+      let marks =
+        List.fold_left
+          (fun acc idx ->
+            let mark = <:expr< (Array.set marks $int:string_of_int idx$ 1) >> in
+            Ast.ExSeq (_loc, Ast.ExSem (_loc, acc, mark)))
+          init
+          !marked_points in
       let func = <:expr<
         fun idx ->
           let curr = marks.(idx) in
           marks.(idx) <- if curr < max_int then (succ curr) else curr >> in
       let e = <:expr<
         let marks = $make$ in
-        ($init$; $func$) >> in
+        ($marks$; $func$) >> in
       let s = <:str_item< let ___bisect_mark___ = $e$ >> in
       files := file :: !files;
       Ast.StSem (Loc.ghost, s, si)
