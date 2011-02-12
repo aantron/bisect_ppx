@@ -34,6 +34,7 @@ let write_lines lines filename =
 
 let () =
   let odocl_chan = open_out odocl_file in
+  let paths = [src_path / "library"; src_path / "report"] in
   Array.iter
     (fun filename ->
       if Pathname.check_extension filename "mli" then begin
@@ -43,7 +44,7 @@ let () =
         output_string odocl_chan modulename;
         output_char odocl_chan '\n'
       end)
-    (Pathname.readdir src_path);
+    (Array.concat (List.map Pathname.readdir paths));
   close_out_noerr odocl_chan
 
 let () =
