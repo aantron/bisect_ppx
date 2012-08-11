@@ -22,6 +22,7 @@ type output_kind =
   | Xml_emma_output of string
   | Csv_output of string
   | Text_output of string
+  | Dump_output of string
 
 let outputs = ref []
 
@@ -54,6 +55,9 @@ let options = [
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Set output to csv, data being written to given file") ;
+  ("-dump",
+   Arg.String (fun s -> add_output (Dump_output s)),
+   "<file>  Set output to bare dump, data being written to given file") ;
   ("-dump-dtd",
    Arg.String
      (function

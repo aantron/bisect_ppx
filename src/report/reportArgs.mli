@@ -25,6 +25,7 @@ type output_kind =
   | Xml_emma_output of string
   | Csv_output of string
   | Text_output of string
+  | Dump_output of string
 (** The type of output kinds. *)
 
 val outputs : output_kind list ref

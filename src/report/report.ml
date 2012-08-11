@@ -71,7 +71,9 @@ let main () =
     | ReportArgs.Csv_output file ->
         generic_output file (ReportCSV.make !ReportArgs.separator)
     | ReportArgs.Text_output file ->
-        generic_output file (ReportText.make ()) in
+        generic_output file (ReportText.make ())
+    | ReportArgs.Dump_output file ->
+        generic_output file (ReportDump.make ()) in
   List.iter write_output (List.rev !ReportArgs.outputs)
 
 let () =
