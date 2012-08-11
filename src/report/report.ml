@@ -73,7 +73,18 @@ let main () =
     | ReportArgs.Text_output file ->
         generic_output file (ReportText.make ())
     | ReportArgs.Dump_output file ->
-        generic_output file (ReportDump.make ()) in
+        generic_output file (ReportDump.make ())
+    | ReportArgs.Bisect_output file ->
+        Common.try_out_channel
+          true
+          file
+          (fun chan ->
+            let data =
+              Hashtbl.fold
+                (fun k v acc -> (k, v) :: acc)
+                data
+                [] in
+            Common.write_runtime_data chan data) in
   List.iter write_output (List.rev !ReportArgs.outputs)
 
 let () =

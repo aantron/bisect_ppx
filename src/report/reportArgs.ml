@@ -23,6 +23,7 @@ type output_kind =
   | Csv_output of string
   | Text_output of string
   | Dump_output of string
+  | Bisect_output of string
 
 let outputs = ref []
 
@@ -52,6 +53,9 @@ let add_file f =
   files := f :: !files
 
 let options = [
+  ("-bisect",
+   Arg.String (fun s -> add_output (Bisect_output s)),
+   "<file>  Set output to bisect, data being written to given file") ;
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Set output to csv, data being written to given file") ;

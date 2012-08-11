@@ -16,6 +16,7 @@ run::
 
 report::
 	@rm -fr report
+	@$(REPORT) -bisect result.bisect *.out
 	@$(REPORT) -csv result.csv *.out
 	@$(REPORT) -dump-dtd result.dtd *.out
 	@$(REPORT) -dump result.dump *.out
@@ -29,7 +30,7 @@ ifeq ($(findstring xmllint,$(XMLLINT)),xmllint)
 	@$(XMLLINT) --noout result.xml-emma
 else
 endif
-	@(for ext in csv dtd dump html text xml xml-emma; do \
+	@(for ext in bisect csv dtd dump html text xml xml-emma; do \
 		echo "     testing '$$ext' format ..."; \
 		diff -q result.$$ext reference.$$ext && rm -f result.$$ext; \
 	done || exit 0)
