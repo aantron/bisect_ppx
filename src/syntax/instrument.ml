@@ -224,7 +224,10 @@ let wrap_expr k e =
 (* Wraps the "toplevel" expressions of a binding, using "wrap_expr". *)
 let rec wrap_binding = function
   | Ast.BiAnd (loc, b1, b2) -> Ast.BiAnd (loc, (wrap_binding b1), (wrap_binding b2))
-  | Ast.BiEq (loc, p, e) -> Ast.BiEq (loc, p, (wrap_expr Common.Binding e))
+  | Ast.BiEq (loc, p, Ast.ExTyc (_, e, t)) ->
+      Ast.BiEq (loc, Ast.PaTyc (loc, p, t), (wrap_expr Common.Binding e))
+  | Ast.BiEq (loc, p, e) ->
+      Ast.BiEq (loc, p, (wrap_expr Common.Binding e))
   | b -> b
 
 (* Wraps a sequence. *)
