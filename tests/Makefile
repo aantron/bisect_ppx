@@ -1,6 +1,6 @@
 #
 # This file is part of Bisect.
-# Copyright (C) 2009-2011 Xavier Clerc.
+# Copyright (C) 2009-2012 Xavier Clerc.
 #
 # Bisect is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
