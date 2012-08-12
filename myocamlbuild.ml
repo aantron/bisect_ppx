@@ -37,7 +37,9 @@ let () =
   let paths = [src_path / "library"; src_path / "report"] in
   Array.iter
     (fun filename ->
-      if Pathname.check_extension filename "mli" then begin
+      if (Pathname.check_extension filename "mli")
+    || (Pathname.check_extension filename "mly")
+    || (Pathname.check_extension filename "mll") then begin
         let modulename = Pathname.remove_extension filename in
         let modulename = Pathname.basename modulename in
         let modulename = String.capitalize modulename in
@@ -49,7 +51,7 @@ let () =
 
 let () =
   write_lines ["Common"; "Runtime"] mlpack_file;
-  write_lines ["Common"; "Instrument"] mlpack_pp
+  write_lines ["Common"; "Instrument"; "Exclude"; "ExcludeParser"; "ExcludeLexer"] mlpack_pp
 
 let version_tag = "src_library_version_ml"
 let version_ml = "src/library/version.ml"

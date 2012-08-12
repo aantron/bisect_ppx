@@ -1,0 +1,11 @@
+let () = Bisect.Runtime.init "source.ml"
+  
+let f1 x y = if x = y then x + y else x - y
+  
+let g s =
+  (Bisect.Runtime.mark "source.ml" 1;
+   for i = 1 to 5 do Bisect.Runtime.mark "source.ml" 0; print_endline s done)
+  
+let f2 b x = if b then x * x else x
+  
+

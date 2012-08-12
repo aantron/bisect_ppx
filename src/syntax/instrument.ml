@@ -34,19 +34,48 @@ let mode = ref Safe
 (* Association list mapping points kinds to whether they are activated. *)
 let kinds = List.map (fun x -> (x, ref true)) Common.all_point_kinds
 
-(* Exluded functions. *)
-let exluded = ref []
+(* Exluded toplevel declarations. *)
+type exclusion =
+  | Regular_expression of Str.regexp
+  | Exclude_file of Exclude.file
+let excluded = ref []
 let function_separator = Str.regexp "[ \t]*,[ \t]*"
 let add_excluded s =
   let patterns = Str.split function_separator s in
-  let patterns = List.map Str.regexp patterns in
-  exluded := patterns @ !exluded
-let is_excluded name =
+  let patterns = List.map (fun x -> Regular_expression (Str.regexp x)) patterns in
+  excluded := patterns @ !excluded
+let load_exclusion_file filename =
+  let ch = open_in filename in
+  let lexbuf = Lexing.from_channel ch in
+  try
+    let res = ExcludeParser.file ExcludeLexer.token lexbuf in
+    let res = List.map (fun x -> Exclude_file x) res in
+    excluded := res @ !excluded;
+    close_in_noerr ch
+  with
+  | Exclude.Exception (line, msg) ->
+      Printf.eprintf " *** error in file %S at line %d: %s\n"
+        filename line msg;
+      exit 1
+  | e ->
+      close_in_noerr ch;
+      raise e
+let is_excluded file name =
+  let match_pattern patt =
+    (Str.string_match patt name 0)
+      && ((Str.match_end ()) = (String.length name)) in
   List.exists
-    (fun patt ->
-      (Str.string_match patt name 0)
-        && ((Str.match_end ()) = (String.length name)))
-    !exluded
+    (function
+      | Regular_expression patt ->
+          match_pattern patt
+      | Exclude_file ef ->
+          (ef.Exclude.path = file)
+            && (List.exists
+                  (function
+                    | Exclude.Name en -> name = en
+                    | Exclude.Regexp patt -> match_pattern patt)
+                  ef.Exclude.exclusions))
+    !excluded
 
 (* Registers the various command-line options of the instrumenter. *)
 let () =
@@ -68,6 +97,7 @@ let () =
   let desc = String.concat "" lines in
   Camlp4.Options.add "-enable" (Arg.String (set_kinds true)) ("<kinds>  Enable point kinds:" ^ desc);
   Camlp4.Options.add "-exclude" (Arg.String add_excluded) "<pattern>  Exclude functions matching pattern";
+  Camlp4.Options.add "-exclude-file" (Arg.String load_exclusion_file) "<filename>  Exclude functions listed in given file";
   Camlp4.Options.add "-disable" (Arg.String (set_kinds false)) ("<kinds>  Disable point kinds:" ^ desc);
   let mode_names = List.map fst modes in
   Camlp4.Options.add
@@ -288,7 +318,7 @@ let instrument =
     method str_item si =
       match si with
       | Ast.StVal (loc, rc, Ast.BiEq (_, (Ast.PaId (_, x)), _))
-        when is_excluded (string_of_ident x) -> si
+        when is_excluded (Loc.file_name loc) (string_of_ident x) -> si
       | _ -> (match super#str_item si with
         | Ast.StDir (loc, id, e) -> Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
         | Ast.StExp (loc, e) -> Ast.StExp (loc, (wrap_expr Common.Toplevel_expr e))
