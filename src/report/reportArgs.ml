@@ -49,6 +49,8 @@ let add_search_path sp =
 
 let files = ref []
 
+let combine_expr = ref None
+
 let add_file f =
   files := f :: !files
 
@@ -56,6 +58,9 @@ let options = [
   ("-bisect",
    Arg.String (fun s -> add_output (Bisect_output s)),
    "<file>  Set output to bisect, data being written to given file") ;
+  ("-combine-expr",
+   Arg.String (fun s -> combine_expr := Some s),
+   "<expr>  Combine file according to given expression to produce data") ;
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Set output to csv, data being written to given file") ;

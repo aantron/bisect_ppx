@@ -21,25 +21,41 @@ open ReportUtils
 
 let main () =
   ReportArgs.parse ();
-  if !ReportArgs.files = [] then begin
-    prerr_endline " *** warning: no input file";
-    exit 0
-  end;
   if !ReportArgs.outputs = [] then begin
     prerr_endline " *** warning: no output requested";
     exit 0
   end;
   let data =
-    List.fold_right
-      (fun s acc ->
-        List.iter
-          (fun (k, arr) ->
-            let arr' = try (Hashtbl.find acc k) +| arr with Not_found -> arr in
-            Hashtbl.replace acc k arr')
-          (Common.read_runtime_data s);
-        acc)
-      !ReportArgs.files
-      (Hashtbl.create 17) in
+    match !ReportArgs.files, !ReportArgs.combine_expr with
+    | [], None ->
+        prerr_endline " *** warning: neither input file nor expression provided";
+        exit 0
+    | (_ :: _), None ->
+        List.fold_right
+          (fun s acc ->
+            List.iter
+              (fun (k, arr) ->
+                let arr' = try (Hashtbl.find acc k) +| arr with Not_found -> arr in
+                Hashtbl.replace acc k arr')
+              (Common.read_runtime_data s);
+            acc)
+          !ReportArgs.files
+          (Hashtbl.create 17)
+    | [], Some expr ->
+        (try
+          Combine.eval expr
+        with
+        | Combine.Exception e ->
+            Printf.eprintf " *** combine expression error: %s\n"
+              (Combine.string_of_error e);
+            exit 1
+        | e ->
+            Printf.eprintf " *** combine expression error: %s\n"
+              (Printexc.to_string e);
+            exit 1)
+    | (_ :: _), Some _ ->
+        prerr_endline " *** error: both input file(s) and expression provided";
+        exit 1 in
   let verbose = if !ReportArgs.verbose then print_endline else ignore in
   let search_file l f =
     let fail () = raise (Sys_error (f ^ ": No such file or directory")) in

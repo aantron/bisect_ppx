@@ -25,6 +25,7 @@ true: -traverse
 <src/**> and not "src/threads/bisectThread.ml": for-pack(Bisect)
 "src/syntax/instrument.ml": pp(camlp4of), use_camlp4
 "src/threads/bisectThread.ml": thread
+<src/report/report.{byte,native,jar}>: use_str
 <src/**/*.ml{,i}>: warn_Ae
 <src/**/*.ml{,i}>: warn_error_A
 

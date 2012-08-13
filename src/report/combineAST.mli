@@ -16,17 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-let make () =
-  object
-    method header = ""
-    method footer = ""
-    method summary _ = ""
-    method file_header f = Printf.sprintf "file %S\n" f
-    method file_footer _ = ""
-    method file_summary _ = ""
-    method point ofs nb k =
-      Printf.sprintf "  point %20s at offset %6d: %6d\n"
-        (Common.string_of_point_kind k)
-        ofs
-        nb
-  end
+(** This module defines the bbstract syntax tree for 'combine'
+    expressions. *)
+
+type expr =
+  | Plus of expr * expr
+  | Minus of expr * expr
+  | Multiply of expr * expr
+  | Divide of expr * expr
+  | Function of string * (expr list)
+  | File of string
+  | Files of string
+  | Integer of int
+(** The type of combination expression. *)
+
+val to_string : expr -> string
+(** Converts the passed expression into a string. *)

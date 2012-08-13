@@ -56,5 +56,8 @@ val search_path : string list ref
 val files : string list ref
 (** Files to gather (runtime data). *)
 
+val combine_expr : string option ref
+(** Expression used to combine data files. *)
+
 val parse : unit -> unit
 (** Parses the command-line. *)

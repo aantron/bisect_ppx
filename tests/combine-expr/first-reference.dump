@@ -1,0 +1,10 @@
+file "source.ml"
+  point             sequence at offset     17:      1
+  point             sequence at offset     42:      1
+  point                  for at offset     64:      5
+  point             sequence at offset    118:      0
+  point             sequence at offset    144:      0
+  point                  for at offset    166:      0
+  point       match/function at offset    253:      1
+  point       match/function at offset    278:      0
+  point       match/function at offset    297:      0

@@ -26,17 +26,24 @@ let (++) x y =
   else
     x + y
 
-let rec (+|) x y =
+let (--) x y =
+  (++) x (-y)
+
+let rec zip op x y =
   let lx = Array.length x in
   let ly = Array.length y in
   if lx >= ly then begin
     let z = Array.copy x in
     for i = 0 to (pred ly) do
-      z.(i) <- x.(i) ++ y.(i)
+      z.(i) <- op x.(i) y.(i)
     done;
     z
   end else
-    y +| x
+    zip op y x
+
+let (+|) x y = zip (++) x y
+
+let (-|) x y = zip (--) x y
 
 let mkdirs ?(perm=0o755) dir =
   let rec mk dir =
