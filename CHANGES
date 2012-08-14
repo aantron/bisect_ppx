@@ -1,3 +1,14 @@
+Version 1.2 (2012-08-14):
+-------------------------
+  - new '-combine-expr' to allow combination of results
+  - new 'dump' output mode (mainly for debug)
+  - new 'bisect' output mode (i. e. format of runtime data)
+  - new '-exclude-file' command-line switch to exclude toplevel functions
+    listed in a file
+  - update for OCaml 4.00.0
+  - bug #95: polymorphic recursion is not handled
+  - bug #104: configure script should be executable
+
 Version 1.1 (2011-02-12):
 -------------------------
   - update for Objective Caml 3.12.0
