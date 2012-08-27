@@ -24,6 +24,7 @@ bin_path=`dirname $ocamlbuild`
 ocaml_prefix=`dirname $bin_path`
 ocamlfind=`which ocamlfind 2> /dev/null || echo ''`
 native_dynlink='TRUE'
+devel='FALSE'
 
 # command-line analysis
 while [ $# -gt 0 ]
@@ -35,8 +36,10 @@ do
             ocamlfind="$2"; shift;;
         -no-native-dynlink)
             native_dynlink='FALSE';;
+        -devel)
+            devel='TRUE';;
         *)
-            echo "usage: $0 [-ocaml-prefix <path>] [-ocamlfind <path>]";
+            echo "usage: $0 [-ocaml-prefix <path>] [-ocamlfind <path>] [-no-native-dynlink] [-devel]";
             exit 1;;
         esac
         shift
@@ -54,6 +57,7 @@ echo "# timestamp: `date`" > Makefile.config
 echo "PATH_OCAML_PREFIX=$ocaml_prefix" >> Makefile.config
 echo "PATH_OCAMLFIND=$ocamlfind" >> Makefile.config
 echo "NATIVE_DYNLINK=$native_dynlink" >> Makefile.config
+echo "WARNINGS=$devel" >> Makefile.config
 echo "MAKE_QUIET=$make_quiet" >> Makefile.config
 echo "" >> Makefile.config
 echo 'Makefile.config successfully created'

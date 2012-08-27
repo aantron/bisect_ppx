@@ -67,6 +67,8 @@ let () =
     cp src dst in
   dispatch begin function
     | After_rules ->
+        if String.uppercase (try Sys.getenv "WARNINGS" with _ -> "") = "TRUE" then
+          flag ["ocaml"; "compile"; "warnings"] (S[A"-w"; A"Ae"; A"-warn-error"; A"A"]);
         dep [version_tag] [version_ml];
         rule ("generation of " ^ version_ml)
           ~prod:version_ml

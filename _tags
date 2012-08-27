@@ -26,8 +26,7 @@ true: -traverse
 "src/syntax/instrument.ml": pp(camlp4of), use_camlp4
 "src/threads/bisectThread.ml": thread
 <src/report/report.{byte,native,jar}>: use_str
-<src/**/*.ml{,i}>: warn_Ae
-<src/**/*.ml{,i}>: warn_error_A
+<src/**/*.ml{,i}>: warnings
 
 # Generation of version file
 "src/library/version.mli": src_library_version_ml
