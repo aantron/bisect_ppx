@@ -18,157 +18,25 @@
 
 open Camlp4.PreCast
 
-(* Instrumentation modes. *)
-type mode =
-  | Safe
-  | Fast
-  | Faster
-
-let modes =
-  ["safe", Safe;
-   "fast", Fast;
-   "faster", Faster]
-
-let mode = ref Safe
-
-(* Association list mapping points kinds to whether they are activated. *)
-let kinds = List.map (fun x -> (x, ref true)) Common.all_point_kinds
-
-(* Exluded toplevel declarations. *)
-type exclusion =
-  | Regular_expression of Str.regexp
-  | Exclude_file of Exclude.file
-let excluded = ref []
-let function_separator = Str.regexp "[ \t]*,[ \t]*"
-let add_excluded s =
-  let patterns = Str.split function_separator s in
-  let patterns = List.map (fun x -> Regular_expression (Str.regexp x)) patterns in
-  excluded := patterns @ !excluded
-let load_exclusion_file filename =
-  let ch = open_in filename in
-  let lexbuf = Lexing.from_channel ch in
-  try
-    let res = ExcludeParser.file ExcludeLexer.token lexbuf in
-    let res = List.map (fun x -> Exclude_file x) res in
-    excluded := res @ !excluded;
-    close_in_noerr ch
-  with
-  | Exclude.Exception (line, msg) ->
-      Printf.eprintf " *** error in file %S at line %d: %s\n"
-        filename line msg;
-      exit 1
-  | e ->
-      close_in_noerr ch;
-      raise e
-let is_excluded file name =
-  let match_pattern patt =
-    (Str.string_match patt name 0)
-      && ((Str.match_end ()) = (String.length name)) in
-  List.exists
-    (function
-      | Regular_expression patt ->
-          match_pattern patt
-      | Exclude_file ef ->
-          (ef.Exclude.path = file)
-            && (List.exists
-                  (function
-                    | Exclude.Name en -> name = en
-                    | Exclude.Regexp patt -> match_pattern patt)
-                  ef.Exclude.exclusions))
-    !excluded
-
 (* Registers the various command-line options of the instrumenter. *)
 let () =
-  let set_kinds v s =
-    String.iter
-      (fun ch ->
-	try
-	  let k = Common.point_kind_of_char ch in
-	  (List.assoc k kinds) := v
-	with _ -> raise (Arg.Bad (Printf.sprintf "unknown point kind: %C" ch)))
-      s in
-  let lines =
-    List.map
-      (fun k ->
-	Printf.sprintf "\n     %c %s"
-	  (Common.char_of_point_kind k)
-	  (Common.string_of_point_kind k))
-      Common.all_point_kinds in
-  let desc = String.concat "" lines in
-  Camlp4.Options.add "-enable" (Arg.String (set_kinds true)) ("<kinds>  Enable point kinds:" ^ desc);
-  Camlp4.Options.add "-exclude" (Arg.String add_excluded) "<pattern>  Exclude functions matching pattern";
-  Camlp4.Options.add "-exclude-file" (Arg.String load_exclusion_file) "<filename>  Exclude functions listed in given file";
-  Camlp4.Options.add "-disable" (Arg.String (set_kinds false)) ("<kinds>  Disable point kinds:" ^ desc);
-  let mode_names = List.map fst modes in
-  Camlp4.Options.add
-    "-mode"
-    (Arg.Symbol (mode_names, (fun s -> mode := List.assoc s modes)))
-    "  Set instrumentation mode"
+  List.iter
+    (fun (key, spec, doc) ->
+      Camlp4.Options.add key spec doc)
+    InstrumentArgs.switches
 
-(* Bare lexer, used for 'special' comments. *)
-type comments = {
-    mutable ignored_intervals : (int * int) list;
-    mutable marked_lines : int list;
-  }
-let comments_cache : (string, comments) Hashtbl.t = Hashtbl.create 17
+(** List of marked points. *)
 let marked_points = ref []
-module LexerLoc = Camlp4.Struct.Loc
-module LexerToken = Camlp4.Struct.Token.Make (LexerLoc)
-module Lexer = Camlp4.Struct.Lexer.Make (LexerToken)
-let read_comments filename =
-  try
-    Hashtbl.find comments_cache filename
-  with Not_found ->
-    let comments = { ignored_intervals = []; marked_lines = [] } in
-    Hashtbl.add comments_cache filename comments;
-    let loc = LexerLoc.mk filename in
-    let chan = open_in filename in
-    let stream = Stream.of_channel chan in
-    let lexer = Lexer.from_stream ~quotations:false loc stream in
-    let stack = Stack.create () in
-    let rec lex () =
-      match Stream.peek lexer with
-      | Some (Camlp4.Sig.EOI, _) -> ()
-      | Some (Camlp4.Sig.COMMENT comment, loc) ->
-          let line = LexerLoc.start_line loc in
-          (match comment with
-          | "(*BISECT-IGNORE-BEGIN*)" ->
-              Stack.push line stack
-          | "(*BISECT-IGNORE-END*)" ->
-              (try
-                let bib = Stack.pop stack in
-                comments.ignored_intervals <- (bib, line) :: comments.ignored_intervals
-              with Stack.Empty ->
-                Printf.eprintf "%s:\n%s"
-                  (LexerLoc.to_string loc)
-                  "unmatched '(*BISECT-IGNORE-END*)' comment")
-          | "(*BISECT-IGNORE*)" ->
-              comments.ignored_intervals <- (line, line) :: comments.ignored_intervals
-          | "(*BISECT-VISIT*)" | "(*BISECT-MARK*)" ->
-              comments.marked_lines <- line :: comments.marked_lines
-          | _ -> ());
-          Stream.junk lexer;
-          lex ()
-      | Some _ ->
-          Stream.junk lexer;
-          lex ()
-      | None -> () in
-    lex ();
-    if not (Stack.is_empty stack) then
-      Printf.eprintf "File %s:\n%s"
-        filename
-        "unmatched '(*BISECT-IGNORE-BEGIN*)' and '(*BISECT-IGNORE-END*)' comment";
-    close_in_noerr chan;
-    comments
 
-(* Contains the list of files with a call to "Bisect.Runtime.init" *)
+(* List of files with a call to "Bisect.Runtime.init". *)
 let files = ref []
 
 (* Map from file name to list of point definitions. *)
 let points : (string, (Common.point_definition list)) Hashtbl.t = Hashtbl.create 17
 
 (* Dumps the points to their respective files. *)
-let () = at_exit
+let () =
+  at_exit
     (fun () ->
       List.iter
         (fun f ->
@@ -223,18 +91,18 @@ let marker file ofs kind marked =
     if marked then marked_points := idx :: !marked_points;
     Hashtbl.replace points file ((ofs, idx, kind) :: lst);
     let _loc = Loc.ghost in
-    match !mode with
-    | Safe ->
+    match !InstrumentArgs.mode with
+    | InstrumentArgs.Safe ->
         <:expr< (Bisect.Runtime.mark $str:file$ $int:string_of_int idx$) >>
-    | Fast
-    | Faster ->
+    | InstrumentArgs.Fast
+    | InstrumentArgs.Faster ->
         <:expr< (___bisect_mark___ $int:string_of_int idx$) >>
 
 (* Wraps an expression with a marker, returning the passed expression
    unmodified if the expression is already marked, is a bare mapping,
    or has a ghost location. *)
 let wrap_expr k e =
-  let enabled = List.assoc k kinds in
+  let enabled = List.assoc k InstrumentArgs.kinds in
   if (is_bare_mapping e) || (Loc.is_ghost (Ast.loc_of_expr e)) || (not !enabled) then
     e
   else
@@ -243,11 +111,11 @@ let wrap_expr k e =
       let ofs = Loc.start_off loc in
       let file = Loc.file_name loc in
       let line = Loc.start_line loc in
-      let comments = read_comments file in
-      if List.exists (fun (lo, hi) -> line >= lo && line <= hi) comments.ignored_intervals then
+      let c = Comments.get file in
+      if List.exists (fun (lo, hi) -> line >= lo && line <= hi) c.Comments.ignored_intervals then
         e
       else
-        let marked = List.mem line comments.marked_lines in
+        let marked = List.mem line c.Comments.marked_lines in
         Ast.ExSeq (loc, Ast.ExSem (loc, (marker file ofs k marked), e))
     with Already_marked -> e
 
@@ -318,7 +186,7 @@ let instrument =
     method! str_item si =
       match si with
       | Ast.StVal (loc, _, Ast.BiEq (_, (Ast.PaId (_, x)), _))
-        when is_excluded (Loc.file_name loc) (string_of_ident x) -> si
+        when Exclusions.contains (Loc.file_name loc) (string_of_ident x) -> si
       | _ -> (match super#str_item si with
         | Ast.StDir (loc, id, e) -> Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
         | Ast.StExp (loc, e) -> Ast.StExp (loc, (wrap_expr Common.Toplevel_expr e))
@@ -393,10 +261,10 @@ let instrument' =
       let loc = Ast.loc_of_str_item si in
       let file = Loc.file_name loc in
       if not (List.mem file !files) && not (Loc.is_ghost loc) then
-        let impl = match !mode with
-        | Safe -> self#safe
-        | Fast -> self#fast
-        | Faster -> self#faster in
+        let impl = match !InstrumentArgs.mode with
+        | InstrumentArgs.Safe -> self#safe
+        | InstrumentArgs.Fast -> self#fast
+        | InstrumentArgs.Faster -> self#faster in
         impl file si
       else si
   end
