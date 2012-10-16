@@ -262,7 +262,7 @@ let escape_line tab_size line offset points =
       | ' ' -> Buffer.add_string buff "&nbsp;"
       | '\"' -> Buffer.add_string buff "&quot;"
       | '&' -> Buffer.add_string buff "&amp;"
-      | '\t' -> for i = 1 to tab_size do Buffer.add_string buff "&nbsp;" done
+      | '\t' -> for _i = 1 to tab_size do Buffer.add_string buff "&nbsp;" done
       | _ -> Buffer.add_char buff ch);
       incr ofs)
     line;

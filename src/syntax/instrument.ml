@@ -278,17 +278,17 @@ let has_no_else_branch e =
 let instrument =
   object
     inherit Ast.map as super
-    method class_expr ce =
+    method! class_expr ce =
       match super#class_expr ce with
       | Ast.CeApp (loc, ce, e) -> Ast.CeApp (loc, ce, (wrap_expr Common.Class_expr e))
       | x -> x
-    method class_str_item csi =
+    method! class_str_item csi =
       match super#class_str_item csi with
       | Ast.CrIni (loc, e) -> Ast.CrIni (loc, (wrap_expr Common.Class_init e))
       | Ast.CrMth (loc, id, ovr, priv, e, ct) -> Ast.CrMth (loc, id, ovr, priv, (wrap_expr Common.Class_meth e), ct)
       | Ast.CrVal (loc, id, ovr, mut, e) -> Ast.CrVal (loc, id, ovr, mut, (wrap_expr Common.Class_val e))
       | x -> x
-    method expr e =
+    method! expr e =
       let e' = super#expr e in
       match e' with
       | Ast.ExApp (loc, (Ast.ExApp (loc', e1, e2)), e3) ->
@@ -310,14 +310,14 @@ let instrument =
       | Ast.ExTry (loc, e1, h) -> Ast.ExTry (loc, (wrap_seq Common.Try e1), h)
       | Ast.ExWhi (loc, e1, e2) -> Ast.ExWhi (loc, e1, (wrap_seq Common.While e2))
       | x -> x
-    method match_case mc =
+    method! match_case mc =
       match super#match_case mc with
       | Ast.McArr (loc, p1, e1, e2) ->
           Ast.McArr (loc, p1, e1, (wrap_expr Common.Match e2))
       | x -> x
-    method str_item si =
+    method! str_item si =
       match si with
-      | Ast.StVal (loc, rc, Ast.BiEq (_, (Ast.PaId (_, x)), _))
+      | Ast.StVal (loc, _, Ast.BiEq (_, (Ast.PaId (_, x)), _))
         when is_excluded (Loc.file_name loc) (string_of_ident x) -> si
       | _ -> (match super#str_item si with
         | Ast.StDir (loc, id, e) -> Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
@@ -328,7 +328,7 @@ let instrument =
 
 let instrument' =
   object (self)
-    inherit Ast.map as super
+    inherit Ast.map
     method safe file si =
       let _loc = Loc.ghost in
       let e = <:expr< (Bisect.Runtime.init $str:file$) >> in
@@ -389,7 +389,7 @@ let instrument' =
       let s = <:str_item< let ___bisect_mark___ = $e$ >> in
       files := file :: !files;
       Ast.StSem (Loc.ghost, s, si)
-    method str_item si =
+    method! str_item si =
       let loc = Ast.loc_of_str_item si in
       let file = Loc.file_name loc in
       if not (List.mem file !files) && not (Loc.is_ghost loc) then
