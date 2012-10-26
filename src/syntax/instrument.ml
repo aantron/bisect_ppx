@@ -103,7 +103,11 @@ let marker file ofs kind marked =
    or has a ghost location. *)
 let wrap_expr k e =
   let enabled = List.assoc k InstrumentArgs.kinds in
-  if (is_bare_mapping e) || (Loc.is_ghost (Ast.loc_of_expr e)) || (not !enabled) then
+  let dont_wrap =
+    (is_bare_mapping e)
+    || (Loc.is_ghost (Ast.loc_of_expr e))
+    || (not !enabled) in
+  if dont_wrap then
     e
   else
     try
@@ -112,7 +116,12 @@ let wrap_expr k e =
       let file = Loc.file_name loc in
       let line = Loc.start_line loc in
       let c = Comments.get file in
-      if List.exists (fun (lo, hi) -> line >= lo && line <= hi) c.Comments.ignored_intervals then
+      let ignored =
+        List.exists
+          (fun (lo, hi) ->
+            line >= lo && line <= hi)
+          c.Comments.ignored_intervals in
+      if ignored then
         e
       else
         let marked = List.mem line c.Comments.marked_lines in
@@ -121,41 +130,54 @@ let wrap_expr k e =
 
 (* Wraps the "toplevel" expressions of a binding, using "wrap_expr". *)
 let rec wrap_binding = function
-  | Ast.BiAnd (loc, b1, b2) -> Ast.BiAnd (loc, (wrap_binding b1), (wrap_binding b2))
+  | Ast.BiAnd (loc, b1, b2) ->
+      Ast.BiAnd (loc, (wrap_binding b1), (wrap_binding b2))
   | Ast.BiEq (loc, p, Ast.ExTyc (_, e, t)) ->
       Ast.BiEq (loc, Ast.PaTyc (loc, p, t), (wrap_expr Common.Binding e))
   | Ast.BiEq (loc, p, e) ->
       Ast.BiEq (loc, p, (wrap_expr Common.Binding e))
-  | b -> b
+  | b ->
+      b
 
 (* Wraps a sequence. *)
 let rec wrap_seq k = function
   | Ast.ExSem (loc, e1, e2) ->
       Ast.ExSem (loc, (wrap_seq k e1), (wrap_seq Common.Sequence e2))
-  | Ast.ExNil loc -> Ast.ExNil loc
-  | x -> (wrap_expr k x)
+  | Ast.ExNil loc ->
+      Ast.ExNil loc
+  | x ->
+      wrap_expr k x
 
-(* Tests whether the passed expression is an if/then construct that has no else branch. *)
+(* Tests whether the passed expression is an if/then construct that has no
+   else branch. *)
 let has_no_else_branch e =
   match e with
   | <:expr< if $_$ then $_$ else $(<:expr< () >> as e')$ >> ->
       Ast.loc_of_expr e = Ast.loc_of_expr e'
-  | _ -> false
+  | _ ->
+      false
 
 (* The actual "instrumenter" object, marking expressions. *)
 let instrument =
   object
     inherit Ast.map as super
+
     method! class_expr ce =
       match super#class_expr ce with
-      | Ast.CeApp (loc, ce, e) -> Ast.CeApp (loc, ce, (wrap_expr Common.Class_expr e))
+      | Ast.CeApp (loc, ce, e) ->
+          Ast.CeApp (loc, ce, (wrap_expr Common.Class_expr e))
       | x -> x
+
     method! class_str_item csi =
       match super#class_str_item csi with
-      | Ast.CrIni (loc, e) -> Ast.CrIni (loc, (wrap_expr Common.Class_init e))
-      | Ast.CrMth (loc, id, ovr, priv, e, ct) -> Ast.CrMth (loc, id, ovr, priv, (wrap_expr Common.Class_meth e), ct)
-      | Ast.CrVal (loc, id, ovr, mut, e) -> Ast.CrVal (loc, id, ovr, mut, (wrap_expr Common.Class_val e))
+      | Ast.CrIni (loc, e) ->
+          Ast.CrIni (loc, (wrap_expr Common.Class_init e))
+      | Ast.CrMth (loc, id, ovr, priv, e, ct) ->
+          Ast.CrMth (loc, id, ovr, priv, (wrap_expr Common.Class_meth e), ct)
+      | Ast.CrVal (loc, id, ovr, mut, e) ->
+          Ast.CrVal (loc, id, ovr, mut, (wrap_expr Common.Class_val e))
       | x -> x
+
     method! expr e =
       let e' = super#expr e in
       match e' with
@@ -167,36 +189,56 @@ let instrument =
                                           (wrap_expr Common.Lazy_operator e2))),
                                (wrap_expr Common.Lazy_operator e3))
           | _ -> e')
-      | Ast.ExFor (loc, id, e1, e2, dir, e3) -> Ast.ExFor (loc, id, e1, e2, dir, (wrap_seq Common.For e3))
+      | Ast.ExFor (loc, id, e1, e2, dir, e3) ->
+          Ast.ExFor (loc, id, e1, e2, dir, (wrap_seq Common.For e3))
       | Ast.ExIfe (loc, e1, e2, e3) ->
           if has_no_else_branch e then
             Ast.ExIfe (loc, e1, (wrap_expr Common.If_then e2), e3)
           else
-            Ast.ExIfe (loc, e1, (wrap_expr Common.If_then e2), (wrap_expr Common.If_then e3))
-      | Ast.ExLet (loc, r, bnd, e1) -> Ast.ExLet (loc, r, bnd, (wrap_expr Common.Binding e1))
-      | Ast.ExSeq (loc, e) -> Ast.ExSeq (loc, (wrap_seq Common.Sequence e))
-      | Ast.ExTry (loc, e1, h) -> Ast.ExTry (loc, (wrap_seq Common.Try e1), h)
-      | Ast.ExWhi (loc, e1, e2) -> Ast.ExWhi (loc, e1, (wrap_seq Common.While e2))
-      | x -> x
+            Ast.ExIfe (loc,
+                       e1,
+                       (wrap_expr Common.If_then e2),
+                       (wrap_expr Common.If_then e3))
+      | Ast.ExLet (loc, r, bnd, e1) ->
+          Ast.ExLet (loc, r, bnd, (wrap_expr Common.Binding e1))
+      | Ast.ExSeq (loc, e) ->
+          Ast.ExSeq (loc, (wrap_seq Common.Sequence e))
+      | Ast.ExTry (loc, e1, h) ->
+          Ast.ExTry (loc, (wrap_seq Common.Try e1), h)
+      | Ast.ExWhi (loc, e1, e2) ->
+          Ast.ExWhi (loc, e1, (wrap_seq Common.While e2))
+      | x ->
+          x
+
     method! match_case mc =
       match super#match_case mc with
       | Ast.McArr (loc, p1, e1, e2) ->
           Ast.McArr (loc, p1, e1, (wrap_expr Common.Match e2))
-      | x -> x
+      | x ->
+          x
+
     method! str_item si =
       match si with
       | Ast.StVal (loc, _, Ast.BiEq (_, (Ast.PaId (_, x)), _))
-        when Exclusions.contains (Loc.file_name loc) (string_of_ident x) -> si
-      | _ -> (match super#str_item si with
-        | Ast.StDir (loc, id, e) -> Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
-        | Ast.StExp (loc, e) -> Ast.StExp (loc, (wrap_expr Common.Toplevel_expr e))
-        | Ast.StVal (loc, rc, bnd) -> Ast.StVal (loc, rc, (wrap_binding bnd))
-        | x -> x)
+        when Exclusions.contains (Loc.file_name loc) (string_of_ident x) ->
+          si
+      | _ ->
+          (match super#str_item si with
+          | Ast.StDir (loc, id, e) ->
+              Ast.StDir (loc, id, (wrap_expr Common.Toplevel_expr e))
+          | Ast.StExp (loc, e) ->
+              Ast.StExp (loc, (wrap_expr Common.Toplevel_expr e))
+          | Ast.StVal (loc, rc, bnd) ->
+              Ast.StVal (loc, rc, (wrap_binding bnd))
+          | x ->
+              x)
   end
 
-let instrument' =
+(* Initializes storage and applies requested marks. *)
+let add_init_and_marks =
   object (self)
     inherit Ast.map
+
     method safe file si =
       let _loc = Loc.ghost in
       let e = <:expr< (Bisect.Runtime.init $str:file$) >> in
@@ -210,6 +252,7 @@ let instrument' =
       let s = <:str_item< let () = $e$ >> in
       files := file :: !files;
       Ast.StSem (Loc.ghost, s, si)
+
     method fast file si =
       let _loc = Loc.ghost in
       let nb = List.length (Hashtbl.find points file) in
@@ -235,6 +278,7 @@ let instrument' =
       let s = <:str_item< let ___bisect_mark___ = $e$ >> in
       files := file :: !files;
       Ast.StSem (Loc.ghost, s, si)
+
     method faster file si =
       let _loc = Loc.ghost in
       let nb = List.length (Hashtbl.find points file) in
@@ -257,6 +301,7 @@ let instrument' =
       let s = <:str_item< let ___bisect_mark___ = $e$ >> in
       files := file :: !files;
       Ast.StSem (Loc.ghost, s, si)
+
     method! str_item si =
       let loc = Ast.loc_of_str_item si in
       let file = Loc.file_name loc in
@@ -272,4 +317,4 @@ let instrument' =
 (* Registers the "instrumenter". *)
 let () =
   AstFilters.register_str_item_filter instrument#str_item;
-  AstFilters.register_str_item_filter instrument'#str_item
+  AstFilters.register_str_item_filter add_init_and_marks#str_item
