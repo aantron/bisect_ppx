@@ -67,6 +67,16 @@ let () =
     cp src dst in
   dispatch begin function
     | After_rules ->
+        let camlp4of =
+          try
+            let path_bin = Filename.concat (Sys.getenv "PATH_OCAML_PREFIX") "bin" in
+            Filename.concat path_bin "camlp4of"
+          with _ -> "camlp4of" in
+        flag ["ocaml"; "compile"; "pp_camlp4of"] (S[A"-pp"; A camlp4of]);
+        flag ["ocaml"; "pp:dep"; "pp_camlp4of"] (S[A camlp4of]);
+        flag ["ocaml"; "compile"; "use_compiler_libs"] (S[A"-I"; A"+compiler-libs"]);
+        flag ["ocaml"; "link"; "byte"; "use_compiler_libs"] (S[A"-I"; A"+compiler-libs"; A"ocamlcommon.cma"]);
+        flag ["ocaml"; "link"; "native"; "use_compiler_libs"] (S[A"-I"; A"+compiler-libs"; A"ocamlcommon.cmxa"]);
         if String.uppercase (try Sys.getenv "WARNINGS" with _ -> "") = "TRUE" then
           flag ["ocaml"; "compile"; "warnings"] (S[A"-w"; A"Ae"; A"-warn-error"; A"A"]);
         dep [version_tag] [version_ml];
