@@ -59,5 +59,8 @@ val files : string list ref
 val combine_expr : string option ref
 (** Expression used to combine data files. *)
 
+val summary_only : bool ref
+(** Whether to ouput onlly summary (text only). *)
+
 val parse : unit -> unit
 (** Parses the command-line. *)

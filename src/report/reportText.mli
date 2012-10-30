@@ -19,5 +19,6 @@
 (** This module defines the output to bare text. *)
 
 
-val make : unit -> ReportGeneric.converter
-(** Returns a converter for bare text output. *)
+val make : bool -> ReportGeneric.converter
+(** Returns a converter for bare text output, the passed boolean indicates
+    whether only summary should be output. *)

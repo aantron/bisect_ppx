@@ -51,6 +51,8 @@ let files = ref []
 
 let combine_expr = ref None
 
+let summary_only = ref false
+
 let add_file f =
   files := f :: !files
 
@@ -95,6 +97,9 @@ let options = [
   ("-separator",
    Arg.Set_string separator,
    "<string>  Set the separator for generated output (CSV only)") ;
+  ("-summary-only",
+   Arg.Set summary_only,
+   " Output only a summary (text only)") ;
   ("-tab-size",
    Arg.Int
      (fun x ->

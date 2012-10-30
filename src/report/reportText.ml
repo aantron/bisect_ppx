@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-let make () =
+let make summary_only =
   object (self)
     method header = ""
     method footer = ""
     method summary s = "Summary:\n" ^ (self#sum s)
-    method file_header f = Printf.sprintf "File '%s':\n" f
+    method file_header f = if not summary_only then Printf.sprintf "File '%s':\n" f else ""
     method file_footer _ = ""
-    method file_summary s = self#sum s
+    method file_summary s = if not summary_only then self#sum s else ""
     method point _ _ _ = ""
     method private sum s =
       let numbers x y =

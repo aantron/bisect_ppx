@@ -87,7 +87,7 @@ let main () =
     | ReportArgs.Csv_output file ->
         generic_output file (ReportCSV.make !ReportArgs.separator)
     | ReportArgs.Text_output file ->
-        generic_output file (ReportText.make ())
+        generic_output file (ReportText.make !ReportArgs.summary_only)
     | ReportArgs.Dump_output file ->
         generic_output file (ReportDump.make ())
     | ReportArgs.Bisect_output file ->
