@@ -53,8 +53,12 @@ default:
 
 all: generate
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME).otarget
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_pp.cmo
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_ppx.byte
+	if [ "$(NO_CAMLP4)" = "FALSE" ]; then \
+	  $(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_pp.cmo; \
+	fi
+	if [ "$(PPX)" = "TRUE" ]; then \
+	  $(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_ppx.byte; \
+	fi
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmo
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmx
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) report.byte
@@ -77,6 +81,9 @@ veryclean: clean
 
 install: FORCE
 	cp $(PATH_BUILD)/src/report/report.byte $(PATH_OCAML_PREFIX)/bin/bisect-report; \
+	if [ "$(PPX)" = "TRUE" ]; then \
+	  cp $(PATH_BUILD)/src/syntax/bisect_ppx.byte $(PATH_OCAML_PREFIX)/bin; \
+	fi; \
 	(test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && cp $(PATH_BUILD)/src/report/report.native $(PATH_OCAML_PREFIX)/bin/bisect-report.opt || true); \
 	if [ -x "$(PATH_OCAMLFIND)" ]; then \
 	  $(PATH_OCAMLFIND) query $(PROJECT_NAME) && $(PATH_OCAMLFIND) remove $(PROJECT_NAME) || true; \
@@ -95,7 +102,9 @@ install: FORCE
 	    $(PATH_BUILD)/$(PROJECT_NAME).ja; \
 	else \
 	  mkdir -p $(PATH_INSTALL); \
-	  cp $(PATH_BUILD)/$(PROJECT_NAME)_pp.cmo $(PATH_INSTALL); \
+	  if [ "$(NO_CAMLP4)" = "FALSE" ]; then \
+	    cp $(PATH_BUILD)/$(PROJECT_NAME)_pp.cmo $(PATH_INSTALL); \
+	  fi; \
 	  for ext in cmi cmo cmx o cmj jo; do \
 	    test -f $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.$$ext && cp $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.$$ext $(PATH_INSTALL) || true; \
 	  done; \

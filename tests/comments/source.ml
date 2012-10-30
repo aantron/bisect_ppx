@@ -4,7 +4,7 @@ let f1 x y =
     x + y
   else
     x - y
-(*BISECT-IGNORE-END*)
+  (*BISECT-IGNORE-END*)
 
 let g s =
   if true then

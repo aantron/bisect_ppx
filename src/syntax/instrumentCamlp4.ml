@@ -51,7 +51,7 @@ let () =
             (fun channel -> Common.write_points channel points file))
         points)
 
-(* Returns the identifier  as a string. *)
+(* Returns the identifier as a string. *)
 let rec string_of_ident = function
   | Ast.IdAcc (_, _, id) -> string_of_ident id
   | Ast.IdApp (_, id, _) -> string_of_ident id
@@ -79,7 +79,7 @@ let rec is_bare_mapping = function
 exception Already_marked
 
 (* Creates the marking expression for given file, offset, and kind.
-   Populates the 'points' global variables.
+   Populates the 'points' global variable.
    Raises 'Already_marked' when the passed file is already marked for the
    passed offset. *)
 let marker file ofs kind marked =
@@ -103,28 +103,25 @@ let marker file ofs kind marked =
    or has a ghost location. *)
 let wrap_expr k e =
   let enabled = List.assoc k InstrumentArgs.kinds in
-  let dont_wrap =
-    (is_bare_mapping e)
-    || (Loc.is_ghost (Ast.loc_of_expr e))
-    || (not !enabled) in
+  let loc = Ast.loc_of_expr e in
+  let dont_wrap = (is_bare_mapping e) || (Loc.is_ghost loc) || (not !enabled) in
   if dont_wrap then
     e
   else
     try
-      let loc = Ast.loc_of_expr e in
       let ofs = Loc.start_off loc in
       let file = Loc.file_name loc in
       let line = Loc.start_line loc in
-      let c = Comments.get file in
+      let c = CommentsCamlp4.get file in
       let ignored =
         List.exists
           (fun (lo, hi) ->
             line >= lo && line <= hi)
-          c.Comments.ignored_intervals in
+          c.CommentsCamlp4.ignored_intervals in
       if ignored then
         e
       else
-        let marked = List.mem line c.Comments.marked_lines in
+        let marked = List.mem line c.CommentsCamlp4.marked_lines in
         Ast.ExSeq (loc, Ast.ExSem (loc, (marker file ofs k marked), e))
     with Already_marked -> e
 

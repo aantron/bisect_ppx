@@ -25,6 +25,8 @@ ocaml_prefix=`dirname $bin_path`
 ocamlfind=`which ocamlfind 2> /dev/null || echo ''`
 native_dynlink='TRUE'
 devel='FALSE'
+no_camlp4='FALSE'
+ppx='FALSE'
 
 # command-line analysis
 while [ $# -gt 0 ]
@@ -38,12 +40,22 @@ do
             native_dynlink='FALSE';;
         -devel)
             devel='TRUE';;
+        -no-camlp4)
+            no_camlp4='TRUE';;
+        -ppx)
+            ppx='TRUE';;
         *)
             echo "usage: $0 [-ocaml-prefix <path>] [-ocamlfind <path>] [-no-native-dynlink] [-devel]";
             exit 1;;
         esac
         shift
 done
+
+# sanity check
+if [ "$no_camlp4" = "TRUE" -a "$ppx" = "FALSE" ]; then
+  echo 'At least one instrumenter should be chosen (either camlp4 or ppx)'
+  exit 1
+fi
 
 # make options
 make_quiet=`make -f - <<EOF
@@ -58,6 +70,8 @@ echo "PATH_OCAML_PREFIX=$ocaml_prefix" >> Makefile.config
 echo "PATH_OCAMLFIND=$ocamlfind" >> Makefile.config
 echo "NATIVE_DYNLINK=$native_dynlink" >> Makefile.config
 echo "WARNINGS=$devel" >> Makefile.config
+echo "NO_CAMLP4=$no_camlp4" >> Makefile.config
+echo "PPX=$ppx" >> Makefile.config
 echo "MAKE_QUIET=$make_quiet" >> Makefile.config
 echo "" >> Makefile.config
 echo 'Makefile.config successfully created'
