@@ -32,16 +32,16 @@ all: clean
 	  fi \
 	done
 	@echo ''
-	@echo "`grep '\*\*\*' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
+	@echo "`grep '^*** error' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
 
 one: FORCE
 	@if [ -z $(NAME) ]; then echo "*** value for 'NAME' is missing"; exit 1; fi
 	@echo "Running tests for '$(NAME)'..." | tee -a _log
-	@cd $(NAME) && \
+	@(cd $(NAME) && \
 	  $(MAKE) PATH_OCAML_BIN=$(PATH_OCAML_PREFIX)/bin \
 	  COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma EXE_SUFFIX='' \
 	  REPORT=../../_build/src/report/report.byte && \
-	cd ..
+	cd ..) || echo '*** error' >> _log
 
 clean: FORCE
 	@rm -f _log
@@ -50,6 +50,6 @@ clean: FORCE
 log: FORCE
 	@cat _log
 	@echo ''
-	@echo "`grep '^\*\*\*' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
+	@echo "`grep '^*** error' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
 
 FORCE:
