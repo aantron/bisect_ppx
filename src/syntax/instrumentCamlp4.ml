@@ -252,7 +252,7 @@ let add_init_and_marks =
 
     method fast file si =
       let _loc = Loc.ghost in
-      let nb = List.length (Hashtbl.find points file) in
+      let nb = try List.length (Hashtbl.find points file) with _ -> 0 in
       let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks false) >> in
       let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
       let marks =
@@ -278,7 +278,7 @@ let add_init_and_marks =
 
     method faster file si =
       let _loc = Loc.ghost in
-      let nb = List.length (Hashtbl.find points file) in
+      let nb = try List.length (Hashtbl.find points file) with _ -> 0 in
       let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks true) >> in
       let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
       let marks =
