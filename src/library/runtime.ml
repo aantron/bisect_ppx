@@ -16,12 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-let verbose =
+type message =
+  | Compiled_in_unsafe_mode of string
+  | Unable_to_create_file
+  | Unable_to_write_file
+
+let string_of_message = function
+  | Compiled_in_unsafe_mode fn ->
+      Printf.sprintf " *** Bisect: %S was compiled in unsafe mode." fn
+  | Unable_to_create_file ->
+      " *** Bisect runtime was unable to create file."
+  | Unable_to_write_file ->
+      " *** Bisect runtime was unable to write file."
+
+let verbose msg =
   try
     match String.uppercase (Sys.getenv "BISECT_SILENT") with
-    | "YES" | "ON" -> ignore
-    | _ -> prerr_endline
-  with Not_found -> prerr_endline
+    | "YES" | "ON" -> ()
+    | _ -> prerr_endline (string_of_message msg)
+  with Not_found -> prerr_endline (string_of_message msg)
 
 let no_hook = fun () -> ()
 
@@ -52,7 +65,7 @@ let init_with_array fn arr unsafe =
   if not (Hashtbl.mem table fn) then
     Hashtbl.add table fn arr;
   if unsafe && (registered_hook ()) then
-    verbose (Printf.sprintf " *** Bisect: %S was compiled in unsafe mode." fn);
+    verbose (Compiled_in_unsafe_mode fn);
   !hook_after ()
 
 let mark fn pt =
@@ -77,6 +90,9 @@ let mark fn pt =
   Hashtbl.replace table fn arr;
   !hook_after ()
 
+let mark_array fn pts =
+  Array.iter (mark fn) pts
+
 let file_channel =
   let base_name =
     try
@@ -98,7 +114,7 @@ let file_channel =
   try
     Some (open_out_bin !actual_name)
   with _ ->
-    verbose " *** Bisect runtime was unable to create file.";
+    verbose Unable_to_create_file;
     None
 
 let dump () =
@@ -109,7 +125,7 @@ let dump () =
       (try
         Common.write_runtime_data channel content;
       with _ ->
-        verbose " *** Bisect runtime was unable to write file.");
+        verbose Unable_to_write_file);
       close_out_noerr channel
 
 let () = at_exit dump

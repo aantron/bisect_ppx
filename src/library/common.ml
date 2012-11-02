@@ -34,7 +34,11 @@ type point_kind =
   | Toplevel_expr
   | Lazy_operator
 
-type point_definition = int * int * point_kind
+type point_definition = {
+    offset : int;
+    identifier : int;
+    kind : point_kind;
+  }
 
 let all_point_kinds = [
   Binding ;
@@ -139,6 +143,10 @@ let magic_number_rtd = "BISECT-RTD"
 
 let magic_number_pts = "BISECT-PTS"
 
+let supported_versions = [
+  1, 0
+]
+
 let format_version = (1, 0)
 
 let write_channel channel magic write_digest x =
@@ -153,20 +161,22 @@ let check_channel channel filename magic check_digest =
   let magic_length = String.length magic in
   let file_magic = String.create magic_length in
   really_input channel file_magic 0 magic_length;
-  if file_magic = magic then
-    let file_version : (int * int) = input_value channel in
-    if file_version <> format_version then
-      raise (Unsupported_version filename)
+  let file_version =
+    if file_magic = magic then
+      let file_version : (int * int) = input_value channel in
+      if not (List.mem file_version supported_versions) then
+        raise (Unsupported_version filename)
+      else
+        file_version
     else
-      ()
-  else
-    raise (Invalid_file filename);
-  match check_digest with
+      raise (Invalid_file filename) in
+  (match check_digest with
   | Some file ->
       let file_digest : string = input_value channel in
       let digest = Digest.file file in
       if file_digest <> digest then raise (Modified_file filename)
-  | None -> ()
+  | None -> ());
+  file_version
 
 let write_runtime_data channel content =
   write_channel channel magic_number_rtd None (Array.of_list content)
@@ -181,22 +191,28 @@ let read_runtime_data filename =
     true
     filename
     (fun channel ->
-      check_channel channel filename magic_number_rtd None;
-      let file_content : (string * (int array)) array = input_value channel in
-      Array.to_list file_content)
+      let version = check_channel channel filename magic_number_rtd None in
+      match version with
+      | 1, 0 ->
+          let file_content : (string * (int array)) array =
+            input_value channel in
+          Array.to_list file_content
+      | _ -> assert false)
 
 let read_points filename =
-  let offset (o, _, _) = o in
   let filename' = cmp_file_of_ml_file filename in
   try_in_channel
     true
     filename'
     (fun channel ->
-      check_channel channel filename' magic_number_pts (Some filename);
-      let arr : point_definition array = input_value channel in
-      Array.sort compare arr;
-      for i = 1 to (pred (Array.length arr)) do
-        if (offset arr.(i)) = (offset arr.(pred i)) then
-          raise (Invalid_file filename);
-      done;
-      Array.to_list arr)
+      let version = check_channel channel filename' magic_number_pts (Some filename) in
+      match version with
+      | 1, 0 ->
+          let arr : point_definition array = input_value channel in
+          Array.sort compare arr;
+          for i = 1 to (pred (Array.length arr)) do
+            if arr.(i).offset = arr.(pred i).offset then
+              raise (Invalid_file filename);
+          done;
+          Array.to_list arr
+      | _ -> assert false)
