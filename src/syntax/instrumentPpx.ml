@@ -235,16 +235,20 @@ class instrumenter = object (self)
       let header = match !InstrumentArgs.mode with
       | InstrumentArgs.Safe ->
           let e = E.(apply_nolabs (lid "Bisect.Runtime.init") [strconst file]) in
+          let tab =
+            List.fold_right
+              (fun idx acc -> (intconst idx) :: acc)
+              (InstrumentState.get_marked_points ())
+              [] in
+          let mark_array =
+            E.(apply_nolabs
+                 (lid "Bisect.Runtime.mark_array")
+                 [strconst file; array tab]) in
           let e =
-            List.fold_left
-              (fun acc idx ->
-                let mark =
-                  E.(apply_nolabs
-                       (lid "Bisect.Runtime.mark")
-                       [strconst file; intconst idx]) in
-                E.sequence acc mark)
-              e
-              (InstrumentState.get_marked_points ()) in
+            if tab <> [] then
+              E.sequence e mark_array
+            else
+              e in
           InstrumentState.add_file file;
           M.eval e
       | InstrumentArgs.Fast
@@ -260,14 +264,14 @@ class instrumenter = object (self)
                  [intconst nb; intconst 0]) in
           let marks =
             List.fold_left
-              (fun acc idx ->
+              (fun acc (idx, nb) ->
                 let mark =
                   E.(apply_nolabs
                        (lid "Array.set")
-                       [lid "marks"; intconst idx; intconst 1]) in
+                       [lid "marks"; intconst idx; intconst nb]) in
                 E.sequence acc mark)
               init
-              (InstrumentState.get_marked_points ()) in
+              (InstrumentState.get_marked_points_assoc ()) in
           let func =
             let body =
               let if_then_else =

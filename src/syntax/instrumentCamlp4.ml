@@ -216,13 +216,20 @@ let add_init_and_marks =
     method safe file si =
       let _loc = Loc.ghost in
       let e = <:expr< (Bisect.Runtime.init $str:file$) >> in
+      let tab =
+        List.fold_right
+          (fun idx acc ->
+            let elem = <:expr< $int:string_of_int idx$ >> in
+            Ast.ExSem (_loc, elem, acc))
+          (InstrumentState.get_marked_points ())
+          (Ast.ExNil _loc) in
+      let tab = Ast.ExArr (_loc, tab) in
+      let mark_array =
+        <:expr< (Bisect.Runtime.mark_array $str:file$ $tab$) >> in
       let e =
-        List.fold_left
-          (fun acc idx ->
-            let mark = <:expr< (Bisect.Runtime.mark $str:file$ $int:string_of_int idx$) >> in
-            Ast.ExSeq (_loc, Ast.ExSem (_loc, acc, mark)))
-          e
-          (InstrumentState.get_marked_points ()) in
+        match tab with
+        | Ast.ExArr (_, Ast.ExNil _) -> e
+        | _ -> Ast.ExSeq (_loc, Ast.ExSem (_loc, e, mark_array)) in
       let s = <:str_item< let () = $e$ >> in
       InstrumentState.add_file file;
       Ast.StSem (Loc.ghost, s, si)
@@ -239,11 +246,11 @@ let add_init_and_marks =
       let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
       let marks =
         List.fold_left
-          (fun acc idx ->
-            let mark = <:expr< (Array.set marks $int:string_of_int idx$ 1) >> in
+          (fun acc (idx, nb) ->
+            let mark = <:expr< (Array.set marks $int:string_of_int idx$ $int:string_of_int nb$) >> in
             Ast.ExSeq (_loc, Ast.ExSem (_loc, acc, mark)))
           init
-          (InstrumentState.get_marked_points ()) in
+          (InstrumentState.get_marked_points_assoc ()) in
       let func =
         if threadsafe then
           <:expr<

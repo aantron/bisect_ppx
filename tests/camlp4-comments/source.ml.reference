@@ -1,4 +1,6 @@
-let () = (Bisect.Runtime.init "source.ml"; Bisect.Runtime.mark "source.ml" 1)
+let () =
+  (Bisect.Runtime.init "source.ml";
+   Bisect.Runtime.mark_array "source.ml" [| 1 |])
   
 (*BISECT-IGNORE-BEGIN*)
 let f1 x y = if x = y then x + y else x - y
