@@ -16,15 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-(** File lexer, used for 'special' comments. *)
-
-type t = {
-    mutable ignored_intervals : (int * int) list; (** lines between BISECT-IGNORE-BEGIN and BISECT-IGNORE-END commments, or with BISECT-IGNORE comment. *)
-    mutable marked_lines : int list; (** lines with BISECT-MARK or BISECT-VISIT comment. *)
-  }
-
-val get : string -> t
-(** Returns the information about special comments for the passed file
-    (parsed file are cached).
-
-    Raises [Sys_error] if an i/o error occurs. *)
+let () =
+  let files = ref [] in
+  let add_file f = files := f :: !files in
+  let usage = Printf.sprintf "Usage: %s <options> <file-in> <file-out>" Sys.argv.(0) in
+  Arg.parse InstrumentArgs.switches add_file usage;
+  match !files with
+  | file_out :: file_in :: [] ->
+      (try
+        let instrumenter = new InstrumentPpx.instrumenter in
+        instrumenter#run file_in file_out
+      with e ->
+        Printf.eprintf "Error: %s\n" (Printexc.to_string e);
+        exit 1)
+  | _ ->
+      prerr_endline usage;
+      exit 2

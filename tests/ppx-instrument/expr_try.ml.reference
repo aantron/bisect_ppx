@@ -1,0 +1,38 @@
+let _= Bisect.Runtime.init "expr_try.ml"
+let () =
+  (
+  Bisect.Runtime.mark "expr_try.ml" 6; print_endline "before"
+  );
+  (
+  Bisect.Runtime.mark "expr_try.ml" 5;
+  (
+  try
+    (
+    Bisect.Runtime.mark "expr_try.ml" 3; print_endline "abc"
+    );
+    Bisect.Runtime.mark "expr_try.ml" 2;
+    print_endline "def"
+  with
+  | _ -> (
+      (
+      Bisect.Runtime.mark "expr_try.ml" 1; print_endline "ABC"
+      );
+      Bisect.Runtime.mark "expr_try.ml" 0;
+      print_endline "DEF" )
+  )
+  );
+  Bisect.Runtime.mark "expr_try.ml" 4;
+  print_endline "after"
+let () =
+  (
+  Bisect.Runtime.mark "expr_try.ml" 11; print_endline "before"
+  );
+  (
+  Bisect.Runtime.mark "expr_try.ml" 10;
+  (
+  try Bisect.Runtime.mark "expr_try.ml" 8; print_endline "abc"
+  with | _ -> ( Bisect.Runtime.mark "expr_try.ml" 7; print_endline "ABC" )
+  )
+  );
+  Bisect.Runtime.mark "expr_try.ml" 9;
+  print_endline "after"

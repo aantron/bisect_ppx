@@ -25,31 +25,6 @@ let () =
       Camlp4.Options.add key spec doc)
     InstrumentArgs.switches
 
-(** List of marked points. *)
-let marked_points = ref []
-
-(* List of files with a call to "Bisect.Runtime.init". *)
-let files = ref []
-
-(* Map from file name to list of point definitions. *)
-let points : (string, (Common.point_definition list)) Hashtbl.t = Hashtbl.create 17
-
-(* Dumps the points to their respective files. *)
-let () =
-  at_exit
-    (fun () ->
-      List.iter
-        (fun f ->
-          if not (Hashtbl.mem points f) then
-            Hashtbl.add points f [])
-        !files;
-      Hashtbl.iter
-        (fun file points ->
-          Common.try_out_channel
-            true
-            (Common.cmp_file_of_ml_file file)
-            (fun channel -> Common.write_points channel points file))
-        points)
 
 (* Returns the identifier as a string. *)
 let rec string_of_ident = function
@@ -83,13 +58,14 @@ exception Already_marked
    Raises 'Already_marked' when the passed file is already marked for the
    passed offset. *)
 let marker file ofs kind marked =
-  let lst = try Hashtbl.find points file with Not_found -> [] in
-  if List.exists (fun (o, _, _) -> o = ofs) lst then
+  let lst = InstrumentState.get_points_for_file file in
+  if List.exists (fun p -> p.Common.offset = ofs) lst then
     raise Already_marked
   else
     let idx = List.length lst in
-    if marked then marked_points := idx :: !marked_points;
-    Hashtbl.replace points file ((ofs, idx, kind) :: lst);
+    if marked then InstrumentState.add_marked_point idx;
+    let pt = { Common.offset = ofs; identifier = idx; kind = kind } in
+    InstrumentState.set_points_for_file file (pt :: lst);
     let _loc = Loc.ghost in
     match !InstrumentArgs.mode with
     | InstrumentArgs.Safe ->
@@ -100,7 +76,8 @@ let marker file ofs kind marked =
 
 (* Wraps an expression with a marker, returning the passed expression
    unmodified if the expression is already marked, is a bare mapping,
-   or has a ghost location. *)
+   has a ghost location, construct instrumentation is disabled, or a
+   special comments indicates to ignore line. *)
 let wrap_expr k e =
   let enabled = List.assoc k InstrumentArgs.kinds in
   let loc = Ast.loc_of_expr e in
@@ -245,15 +222,20 @@ let add_init_and_marks =
             let mark = <:expr< (Bisect.Runtime.mark $str:file$ $int:string_of_int idx$) >> in
             Ast.ExSeq (_loc, Ast.ExSem (_loc, acc, mark)))
           e
-          !marked_points in
+          (InstrumentState.get_marked_points ()) in
       let s = <:str_item< let () = $e$ >> in
-      files := file :: !files;
+      InstrumentState.add_file file;
       Ast.StSem (Loc.ghost, s, si)
 
-    method fast file si =
+    method fast threadsafe file si =
       let _loc = Loc.ghost in
-      let nb = try List.length (Hashtbl.find points file) with _ -> 0 in
-      let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks false) >> in
+      let nb = List.length (InstrumentState.get_points_for_file file) in
+      let not_threadsafe =
+        if threadsafe then
+          <:expr< false >>
+        else
+          <:expr< true >> in
+      let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks $not_threadsafe$) >> in
       let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
       let marks =
         List.fold_left
@@ -261,52 +243,42 @@ let add_init_and_marks =
             let mark = <:expr< (Array.set marks $int:string_of_int idx$ 1) >> in
             Ast.ExSeq (_loc, Ast.ExSem (_loc, acc, mark)))
           init
-          !marked_points in
-      let func = <:expr<
-        fun idx ->
-          hook_before ();
-          let curr = marks.(idx) in
-          marks.(idx) <- if curr < max_int then (succ curr) else curr;
-          hook_after () >> in
-      let e = <:expr<
-        let marks = $make$ in
-        let hook_before, hook_after = Bisect.Runtime.get_hooks () in
-        ($marks$; $func$) >> in
+          (InstrumentState.get_marked_points ()) in
+      let func =
+        if threadsafe then
+          <:expr<
+          fun idx ->
+            hook_before ();
+            let curr = marks.(idx) in
+            marks.(idx) <- if curr < max_int then (succ curr) else curr;
+            hook_after () >>
+        else
+          <:expr<
+          fun idx ->
+            let curr = marks.(idx) in
+            marks.(idx) <- if curr < max_int then (succ curr) else curr >> in
+      let e =
+        if threadsafe then
+          <:expr<
+          let marks = $make$ in
+          let hook_before, hook_after = Bisect.Runtime.get_hooks () in
+          ($marks$; $func$) >>
+        else
+          <:expr<
+          let marks = $make$ in
+          ($marks$; $func$) >> in
       let s = <:str_item< let ___bisect_mark___ = $e$ >> in
-      files := file :: !files;
-      Ast.StSem (Loc.ghost, s, si)
-
-    method faster file si =
-      let _loc = Loc.ghost in
-      let nb = try List.length (Hashtbl.find points file) with _ -> 0 in
-      let init = <:expr< (Bisect.Runtime.init_with_array $str:file$ marks true) >> in
-      let make = <:expr< (Array.make $int:string_of_int nb$ 0) >> in
-      let marks =
-        List.fold_left
-          (fun acc idx ->
-            let mark = <:expr< (Array.set marks $int:string_of_int idx$ 1) >> in
-            Ast.ExSeq (_loc, Ast.ExSem (_loc, acc, mark)))
-          init
-          !marked_points in
-      let func = <:expr<
-        fun idx ->
-          let curr = marks.(idx) in
-          marks.(idx) <- if curr < max_int then (succ curr) else curr >> in
-      let e = <:expr<
-        let marks = $make$ in
-        ($marks$; $func$) >> in
-      let s = <:str_item< let ___bisect_mark___ = $e$ >> in
-      files := file :: !files;
+      InstrumentState.add_file file;
       Ast.StSem (Loc.ghost, s, si)
 
     method! str_item si =
       let loc = Ast.loc_of_str_item si in
       let file = Loc.file_name loc in
-      if not (List.mem file !files) && not (Loc.is_ghost loc) then
+      if not (InstrumentState.is_file file) && not (Loc.is_ghost loc) then
         let impl = match !InstrumentArgs.mode with
         | InstrumentArgs.Safe -> self#safe
-        | InstrumentArgs.Fast -> self#fast
-        | InstrumentArgs.Faster -> self#faster in
+        | InstrumentArgs.Fast -> self#fast true
+        | InstrumentArgs.Faster -> self#fast false in
         impl file si
       else si
   end

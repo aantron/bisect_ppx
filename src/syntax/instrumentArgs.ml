@@ -35,7 +35,7 @@ let set_kinds v s =
   String.iter
     (fun ch ->
       try
-	let k = Common.point_kind_of_char ch in
+        let k = Common.point_kind_of_char ch in
 	(List.assoc k kinds) := v
       with _ -> raise (Arg.Bad (Printf.sprintf "unknown point kind: %C" ch)))
     s
@@ -51,6 +51,10 @@ let desc_kinds =
   String.concat "" lines
 
 let switches = [
+  ("-disable",
+   Arg.String (set_kinds false),
+   ("<kinds>  Disable point kinds:" ^ desc_kinds)) ;
+
   ("-enable",
    Arg.String (set_kinds true),
    ("<kinds>  Enable point kinds:" ^ desc_kinds)) ;
@@ -62,10 +66,6 @@ let switches = [
   ("-exclude-file",
    Arg.String Exclusions.add_file,
    "<filename>  Exclude functions listed in given file") ;
-
-  ("-disable",
-   Arg.String (set_kinds false),
-   ("<kinds>  Disable point kinds:" ^ desc_kinds));
 
   ("-mode",
    (let mode_names = List.map fst modes in

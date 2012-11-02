@@ -1,0 +1,7 @@
+let _= Bisect.Runtime.init "expr_lazyop.ml"
+let f x y =
+  ( Bisect.Runtime.mark "expr_lazyop.ml" 1; x > 0 ) && (
+    Bisect.Runtime.mark "expr_lazyop.ml" 0; y > 0 )
+let g x y =
+  ( Bisect.Runtime.mark "expr_lazyop.ml" 3; x > 0 ) || (
+    Bisect.Runtime.mark "expr_lazyop.ml" 2; y > 0 )

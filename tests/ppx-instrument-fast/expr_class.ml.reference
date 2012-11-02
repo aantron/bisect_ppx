@@ -1,0 +1,48 @@
+let ___bisect_mark___ =
+  let marks = Array.make 15 0 and (hook_before,hook_after) =
+    Bisect.Runtime.get_hooks () in
+  Bisect.Runtime.init_with_array "expr_class.ml" marks true;
+  (
+  fun idx ->
+    (
+    hook_before ();
+    let curr = marks.(idx) in
+    marks.(idx)<-if curr < Pervasives.max_int
+                 then Pervasives.succ curr
+                 else curr
+    );
+    hook_after ()
+  )
+class c =
+  object 
+    val mutable x = ___bisect_mark___ 0; 0
+    method get_x = ___bisect_mark___ 1; x
+    method set_x x' = ___bisect_mark___ 2; x <- x'
+    method print = ___bisect_mark___ 3; print_int x
+    initializer ___bisect_mark___ 4; print_endline "created"
+  end
+let i = ___bisect_mark___ 5; new c
+class c' =
+  object 
+    val mutable x = ___bisect_mark___ 6; 0
+    method get_x = ___bisect_mark___ 7; x
+    method set_x x' =
+      (
+      ___bisect_mark___ 9; print_endline "modified"
+      );
+      ___bisect_mark___ 8;
+      x <- x'
+    method print =
+      (
+      ___bisect_mark___ 11; print_int x
+      );
+      ___bisect_mark___ 10;
+      print_newline ()
+    initializer
+      (
+      ___bisect_mark___ 13; print_string "created"
+      );
+      ___bisect_mark___ 12;
+      print_newline ()
+  end
+let i = ___bisect_mark___ 14; new c

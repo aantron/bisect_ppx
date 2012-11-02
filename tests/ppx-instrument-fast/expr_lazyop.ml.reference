@@ -1,0 +1,17 @@
+let ___bisect_mark___ =
+  let marks = Array.make 4 0 and (hook_before,hook_after) =
+    Bisect.Runtime.get_hooks () in
+  Bisect.Runtime.init_with_array "expr_lazyop.ml" marks true;
+  (
+  fun idx ->
+    (
+    hook_before ();
+    let curr = marks.(idx) in
+    marks.(idx)<-if curr < Pervasives.max_int
+                 then Pervasives.succ curr
+                 else curr
+    );
+    hook_after ()
+  )
+let f x y = ( ___bisect_mark___ 1; x > 0 ) && ( ___bisect_mark___ 0; y > 0 )
+let g x y = ( ___bisect_mark___ 3; x > 0 ) || ( ___bisect_mark___ 2; y > 0 )

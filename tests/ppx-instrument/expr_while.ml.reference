@@ -1,0 +1,30 @@
+let _= Bisect.Runtime.init "expr_while.ml"
+let () =
+  (
+  Bisect.Runtime.mark "expr_while.ml" 5; print_endline "before"
+  );
+  (
+  Bisect.Runtime.mark "expr_while.ml" 4;
+  while true do (
+    (
+    Bisect.Runtime.mark "expr_while.ml" 2; print_endline "abc"
+    );
+    (
+    Bisect.Runtime.mark "expr_while.ml" 1; print_endline "def"
+    );
+    Bisect.Runtime.mark "expr_while.ml" 0;
+    print_endline "ghi" ) done
+  );
+  Bisect.Runtime.mark "expr_while.ml" 3;
+  print_endline "after"
+let () =
+  (
+  Bisect.Runtime.mark "expr_while.ml" 9; print_endline "before"
+  );
+  (
+  Bisect.Runtime.mark "expr_while.ml" 8;
+  while true do ( Bisect.Runtime.mark "expr_while.ml" 6; print_endline "abc"
+    ) done
+  );
+  Bisect.Runtime.mark "expr_while.ml" 7;
+  print_endline "after"

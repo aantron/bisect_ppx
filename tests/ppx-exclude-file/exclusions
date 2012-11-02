@@ -1,0 +1,8 @@
+file "missing.ml" [
+  name "g";
+];
+
+file "source.ml" [
+  name "f1";
+  regexp "f.*";
+];

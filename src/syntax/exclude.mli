@@ -16,16 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
+(** This modules defines the types related to exlusion as stored in
+    files. *)
+
 exception Exception of (int * string)
 (** The exception raised by either the lexer, or the parser. *)
 
 type t =
-  | Name of string
-  | Regexp of Str.regexp
+  | Name of string (** The exclusion is specified through an exact name. *)
+  | Regexp of Str.regexp (** The exclusion is specified through a regular expression over names. *)
 (** The type of an exclusion. *)
 
 type file = {
-    path : string;
-    exclusions : t list;
+    path : string; (** The path to the file. *)
+    exclusions : t list; (** The list of exclusions. *)
   }
 (** The type describing the contents of an exclusion file. *)

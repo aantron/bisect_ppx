@@ -1,0 +1,52 @@
+let ___bisect_mark___ =
+  let marks = Array.make 12 0 and (hook_before,hook_after) =
+    Bisect.Runtime.get_hooks () in
+  Bisect.Runtime.init_with_array "expr_try.ml" marks true;
+  (
+  fun idx ->
+    (
+    hook_before ();
+    let curr = marks.(idx) in
+    marks.(idx)<-if curr < Pervasives.max_int
+                 then Pervasives.succ curr
+                 else curr
+    );
+    hook_after ()
+  )
+let () =
+  (
+  ___bisect_mark___ 6; print_endline "before"
+  );
+  (
+  ___bisect_mark___ 5;
+  (
+  try
+    (
+    ___bisect_mark___ 3; print_endline "abc"
+    );
+    ___bisect_mark___ 2;
+    print_endline "def"
+  with
+  | _ -> (
+      (
+      ___bisect_mark___ 1; print_endline "ABC"
+      );
+      ___bisect_mark___ 0;
+      print_endline "DEF" )
+  )
+  );
+  ___bisect_mark___ 4;
+  print_endline "after"
+let () =
+  (
+  ___bisect_mark___ 11; print_endline "before"
+  );
+  (
+  ___bisect_mark___ 10;
+  (
+  try ___bisect_mark___ 8; print_endline "abc"
+  with | _ -> ( ___bisect_mark___ 7; print_endline "ABC" )
+  )
+  );
+  ___bisect_mark___ 9;
+  print_endline "after"

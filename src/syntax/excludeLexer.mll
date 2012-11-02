@@ -54,7 +54,7 @@ let letter = [ 'a'-'z' 'A'-'Z' '\192'-'\214' '\216'-'\246' '\248'-'\255' ]
 
 let decimal_digit = [ '0'-'9' ]
 
-let decimal = decimal_digit*
+let decimal = decimal_digit+
 
 let octal_digit = [ '0'-'7' ]
 
@@ -73,26 +73,31 @@ rule token = parse
 | "file"          { ExcludeParser.FILE }
 | "name"          { ExcludeParser.NAME }
 | "regexp"        { ExcludeParser.REGEXP }
-| "\""            { string (Buffer.create 64) lexbuf }
+| "\""            { string 0 (Buffer.create 64) lexbuf }
 | "(*"            { comment 1 lexbuf }
 | whitespace+     { token lexbuf }
 | eol             { incr_line lexbuf; token lexbuf }
 | eof             { ExcludeParser.EOF }
 | _ as ch         { fail lexbuf (Invalid_character ch) }
-and string strbuf = parse
-| "\\b"           { Buffer.add_char strbuf '\008'; string strbuf lexbuf }
-| "\\t"           { Buffer.add_char strbuf '\009'; string strbuf lexbuf }
-| "\\n"           { Buffer.add_char strbuf '\010'; string strbuf lexbuf }
-| "\\r"           { Buffer.add_char strbuf '\013'; string strbuf lexbuf }
-| "\\\'"          { Buffer.add_char strbuf '\''; string strbuf lexbuf }
-| "\\\""          { Buffer.add_char strbuf '\"'; string strbuf lexbuf }
-| "\\\\"          { Buffer.add_char strbuf '\\'; string strbuf lexbuf }
-| "\\" octal as o { add_octal_char strbuf o; string strbuf lexbuf }
-| "\\x" hexa as h { add_hexa_char strbuf h; string strbuf lexbuf }
-| "\""            { ExcludeParser.STRING (Buffer.contents strbuf) }
-| _ as c          { Buffer.add_char strbuf c; string strbuf lexbuf }
+and string n strbuf = parse
+| "\\b"           { Buffer.add_char strbuf '\008'; string n strbuf lexbuf }
+| "\\t"           { Buffer.add_char strbuf '\009'; string n strbuf lexbuf }
+| "\\n"           { Buffer.add_char strbuf '\010'; string n strbuf lexbuf }
+| "\\r"           { Buffer.add_char strbuf '\013'; string n strbuf lexbuf }
+| "\\\'"          { Buffer.add_char strbuf '\''; string n strbuf lexbuf }
+| "\\\""          { Buffer.add_char strbuf '\"'; string n strbuf lexbuf }
+| "\\\\"          { Buffer.add_char strbuf '\\'; string n strbuf lexbuf }
+| "\\" octal as o { add_octal_char strbuf o; string n strbuf lexbuf }
+| "\\x" hexa as h { add_hexa_char strbuf h; string n strbuf lexbuf }
+| "\""            { if n = 0 then
+                      ExcludeParser.STRING (Buffer.contents strbuf)
+                    else
+                      comment n lexbuf }
+| _ as c          { Buffer.add_char strbuf c; string n strbuf lexbuf }
 and comment n = parse
+| "(*"            { comment (succ n) lexbuf }
 | "*)"            { if n = 1 then token lexbuf else comment (pred n) lexbuf }
+| "\""            { string n (Buffer.create 64) lexbuf }
 | eol             { incr_line lexbuf; comment n lexbuf }
 | eof             { fail lexbuf Unexpected_end_of_file }
 | _               { comment n lexbuf }

@@ -1,0 +1,30 @@
+let ___bisect_mark___ =
+  let marks = Array.make 10 0 and (hook_before,hook_after) =
+    Bisect.Runtime.get_hooks () in
+  Bisect.Runtime.init_with_array "expr_binding.ml" marks true;
+  (
+  fun idx ->
+    (
+    hook_before ();
+    let curr = marks.(idx) in
+    marks.(idx)<-if curr < Pervasives.max_int
+                 then Pervasives.succ curr
+                 else curr
+    );
+    hook_after ()
+  )
+let x = ___bisect_mark___ 0; 3
+let y = ___bisect_mark___ 1; [1; 2; 3]
+let z = ___bisect_mark___ 2; [|1;2;3|]
+let f x = ___bisect_mark___ 3; print_endline x
+let f' x =
+  ___bisect_mark___ 6;
+  let x' = ___bisect_mark___ 4; String.uppercase x in (
+    ___bisect_mark___ 5; print_endline x' )
+let g x y z = ___bisect_mark___ 7; ( x + y ) * z
+let g' x y =
+  (
+  ___bisect_mark___ 9; print_endline x
+  );
+  ___bisect_mark___ 8;
+  print_endline y

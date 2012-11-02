@@ -20,13 +20,13 @@
 
 type error =
   | Invalid_file_contents
-  | Invalid_file_decl
+  | Invalid_file_declaration
   | Invalid_exclusion
   | Invalid_regular_expression of string
 
 let string_of_error = function
   | Invalid_file_contents -> "invalid file contents"
-  | Invalid_file_decl -> "invalid file declaration"
+  | Invalid_file_declaration -> "invalid file declaration"
   | Invalid_exclusion -> "invalid exclusion"
   | Invalid_regular_expression re -> Printf.sprintf "invalid regular expression %S" re
 
@@ -55,7 +55,7 @@ file_decl_list: /* epsilon */    { [] }
 file_decl: FILE STRING OPENING_BRACKET exclusion_list CLOSING_BRACKET separator_opt
                                  { { Exclude.path = $2;
                                      Exclude.exclusions = List.rev $4; } }
-| FILE error                     { fail Invalid_file_decl }
+| FILE error                     { fail Invalid_file_declaration }
 
 exclusion_list: /* epsilon */    { [] }
 | exclusion_list exclusion       { $2 :: $1 }

@@ -67,10 +67,14 @@ let get filename =
           Stream.junk lexer;
           lex ()
       | None -> () in
-    lex ();
-    if not (Stack.is_empty stack) then
-      Printf.eprintf "File %s:\n%s"
-        filename
-        "unmatched '(*BISECT-IGNORE-BEGIN*)' and '(*BISECT-IGNORE-END*)' comments";
-    close_in_noerr chan;
-    comments
+    try
+      lex ();
+      if not (Stack.is_empty stack) then
+        Printf.eprintf "File %s:\n%s"
+          filename
+          "unmatched '(*BISECT-IGNORE-BEGIN*)' and '(*BISECT-IGNORE-END*)' comments";
+      close_in_noerr chan;
+      comments
+    with e ->
+      close_in_noerr chan;
+      raise e

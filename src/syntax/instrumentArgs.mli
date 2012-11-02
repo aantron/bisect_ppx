@@ -20,9 +20,9 @@
 
 
 type mode =
-  | Safe
-  | Fast
-  | Faster
+  | Safe (** Original mode: calls to Bisect functions. *)
+  | Fast (** Fast mode: storage/function local to module. *)
+  | Faster (** Like fast mode, but thread-unsafe. *)
 (** The type of instrumentation modes. *)
 
 val mode : mode ref

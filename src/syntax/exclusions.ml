@@ -41,6 +41,7 @@ let add_file filename =
   | Exclude.Exception (line, msg) ->
       Printf.eprintf " *** error in file %S at line %d: %s\n"
         filename line msg;
+      close_in_noerr ch;
       exit 1
   | e ->
       close_in_noerr ch;

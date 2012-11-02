@@ -16,14 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-(** Exluded toplevel declarations. *)
+(** This stateful module contains the information about exluded toplevel
+    declarations. *)
 
 
 val add : string -> unit
 (** Adds a list of comma-separated elements to excluded list. *)
 
 val add_file : string -> unit
-(** Adds exclusions from the passed file. *)
+(** Adds exclusions from the passed file to excluded list.
+
+    Raises [Sys_error] if an i/o error occurs, [Exclude.Exception] if
+    an error occurs while parsing the file. *)
 
 val contains : string -> string -> bool
 (** [contains file name] tests whether toplevel value with name

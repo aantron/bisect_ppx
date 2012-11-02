@@ -16,15 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-(** File lexer, used for 'special' comments. *)
-
 type t = {
-    mutable ignored_intervals : (int * int) list; (** lines between BISECT-IGNORE-BEGIN and BISECT-IGNORE-END commments, or with BISECT-IGNORE comment. *)
-    mutable marked_lines : int list; (** lines with BISECT-MARK or BISECT-VISIT comment. *)
+    mutable ignored_intervals : (int * int) list;
+    mutable marked_lines : int list;
   }
 
-val get : string -> t
-(** Returns the information about special comments for the passed file
-    (parsed file are cached).
+let comments_cache : (string, t) Hashtbl.t = Hashtbl.create 17
 
-    Raises [Sys_error] if an i/o error occurs. *)
+let get filename =
+  try
+    Hashtbl.find comments_cache filename
+  with Not_found ->
+    let comments = { ignored_intervals = []; marked_lines = [] } in
+    Hashtbl.add comments_cache filename comments;
+    let chan = open_in filename in
+    try
+      let lexbuf = Lexing.from_channel chan in
+      let ignored, marked = CommentsLexer.normal [] [] (Stack.create ()) lexbuf in
+      comments.ignored_intervals <- ignored;
+      comments.marked_lines <- marked;
+      close_in_noerr chan;
+      comments
+    with e ->
+      close_in_noerr chan;
+      raise e

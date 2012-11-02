@@ -51,7 +51,7 @@ let () =
 
 let () =
   write_lines ["Common"; "Runtime"] mlpack_file;
-  write_lines ["Common"; "Exclusions"; "InstrumentArgs"; "CommentsCamlp4"; "InstrumentCamlp4"; "Exclude"; "ExcludeParser"; "ExcludeLexer"] mlpack_pp
+  write_lines ["Common"; "Exclusions"; "InstrumentState"; "InstrumentArgs"; "CommentsCamlp4"; "InstrumentCamlp4"; "Exclude"; "ExcludeParser"; "ExcludeLexer"] mlpack_pp
 
 
 let version_tag = "src_library_version_ml"
