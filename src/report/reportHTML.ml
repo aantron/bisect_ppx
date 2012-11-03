@@ -138,7 +138,7 @@ let html_of_stats s =
   (hos s1), (hos s2)
 
 let output_html_index verbose title filename l =
-  verbose "Writing index file ...";
+  verbose "Writing index file...";
   Common.try_out_channel
     false
     filename
@@ -270,17 +270,21 @@ let escape_line tab_size line offset points =
   Buffer.contents buff
 
 let output_html verbose tab_size title no_navbar no_folding in_file out_file script_file script_file_basename resolver visited =
-  verbose (Printf.sprintf "Processing file '%s' ..." in_file);
+  verbose (Printf.sprintf "Processing file '%s'..." in_file);
   let cmp_content = Common.read_points (resolver in_file) in
   verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
   let len = Array.length visited in
   let stats = ReportStat.make () in
   let pts = ref (List.map
-                    (fun (ofs, pt, k) ->
-                      let nb = if pt < len then visited.(pt) else 0 in
-                      ReportStat.update stats k (nb > 0);
-                      (ofs, nb))
-                    cmp_content) in
+                   (fun p ->
+                     let nb =
+                       if p.Common.identifier < len then
+                         visited.(p.Common.identifier)
+                       else
+                         0 in
+                     ReportStat.update stats p.Common.kind (nb > 0);
+                     (p.Common.offset, nb))
+                   cmp_content) in
   let in_channel, out_channel = open_both in_file out_file in
   (try
     let navbar_script =

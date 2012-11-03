@@ -34,7 +34,7 @@ type all = (Common.point_kind * single) list
 
 val make : unit -> all
 (** Returns {i empty} statistics for all point kinds.
-    All element have both [count] and [total] set to zero. *)
+    All elements have both [count] and [total] set to zero. *)
 
 val update : all -> Common.point_kind -> bool -> unit
 (** [update stats k b] updates [stats] for point kind [k].

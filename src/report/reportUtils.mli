@@ -46,8 +46,9 @@ val (-|) : int array -> int array -> int array
 
 val mkdirs : ?perm:Unix.file_perm -> string -> unit
 (** Creates the directory whose path is passed, and all necessary parent
-    directories. The optional [perms] parameter indicates the permissions used
-    for directory creation(s), defaulting to [0o755].
+    directories. The optional [perms] parameter indicates the permissions
+    used for directory creation(s), defaulting to [0o755].
+
     Raises [Unix.Unix_error] if creation fails. *)
 
 val split : ('a -> bool) -> ('a list) -> 'a list * 'a list
@@ -61,20 +62,24 @@ val open_both : string -> string -> in_channel * out_channel
 (** [open_both in_file out_file] return a [(i, o)] couple where:
     - [i] is an input channel for [in_file];
     - [o] is an output channel for [out_file].
-    Raises an exception if an error occurs; ensures that either both files
-    are either opened or closed. *)
+
+    Raises an exception if an error occurs; ensures that files are either
+    both opened or both closed. *)
 
 val output_strings : string list -> (string * string) list -> out_channel -> unit
 (** [output_strings lines mapping ch] writes the elements of [lines]
-    to the channel [ch]. Each line is written after substituting {i $(xyz)}
-    sequences as described by [Buffer.add_substitute]. The substitution is
-    based on the association list [mapping]; if no mapping is found, [""] is used.
+    to the channel [ch]. Each line is written after substituting
+    {i $(xyz)} sequences as described by [Buffer.add_substitute]. The
+    substitution is based on the association list [mapping]; if no mapping
+    is found, [""] is used.
+
     Raises an exception if an error occurs. *)
 
 val output_bytes : int array -> string -> unit
 (** [output_bytes data filename] creates the file [filename] and writes
     the bytes from [data] to it. Each array element is considered as a
     byte value.
+
     Raises an exception if an error occurs. *)
 
 val current_time : unit -> string

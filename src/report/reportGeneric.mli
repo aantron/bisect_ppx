@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-(** This module defines a generic output mode parametrized by functions. *)
+(** This module defines a generic output mode parametrized by an
+    object. *)
+
 
 class type converter =
   object
@@ -39,11 +41,13 @@ class type converter =
     (** Should return the file summary for passed statistics. *)
 
     method point : int -> int -> Common.point_kind -> string
-    (** [point o n k] should return the output for a given point, [o] being the
-	offset, [n] the number of visits, and [k] the point kind. *)
+    (** [point o n k] should return the output for a given point, [o]
+        being the offset, [n] the number of visits, and [k] the point
+        kind. *)
   end
+(** The class type defining a generic output. *)
 
 val output : (string -> unit) -> string -> converter -> (string -> string) -> (string, int array) Hashtbl.t -> unit
-(** [output verbose file conv resolver data] writes the element for [data] to
-    file [file] using [conv] for data conversion, [verbose] for verbose output,
-    and [resolver] associates the actual path to a given filename. *)
+(** [output verbose file conv resolver data] writes the element for [data]
+    to file [file] using [conv] for data conversion, [verbose] for verbose
+    output. [resolver] associates the actual path to a given filename. *)

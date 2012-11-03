@@ -16,22 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
+type binop =
+  | Plus
+  | Minus
+  | Multiply
+  | Divide
+
+let string_of_binop = function
+  | Plus -> "+"
+  | Minus -> "-"
+  | Multiply -> "*"
+  | Divide -> "/"
+
 type expr =
-  | Plus of expr * expr
-  | Minus of expr * expr
-  | Multiply of expr * expr
-  | Divide of expr * expr
+  | Binop of binop * expr * expr
   | Function of string * (expr list)
   | File of string
   | Files of string
   | Integer of int
 
 let rec to_string = function
-  | Plus (e1, e2) -> Printf.sprintf "+(%s, %s)" (to_string e1) (to_string e2)
-  | Minus (e1, e2) -> Printf.sprintf "-(%s, %s)" (to_string e1) (to_string e2)
-  | Multiply (e1, e2) -> Printf.sprintf "*(%s, %s)" (to_string e1) (to_string e2)
-  | Divide (e1, e2) -> Printf.sprintf "/(%s, %s)" (to_string e1) (to_string e2)
-  | Function (id, l) -> Printf.sprintf "%s(%s)" id (String.concat ", " (List.map to_string l))
-  | File f -> Printf.sprintf "\"%s\"" f
-  | Files p -> Printf.sprintf "<%s>" p
-  | Integer i -> string_of_int i
+  | Binop (op, e1, e2) ->
+      Printf.sprintf "%s(%s, %s)" (string_of_binop op) (to_string e1) (to_string e2)
+  | Function (id, l) ->
+      Printf.sprintf "%s(%s)" id (String.concat ", " (List.map to_string l))
+  | File f ->
+      Printf.sprintf "\"%s\"" f
+  | Files p ->
+      Printf.sprintf "<%s>" p
+  | Integer i ->
+      string_of_int i

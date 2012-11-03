@@ -27,7 +27,14 @@ let (++) x y =
     x + y
 
 let (--) x y =
-  (++) x (-y)
+  if y > min_int then
+    (++) x (-y)
+  else
+    let res = (++) x max_int in
+    if res < max_int then
+      succ res
+    else
+      res
 
 let rec zip op x y =
   let lx = Array.length x in

@@ -35,7 +35,7 @@ let fail error =
 
 %}
 
-%token CLOSING_PARENT OPENING_PARENT
+%token CLOSING_PARENT OPENING_PARENT COMMA
 %token PLUS MINUS MULTIPLY DIVIDE
 %token EOF
 %token <string> IDENT
@@ -53,10 +53,10 @@ let fail error =
 
 start: expr EOF                                  { $1 }
 
-expr: expr PLUS expr                             { CombineAST.Plus ($1, $3) }
-| expr MINUS expr                                { CombineAST.Minus ($1, $3) }
-| expr MULTIPLY expr                             { CombineAST.Multiply ($1, $3) }
-| expr DIVIDE expr                               { CombineAST.Divide ($1, $3) }
+expr: expr PLUS expr                             { CombineAST.(Binop (Plus, $1, $3)) }
+| expr MINUS expr                                { CombineAST.(Binop (Minus, $1, $3)) }
+| expr MULTIPLY expr                             { CombineAST.(Binop (Multiply, $1, $3)) }
+| expr DIVIDE expr                               { CombineAST.(Binop (Divide, $1, $3)) }
 | OPENING_PARENT expr CLOSING_PARENT             { $2 }
 | IDENT OPENING_PARENT expr_list CLOSING_PARENT  { CombineAST.Function ($1, List.rev $3) }
 | FILE                                           { CombineAST.File $1 }
@@ -64,7 +64,7 @@ expr: expr PLUS expr                             { CombineAST.Plus ($1, $3) }
 | INTEGER                                        { CombineAST.Integer $1 }
 | error                                          { fail Invalid_expression }
 
-expr_list: /* epsilon */                         { [] }
-| expr_list expr                                 { $2 :: $1 }
+expr_list: expr                                  { [$1] }
+| expr_list COMMA expr                           { $3 :: $1 }
 
 %%

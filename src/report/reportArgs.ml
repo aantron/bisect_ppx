@@ -129,4 +129,7 @@ let options = [
 ]
 
 let parse () =
-  Arg.parse options add_file "Usage: bisect <options> <files>\nOptions are:"
+  Arg.parse
+    options
+    add_file
+    "Usage: bisect <options> <files>\nOptions are:"

@@ -38,4 +38,5 @@ exception Exception of error
 
 val eval : string -> (string, int array) Hashtbl.t
 (** [eval s] parses and evaluates expression [s], returning a data set.
+
     Raises [Exception] if [s] cannot be parsed or evaluated. *)

@@ -20,7 +20,7 @@
 
 
 val dtd : string list
-(** The dtd defining the XML output. *)
+(** The DTD defining the XML output. *)
 
 val make : unit -> ReportGeneric.converter
 (** Returns a converter for XML output. *)

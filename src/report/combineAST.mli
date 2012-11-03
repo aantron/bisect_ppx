@@ -19,15 +19,19 @@
 (** This module defines the bbstract syntax tree for 'combine'
     expressions. *)
 
+type binop =
+  | Plus (** {i i. e.} [+]. *)
+  | Minus (** {i i. e.} [-]. *)
+  | Multiply (** {i i. e.} [*]. *)
+  | Divide (** {i i. e.} [/]. *)
+(** The type of binary operators. *)
+
 type expr =
-  | Plus of expr * expr
-  | Minus of expr * expr
-  | Multiply of expr * expr
-  | Divide of expr * expr
-  | Function of string * (expr list)
-  | File of string
-  | Files of string
-  | Integer of int
+  | Binop of binop * expr * expr (** {i i. e.} [e1 op e2]. *)
+  | Function of string * (expr list) (** {i i. e.} [f(e1, ..., en)]. *)
+  | File of string (** {i i. e.} ["filename"]. *)
+  | Files of string (** {i i. e.} [<regexp>]. *)
+  | Integer of int (** {i i. e.} [123]. *)
 (** The type of combination expression. *)
 
 val to_string : expr -> string

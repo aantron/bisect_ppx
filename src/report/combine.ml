@@ -171,6 +171,10 @@ let read_runtime_data_from_pattern patt =
   let files = get_file_list patt in
   List.map (fun f -> read_runtime_data_from_file f) files
 
+let (//) x y =
+  if y = 0 then fail (Evaluation_error "division by zero")
+  else x / y
+
 let rec eval_expr expr =
   let open ReportUtils in
   let open CombineAST in
@@ -193,26 +197,25 @@ let rec eval_expr expr =
       res;
     res in
   match expr with
-  | Plus (e1, e2) ->
+  | Binop ((Plus | Minus) as op, e1, e2) ->
+      let op_simple, op_integer, op_repr = match op with
+      | Plus -> combine_data_data (+|), (++), "+"
+      | Minus -> combine_data_data (-|), (--), "-"
+      | _ -> assert false in
       (match eval_expr e1, eval_expr e2 with
-      | (Simple_data d1), (Simple_data d2) -> Simple_data (combine_data_data (+|) d1 d2)
-      | (Integer_val i1), (Integer_val i2) -> Integer_val (i1 ++ i2)
-      | _ -> fail (Invalid_operands "+"))
-  | Minus (e1, e2) ->
-      (match eval_expr e1, eval_expr e2 with
-      | (Simple_data d1), (Simple_data d2) -> Simple_data (combine_data_data (-|) d1 d2)
-      | (Integer_val i1), (Integer_val i2) -> Integer_val (i1 -- i2)
-      | _ -> fail (Invalid_operands "-"))
-  | Multiply (e1, e2) ->
-      (match eval_expr e1, eval_expr e2 with
-      | (Integer_val i), (Simple_data d)
-      | (Simple_data d), (Integer_val i) -> Simple_data (combine_data_function (fun x -> i * x) d)
-      | _ -> fail (Invalid_operands "*"))
-  | Divide (e1, e2) ->
+      | (Simple_data d1), (Simple_data d2) -> Simple_data (op_simple d1 d2)
+      | (Integer_val i1), (Integer_val i2) -> Integer_val (op_integer i1 i2)
+      | _ -> fail (Invalid_operands op_repr))
+  | Binop ((Multiply | Divide) as op, e1, e2) ->
+      let op_simple, op_integer, op_repr = match op with
+      | Multiply -> (fun i -> combine_data_function (fun x -> i * x)), ( * ), "*"
+      | Divide -> (fun i -> combine_data_function (fun x -> i // x)), (//), "/"
+      | _ -> assert false in
       (match eval_expr e1, eval_expr e2 with
       | (Integer_val i), (Simple_data d)
-      | (Simple_data d), (Integer_val i) -> Simple_data (combine_data_function (fun x -> i / x) d)
-      | _ -> fail (Invalid_operands "/"))
+      | (Simple_data d), (Integer_val i) -> Simple_data (op_simple i d)
+      | (Integer_val i1), (Integer_val i2) -> Integer_val (op_integer i1 i2)
+      | _ -> fail (Invalid_operands op_repr))
   | Function (fn, el) ->
       let el = List.map eval_expr el in
       (match fn with

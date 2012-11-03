@@ -58,7 +58,7 @@ let letter = [ 'a'-'z' 'A'-'Z' '\192'-'\214' '\216'-'\246' '\248'-'\255' ]
 
 let decimal_digit = [ '0'-'9' ]
 
-let decimal = decimal_digit*
+let decimal = decimal_digit+
 
 let octal_digit = [ '0'-'7' ]
 
@@ -77,31 +77,43 @@ rule token = parse
 | "-"             { CombineParser.MINUS }
 | "*"             { CombineParser.MULTIPLY }
 | "/"             { CombineParser.DIVIDE }
+| ","             { CombineParser.COMMA }
 | ident as id     { CombineParser.IDENT id }
-| "\""            { CombineParser.FILE (string '"' (Buffer.create 64) lexbuf) }
-| "<"             { CombineParser.FILES (string '>' (Buffer.create 64) lexbuf) }
+| "\""            { string 0 '"' (Buffer.create 64) lexbuf }
+| "<"             { string 0 '>' (Buffer.create 64) lexbuf }
 | decimal as dec  { CombineParser.INTEGER (int_of_string dec) }
 | "(*"            { comment 1 lexbuf }
 | whitespace+     { token lexbuf }
 | eol             { incr_line lexbuf; token lexbuf }
 | eof             { CombineParser.EOF }
 | _ as ch         { fail lexbuf (Invalid_character ch) }
-and string closing strbuf = parse
-| "\\b"           { Buffer.add_char strbuf '\008'; string closing strbuf lexbuf }
-| "\\t"           { Buffer.add_char strbuf '\009'; string closing strbuf lexbuf }
-| "\\n"           { Buffer.add_char strbuf '\010'; string closing strbuf lexbuf }
-| "\\r"           { Buffer.add_char strbuf '\013'; string closing strbuf lexbuf }
-| "\\\'"          { Buffer.add_char strbuf '\''; string closing strbuf lexbuf }
-| "\\\""          { Buffer.add_char strbuf '\"'; string closing strbuf lexbuf }
-| "\\\\"          { Buffer.add_char strbuf '\\'; string closing strbuf lexbuf }
-| "\\" octal as o { add_octal_char strbuf o; string closing strbuf lexbuf }
-| "\\x" hexa as h { add_hexa_char strbuf h; string closing strbuf lexbuf }
-| _ as c          { if c = closing then
-                      Buffer.contents strbuf
-                    else
-                      (Buffer.add_char strbuf c; string closing strbuf lexbuf) }
+and string n closing strbuf = parse
+| "\\b"           { Buffer.add_char strbuf '\008'; string n closing strbuf lexbuf }
+| "\\t"           { Buffer.add_char strbuf '\009'; string n closing strbuf lexbuf }
+| "\\n"           { Buffer.add_char strbuf '\010'; string n closing strbuf lexbuf }
+| "\\r"           { Buffer.add_char strbuf '\013'; string n closing strbuf lexbuf }
+| "\\\'"          { Buffer.add_char strbuf '\''; string n closing strbuf lexbuf }
+| "\\\""          { Buffer.add_char strbuf '\"'; string n closing strbuf lexbuf }
+| "\\\\"          { Buffer.add_char strbuf '\\'; string n closing strbuf lexbuf }
+| "\\" octal as o { add_octal_char strbuf o; string n closing strbuf lexbuf }
+| "\\x" hexa as h { add_hexa_char strbuf h; string n closing strbuf lexbuf }
+| _ as c          { if c = closing then begin
+                      if n = 0 then
+                        let res = Buffer.contents strbuf in
+                        match closing with
+                        | '"' -> CombineParser.FILE res
+                        | '>' -> CombineParser.FILES res
+                        | _ -> assert false
+                      else
+                        comment n lexbuf
+                    end else begin
+                      Buffer.add_char strbuf c;
+                      string n closing strbuf lexbuf
+                    end }
 and comment n = parse
+| "(*"            { comment (succ n) lexbuf }
 | "*)"            { if n = 1 then token lexbuf else comment (pred n) lexbuf }
+| "\""            { string n '"' (Buffer.create 64) lexbuf }
 | eol             { incr_line lexbuf; comment n lexbuf }
 | eof             { fail lexbuf Unexpected_end_of_file }
 | _               { comment n lexbuf }
