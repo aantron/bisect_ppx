@@ -1,17 +1,11 @@
-let _= Bisect.Runtime.init "expr_sequence.ml"
+let _ = Bisect.Runtime.init "expr_sequence.ml"
 let () = Bisect.Runtime.mark "expr_sequence.ml" 0; print_endline "abc"
 let () =
-  (
-  Bisect.Runtime.mark "expr_sequence.ml" 2; print_endline "abc"
-  );
+  (Bisect.Runtime.mark "expr_sequence.ml" 2; print_endline "abc");
   Bisect.Runtime.mark "expr_sequence.ml" 1;
   print_endline "def"
 let () =
-  (
-  Bisect.Runtime.mark "expr_sequence.ml" 5; print_endline "abc"
-  );
-  (
-  Bisect.Runtime.mark "expr_sequence.ml" 4; print_endline "def"
-  );
+  (Bisect.Runtime.mark "expr_sequence.ml" 5; print_endline "abc");
+  (Bisect.Runtime.mark "expr_sequence.ml" 4; print_endline "def");
   Bisect.Runtime.mark "expr_sequence.ml" 3;
   print_endline "ghi"

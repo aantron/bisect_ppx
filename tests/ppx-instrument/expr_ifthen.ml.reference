@@ -1,21 +1,17 @@
-let _= Bisect.Runtime.init "expr_ifthen.ml"
+let _ = Bisect.Runtime.init "expr_ifthen.ml"
 let () =
   Bisect.Runtime.mark "expr_ifthen.ml" 2;
   if true
-  then ( Bisect.Runtime.mark "expr_ifthen.ml" 1; print_endline "abc" )
-  else ( Bisect.Runtime.mark "expr_ifthen.ml" 0; print_endline "def" )
+  then (Bisect.Runtime.mark "expr_ifthen.ml" 1; print_endline "abc")
+  else (Bisect.Runtime.mark "expr_ifthen.ml" 0; print_endline "def")
 let () =
   Bisect.Runtime.mark "expr_ifthen.ml" 7;
   if true
-  then (
-    (
-    Bisect.Runtime.mark "expr_ifthen.ml" 6; print_string "abc"
-    );
-    Bisect.Runtime.mark "expr_ifthen.ml" 5;
-    print_newline () )
-  else (
-    (
-    Bisect.Runtime.mark "expr_ifthen.ml" 4; print_string "def"
-    );
-    Bisect.Runtime.mark "expr_ifthen.ml" 3;
-    print_newline () )
+  then
+    ((Bisect.Runtime.mark "expr_ifthen.ml" 6; print_string "abc");
+     Bisect.Runtime.mark "expr_ifthen.ml" 5;
+     print_newline ())
+  else
+    ((Bisect.Runtime.mark "expr_ifthen.ml" 4; print_string "def");
+     Bisect.Runtime.mark "expr_ifthen.ml" 3;
+     print_newline ())

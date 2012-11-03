@@ -1,38 +1,20 @@
-let _= Bisect.Runtime.init "expr_for.ml"
+let _ = Bisect.Runtime.init "expr_for.ml"
 let () =
-  (
-  Bisect.Runtime.mark "expr_for.ml" 5; print_endline "before"
-  );
-  (
-  Bisect.Runtime.mark "expr_for.ml" 4;
-  for i = 1 to  3 do
-    (
-    (
-    Bisect.Runtime.mark "expr_for.ml" 2; print_endline "abc"
-    );
-    (
-    Bisect.Runtime.mark "expr_for.ml" 1; print_endline "def"
-    );
-    Bisect.Runtime.mark "expr_for.ml" 0;
-    print_endline "ghi"
-    )
-    
-  done
-  );
+  (Bisect.Runtime.mark "expr_for.ml" 5; print_endline "before");
+  (Bisect.Runtime.mark "expr_for.ml" 4;
+   for i = 1 to 3 do
+     ((Bisect.Runtime.mark "expr_for.ml" 2; print_endline "abc");
+      (Bisect.Runtime.mark "expr_for.ml" 1; print_endline "def");
+      Bisect.Runtime.mark "expr_for.ml" 0;
+      print_endline "ghi")
+   done);
   Bisect.Runtime.mark "expr_for.ml" 3;
   print_endline "after"
 let () =
-  (
-  Bisect.Runtime.mark "expr_for.ml" 9; print_endline "before"
-  );
-  (
-  Bisect.Runtime.mark "expr_for.ml" 8;
-  for i = 1 to  3 do
-    (
-    Bisect.Runtime.mark "expr_for.ml" 6; print_endline "abc"
-    )
-    
-  done
-  );
+  (Bisect.Runtime.mark "expr_for.ml" 9; print_endline "before");
+  (Bisect.Runtime.mark "expr_for.ml" 8;
+   for i = 1 to 3 do
+     (Bisect.Runtime.mark "expr_for.ml" 6; print_endline "abc")
+   done);
   Bisect.Runtime.mark "expr_for.ml" 7;
   print_endline "after"
