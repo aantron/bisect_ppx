@@ -17,6 +17,10 @@
  *)
 
 let () =
+  Ast_mapper.run_main (fun _argv -> 
+    let instrumenter = new InstrumentPpx.instrumenter in
+    Ast_mapper_class.to_mapper instrumenter)
+  (*
   let files = ref [] in
   let add_file f = files := f :: !files in
   let usage = Printf.sprintf "Usage: %s <options> <file-in> <file-out>" Sys.argv.(0) in
@@ -32,3 +36,4 @@ let () =
   | _ ->
       prerr_endline usage;
       exit 2
+      *)

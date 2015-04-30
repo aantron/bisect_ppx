@@ -58,6 +58,12 @@ let version_tag = "src_library_version_ml"
 let version_ml = "src/library/version.ml"
 let version_file = "../VERSION"
 
+let lib_dir pkg =
+  let ic = Unix.open_process_in ("ocamlfind query " ^ pkg) in
+  let line = input_line ic in
+  close_in ic;
+  line
+
 let () =
   let safe_cp src dst =
     let src = Pathname.mk src in
@@ -75,9 +81,13 @@ let () =
           with _ -> "camlp4of" in
         flag ["ocaml"; "compile"; "pp_camlp4of"] (S[A"-pp"; A camlp4of]);
         flag ["ocaml"; "pp:dep"; "pp_camlp4of"] (S[A camlp4of]);
-        flag ["ocaml"; "compile"; "use_compiler_libs"] (S[A"-I"; A"+compiler-libs"]);
-        flag ["ocaml"; "link"; "byte"; "use_compiler_libs"] (S[A"-I"; A"+compiler-libs"; A"ocamlcommon.cma"]);
-        flag ["ocaml"; "link"; "native"; "use_compiler_libs"] (S[A"-I"; A"+compiler-libs"; A"ocamlcommon.cmxa"]);
+        let ppx_dir = lib_dir "ppx_tools" in
+        flag ["ocaml"; "compile"; "use_ppx_tools"]
+          (S[A"-I"; A"+compiler-libs"; A"-I"; A ppx_dir]);
+        flag ["ocaml"; "link"; "byte"; "use_ppx_tools"]
+          (S[A"-I"; A"+compiler-libs"; A"ocamlcommon.cma"; A"-I"; A ppx_dir; A"ppx_tools.cma"]);
+        flag ["ocaml"; "link"; "native"; "use_ppx_tools"]
+          (S[A"-I"; A"+compiler-libs"; A"ocamlcommon.cmxa"; A"-I"; A ppx_dir; A"ppx_tools.cma"]);
         if String.uppercase (try Sys.getenv "WARNINGS" with _ -> "") = "TRUE" then
           flag ["ocaml"; "compile"; "warnings"] (S[A"-w"; A"Ae"; A"-warn-error"; A"A"]);
         dep [version_tag] [version_ml];

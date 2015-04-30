@@ -24,10 +24,11 @@ true: -traverse
 <src/**>: use_unix
 <src/**> and not "src/threads/bisectThread.ml": for-pack(Bisect)
 "src/syntax/instrumentCamlp4.ml": pp_camlp4of, use_camlp4
-"src/syntax/ast_mapper.ml": use_compiler_libs
-"src/syntax/instrumentPpx.ml": use_compiler_libs
+"src/syntax/instrumentPpx.ml": use_ppx_tools
+"src/syntax/instrumentPpx.mli": use_ppx_tools
+"src/syntax/bisect_ppx.ml": use_ppx_tools
 "src/syntax/commentsCamlp4.ml": use_camlp4
-<src/syntax/bisect_ppx.{byte,native,jar}>: use_str, use_compiler_libs
+<src/syntax/bisect_ppx.{byte,native,jar}>: use_str, use_ppx_tools
 "src/threads/bisectThread.ml": thread
 <src/report/report.{byte,native,jar}>: use_str
 <src/**/*.ml{,i}>: warnings

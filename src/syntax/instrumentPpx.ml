@@ -18,21 +18,27 @@
 
 open Parsetree
 open Asttypes
-open Ast_mapper
+(*open Ast_mapper_class *)
+module Ac = Ast_convenience
+module Ah = Ast_helper
 
-let pattern_var id =
-  P.var { txt = id; loc = Location.none }
+let pattern_var id = Ac.pvar id
+  (*P.var { txt = id; loc = Location.none } *)
 
-let intconst x =
-  E.constant (Const_int x)
+let intconst x = Ac.int x
+  (* E.constant (Const_int x) *)
 
-let constr id =
-  let t = Location.mkloc (Longident.parse id) Location.none in
-  E.(construct t None false)
+let constr id = Ac.constr id
+  (*let t = Location.mkloc (Longident.parse id) Location.none in
+  E.(construct t None false) *)
+
+let lid = Ac.lid
 
 let trueconst () = constr "true"
 
 let unitconst () = constr "()"
+
+let strconst = Ac.str
 
 let string_of_ident ident =
   String.concat "." (Longident.flatten ident.txt)
@@ -56,14 +62,16 @@ let marker file ofs kind marked =
     let loc = Location.none in
     match !InstrumentArgs.mode with
     | InstrumentArgs.Safe ->
-        E.(apply_nolabs ~loc
+        Ac.app (Ac.evar "Bisect.Runtime.mark") [strconst file; intconst idx]
+        (* E.(apply_nolabs ~loc
              (lid "Bisect.Runtime.mark")
-             [strconst file; intconst idx])
+             [strconst file; intconst idx]) *)
     | InstrumentArgs.Fast
     | InstrumentArgs.Faster ->
-        E.(apply_nolabs ~loc
+        Ac.app (Ac.evar "___bisect_mark___") [intconst idx]
+        (*E.(apply_nolabs ~loc
              (lid "___bisect_mark___")
-             [intconst idx])
+             [intconst idx]) *)
 
 (* Tests whether the passed expression is a bare mapping,
    or starts with a bare mapping (if the expression is a sequence).
@@ -103,7 +111,8 @@ let wrap_expr k e =
         e
       else
         let marked = List.mem line c.CommentsPpx.marked_lines in
-        E.(sequence ~loc (marker file ofs k marked) e)
+        Ah.Exp.sequence ~loc (marker file ofs k marked) e
+        (* E.(sequence ~loc (marker file ofs k marked) e) *)
     with Already_marked -> e
 
 (* Wraps a sequence. *)
@@ -111,11 +120,13 @@ let rec wrap_seq k e =
   let _loc = e.pexp_loc in
   match e.pexp_desc with
   | Pexp_sequence (e1, e2) ->
-      E.sequence (wrap_seq k e1) (wrap_seq Common.Sequence e2)
+      Ah.Exp.sequence (wrap_seq k e1) (wrap_seq Common.Sequence e2)
+      (*E.sequence (wrap_seq k e1) (wrap_seq Common.Sequence e2) *)
   | _ ->
       wrap_expr k e
 
 (* Wraps an expression possibly denoting a function. *)
+      (*
 let rec wrap_func k e =
   let loc = e.pexp_loc in
   match e.pexp_desc with
@@ -125,12 +136,15 @@ let rec wrap_func k e =
   | Pexp_poly (e, ct) ->
       E.poly ~loc (wrap_func k e) ct
   | _ -> wrap_expr k e
+  *)
 
 (* The actual "instrumenter" object, marking expressions. *)
 class instrumenter = object (self)
 
-  inherit create as super
+  (*inherit create as super *)
+  inherit Ast_mapper_class.mapper as super
 
+(*
   method! class_expr ce =
     let loc = ce.pcl_loc in
     let ce = super#class_expr ce in
@@ -307,5 +321,5 @@ class instrumenter = object (self)
       (file, header :: ast)
     else
       (file, ast)
-
+*)
 end
