@@ -17,6 +17,7 @@
  *)
 
 
-class instrumenter : Ast_mapper_class.mapper
-(** This class implements an instrumenter to be used through the {i -ppx}
+(* class instrumenter : Ast_mapper_class.mapper
+  This class implements an instrumenter to be used through the {i -ppx}
     command-line switch. *)
+val instrumenter : Ast_mapper.mapper

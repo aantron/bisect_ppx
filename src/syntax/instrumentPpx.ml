@@ -156,135 +156,131 @@ let wrap_class_field_kind k = function
     | Cfk_virtual _ as cf -> cf
     | Cfk_concrete (o,e) -> Cf.concrete o (wrap_expr k e)
 
-(* The actual "instrumenter" object, marking expressions. *)
-class instrumenter = object (self)
+let class_expr ce =
+  let loc = ce.pcl_loc in
+  (*let ce = super#class_expr ce in *)
+  match ce.pcl_desc with
+  | Pcl_apply (ce, l) ->
+      let l =
+        List.map
+          (fun (l, e) ->
+            (l, (wrap_expr Common.Class_expr e)))
+          l in
+      (* CE.apply ~loc ce l *)
+      Cl.apply ~loc ce l
+  | _ -> ce
 
-  (*inherit create as super *)
-  inherit Ast_mapper_class.mapper as super
+let class_field cf =
+  let loc = cf.pcf_loc in
+  (*let cf = super#class_field cf in *)
+  match cf.pcf_desc with
+  (*| Pcf_val (id, mut, over, e) -> *)
+  | Pcf_val (id, mut, cf) ->
+      (* CE.val_ ~loc id mut over (wrap_expr Common.Class_val e) *)
+      Cf.val_ ~loc id mut (wrap_class_field_kind Common.Class_val cf)
+  (* | Pcf_meth (id, priv, over, e) -> *)
+  | Pcf_method (id, mut, cf) ->
+      (* CE.meth ~loc id priv over (wrap_func Common.Class_meth e) *)
+      Cf.method_ ~loc id mut (wrap_class_field_kind Common.Class_meth cf)
+  (*| Pcf_init e -> *)
+  | Pcf_initializer e ->
+      (* CE.init ~loc (wrap_expr Common.Class_init e) *)
+      Cf.initializer_ ~loc (wrap_expr Common.Class_init e)
+  | _ -> cf
 
-  method! class_expr ce =
-    let loc = ce.pcl_loc in
-    let ce = super#class_expr ce in
-    match ce.pcl_desc with
-    | Pcl_apply (ce, l) ->
-        let l =
-          List.map
-            (fun (l, e) ->
-              (l, (wrap_expr Common.Class_expr e)))
-            l in
-        (* CE.apply ~loc ce l *)
-        Cl.apply ~loc ce l
-    | _ -> ce
-
-  method! class_field cf =
-    let loc = cf.pcf_loc in
-    let cf = super#class_field cf in
-    match cf.pcf_desc with
-    (*| Pcf_val (id, mut, over, e) -> *)
-    | Pcf_val (id, mut, cf) ->
-        (* CE.val_ ~loc id mut over (wrap_expr Common.Class_val e) *)
-        Cf.val_ ~loc id mut (wrap_class_field_kind Common.Class_val cf)
-    (* | Pcf_meth (id, priv, over, e) -> *)
-    | Pcf_method (id, mut, cf) ->
-        (* CE.meth ~loc id priv over (wrap_func Common.Class_meth e) *)
-        Cf.method_ ~loc id mut (wrap_class_field_kind Common.Class_meth cf)
-    (*| Pcf_init e -> *)
-    | Pcf_initializer e ->
-        (* CE.init ~loc (wrap_expr Common.Class_init e) *)
-        Cf.initializer_ ~loc (wrap_expr Common.Class_init e)
-    | _ -> cf
-
-  method! expr e =
-    let loc = e.pexp_loc in
-    let e' = super#expr e in
-    match e'.pexp_desc with
-    | Pexp_let (rec_flag, l, e) ->
-        let l =
-          List.map (fun vb ->
-          {vb with pvb_expr = wrap_expr Common.Binding vb.pvb_expr}) l in
-        (*let l = List.map (fun (p, e) -> (p, wrap_expr Common.Binding e)) l in *)
-        Exp.let_ ~loc rec_flag l (wrap_expr Common.Binding e)
-        (*E.let_ ~loc rec_flag l (wrap_expr Common.Binding e) *)
-    | Pexp_apply (e1, [l2, e2; l3, e3]) ->
-        (match e1.pexp_desc with
-        | Pexp_ident ident
-          when
-            List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
-              Exp.apply ~loc e1
-                [l2, (wrap_expr Common.Lazy_operator e2);
-                l3, (wrap_expr Common.Lazy_operator e3)]
-            (*E.apply
-              ~loc
-              e1
+let expr e =
+  let loc = e.pexp_loc in
+  (* let e' = super#expr e in *)
+  let e' = e in
+  match e'.pexp_desc with
+  | Pexp_let (rec_flag, l, e) ->
+      let l =
+        List.map (fun vb ->
+        {vb with pvb_expr = wrap_expr Common.Binding vb.pvb_expr}) l in
+      (*let l = List.map (fun (p, e) -> (p, wrap_expr Common.Binding e)) l in *)
+      Exp.let_ ~loc rec_flag l (wrap_expr Common.Binding e)
+      (*E.let_ ~loc rec_flag l (wrap_expr Common.Binding e) *)
+  | Pexp_apply (e1, [l2, e2; l3, e3]) ->
+      (match e1.pexp_desc with
+      | Pexp_ident ident
+        when
+          List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
+            Exp.apply ~loc e1
               [l2, (wrap_expr Common.Lazy_operator e2);
-               l3, (wrap_expr Common.Lazy_operator e3)]
-               *)
-        | _ -> e')
-    | Pexp_match (e, l) ->
-        (*let l = List.map (fun (p, e) -> (p, wrap_expr Common.Match e)) l in
-        E.match_ ~loc e l *)
-        List.map (wrap_case Common.Match) l
-        |> Exp.match_ ~loc e
-    | Pexp_try (e, l) ->
-        (*let l = List.map (fun (p, e) -> (p, wrap_expr Common.Match e)) l in
-        E.try_ ~loc (wrap_expr Common.Sequence e) l *)
-        List.map (wrap_case Common.Match) l
-        |> Exp.try_ ~loc (wrap_expr Common.Sequence e)
-    | Pexp_ifthenelse (e1, e2, e3) ->
-        (*E.ifthenelse
+              l3, (wrap_expr Common.Lazy_operator e3)]
+          (*E.apply
             ~loc
             e1
-            (wrap_expr Common.If_then e2)
-            (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None) *)
-        Exp.ifthenelse ~loc e1 (wrap_expr Common.If_then e2)
-          (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None)
-    | Pexp_sequence _ ->
-        (wrap_seq Common.Sequence e')
-    | Pexp_while (e1, e2) ->
-        (* E.while_ ~loc e1 (wrap_seq Common.While e2) *)
-        Exp.while_ ~loc e1 (wrap_seq Common.While e2)
-    | Pexp_for (id, e1, e2, dir, e3) ->
-        (* E.for_ ~loc id e1 e2 dir (wrap_seq Common.For e3) *)
-        Exp.for_ ~loc id e1 e2 dir (wrap_seq Common.For e3)
-    | _ -> e'
+            [l2, (wrap_expr Common.Lazy_operator e2);
+              l3, (wrap_expr Common.Lazy_operator e3)]
+              *)
+      | _ -> e')
+  | Pexp_match (e, l) ->
+      (*let l = List.map (fun (p, e) -> (p, wrap_expr Common.Match e)) l in
+      E.match_ ~loc e l *)
+      List.map (wrap_case Common.Match) l
+      |> Exp.match_ ~loc e
+  | Pexp_try (e, l) ->
+      (*let l = List.map (fun (p, e) -> (p, wrap_expr Common.Match e)) l in
+      E.try_ ~loc (wrap_expr Common.Sequence e) l *)
+      List.map (wrap_case Common.Match) l
+      |> Exp.try_ ~loc (wrap_expr Common.Sequence e)
+  | Pexp_ifthenelse (e1, e2, e3) ->
+      (*E.ifthenelse
+          ~loc
+          e1
+          (wrap_expr Common.If_then e2)
+          (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None) *)
+      Exp.ifthenelse ~loc e1 (wrap_expr Common.If_then e2)
+        (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None)
+  | Pexp_sequence _ ->
+      (wrap_seq Common.Sequence e')
+  | Pexp_while (e1, e2) ->
+      (* E.while_ ~loc e1 (wrap_seq Common.While e2) *)
+      Exp.while_ ~loc e1 (wrap_seq Common.While e2)
+  | Pexp_for (id, e1, e2, dir, e3) ->
+      (* E.for_ ~loc id e1 e2 dir (wrap_seq Common.For e3) *)
+      Exp.for_ ~loc id e1 e2 dir (wrap_seq Common.For e3)
+  | _ -> e'
 
-  method! structure_item si =
-    let loc = si.pstr_loc in
-    match si.pstr_desc with
-    | Pstr_value (rec_flag, l) ->
-        let l =
-          List.map (fun vb ->
-            { vb with pvb_expr =
-                match vb.pvb_pat.ppat_desc with
-                | Ppat_var ident when Exclusions.contains
-                      (ident.loc.Location.loc_start.Lexing.pos_fname)
-                    ident.txt -> vb.pvb_expr
-                | _ -> wrap_func Common.Binding (self#expr vb.pvb_expr)})
-          l
-        (*let l =
-          List.map
-            (fun (p, e) ->
-              match p.ppat_desc with
-              | Ppat_var ident
-                when Exclusions.contains
+let structure_item si =
+  let loc = si.pstr_loc in
+  match si.pstr_desc with
+  | Pstr_value (rec_flag, l) ->
+      let l =
+        List.map (fun vb ->
+          { vb with pvb_expr =
+              match vb.pvb_pat.ppat_desc with
+              | Ppat_var ident when Exclusions.contains
                     (ident.loc.Location.loc_start.Lexing.pos_fname)
-                    ident.txt ->
-                      (p, e)
-              | _ ->
-                  (p, wrap_func Common.Binding (self#expr e)))
-            l
-            *)
-        in
-        (*[ M.value ~loc rec_flag l ] *)
-         Str.value ~loc rec_flag l
-    (*| Pstr_eval e -> *)
-    | Pstr_eval (e, a) ->
-        (*[ M.eval ~loc (wrap_expr Common.Toplevel_expr (self#expr e)) ]*)
-        Str.eval ~loc (wrap_expr Common.Toplevel_expr (self#expr e))
-    | _ ->
-        super#structure_item si
-
-end
+                  ident.txt -> vb.pvb_expr
+              (*| _ -> wrap_func Common.Binding (self#expr vb.pvb_expr)}) *)
+              | _ -> wrap_func Common.Binding (expr vb.pvb_expr)})
+        l
+      (*let l =
+        List.map
+          (fun (p, e) ->
+            match p.ppat_desc with
+            | Ppat_var ident
+              when Exclusions.contains
+                  (ident.loc.Location.loc_start.Lexing.pos_fname)
+                  ident.txt ->
+                    (p, e)
+            | _ ->
+                (p, wrap_func Common.Binding (self#expr e)))
+          l
+          *)
+      in
+      (*[ M.value ~loc rec_flag l ] *)
+        Str.value ~loc rec_flag l
+  (*| Pstr_eval e -> *)
+  | Pstr_eval (e, a) ->
+      (*[ M.eval ~loc (wrap_expr Common.Toplevel_expr (self#expr e)) ]*)
+      (*Str.eval ~loc (wrap_expr Common.Toplevel_expr (self#expr e)) *)
+      Str.eval ~loc (wrap_expr Common.Toplevel_expr (expr e))
+  | _ ->
+      si
+      (* super#structure_item si *)
 
 let safe file =
   (*let e = E.(apply_nolabs (lid "Bisect.Runtime.init") [strconst file]) in *)
@@ -402,17 +398,34 @@ let faster file =
   (*M.value Nonrecursive [pattern_var "___bisect_mark___", e] *)
   Str.value Nonrecursive [ Vb.mk (pattern_var "___bisect_mark__") e]
 
-(* Initializes storage and applies requested marks. *)
-let foorbo (file : string) ast =
-  (*let _, ast = super#implementation file ast in *)
-  if not (InstrumentState.is_file file) then
-    let header =
-      match !InstrumentArgs.mode with
-      | InstrumentArgs.Safe   -> safe file
-      | InstrumentArgs.Fast
-      | InstrumentArgs.Faster -> faster file
-    in
-    (file, header :: ast)
-  else
-    (file, ast)
+let get_filename = function
+  | [] -> None
+  | si :: _ ->
+    let f,_,_ = Location.get_pos_info si.pstr_loc.loc_start in
+    Some f
 
+(* Initializes storage and applies requested marks. *)
+let structure ast =
+  (*let _, ast = super#implementation file ast in *)
+  match get_filename ast with
+  | None -> ast
+  | Some file ->
+    if not (InstrumentState.is_file file) then
+      let header =
+        match !InstrumentArgs.mode with
+        | InstrumentArgs.Safe   -> safe file
+        | InstrumentArgs.Fast
+        | InstrumentArgs.Faster -> faster file
+      in
+      header :: ast
+    else
+      ast
+
+let instrumenter =
+  { default_mapper
+      with class_expr     = (fun _mpr ce -> class_expr ce)
+         ; class_field    = (fun _mpr cf -> class_field cf)
+         ; expr           = (fun _mpr e  -> expr e)
+         ; structure_item = (fun _mpr si -> structure_item si)
+         ; structure      = (fun _mpr s  -> structure s)
+  }

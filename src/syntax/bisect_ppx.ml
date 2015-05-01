@@ -17,14 +17,16 @@
  *)
 
 let () =
-  Ast_mapper.run_main (fun _argv -> 
-    let instrumenter = new InstrumentPpx.instrumenter in
-    Ast_mapper_class.to_mapper instrumenter)
+  Printf.printf "tool: %s\n" (Ast_mapper.tool_name ());
+  Ast_mapper.run_main (fun argv ->
+    let anon s = raise (invalid_arg ("nothing anonymous: " ^ s)) in
+    let usage = Printf.sprintf "Usage: bisect_ppx <options>" in
+    Arg.parse_argv (Array.of_list argv) InstrumentArgs.switches anon usage;
+    InstrumentPpx.instrumenter)
   (*
   let files = ref [] in
   let add_file f = files := f :: !files in
   let usage = Printf.sprintf "Usage: %s <options> <file-in> <file-out>" Sys.argv.(0) in
-  Arg.parse InstrumentArgs.switches add_file usage;
   match !files with
   | file_out :: file_in :: [] ->
       (try
