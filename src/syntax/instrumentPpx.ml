@@ -161,8 +161,8 @@ let rec wrap_func k e =
       end
 
 let wrap_class_field_kind k = function
-    | Cfk_virtual _ as cf -> cf
-    | Cfk_concrete (o,e) -> Cf.concrete o (wrap_expr k e)
+  | Cfk_virtual _ as cf -> cf
+  | Cfk_concrete (o,e)  -> Cf.concrete o (wrap_func k e)
 
 let safe file =
   let e = apply_nolabs (lid "Bisect.Runtime.init") [strconst file] in
@@ -244,7 +244,7 @@ let faster file =
     Exp.(let_ Nonrecursive vb (sequence marks func))
   in
   InstrumentState.add_file file;
-  Str.value Nonrecursive [ Vb.mk (pattern_var "___bisect_mark__") e]
+  Str.value Nonrecursive [ Vb.mk (pattern_var "___bisect_mark___") e]
 
 let get_filename = function
   | [] -> None
@@ -268,19 +268,41 @@ class instrumenter = object (self)
               (l, (wrap_expr Common.Class_expr e)))
             l in
         Cl.apply ~loc ce l
-    | _ -> ce
+    | _ ->
+        ce
 
   method! class_field cf =
     let loc = cf.pcf_loc in
     let cf = super#class_field cf in
     match cf.pcf_desc with
     | Pcf_val (id, mut, cf) ->
-        Cf.val_ ~loc id mut (wrap_class_field_kind Common.Class_val cf)
+        begin
+          (*Printf.eprintf "Wrap Pcf_val\n";
+          Location.print_loc Format.err_formatter loc;
+          Printf.eprintf "\nDone function \n"; *)
+          Cf.val_ ~loc id mut (wrap_class_field_kind Common.Class_val cf)
+        end
     | Pcf_method (id, mut, cf) ->
-        Cf.method_ ~loc id mut (wrap_class_field_kind Common.Class_meth cf)
+        begin
+          (*Printf.eprintf "Wrap Pcf_method\n";
+          Location.print_loc Format.err_formatter loc;
+          Printf.eprintf "\nDone function \n";*)
+          Cf.method_ ~loc id mut (wrap_class_field_kind Common.Class_meth cf)
+        end
     | Pcf_initializer e ->
-        Cf.initializer_ ~loc (wrap_expr Common.Class_init e)
-    | _ -> cf
+        begin
+          (*Printf.eprintf "Wrap Pcf_initializer\n";
+          Location.print_loc Format.err_formatter loc;
+          Printf.eprintf "\nDone function \n";*)
+          Cf.initializer_ ~loc (wrap_expr Common.Class_init e)
+        end
+    | _ ->
+        begin
+          (*Printf.eprintf "Wrap _________________\n";
+          Location.print_loc Format.err_formatter loc;
+          Printf.eprintf "\nDone function \n"; *)
+          cf
+        end
 
   method! expr e =
     let loc = e.pexp_loc in
