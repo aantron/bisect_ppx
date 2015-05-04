@@ -93,6 +93,7 @@ install: FORCE
 	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.o \
 	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.jo \
 	    $(PATH_BUILD)/$(PROJECT_NAME).a \
+	    $(PATH_BUILD)/$(PROJECT_NAME).o \
 	    $(PATH_BUILD)/$(PROJECT_NAME).cma \
 	    $(PATH_BUILD)/$(PROJECT_NAME).cmi \
 	    $(PATH_BUILD)/$(PROJECT_NAME).cmo \
