@@ -36,7 +36,6 @@ OCAMLBUILD_ENV=WARNINGS=$(WARNINGS) PATH_OCAML_PREFIX=$(PATH_OCAML_PREFIX)
 OCAMLBUILD_FLAGS=-classic-display -no-links -cflag -annot
 MODULES_ODOCL=$(PROJECT_NAME).odocl
 MODULES_MLPACK=$(PROJECT_NAME).mlpack
-MODULES_MLPACK_PP=$(PROJECT_NAME)_pp.mlpack
 
 
 # TARGETS
@@ -53,12 +52,7 @@ default:
 
 all: generate
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME).otarget
-	if [ "$(NO_CAMLP4)" = "FALSE" ]; then \
-	  $(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_pp.cmo; \
-	fi
-	if [ "$(PPX)" = "TRUE" ]; then \
-	  $(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_ppx.byte; \
-	fi
+	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_ppx.byte;
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmo
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmx
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) report.byte
@@ -74,21 +68,19 @@ tests: FORCE
 clean: FORCE
 	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) -clean
 	test -f $(PATH_TESTS)/Makefile && (cd $(PATH_TESTS) && $(MAKE) $(MAKE_QUIET) clean && cd ..) || true
-	rm -f $(MODULES_ODOCL) $(MODULES_MLPACK) $(MODULES_MLPACK_PP) $(PROJECT_NAME).itarget
+	rm -f $(MODULES_ODOCL) $(MODULES_MLPACK) $(PROJECT_NAME).itarget
 
 veryclean: clean
 	rm -f $(PATH_OCAMLDOC)/*.html $(PATH_OCAMLDOC)/*.css
 
 install: FORCE
 	cp $(PATH_BUILD)/src/report/report.byte $(PATH_OCAML_PREFIX)/bin/bisect-report; \
-	if [ "$(PPX)" = "TRUE" ]; then \
-	  cp $(PATH_BUILD)/src/syntax/bisect_ppx.byte $(PATH_OCAML_PREFIX)/bin; \
-	fi; \
+	cp $(PATH_BUILD)/src/syntax/bisect_ppx.byte $(PATH_OCAML_PREFIX)/bin; \
 	(test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && cp $(PATH_BUILD)/src/report/report.native $(PATH_OCAML_PREFIX)/bin/bisect-report.opt || true); \
 	if [ -x "$(PATH_OCAMLFIND)" ]; then \
 	  $(PATH_OCAMLFIND) query $(PROJECT_NAME) && $(PATH_OCAMLFIND) remove $(PROJECT_NAME) || true; \
 	  $(PATH_OCAMLFIND) install $(PROJECT_NAME) META -optional \
-	    $(PATH_BUILD)/$(PROJECT_NAME)_pp.cmo \
+	    $(PATH_BUILD)/$(PROJECT_NAME)_ppx.cmo \
 	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.cm* \
 	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.o \
 	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.jo \
@@ -103,9 +95,6 @@ install: FORCE
 	    $(PATH_BUILD)/$(PROJECT_NAME).ja; \
 	else \
 	  mkdir -p $(PATH_INSTALL); \
-	  if [ "$(NO_CAMLP4)" = "FALSE" ]; then \
-	    cp $(PATH_BUILD)/$(PROJECT_NAME)_pp.cmo $(PATH_INSTALL); \
-	  fi; \
 	  for ext in cmi cmo cmx o cmj jo; do \
 	    test -f $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.$$ext && cp $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.$$ext $(PATH_INSTALL) || true; \
 	  done; \

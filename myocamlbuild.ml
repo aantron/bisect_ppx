@@ -20,7 +20,6 @@ open Ocamlbuild_plugin
 
 let odocl_file = Pathname.pwd / "bisect.odocl"
 let mlpack_file = Pathname.pwd / "bisect.mlpack"
-let mlpack_pp = Pathname.pwd / "bisect_pp.mlpack"
 let src_path = Pathname.pwd / "src"
 
 let write_lines lines filename =
@@ -50,8 +49,8 @@ let () =
   close_out_noerr odocl_chan
 
 let () =
-  write_lines ["Common"; "Runtime"] mlpack_file;
-  write_lines ["Common"; "Exclusions"; "InstrumentState"; "InstrumentArgs"; "CommentsCamlp4"; "InstrumentCamlp4"; "Exclude"; "ExcludeParser"; "ExcludeLexer"] mlpack_pp
+  write_lines ["Common"; "Runtime"] mlpack_file
+  (* write_lines ["Common"; "Exclusions"; "InstrumentState"; "InstrumentArgs"; "Exclude"; "ExcludeParser"; "ExcludeLexer"] mlpack_pp *)
 
 
 let version_tag = "src_library_version_ml"
@@ -74,13 +73,6 @@ let () =
     cp src dst in
   dispatch begin function
     | After_rules ->
-        let camlp4of =
-          try
-            let path_bin = Filename.concat (Sys.getenv "PATH_OCAML_PREFIX") "bin" in
-            Filename.concat path_bin "camlp4of"
-          with _ -> "camlp4of" in
-        flag ["ocaml"; "compile"; "pp_camlp4of"] (S[A"-pp"; A camlp4of]);
-        flag ["ocaml"; "pp:dep"; "pp_camlp4of"] (S[A camlp4of]);
         let ppx_dir = lib_dir "ppx_tools" in
         flag ["ocaml"; "compile"; "use_ppx_tools"]
           (S[A"-I"; A"+compiler-libs"; A"-I"; A ppx_dir]);

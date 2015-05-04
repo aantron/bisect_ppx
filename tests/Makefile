@@ -46,6 +46,7 @@ one: FORCE
 clean: FORCE
 	@rm -f _log
 	@rm -f */*.result */result */*.cm*
+	@cd report && make clean && cd -
 
 log: FORCE
 	@cat _log
