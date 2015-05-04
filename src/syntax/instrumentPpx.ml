@@ -249,7 +249,7 @@ let faster file =
 let get_filename = function
   | [] -> None
   | si :: _ ->
-    let f,_,_ = Location.get_pos_info si.pstr_loc.loc_start in
+    let f,_,_ = Location.get_pos_info si.pstr_loc.Location.loc_start in
     Some f
 
 (* The actual "instrumenter" object, marking expressions. *)
