@@ -31,7 +31,6 @@ true: -traverse
 <src/syntax/bisect_ppx.{byte,native,jar}>: use_str, use_ppx_tools
 "src/threads/bisectThread.ml": thread
 <src/report/report.{byte,native,jar}>: use_str
-<src/**/*.ml{,i}>: warnings
 
 # Generation of version file
 "src/library/version.mli": src_library_version_ml

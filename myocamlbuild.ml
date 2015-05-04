@@ -91,6 +91,7 @@ let () =
         if String.uppercase (try Sys.getenv "WARNINGS" with _ -> "") = "TRUE" then
           flag ["ocaml"; "compile"; "warnings"] (S[A"-w"; A"Ae"; A"-warn-error"; A"A"]);
         dep [version_tag] [version_ml];
+        mark_tag_used version_tag;
         rule ("generation of " ^ version_ml)
           ~prod:version_ml
           ~insert:`bottom
