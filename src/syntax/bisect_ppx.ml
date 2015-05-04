@@ -24,19 +24,3 @@ let () =
     Arg.parse_argv arga InstrumentArgs.switches anon usage;
     let instrumenter = new InstrumentPpx.instrumenter in
     Ast_mapper_class.to_mapper instrumenter)
-  (*
-  let files = ref [] in
-  let add_file f = files := f :: !files in
-  let usage = Printf.sprintf "Usage: %s <options> <file-in> <file-out>" Sys.argv.(0) in
-  match !files with
-  | file_out :: file_in :: [] ->
-      (try
-        let instrumenter = new InstrumentPpx.instrumenter in
-        instrumenter#run file_in file_out
-      with e ->
-        Printf.eprintf "Error: %s\n" (Printexc.to_string e);
-        exit 1)
-  | _ ->
-      prerr_endline usage;
-      exit 2
-      *)
