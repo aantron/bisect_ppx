@@ -6,6 +6,8 @@ original, excellent Bisect library, updated to use the new
 [Ast_mapper](https://github.com/ocaml/ocaml/blob/trunk/parsing/ast_mapper.mli) interface and
 provide instrumentation just via `ppx` .
 
+[![Build Status](https://travis-ci.org/rleonid/bisect_ppx.svg?)](https://travis-ci.org/rleonid/bisect_ppx)
+
 ## Demo
 
 ### Files
