@@ -25,12 +25,12 @@ PATH_BUILD=$(PATH_BASE)/_build
 PATH_OCAMLDOC=$(PATH_BASE)/ocamldoc
 PATH_SRC=$(PATH_BASE)/src
 PATH_TESTS=$(PATH_BASE)/tests
-PATH_INSTALL=$(PATH_OCAML_PREFIX)/lib/ocaml/bisect
 
 
 # DEFINITIONS
 
 PROJECT_NAME=bisect
+INSTALL_NAME=$(PROJECT_NAME)_ppx
 OCAMLBUILD=$(PATH_OCAML_PREFIX)/bin/ocamlbuild
 OCAMLBUILD_ENV=WARNINGS=$(WARNINGS) PATH_OCAML_PREFIX=$(PATH_OCAML_PREFIX)
 OCAMLBUILD_FLAGS=-classic-display -no-links -cflag -annot
@@ -52,11 +52,13 @@ default:
 
 all: generate
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME).otarget
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_ppx.byte;
+	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_ppx.byte
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmo
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmx
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) report.byte
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) report.native
+	ln -s $(PATH_BUILD)/src/report/report.byte bisect-report
+	ln -s $(PATH_BUILD)/src/report/report.native bisect-report.opt
 
 doc: FORCE
 	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME).docdir/index.html
@@ -66,6 +68,7 @@ tests: FORCE
 	test -f $(PATH_TESTS)/Makefile && (cd $(PATH_TESTS) && $(MAKE) $(MAKE_QUIET) all && cd ..) || true
 
 clean: FORCE
+	rm -rf bisect-report bisect-report.opt
 	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) -clean
 	test -f $(PATH_TESTS)/Makefile && (cd $(PATH_TESTS) && $(MAKE) $(MAKE_QUIET) clean && cd ..) || true
 	rm -f $(MODULES_ODOCL) $(MODULES_MLPACK) $(PROJECT_NAME).itarget
@@ -73,13 +76,14 @@ clean: FORCE
 veryclean: clean
 	rm -f $(PATH_OCAMLDOC)/*.html $(PATH_OCAMLDOC)/*.css
 
+#	cp $(PATH_BUILD)/src/report/report.byte $(PATH_OCAML_PREFIX)/bin/bisect-report; \
+#	cp $(PATH_BUILD)/src/syntax/bisect_ppx.byte $(PATH_OCAML_PREFIX)/bin; \
+# (test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && cp $(PATH_BUILD)/src/report/report.native $(PATH_OCAML_PREFIX)/bin/bisect-report.opt || true); \
+
 install: FORCE
-	cp $(PATH_BUILD)/src/report/report.byte $(PATH_OCAML_PREFIX)/bin/bisect-report; \
-	cp $(PATH_BUILD)/src/syntax/bisect_ppx.byte $(PATH_OCAML_PREFIX)/bin; \
-	(test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && cp $(PATH_BUILD)/src/report/report.native $(PATH_OCAML_PREFIX)/bin/bisect-report.opt || true); \
 	if [ -x "$(PATH_OCAMLFIND)" ]; then \
-	  $(PATH_OCAMLFIND) query $(PROJECT_NAME) && $(PATH_OCAMLFIND) remove $(PROJECT_NAME) || true; \
-	  $(PATH_OCAMLFIND) install $(PROJECT_NAME) META -optional \
+	  $(PATH_OCAMLFIND) query $(INSTALL_NAME) && $(PATH_OCAMLFIND) remove $(INSTALL_NAME) || true; \
+	  $(PATH_OCAMLFIND) install $(INSTALL_NAME) META -optional \
 	    $(PATH_BUILD)/$(PROJECT_NAME)_ppx.cmo \
 	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.cm* \
 	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.o \
@@ -93,14 +97,6 @@ install: FORCE
 	    $(PATH_BUILD)/$(PROJECT_NAME).cmxa \
 	    $(PATH_BUILD)/$(PROJECT_NAME).cmja \
 	    $(PATH_BUILD)/$(PROJECT_NAME).ja; \
-	else \
-	  mkdir -p $(PATH_INSTALL); \
-	  for ext in cmi cmo cmx o cmj jo; do \
-	    test -f $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.$$ext && cp $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.$$ext $(PATH_INSTALL) || true; \
-	  done; \
-	  for ext in a cmi cmo cmx cma cmxa cmja ja; do \
-	    test -f $(PATH_BUILD)/$(PROJECT_NAME).$$ext && cp $(PATH_BUILD)/$(PROJECT_NAME).$$ext $(PATH_INSTALL) || true; \
-	  done \
 	fi
 
 generate: FORCE
