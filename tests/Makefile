@@ -32,7 +32,7 @@ all: clean
 	  fi \
 	done
 	@echo ''
-	@echo "`grep '^*** error' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
+	@echo "`grep '^ error' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
 
 one: FORCE
 	@if [ -z $(NAME) ]; then echo "*** value for 'NAME' is missing"; exit 1; fi
@@ -51,6 +51,6 @@ clean: FORCE
 log: FORCE
 	@cat _log
 	@echo ''
-	@echo "`grep '^*** error' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
+	@echo "`grep '^ error' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
 
 FORCE:
