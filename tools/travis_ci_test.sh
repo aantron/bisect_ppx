@@ -50,8 +50,8 @@ eval `opam config env`
 git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 
-echo Install Ocamlfind
-opam install ocamlfind
+echo Install dependencies
+opam install ocamlfind ppx_tools
 
 echo Configuring
 sh configure
