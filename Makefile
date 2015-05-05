@@ -57,8 +57,8 @@ all: generate
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmx
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) report.byte
 	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) report.native
-	ln -s $(PATH_BUILD)/src/report/report.byte bisect-report
-	ln -s $(PATH_BUILD)/src/report/report.native bisect-report.opt
+	ln -fs $(PATH_BUILD)/src/report/report.byte bisect-report
+	ln -fs $(PATH_BUILD)/src/report/report.native bisect-report.opt
 
 doc: FORCE
 	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME).docdir/index.html
@@ -88,6 +88,8 @@ install: FORCE
 	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.cm* \
 	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.o \
 	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.jo \
+	    $(PATH_BUILD)/src/syntax/$(PROJECT_NAME)_ppx.cmo \
+	    $(PATH_BUILD)/src/syntax/$(PROJECT_NAME)_ppx.byte \
 	    $(PATH_BUILD)/$(PROJECT_NAME).a \
 	    $(PATH_BUILD)/$(PROJECT_NAME).o \
 	    $(PATH_BUILD)/$(PROJECT_NAME).cma \

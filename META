@@ -1,4 +1,4 @@
-description="coverage tool"
+description="code coverage tool via ppx"
 requires=""
 version="0.1"
 
@@ -9,3 +9,5 @@ archive(java)="bisect.cmja"
 archive(byte,mt)="bisect.cma bisectThread.cmo"
 archive(native,mt)="bisect.cmxa bisectThread.cmx"
 archive(java,mt)="bisect.cmja bisectThread.cmj"
+
+ppx = "./bisect_ppx.byte"
