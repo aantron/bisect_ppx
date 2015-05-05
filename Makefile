@@ -81,9 +81,9 @@ install: FORCE
 	  $(PATH_OCAMLFIND) query $(PROJECT_NAME) && $(PATH_OCAMLFIND) remove $(PROJECT_NAME) || true; \
 	  $(PATH_OCAMLFIND) install $(PROJECT_NAME) META -optional \
 	    $(PATH_BUILD)/$(PROJECT_NAME)_ppx.cmo \
-	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.cm* \
-	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.o \
-	    $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.jo \
+	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.cm* \
+	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.o \
+	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.jo \
 	    $(PATH_BUILD)/$(PROJECT_NAME).a \
 	    $(PATH_BUILD)/$(PROJECT_NAME).o \
 	    $(PATH_BUILD)/$(PROJECT_NAME).cma \
@@ -96,7 +96,7 @@ install: FORCE
 	else \
 	  mkdir -p $(PATH_INSTALL); \
 	  for ext in cmi cmo cmx o cmj jo; do \
-	    test -f $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.$$ext && cp $(PATH_BUILD)/src/$(PROJECT_NAME)Thread.$$ext $(PATH_INSTALL) || true; \
+	    test -f $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.$$ext && cp $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.$$ext $(PATH_INSTALL) || true; \
 	  done; \
 	  for ext in a cmi cmo cmx cma cmxa cmja ja; do \
 	    test -f $(PATH_BUILD)/$(PROJECT_NAME).$$ext && cp $(PATH_BUILD)/$(PROJECT_NAME).$$ext $(PATH_INSTALL) || true; \
