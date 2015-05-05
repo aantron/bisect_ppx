@@ -1,7 +1,10 @@
 # Bisect Code coverage via PPX.
 
 Instrument `OCaml` code with [Bisect](http://bisect.x9c.fr/) run time tracking information via
-[ppx](http://caml.inria.fr/pub/docs/manual-ocaml-4.02/extn.html#sec241).
+[ppx](http://caml.inria.fr/pub/docs/manual-ocaml-4.02/extn.html#sec241). This is a fork of the
+original, excellent Bisect library, updated to use the new
+[Ast_mapper](https://github.com/ocaml/ocaml/blob/trunk/parsing/ast_mapper.mli) interface and
+provide instrumentation just via `ppx` .
 
 ## Demo
 
