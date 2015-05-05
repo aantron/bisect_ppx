@@ -3,6 +3,8 @@
 Instrument `OCaml` code with [Bisect](http://bisect.x9c.fr/) run time tracking information via
 [ppx](http://caml.inria.fr/pub/docs/manual-ocaml-4.02/extn.html#sec241).
 
+[![Build Status](https://travis-ci.org/rleonid/bisect_ppx.svg?)](https://travis-ci.org/rleonid/bisect_ppx)
+
 ## Demo
 
 ### Files
