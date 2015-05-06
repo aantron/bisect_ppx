@@ -1,15 +1,15 @@
 
 build:
-	ocamlc -I ../../_build/ bisect.cmo -ppx ../../_build/src/syntax/bisect_ppx.byte actors.ml test.ml -o test.covered
+	ocamlfind ocamlc -package bisect_ppx -linkpkg actors.ml test.ml -o test.covered
 
-instrument:
-	ocamlc -I ../../_build/ bisect.cmo -ppx ../../_build/src/syntax/bisect_ppx.byte -dsource actors.ml 2> actors.ml.instrumented
+build_with_source:
+	ocamlfind ocamlc -package bisect_ppx -linkpkg actors.ml test.ml -dsource -o test.covered
 
 run:
-	./test.covered 
+	./test.covered
 
 report:
-	../../_build/src/report/report.native -html report bisect0001.out 
+	bisect-report -html report_dir bisect0001.out
 
 clean:
-	rm -rf test.covered report bisect*.out *.cmo *.cmi *.cmp actors.ml.instrumented
+	rm -rf test.covered report_dir bisect*.out *.cmo *.cmi *.cmp actors.ml.instrumented
