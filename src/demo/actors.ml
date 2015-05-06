@@ -5,9 +5,9 @@ type t =
   | Cleopatra
 
 let message = function
-  | Anthony     -> "friends, romans, countrymen, lend me your ears"
-  | Caesar      -> "the fault, dear brutus, is not in our stars, \
-                    but in ourselves, that we are underlings."
-  | Cleopatra   -> "fool! don't you see now that i could have poisoned \
-                    you a hundred times had i been able to live without you."
-
+  | Anthony     -> "Friends, Romans, countrymen, lend me your ears;\
+                    I come to bury Caesar, not to praise him."
+  | Caesar      -> "The fault, dear Brutus, is not in our stars,\
+                    But in ourselves, that we are underlings."
+  | Cleopatra   -> "Fool! Don't you see now that I could have poisoned you\
+                    a hundred times had I been able to live without you."

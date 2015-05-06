@@ -21,11 +21,12 @@ type t =
   | Cleopatra
 
 let message = function
-  | Anthony     -> "friends, romans, countrymen, lend me your ears"
-  | Caesar      -> "the fault, dear brutus, is not in our stars, \
-                    but in ourselves, that we are underlings."
-  | Cleopatra   -> "fool! don't you see now that i could have poisoned \
-                    you a hundred times had i been able to live without you."
+  | Anthony     -> "Friends, Romans, countrymen, lend me your ears;\
+                    I come to bury Caesar, not to praise him."
+  | Caesar      -> "The fault, dear Brutus, is not in our stars,\
+                    But in ourselves, that we are underlings."
+  | Cleopatra   -> "Fool! Don't you see now that I could have poisoned you\
+                    a hundred times had I been able to live without you."
 ```
 
 `test.ml`:
@@ -42,7 +43,7 @@ let () =
 
 ```Bash
 # Build with coverage:
-$	ocamlc bisect.cmo -ppx bisect_ppx.byte actors.ml test.ml -o test.covered
+$	ocamlfind ocamlc -package bisect_ppx -linkpkg actors.ml test.ml -o test.covered
 ```
 
 Instrumented `actors.ml`
@@ -57,20 +58,20 @@ let message =
   function
   | Anthony  ->
       (Bisect.Runtime.mark "actors.ml" 0;
-       "friends, romans, countrymen, lend me your ears")
+       "Friends, Romans, countrymen, lend me your ears;I come to bury Caesar, not to praise him.")
   | Caesar  ->
       (Bisect.Runtime.mark "actors.ml" 1;
-       "the fault, dear brutus, is not in our stars, but in ourselves, that we are underlings.")
+       "The fault, dear Brutus, is not in our stars,But in ourselves, that we are underlings.")
   | Cleopatra  ->
       (Bisect.Runtime.mark "actors.ml" 2;
-       "fool! don't you see now that i could have poisoned you a hundred times had i been able to live without you.")
+       "Fool! Don't you see now that I could have poisoned youa hundred times had I been able to live without you.")
 ```
 
 ```Bash
 # Run
 $ ./test.covered
-Fool! Don't you see now that I could have poisoned you a hundred times had I been able to live without you.
-The fault, dear Brutus, is not in our stars, But in ourselves, that we are underlings.
+Fool! Don't you see now that I could have poisoned youa hundred times had I been able to live without you.
+Friends, Romans, countrymen, lend me your ears;I come to bury Caesar, not to praise him.
 
 # Create report
 $ bisect_report -html report_dir bisect0001.out
