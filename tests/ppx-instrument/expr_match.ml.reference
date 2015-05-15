@@ -1,5 +1,5 @@
 let _ = Bisect.Runtime.init "expr_match.ml"
-let () =
+let f x =
   match x with
   | 0 -> (Bisect.Runtime.mark "expr_match.ml" 0; print_endline "abc")
   | 1 -> (Bisect.Runtime.mark "expr_match.ml" 1; print_endline "def")
@@ -9,7 +9,7 @@ let f =
   | 0 -> (Bisect.Runtime.mark "expr_match.ml" 3; print_endline "abc")
   | 1 -> (Bisect.Runtime.mark "expr_match.ml" 4; print_endline "def")
   | _ -> (Bisect.Runtime.mark "expr_match.ml" 5; print_endline "ghi")
-let () =
+let f x =
   match x with
   | 0 ->
       ((Bisect.Runtime.mark "expr_match.ml" 7; print_string "abc");
@@ -37,5 +37,26 @@ let f =
       ((Bisect.Runtime.mark "expr_match.ml" 17; print_string "ghi");
        Bisect.Runtime.mark "expr_match.ml" 16;
        print_newline ())
-File "expr_match.ml", line 2, characters 8-9:
-Error: Unbound value x
+type t =
+  | Foo
+  | Bar
+let f x =
+  match x with
+  | Foo  ->
+      ((Bisect.Runtime.mark "expr_match.ml" 19; print_string "foo");
+       Bisect.Runtime.mark "expr_match.ml" 18;
+       print_newline ())
+  | Bar  ->
+      ((Bisect.Runtime.mark "expr_match.ml" 21; print_string "bar");
+       Bisect.Runtime.mark "expr_match.ml" 20;
+       print_newline ())
+let f =
+  function
+  | Foo  ->
+      ((Bisect.Runtime.mark "expr_match.ml" 23; print_string "foo");
+       Bisect.Runtime.mark "expr_match.ml" 22;
+       print_newline ())
+  | Bar  ->
+      ((Bisect.Runtime.mark "expr_match.ml" 25; print_string "bar");
+       Bisect.Runtime.mark "expr_match.ml" 24;
+       print_newline ())

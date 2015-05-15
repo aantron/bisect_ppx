@@ -131,34 +131,14 @@ let rec wrap_func k e =
   let loc = e.pexp_loc in
   match e.pexp_desc with
   | Pexp_function clst ->
-      begin
-        (*Printf.eprintf "----- function \n";
-        Location.print_loc Format.err_formatter loc;
-        Printf.eprintf "\nDone function \n"; *)
-        List.map (wrap_case k) clst |> Exp.function_ ~loc
-      end
+      List.map (wrap_case k) clst |> Exp.function_ ~loc
   | Pexp_poly (e, ct) ->
-      begin
-        (*Printf.eprintf "++++++ poly\n";
-        Location.print_loc Format.err_formatter loc;
-        Printf.eprintf "\nDone function \n"; *)
-        Exp.poly ~loc (wrap_func k e) ct
-      end
+      Exp.poly ~loc (wrap_func k e) ct
   | Pexp_fun (al, eo, p, e) ->
-      begin
-        (*Printf.eprintf "~~~~~~~~  fun \n";
-        Location.print_loc Format.err_formatter loc;
-        Printf.eprintf "\nDone function \n"; *)
-        let eo = map_opt (wrap_expr k) eo in
-        Exp.fun_ ~loc al eo p (wrap_func k e)
-      end
+      let eo = map_opt (wrap_expr k) eo in
+      Exp.fun_ ~loc al eo p (wrap_func k e)
   | _ ->
-      begin
-        (*Printf.eprintf "??????\n";
-        Location.print_loc Format.err_formatter loc;
-        Printf.eprintf "\nDone function \n"; *)
-        wrap_expr k e
-      end
+      wrap_expr k e
 
 let wrap_class_field_kind k = function
   | Cfk_virtual _ as cf -> cf
@@ -252,6 +232,26 @@ let get_filename = function
     let f,_,_ = Location.get_pos_info si.pstr_loc.Location.loc_start in
     Some f
 
+(*
+let typoo si =
+  match si.pstr_desc with
+  | Pstr_eval _       -> "eval"
+  | Pstr_value _      -> "value"
+  | Pstr_primitive _  -> "primitive"
+  | Pstr_type _       -> "type"
+  | Pstr_typext _     -> "typeext"
+  | Pstr_exception _  -> "exception" 
+  | Pstr_module _     -> "module"
+  | Pstr_recmodule _  -> "recmodule"
+  | Pstr_modtype _    -> "modtype"
+  | Pstr_open _       -> "open"
+  | Pstr_class _      -> "class"
+  | Pstr_class_type _ -> "class_type"
+  | Pstr_include _    -> "include"
+  | Pstr_attribute _  -> "attribute"
+  | Pstr_extension _  -> "extension"
+  *)
+ 
 (* The actual "instrumenter" object, marking expressions. *)
 class instrumenter = object (self)
 
@@ -276,68 +276,54 @@ class instrumenter = object (self)
     let cf = super#class_field cf in
     match cf.pcf_desc with
     | Pcf_val (id, mut, cf) ->
-        begin
-          (*Printf.eprintf "Wrap Pcf_val\n";
-          Location.print_loc Format.err_formatter loc;
-          Printf.eprintf "\nDone function \n"; *)
-          Cf.val_ ~loc id mut (wrap_class_field_kind Common.Class_val cf)
-        end
+        Cf.val_ ~loc id mut (wrap_class_field_kind Common.Class_val cf)
     | Pcf_method (id, mut, cf) ->
-        begin
-          (*Printf.eprintf "Wrap Pcf_method\n";
-          Location.print_loc Format.err_formatter loc;
-          Printf.eprintf "\nDone function \n";*)
-          Cf.method_ ~loc id mut (wrap_class_field_kind Common.Class_meth cf)
-        end
+        Cf.method_ ~loc id mut (wrap_class_field_kind Common.Class_meth cf)
     | Pcf_initializer e ->
-        begin
-          (*Printf.eprintf "Wrap Pcf_initializer\n";
-          Location.print_loc Format.err_formatter loc;
-          Printf.eprintf "\nDone function \n";*)
-          Cf.initializer_ ~loc (wrap_expr Common.Class_init e)
-        end
+        Cf.initializer_ ~loc (wrap_expr Common.Class_init e)
     | _ ->
-        begin
-          (*Printf.eprintf "Wrap _________________\n";
-          Location.print_loc Format.err_formatter loc;
-          Printf.eprintf "\nDone function \n"; *)
-          cf
-        end
+        cf
+
+  val mutable extension_guard = false
+  val mutable attribute_guard = false
 
   method! expr e =
-    let loc = e.pexp_loc in
-    let e' = super#expr e in
-    match e'.pexp_desc with
-    | Pexp_let (rec_flag, l, e) ->
-        let l =
-          List.map (fun vb ->
-          {vb with pvb_expr = wrap_expr Common.Binding vb.pvb_expr}) l in
-        Exp.let_ ~loc rec_flag l (wrap_expr Common.Binding e)
-    | Pexp_apply (e1, [l2, e2; l3, e3]) ->
-        (match e1.pexp_desc with
-        | Pexp_ident ident
-          when
-            List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
-              Exp.apply ~loc e1
-                [l2, (wrap_expr Common.Lazy_operator e2);
-                l3, (wrap_expr Common.Lazy_operator e3)]
-        | _ -> e')
-    | Pexp_match (e, l) ->
-        List.map (wrap_case Common.Match) l
-        |> Exp.match_ ~loc e
-    | Pexp_try (e, l) ->
-        List.map (wrap_case Common.Match) l
-        |> Exp.try_ ~loc (wrap_expr Common.Sequence e)
-    | Pexp_ifthenelse (e1, e2, e3) ->
-        Exp.ifthenelse ~loc e1 (wrap_expr Common.If_then e2)
-          (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None)
-    | Pexp_sequence _ ->
-        (wrap_seq Common.Sequence e')
-    | Pexp_while (e1, e2) ->
-        Exp.while_ ~loc e1 (wrap_seq Common.While e2)
-    | Pexp_for (id, e1, e2, dir, e3) ->
-        Exp.for_ ~loc id e1 e2 dir (wrap_seq Common.For e3)
-    | _ -> e'
+    if attribute_guard || extension_guard then
+      super#expr e
+    else
+      let loc = e.pexp_loc in
+      let e' = super#expr e in
+      match e'.pexp_desc with
+      | Pexp_let (rec_flag, l, e) ->
+          let l =
+            List.map (fun vb ->
+            {vb with pvb_expr = wrap_expr Common.Binding vb.pvb_expr}) l in
+          Exp.let_ ~loc rec_flag l (wrap_expr Common.Binding e)
+      | Pexp_apply (e1, [l2, e2; l3, e3]) ->
+          (match e1.pexp_desc with
+          | Pexp_ident ident
+            when
+              List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
+                Exp.apply ~loc e1
+                  [l2, (wrap_expr Common.Lazy_operator e2);
+                  l3, (wrap_expr Common.Lazy_operator e3)]
+          | _ -> e')
+      | Pexp_match (e, l) ->
+          List.map (wrap_case Common.Match) l
+          |> Exp.match_ ~loc e
+      | Pexp_try (e, l) ->
+          List.map (wrap_case Common.Match) l
+          |> Exp.try_ ~loc (wrap_expr Common.Sequence e)
+      | Pexp_ifthenelse (e1, e2, e3) ->
+          Exp.ifthenelse ~loc e1 (wrap_expr Common.If_then e2)
+            (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None)
+      | Pexp_sequence _ ->
+          (wrap_seq Common.Sequence e')
+      | Pexp_while (e1, e2) ->
+          Exp.while_ ~loc e1 (wrap_seq Common.While e2)
+      | Pexp_for (id, e1, e2, dir, e3) ->
+          Exp.for_ ~loc id e1 e2 dir (wrap_seq Common.For e3)
+      | _ -> e'
 
   method! structure_item si =
     let loc = si.pstr_loc in
@@ -354,26 +340,43 @@ class instrumenter = object (self)
           l
         in
           Str.value ~loc rec_flag l
-    | Pstr_eval (e, a) ->
+    | Pstr_eval (e, a) when not (attribute_guard || extension_guard) ->
         Str.eval ~loc (wrap_expr Common.Toplevel_expr (self#expr e))
     | _ ->
         super#structure_item si
 
-  (*  Initializes storage and applies requested marks. *)
+  (* Guard these because they can carry payloads that we
+     do not want to instrument. *)
+  method! extension e =
+    extension_guard <- true;
+    let r = super#extension e in
+    extension_guard <- false;
+    r
+
+  method! attribute a =
+    attribute_guard <- true;
+    let r = super#attribute a in
+    attribute_guard <- false;
+    r
+
+  (* Initializes storage and applies requested marks. *)
   method! structure ast =
-    let ast = super#structure ast in
-    match get_filename ast with
-    | None -> ast
-    | Some file ->
-      if not (InstrumentState.is_file file) then
-        let header =
-          match !InstrumentArgs.mode with
-          | InstrumentArgs.Safe   -> safe file
-          | InstrumentArgs.Fast
-          | InstrumentArgs.Faster -> faster file
-        in
-        header :: ast
-      else
-        ast
+    (*let ts = String.concat "," (List.map typoo ast) in *)
+    if extension_guard || attribute_guard then
+      super#structure ast
+    else
+      match get_filename ast with
+      | None -> ast
+      | Some file ->
+        if not (InstrumentState.is_file file) then
+          let header =
+            match !InstrumentArgs.mode with
+            | InstrumentArgs.Safe   -> safe file
+            | InstrumentArgs.Fast
+            | InstrumentArgs.Faster -> faster file
+          in
+          header :: (super#structure ast)
+        else
+          super#structure ast
 
 end
