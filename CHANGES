@@ -1,3 +1,7 @@
+Version 0.2.2 (2015-06-02):
+---------------------------
+  - Added a runtime only package distribution for findlib.
+
 Version 0.2.1 (2015-05-22):
 ---------------------------
   - fix double slashes at the end of a string bug, due to BISECT
