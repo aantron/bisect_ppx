@@ -1,6 +1,11 @@
+Version 0.2.1 (2015-05-22):
+---------------------------
+  - fix double slashes at the end of a string bug, due to BISECT
+    specifiy commenting.
+
 Version 0.2 (2015-05-15):
 -------------------------
-  - Fixed bug to make sure that we don't instrument other ppx attributes.
+  - fix bug to make sure that we don't instrument other ppx attributes.
 
 Version 0.1 (2015-05-06):
 -------------------------
