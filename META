@@ -1,6 +1,6 @@
 description="code coverage tool via ppx"
 requires=""
-version="0.1"
+version="0.2.1"
 
 archive(byte)="bisect.cma"
 archive(native)="bisect.cmxa"
