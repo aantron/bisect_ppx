@@ -1,0 +1,5 @@
+let _ = Bisect.Runtime.init "expr_blob_part2.ml"
+let me () =
+  Bisect.Runtime.mark "expr_blob_part2.ml" 0;
+  Printf.printf "ME: %s\n"
+    "let me () = Printf.printf \"ME: %s\\n\" [%blob \"expr_blob.ml\"]\n"

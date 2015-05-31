@@ -84,7 +84,10 @@ rule normal ignored marked stack = parse
 | _                         { normal ignored marked stack lexbuf }
 
 and string n ignored marked stack = parse
-| "\\\""                    { string n ignored marked stack lexbuf }
+| "\\\""                    { if n = 0 then
+                                normal ignored marked stack lexbuf
+                              else
+                                comment n ignored marked stack lexbuf }
 | "\""                      { if n = 0 then
                                 normal ignored marked stack lexbuf
                               else
