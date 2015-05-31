@@ -8,7 +8,7 @@ clean::
 	@rm -f *.cm* *.out *.o *.jo result.* $(EXECUTABLE)
 
 compile::
-	@$(PATH_OCAML_BIN)/$(COMPILER) $(COMPILE_FLAGS) -o $(EXECUTABLE) source.ml
+	@$(PATH_OCAML_BIN)/$(COMPILER) $(COMPILE_FLAGS) -o $(EXECUTABLE) source.ml			# We can pass -dsource
 
 run::
 	@$(RUN)$(EXECUTABLE) -inf 0 -sup 3 > /dev/null
@@ -16,7 +16,7 @@ run::
 
 report::
 	@rm -fr report
-	@$(REPORT) -bisect result.bisect *.out
+	@$(REPORT) -bisect result.bisect *.out							# We can also pass '-verbose' here
 	@$(REPORT) -csv result.csv *.out
 	@$(REPORT) -dump-dtd result.dtd *.out
 	@$(REPORT) -dump result.dump *.out
@@ -36,3 +36,4 @@ endif
 	done || exit 0)
 	@rm -fr report
 	@rm -f *.cm* *.out *.o *.jo $(EXECUTABLE)
+

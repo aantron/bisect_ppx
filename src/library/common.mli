@@ -61,6 +61,7 @@ val point_kind_of_char : char -> point_kind
     Raises [Invalid_argument] if the passed character does not designate a
     point kind. *)
 
+val preference : current:point_kind -> replace:point_kind -> bool
 
 (** {6 Utility functions} *)
 
