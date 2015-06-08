@@ -14,3 +14,5 @@ let f2 b x =
     x * x
   else
     x
+
+let f3 : type a. a -> string = fun _ -> "Hello"
