@@ -14,13 +14,13 @@
         <td valign="top">
           <table class="simple">
             <tr><th>kind</th><th width="16px">&nbsp;</th><th>coverage</th></tr>
-            <tr><td>binding</td><td width="16px">&nbsp;</td><td>3 / 3 (100%)</td></tr>
-            <tr><td>sequence</td><td width="16px">&nbsp;</td><td>5 / 5 (100%)</td></tr>
+            <tr><td>binding</td><td width="16px">&nbsp;</td><td>5 / 9 (55%)</td></tr>
+            <tr><td>sequence</td><td width="16px">&nbsp;</td><td>5 / 6 (83%)</td></tr>
             <tr><td>for</td><td width="16px">&nbsp;</td><td>1 / 1 (100%)</td></tr>
-            <tr><td>if/then</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>try</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
+            <tr><td>if/then</td><td width="16px">&nbsp;</td><td>0 / 4 (0%)</td></tr>
+            <tr><td>try</td><td width="16px">&nbsp;</td><td>0 / 1 (0%)</td></tr>
             <tr><td>while</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>match/function</td><td width="16px">&nbsp;</td><td>2 / 2 (100%)</td></tr>
+            <tr><td>match/function</td><td width="16px">&nbsp;</td><td>0 / 2 (0%)</td></tr>
           </table>
         </td>
         <td valign="top">
@@ -46,8 +46,8 @@
       <div id="line000001" class="lineAllVisited">000001| let&nbsp;inf&nbsp;=&nbsp;(*[2]*)ref&nbsp;0</div>
       <div id="line000002" class="lineAllVisited">000002| let&nbsp;sup&nbsp;=&nbsp;(*[2]*)ref&nbsp;3</div>
       <div id="line000003" class="lineNone">000003| &nbsp;</div>
-      <div id="line000004" class="lineNone">000004| let&nbsp;args&nbsp;=&nbsp;[</div>
-      <div id="line000005" class="lineAllVisited">000005| &nbsp;&nbsp;(*[2]*)(&quot;-inf&quot;,&nbsp;(Arg.Set_int&nbsp;inf),&nbsp;&quot;inferior&nbsp;bound&quot;)&nbsp;;</div>
+      <div id="line000004" class="lineAllVisited">000004| let&nbsp;args&nbsp;=&nbsp;(*[2]*)[</div>
+      <div id="line000005" class="lineNone">000005| &nbsp;&nbsp;(&quot;-inf&quot;,&nbsp;(Arg.Set_int&nbsp;inf),&nbsp;&quot;inferior&nbsp;bound&quot;)&nbsp;;</div>
       <div id="line000006" class="lineNone">000006| &nbsp;&nbsp;(&quot;-sup&quot;,&nbsp;(Arg.Set_int&nbsp;sup),&nbsp;&quot;superior&nbsp;bound&quot;)</div>
       <div id="line000007" class="lineNone">000007| ]</div>
       <div id="line000008" class="lineNone">000008| &nbsp;</div>
@@ -65,7 +65,29 @@
       <div id="line000020" class="lineAllVisited">000020| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)kind&nbsp;i;</div>
       <div id="line000021" class="lineAllVisited">000021| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)print&nbsp;i</div>
       <div id="line000022" class="lineNone">000022| &nbsp;&nbsp;done</div>
+      <div id="line000023" class="lineNone">000023| &nbsp;</div>
+      <div id="line000024" class="lineNone">000024| let&nbsp;is_even&nbsp;x&nbsp;=</div>
       </div>
+      <div id="line000025" class="lineAllUnvisited">000025| &nbsp;&nbsp;(*[0]*)if&nbsp;x&nbsp;mod&nbsp;2&nbsp;=&nbsp;0&nbsp;then&nbsp;(*[0]*)true&nbsp;else&nbsp;(*[0]*)false</div>
+      <div id="fold000026">
+      <div id="line000026" class="lineNone">000026| &nbsp;</div>
+      <div id="line000027" class="lineNone">000027| let&nbsp;rec&nbsp;is_odd&nbsp;x&nbsp;=</div>
+      <div id="line000028" class="lineNone">000028| &nbsp;&nbsp;match&nbsp;x&nbsp;with</div>
+      <div id="line000029" class="lineNone">000029| &nbsp;&nbsp;|&nbsp;1</div>
+      <div id="line000030" class="lineNone">000030| &nbsp;&nbsp;|&nbsp;3</div>
+      <div id="line000031" class="lineNone">000031| &nbsp;&nbsp;|&nbsp;5</div>
+      <div id="line000032" class="lineNone">000032| &nbsp;&nbsp;|&nbsp;7</div>
+      </div>
+      <div id="line000033" class="lineAllUnvisited">000033| &nbsp;&nbsp;|&nbsp;9&nbsp;-&gt;&nbsp;(*[0]*)true</div>
+      <div id="line000034" class="lineAllUnvisited">000034| &nbsp;&nbsp;|&nbsp;x&nbsp;-&gt;&nbsp;(*[0]*)if&nbsp;is_even&nbsp;x&nbsp;then&nbsp;(*[0]*)false&nbsp;else&nbsp;(*[0]*)is_odd&nbsp;(x&nbsp;mod&nbsp;10)</div>
+      <div id="fold000035">
+      <div id="line000035" class="lineNone">000035| &nbsp;</div>
+      <div id="line000036" class="lineNone">000036| let&nbsp;is_zero&nbsp;x&nbsp;=</div>
+      </div>
+      <div id="line000037" class="lineAllUnvisited">000037| &nbsp;&nbsp;(*[0]*)try</div>
+      <div id="line000038" class="lineAllUnvisited">000038| &nbsp;&nbsp;&nbsp;&nbsp;(*[0]*)let&nbsp;_&nbsp;=&nbsp;(*[0]*)20&nbsp;/&nbsp;x&nbsp;in</div>
+      <div id="line000039" class="lineAllUnvisited">000039| &nbsp;&nbsp;&nbsp;&nbsp;(*[0]*)false</div>
+      <div id="line000040" class="lineAllUnvisited">000040| &nbsp;&nbsp;with&nbsp;Division_by_zero&nbsp;-&gt;&nbsp;(*[0]*)true</div>
     </code>
     <br/>
     <div class="section">Legend:</div>

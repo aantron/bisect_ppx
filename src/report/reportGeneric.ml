@@ -30,7 +30,11 @@ class type converter =
 let output_file verbose in_file conv resolver visited =
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
   let cmp_content = Common.read_points (resolver in_file) in
-  verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
+  verbose (Printf.sprintf "... file has the followin points: %s"
+    (String.concat ","
+      (List.map (fun pd ->
+        Printf.sprintf "[%d %d %s]\n" pd.Common.offset pd.Common.identifier
+          (Common.string_of_point_kind pd.Common.kind)) cmp_content)));
   let len = Array.length visited in
   let stats = ReportStat.make () in
   let points =
