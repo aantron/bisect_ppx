@@ -1,50 +1,62 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <bisect-report>
   <summary>
-    <element kind="binding" count="3" total="3"/>
-    <element kind="sequence" count="5" total="5"/>
+    <element kind="binding" count="5" total="9"/>
+    <element kind="sequence" count="5" total="6"/>
     <element kind="for" count="1" total="1"/>
-    <element kind="if/then" count="0" total="0"/>
-    <element kind="try" count="0" total="0"/>
+    <element kind="if/then" count="0" total="4"/>
+    <element kind="try" count="0" total="1"/>
     <element kind="while" count="0" total="0"/>
-    <element kind="match/function" count="2" total="2"/>
+    <element kind="match/function" count="0" total="2"/>
     <element kind="class expression" count="0" total="0"/>
     <element kind="class initializer" count="0" total="0"/>
     <element kind="class method" count="0" total="0"/>
     <element kind="class value" count="0" total="0"/>
     <element kind="toplevel expression" count="0" total="0"/>
     <element kind="lazy operator" count="2" total="2"/>
-    <element kind="total" count="13" total="13"/>
+    <element kind="total" count="13" total="25"/>
   </summary>
   <file path="source.ml">
     <summary>
-      <element kind="binding" count="3" total="3"/>
-      <element kind="sequence" count="5" total="5"/>
+      <element kind="binding" count="5" total="9"/>
+      <element kind="sequence" count="5" total="6"/>
       <element kind="for" count="1" total="1"/>
-      <element kind="if/then" count="0" total="0"/>
-      <element kind="try" count="0" total="0"/>
+      <element kind="if/then" count="0" total="4"/>
+      <element kind="try" count="0" total="1"/>
       <element kind="while" count="0" total="0"/>
-      <element kind="match/function" count="2" total="2"/>
+      <element kind="match/function" count="0" total="2"/>
       <element kind="class expression" count="0" total="0"/>
       <element kind="class initializer" count="0" total="0"/>
       <element kind="class method" count="0" total="0"/>
       <element kind="class value" count="0" total="0"/>
       <element kind="toplevel expression" count="0" total="0"/>
       <element kind="lazy operator" count="2" total="2"/>
-      <element kind="total" count="13" total="13"/>
+      <element kind="total" count="13" total="25"/>
     </summary>
     <point offset="10" count="2" kind="binding"/>
     <point offset="26" count="2" kind="binding"/>
-    <point offset="48" count="2" kind="binding"/>
+    <point offset="44" count="2" kind="binding"/>
     <point offset="178" count="9" kind="lazy operator"/>
     <point offset="187" count="7" kind="lazy operator"/>
-    <point offset="196" count="2" kind="match/function"/>
-    <point offset="233" count="7" kind="match/function"/>
+    <point offset="196" count="2" kind="binding"/>
+    <point offset="233" count="7" kind="binding"/>
     <point offset="272" count="9" kind="sequence"/>
     <point offset="287" count="9" kind="sequence"/>
     <point offset="316" count="2" kind="sequence"/>
     <point offset="355" count="2" kind="sequence"/>
     <point offset="383" count="9" kind="for"/>
     <point offset="395" count="9" kind="sequence"/>
+    <point offset="429" count="0" kind="binding"/>
+    <point offset="449" count="0" kind="if/then"/>
+    <point offset="459" count="0" kind="if/then"/>
+    <point offset="533" count="0" kind="match/function"/>
+    <point offset="547" count="0" kind="match/function"/>
+    <point offset="565" count="0" kind="if/then"/>
+    <point offset="576" count="0" kind="if/then"/>
+    <point offset="613" count="0" kind="binding"/>
+    <point offset="621" count="0" kind="sequence"/>
+    <point offset="629" count="0" kind="binding"/>
+    <point offset="643" count="0" kind="binding"/>
+    <point offset="676" count="0" kind="try"/>
   </file>
 </bisect-report>
