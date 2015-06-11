@@ -368,15 +368,18 @@ class instrumenter = object (self)
       match get_filename ast with
       | None -> ast
       | Some file ->
-        if not (InstrumentState.is_file file) then
-          let header =
-            match !InstrumentArgs.mode with
-            | InstrumentArgs.Safe   -> safe file
-            | InstrumentArgs.Fast
-            | InstrumentArgs.Faster -> faster file
-          in
-          header :: (super#structure ast)
+        if file = "//toplevel//" then
+          ast
         else
-          super#structure ast
+          if not (InstrumentState.is_file file) then
+            let header =
+              match !InstrumentArgs.mode with
+              | InstrumentArgs.Safe   -> safe file
+              | InstrumentArgs.Fast
+              | InstrumentArgs.Faster -> faster file
+            in
+            header :: (super#structure ast)
+          else
+            super#structure ast
 
 end

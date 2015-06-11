@@ -1,6 +1,6 @@
 opam-version: "1.2"
 name: "bisect_ppx"
-version: "0.2.1"
+version: "0.2.2"
 maintainer: "Leonid Rozenberg <leonidr@gmail.com>"
 authors: "Leonid Rozenberg <leonidr@gmail.com>"
 dev-repo: "https://github.com/rleonid/bisect_ppx.git"
