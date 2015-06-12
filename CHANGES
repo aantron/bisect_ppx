@@ -1,8 +1,10 @@
-Version 0.2.2 (2015-06-02):
+Version 0.2.2 (2015-06-12):
 ---------------------------
   - Added a runtime only package distribution for findlib.
   - Change the points annotation method, 'For' loops are correctly labeled.
     - Updated appropriate test.
+  - When linking with '-thread' _Random_ indices are used for the output files.
+  - Fix for exclusions of locally abstract typed definitions.
 
 Version 0.2.1 (2015-05-22):
 ---------------------------
