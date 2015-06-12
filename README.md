@@ -86,3 +86,14 @@ Overall
 ![Screenshot](src/demo/img/Screenshot1.png)
 
 ![Alt text](src/demo/img/Screenshot2.png)
+
+### Caveats
+
+A list of changes from the original `Bisect` implementation.
+
+- When passing `-thread`, `bisect_ppx` will generate reports with
+  __random__ 4 digit suffixes. `bisect2342.out` instead of `bisect0001.out`.
+  This can be used to avoid race conditions of different instrumented
+  _processes_ trying to write out their coverage to the same file,
+  as happens when you instrument [OUnit](http://ounit.forge.ocamlcore.org/)
+  tests.
