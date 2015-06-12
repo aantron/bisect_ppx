@@ -336,7 +336,17 @@ class instrumenter = object (self)
                 | Ppat_var ident when Exclusions.contains
                       (ident.loc.Location.loc_start.Lexing.pos_fname)
                     ident.txt -> vb.pvb_expr
-                | _ -> wrap_func Common.Binding (self#expr vb.pvb_expr)})
+                | Ppat_constraint (p,_) ->
+                    begin
+                      match p.ppat_desc with
+                      | Ppat_var ident when Exclusions.contains
+                          (ident.loc.Location.loc_start.Lexing.pos_fname)
+                            ident.txt -> vb.pvb_expr
+                      | _ ->
+                        wrap_func Common.Binding (self#expr vb.pvb_expr)
+                    end
+                | _ ->
+                    wrap_func Common.Binding (self#expr vb.pvb_expr)})
           l
         in
           Str.value ~loc rec_flag l
