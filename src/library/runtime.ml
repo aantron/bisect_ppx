@@ -93,7 +93,10 @@ let mark fn pt =
 let mark_array fn pts =
   Array.iter (mark fn) pts
 
-let file_channel =
+let random_suffix = ref false
+
+let file_channel () =
+  !hook_before ();
   let base_name =
     try
       let env = Sys.getenv "BISECT_FILE" in
@@ -104,21 +107,28 @@ let file_channel =
     with Not_found ->
       Filename.concat Filename.current_dir_name "bisect" in
   let suffix = ref 0 in
+  if !random_suffix then Random.self_init ();
   let next_name () =
-    incr suffix;
+    if !random_suffix
+    then suffix := Random.int 10000
+    else incr suffix;
     Printf.sprintf "%s%04d.out" base_name !suffix in
   let actual_name = ref (next_name ()) in
   while Sys.file_exists !actual_name do
     actual_name := next_name ()
   done;
-  try
-    Some (open_out_bin !actual_name)
-  with _ ->
-    verbose Unable_to_create_file;
-    None
+  let ic_opt =
+    try
+      Some (open_out_bin !actual_name)
+    with _ ->
+      verbose Unable_to_create_file;
+      None
+  in
+  !hook_after ();
+  ic_opt
 
 let dump () =
-  match file_channel with
+  match file_channel () with
   | None -> ()
   | Some channel ->
       let content = Hashtbl.fold (fun k v acc -> (k, v) :: acc) table [] in
@@ -128,4 +138,7 @@ let dump () =
         verbose Unable_to_write_file);
       close_out_noerr channel
 
-let () = at_exit dump
+
+
+let () =
+  at_exit dump

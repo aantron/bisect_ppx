@@ -57,19 +57,29 @@ let apply_nolabs ?loc lid el =
 let marker file ofs kind marked =
   let lst = InstrumentState.get_points_for_file file in
   if List.exists (fun p -> p.Common.offset = ofs) lst then
-    raise Already_marked
+    let currentl, rest = List.partition (fun p -> p.Common.offset = ofs) lst in
+    let current = List.hd currentl in
+    if Common.preference ~current:current.Common.kind ~replace:kind then
+      begin
+        let nlst = { current with Common.kind = kind } :: rest in
+        InstrumentState.set_points_for_file file nlst
+      end;
+    None
   else
     let idx = List.length lst in
     if marked then InstrumentState.add_marked_point idx;
     let pt = { Common.offset = ofs; identifier = idx; kind = kind } in
     InstrumentState.set_points_for_file file (pt :: lst);
     let loc = Location.none in
-    match !InstrumentArgs.mode with
-    | InstrumentArgs.Safe ->
-        apply_nolabs ~loc (lid "Bisect.Runtime.mark") [strconst file; intconst idx]
-    | InstrumentArgs.Fast
-    | InstrumentArgs.Faster ->
-        apply_nolabs ~loc (lid "___bisect_mark___") [intconst idx]
+    let wrapped =
+      match !InstrumentArgs.mode with
+      | InstrumentArgs.Safe ->
+          apply_nolabs ~loc (lid "Bisect.Runtime.mark") [strconst file; intconst idx]
+      | InstrumentArgs.Fast
+      | InstrumentArgs.Faster ->
+          apply_nolabs ~loc (lid "___bisect_mark___") [intconst idx]
+    in
+    Some wrapped
 
 (* Tests whether the passed expression is a bare mapping,
    or starts with a bare mapping (if the expression is a sequence).
@@ -78,7 +88,7 @@ let rec is_bare_mapping e =
   match e.pexp_desc with
   | Pexp_function _ -> true
   | Pexp_match _ -> true
-  | Pexp_sequence (e', _) -> is_bare_mapping e'
+  | Pexp_sequence (e', _) -> is_bare_mapping e' 
   | _ -> false
 
 (* Wraps an expression with a marker, returning the passed expression
@@ -95,29 +105,29 @@ let wrap_expr k e =
   if dont_wrap then
     e
   else
-    try
-      let ofs = loc.Location.loc_start.Lexing.pos_cnum in
-      let file = loc.Location.loc_start.Lexing.pos_fname in
-      let line = loc.Location.loc_start.Lexing.pos_lnum in
-      let c = CommentsPpx.get file in
-      let ignored =
-        List.exists
-          (fun (lo, hi) ->
-            line >= lo && line <= hi)
-          c.CommentsPpx.ignored_intervals in
-      if ignored then
-        e
-      else
-        let marked = List.mem line c.CommentsPpx.marked_lines in
-        Exp.sequence ~loc (marker file ofs k marked) e
-    with Already_marked -> e
+    let ofs = loc.Location.loc_start.Lexing.pos_cnum in
+    let file = loc.Location.loc_start.Lexing.pos_fname in
+    let line = loc.Location.loc_start.Lexing.pos_lnum in
+    let c = CommentsPpx.get file in
+    let ignored =
+      List.exists
+        (fun (lo, hi) ->
+          line >= lo && line <= hi)
+        c.CommentsPpx.ignored_intervals in
+    if ignored then
+      e
+    else
+      let marked = List.mem line c.CommentsPpx.marked_lines in
+      match marker file ofs k marked with
+      | Some w -> Exp.sequence ~loc w e
+      | None   -> e
 
 (* Wraps a sequence. *)
 let rec wrap_seq k e =
   let _loc = e.pexp_loc in
   match e.pexp_desc with
   | Pexp_sequence (e1, e2) ->
-      Exp.sequence (wrap_seq k e1) (wrap_seq Common.Sequence e2)
+      Exp.sequence (wrap_expr k e1) (wrap_seq Common.Sequence e2)
   | _ ->
       wrap_expr k e
 
@@ -240,7 +250,7 @@ let typoo si =
   | Pstr_primitive _  -> "primitive"
   | Pstr_type _       -> "type"
   | Pstr_typext _     -> "typeext"
-  | Pstr_exception _  -> "exception" 
+  | Pstr_exception _  -> "exception"
   | Pstr_module _     -> "module"
   | Pstr_recmodule _  -> "recmodule"
   | Pstr_modtype _    -> "modtype"
@@ -251,7 +261,7 @@ let typoo si =
   | Pstr_attribute _  -> "attribute"
   | Pstr_extension _  -> "extension"
   *)
- 
+
 (* The actual "instrumenter" object, marking expressions. *)
 class instrumenter = object (self)
 
@@ -312,13 +322,13 @@ class instrumenter = object (self)
           List.map (wrap_case Common.Match) l
           |> Exp.match_ ~loc e
       | Pexp_try (e, l) ->
-          List.map (wrap_case Common.Match) l
+          List.map (wrap_case Common.Try) l
           |> Exp.try_ ~loc (wrap_expr Common.Sequence e)
       | Pexp_ifthenelse (e1, e2, e3) ->
           Exp.ifthenelse ~loc e1 (wrap_expr Common.If_then e2)
             (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None)
       | Pexp_sequence _ ->
-          (wrap_seq Common.Sequence e')
+          wrap_seq Common.Sequence e'
       | Pexp_while (e1, e2) ->
           Exp.while_ ~loc e1 (wrap_seq Common.While e2)
       | Pexp_for (id, e1, e2, dir, e3) ->
@@ -380,15 +390,18 @@ class instrumenter = object (self)
       match get_filename ast with
       | None -> ast
       | Some file ->
-        if not (InstrumentState.is_file file) then
-          let header =
-            match !InstrumentArgs.mode with
-            | InstrumentArgs.Safe   -> safe file
-            | InstrumentArgs.Fast
-            | InstrumentArgs.Faster -> faster file
-          in
-          header :: (super#structure ast)
+        if file = "//toplevel//" then
+          ast
         else
-          super#structure ast
+          if not (InstrumentState.is_file file) then
+            let header =
+              match !InstrumentArgs.mode with
+              | InstrumentArgs.Safe   -> safe file
+              | InstrumentArgs.Fast
+              | InstrumentArgs.Faster -> faster file
+            in
+            header :: (super#structure ast)
+          else
+            super#structure ast
 
 end

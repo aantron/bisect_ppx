@@ -83,3 +83,7 @@ val get_hooks : unit -> (unit -> unit) * (unit -> unit)
 (** Returns [(f1, f2)] that are respectively the hooks called before and
     after execution of [init], [init_with_array], [mark], or
     [mark_array]. *)
+
+val random_suffix : bool ref
+(** Add a random (as opposed to incremental) suffix to the Bisect output file.
+    Defaults to false, but set to true by BisectThread. *)

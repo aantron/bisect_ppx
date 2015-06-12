@@ -102,6 +102,10 @@ let point_kind_of_char = function
   | 'l' -> Lazy_operator
   | _ -> invalid_arg "Bisect.Common.point_kind_of_char"
 
+let preference ~current ~replace =
+  match replace, current with
+  | For, Sequence -> true
+  | _ -> false
 
 (* Utility functions *)
 
