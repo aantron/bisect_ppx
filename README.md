@@ -74,7 +74,7 @@ Fool! Don't you see now that I could have poisoned youa hundred times had I been
 Friends, Romans, countrymen, lend me your ears;I come to bury Caesar, not to praise him.
 
 # Create report
-$ bisect_report -html report_dir bisect0001.out
+$ bisect-ppx-report -html report_dir bisect0001.out
 
 # See output
 $ open report_dir/index.html
@@ -97,3 +97,8 @@ A list of changes from the original `Bisect` implementation.
   _processes_ trying to write out their coverage to the same file,
   as happens when you instrument [OUnit](http://ounit.forge.ocamlcore.org/)
   tests.
+- `bisect-report` has been renamed `bisect-ppx-report` in order to avoid
+  clashes and in case we make future non-backwards compatible changes.
+  Furthermore, the most efficient (native) version of the tool is installed
+  if available.
+
