@@ -61,6 +61,8 @@ let report_unmatched_pair () =
 let eol = ('\010' | '\013' |"\013\010" | "\010\013")
 
 rule normal ignored marked stack = parse
+| "'\"'"                    { normal ignored marked stack lexbuf }
+| "'\\\"'"                  { normal ignored marked stack lexbuf }
 | "\""                      { string 0 ignored marked stack lexbuf }
 | "(*BISECT-IGNORE-BEGIN*)" { let line = get_line lexbuf in
                               Stack.push line stack;
@@ -84,10 +86,8 @@ rule normal ignored marked stack = parse
 | _                         { normal ignored marked stack lexbuf }
 
 and string n ignored marked stack = parse
-| "\\\""                    { if n = 0 then
-                                normal ignored marked stack lexbuf
-                              else
-                                comment n ignored marked stack lexbuf }
+| "\\\\"                    { string n ignored marked stack lexbuf }
+| "\\\""                    { string n ignored marked stack lexbuf }
 | "\""                      { if n = 0 then
                                 normal ignored marked stack lexbuf
                               else
@@ -102,6 +102,8 @@ and comment n ignored marked stack = parse
                                 normal ignored marked stack lexbuf
                               else
                                 comment (pred n) ignored marked stack lexbuf }
+| "'\"'"                    { comment n ignored marked stack lexbuf }
+| "'\\\"'"                  { comment n ignored marked stack lexbuf }
 | "\""                      { string n ignored marked stack lexbuf }
 | eol                       { incr_line lexbuf; comment n ignored marked stack lexbuf }
 | eof                       { fail lexbuf Unexpected_end_of_file }
