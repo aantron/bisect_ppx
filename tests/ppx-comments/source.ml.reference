@@ -12,3 +12,4 @@ let f2 b x = if b then x * x else x
 let s1 = Bisect.Runtime.mark "source.ml" 4; "\\\\"
 let s2 = Bisect.Runtime.mark "source.ml" 5; '"'
 let s3 = Bisect.Runtime.mark "source.ml" 6; '"'
+let s4 = Bisect.Runtime.mark "source.ml" 7; "a\"a"

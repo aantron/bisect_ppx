@@ -23,4 +23,8 @@ let f2 b x = (*BISECT-IGNORE*)
 (* Test the parsing of weird quote literals. *)
 let s1 = "\\\\"
 let s2 = '"'
+(* let s2 = '"' *)
 let s3 = '\"'
+(* let s3 = '\"' *)
+let s4 = "a\"a"
+
