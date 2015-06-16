@@ -19,3 +19,8 @@ let f2 b x = (*BISECT-IGNORE*)
     x * x    (*BISECT-IGNORE*)
   else       (*BISECT-IGNORE*)
     x        (*BISECT-IGNORE*)
+
+(* Test the parsing of weird quote literals. *)
+let s1 = "\\\\"
+let s2 = '"'
+let s3 = '\"'
