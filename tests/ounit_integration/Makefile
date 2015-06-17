@@ -4,7 +4,7 @@ XMLLINT=$(shell which xmllint)
 OUNIT=$(shell ocamlfind query ounit 2>/dev/null; echo $?)
 
 ifneq ($(OUNIT),)
-default: clean compile run report clean
+default: clean compile run report
 else
 default:
 endif
@@ -21,4 +21,4 @@ run::
 report::
 	@rm -fr result.csv
 	@$(REPORT) -csv result.csv bisect*.out # We can also pass '-verbose' here
-	@diff -q result.csv reference.csv && rm -f result.csv bisect*.out
+	@diff -q result.csv reference.csv && rm -f result.csv bisect*.out test.covered 
