@@ -49,6 +49,8 @@ let apply_nolabs ?loc lid el =
     (Exp.ident ?loc lid)
     (List.map (fun e -> ("",e)) el)
 
+let custom_mark_function file =
+  Printf.sprintf "___bisect_mark___%s" (Filename.chop_extension file)
 
 (* Creates the marking expression for given file, offset, and kind.
    Populates the 'points' global variable.
@@ -77,7 +79,7 @@ let marker file ofs kind marked =
           apply_nolabs ~loc (lid "Bisect.Runtime.mark") [strconst file; intconst idx]
       | InstrumentArgs.Fast
       | InstrumentArgs.Faster ->
-          apply_nolabs ~loc (lid "___bisect_mark___") [intconst idx]
+          apply_nolabs ~loc (lid (custom_mark_function file)) [intconst idx]
     in
     Some wrapped
 
@@ -177,6 +179,8 @@ let safe file =
 let pattern_var id =
   Pat.var (Location.mkloc id Location.none)
 
+(* This method is stateful and depends on `InstrumentState.set_points_for_file`
+   having been run on all the points in the rest of the AST. *)
 let faster file =
   let nb = List.length (InstrumentState.get_points_for_file file) in
   let ilid s = Exp.ident (lid s) in
@@ -234,7 +238,7 @@ let faster file =
     Exp.(let_ Nonrecursive vb (sequence marks func))
   in
   InstrumentState.add_file file;
-  Str.value Nonrecursive [ Vb.mk (pattern_var "___bisect_mark___") e]
+  Str.value Nonrecursive [ Vb.mk (pattern_var (custom_mark_function file)) e]
 
 let get_filename = function
   | [] -> None
@@ -394,14 +398,17 @@ class instrumenter = object (self)
           ast
         else
           if not (InstrumentState.is_file file) then
-            let header =
               match !InstrumentArgs.mode with
-              | InstrumentArgs.Safe   -> safe file
+              | InstrumentArgs.Safe   ->
+                  let head = safe file in
+                  let rest = super#structure ast in
+                  head :: rest
               | InstrumentArgs.Fast
-              | InstrumentArgs.Faster -> faster file
-            in
-            header :: (super#structure ast)
+              | InstrumentArgs.Faster ->
+                  let rest = super#structure ast in
+                  let head = faster file in
+                  head :: rest
           else
-            super#structure ast
+            super#structure ast 
 
 end

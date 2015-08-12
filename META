@@ -16,3 +16,10 @@ package "runtime" (
   archive(native,mt)="bisect.cmxa bisectThread.cmx"
   archive(java,mt)="bisect.cmja bisectThread.cmj"
 )
+
+package "fast" (
+  requires="bisect_ppx.runtime"
+  ppx="./bisect_ppx.byte"
+  ppxopt = "bisect_ppx.fast,-mode bisect_ppx.fast,fast"
+  description="The Bisect modules needed for instrumentation, running in fast mode."
+)
