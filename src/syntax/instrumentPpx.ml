@@ -50,7 +50,11 @@ let apply_nolabs ?loc lid el =
     (List.map (fun e -> ("",e)) el)
 
 let custom_mark_function file =
-  Printf.sprintf "___bisect_mark___%s" (Filename.chop_extension file)
+  Printf.sprintf "___bisect_mark___%s"
+    (* Turn's out that the variable name syntax isn't checked again,
+       so directory separtors '\' seem to be fine,
+       and this extension chop might not be necessary. *)
+    (Filename.chop_extension file)
 
 (* Creates the marking expression for given file, offset, and kind.
    Populates the 'points' global variable.
@@ -90,7 +94,7 @@ let rec is_bare_mapping e =
   match e.pexp_desc with
   | Pexp_function _ -> true
   | Pexp_match _ -> true
-  | Pexp_sequence (e', _) -> is_bare_mapping e' 
+  | Pexp_sequence (e', _) -> is_bare_mapping e'
   | _ -> false
 
 (* Wraps an expression with a marker, returning the passed expression
@@ -108,7 +112,7 @@ let wrap_expr k e =
     e
   else
     let ofs = loc.Location.loc_start.Lexing.pos_cnum in
-    let file = loc.Location.loc_start.Lexing.pos_fname in
+    let file = !Location.input_name in
     let line = loc.Location.loc_start.Lexing.pos_lnum in
     let c = CommentsPpx.get file in
     let ignored =
@@ -237,14 +241,7 @@ let faster file =
   let e =
     Exp.(let_ Nonrecursive vb (sequence marks func))
   in
-  InstrumentState.add_file file;
   Str.value Nonrecursive [ Vb.mk (pattern_var (custom_mark_function file)) e]
-
-let get_filename = function
-  | [] -> None
-  | si :: _ ->
-    let f,_,_ = Location.get_pos_info si.pstr_loc.Location.loc_start in
-    Some f
 
 (*
 let typoo si =
@@ -391,24 +388,22 @@ class instrumenter = object (self)
     if extension_guard || attribute_guard then
       super#structure ast
     else
-      match get_filename ast with
-      | None -> ast
-      | Some file ->
-        if file = "//toplevel//" then
-          ast
+      let file = !Location.input_name in
+      if file = "//toplevel//" then
+        ast
+      else
+        if not (InstrumentState.is_file file) then
+          match !InstrumentArgs.mode with
+          | InstrumentArgs.Safe   ->
+              let head = safe file in
+              let rest = super#structure ast in
+              head :: rest
+          | InstrumentArgs.Fast
+          | InstrumentArgs.Faster ->
+              let rest = super#structure ast in
+              let head = faster file in
+              head :: rest
         else
-          if not (InstrumentState.is_file file) then
-              match !InstrumentArgs.mode with
-              | InstrumentArgs.Safe   ->
-                  let head = safe file in
-                  let rest = super#structure ast in
-                  head :: rest
-              | InstrumentArgs.Fast
-              | InstrumentArgs.Faster ->
-                  let rest = super#structure ast in
-                  let head = faster file in
-                  head :: rest
-          else
-            super#structure ast 
+          super#structure ast
 
 end
