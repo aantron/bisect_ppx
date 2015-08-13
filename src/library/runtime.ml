@@ -29,12 +29,27 @@ let string_of_message = function
   | Unable_to_write_file ->
       " *** Bisect runtime was unable to write file."
 
-let verbose msg =
-  try
-    match String.uppercase (Sys.getenv "BISECT_SILENT") with
-    | "YES" | "ON" -> ()
-    | _ -> prerr_endline (string_of_message msg)
-  with Not_found -> prerr_endline (string_of_message msg)
+let full_path fname =
+  if Filename.is_implicit fname then
+    Filename.concat Filename.current_dir_name fname
+  else
+    fname
+
+let env_to_fname env default = try Sys.getenv env with Not_found -> default
+
+let verbose =
+  let fname = env_to_fname "BISECT_SILENT" "bisect.log" in
+  match String.uppercase fname with
+  | "YES" | "ON" -> fun _ -> ()
+  | "ERR"        -> fun msg -> prerr_endline (string_of_message msg)
+  | _uc_fname    ->
+      let oc_l = lazy (
+        let oc = open_out_gen [Open_append] 0o244 (full_path fname) in
+        at_exit (fun () -> close_out_noerr oc);
+        oc)
+      in
+      fun msg ->
+        Printf.fprintf (Lazy.force oc_l) "%s\n" (string_of_message msg)
 
 let no_hook = fun () -> ()
 
@@ -97,15 +112,7 @@ let random_suffix = ref false
 
 let file_channel () =
   !hook_before ();
-  let base_name =
-    try
-      let env = Sys.getenv "BISECT_FILE" in
-      if Filename.is_implicit env then
-        Filename.concat Filename.current_dir_name env
-      else
-        env
-    with Not_found ->
-      Filename.concat Filename.current_dir_name "bisect" in
+  let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
   let suffix = ref 0 in
   if !random_suffix then Random.self_init ();
   let next_name () =

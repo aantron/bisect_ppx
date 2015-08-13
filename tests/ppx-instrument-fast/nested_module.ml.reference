@@ -1,0 +1,14 @@
+let ___bisect_mark___nested_module =
+  let marks = Array.make 3 0
+  and (hook_before,hook_after) = Bisect.Runtime.get_hooks () in
+  Bisect.Runtime.init_with_array "nested_module.ml" marks true;
+  (function
+   | idx ->
+       ((hook_before ();
+         (let curr = marks.(idx) in
+          marks.(idx) <-
+          if curr < Pervasives.max_int then Pervasives.succ curr else curr));
+        hook_after ()))
+let x = ___bisect_mark___nested_module 0; 3
+module F = struct let y x = ___bisect_mark___nested_module 1; x + 4 end
+let z x = ___bisect_mark___nested_module 2; x + 5

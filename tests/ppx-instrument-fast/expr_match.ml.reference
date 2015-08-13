@@ -1,50 +1,51 @@
-let ___bisect_mark___ =
-  let marks = Array.make 18 0 and (hook_before,hook_after) =
-    Bisect.Runtime.get_hooks () in
+let ___bisect_mark___expr_match =
+  let marks = Array.make 18 0
+  and (hook_before,hook_after) = Bisect.Runtime.get_hooks () in
   Bisect.Runtime.init_with_array "expr_match.ml" marks true;
-  (fun idx ->
-     (hook_before ();
-      (let curr = marks.(idx) in
-       marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr));
-     hook_after ())
+  (function
+   | idx ->
+       ((hook_before ();
+         (let curr = marks.(idx) in
+          marks.(idx) <-
+          if curr < Pervasives.max_int then Pervasives.succ curr else curr));
+        hook_after ()))
 let () =
   match x with
-  | 0 -> (( ___bisect_mark___ ) 0; print_endline "abc")
-  | 1 -> (( ___bisect_mark___ ) 1; print_endline "def")
-  | _ -> (( ___bisect_mark___ ) 2; print_endline "ghi")
+  | 0 -> (___bisect_mark___expr_match 0; print_endline "abc")
+  | 1 -> (___bisect_mark___expr_match 1; print_endline "def")
+  | _ -> (___bisect_mark___expr_match 2; print_endline "ghi")
 let f =
   function
-  | 0 -> (( ___bisect_mark___ ) 3; print_endline "abc")
-  | 1 -> (( ___bisect_mark___ ) 4; print_endline "def")
-  | _ -> (( ___bisect_mark___ ) 5; print_endline "ghi")
+  | 0 -> (___bisect_mark___expr_match 3; print_endline "abc")
+  | 1 -> (___bisect_mark___expr_match 4; print_endline "def")
+  | _ -> (___bisect_mark___expr_match 5; print_endline "ghi")
 let () =
   match x with
   | 0 ->
-      ((( ___bisect_mark___ ) 7; print_string "abc");
-       ( ___bisect_mark___ ) 6;
+      ((___bisect_mark___expr_match 7; print_string "abc");
+       ___bisect_mark___expr_match 6;
        print_newline ())
   | 1 ->
-      ((( ___bisect_mark___ ) 9; print_string "def");
-       ( ___bisect_mark___ ) 8;
+      ((___bisect_mark___expr_match 9; print_string "def");
+       ___bisect_mark___expr_match 8;
        print_newline ())
   | _ ->
-      ((( ___bisect_mark___ ) 11; print_string "ghi");
-       ( ___bisect_mark___ ) 10;
+      ((___bisect_mark___expr_match 11; print_string "ghi");
+       ___bisect_mark___expr_match 10;
        print_newline ())
 let f =
   function
   | 0 ->
-      ((( ___bisect_mark___ ) 13; print_string "abc");
-       ( ___bisect_mark___ ) 12;
+      ((___bisect_mark___expr_match 13; print_string "abc");
+       ___bisect_mark___expr_match 12;
        print_newline ())
   | 1 ->
-      ((( ___bisect_mark___ ) 15; print_string "def");
-       ( ___bisect_mark___ ) 14;
+      ((___bisect_mark___expr_match 15; print_string "def");
+       ___bisect_mark___expr_match 14;
        print_newline ())
   | _ ->
-      ((( ___bisect_mark___ ) 17; print_string "ghi");
-       ( ___bisect_mark___ ) 16;
+      ((___bisect_mark___expr_match 17; print_string "ghi");
+       ___bisect_mark___expr_match 16;
        print_newline ())
 File "expr_match.ml", line 2, characters 8-9:
 Error: Unbound value x

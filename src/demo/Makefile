@@ -5,6 +5,12 @@ build:
 build_with_source:
 	ocamlfind ocamlc -package bisect_ppx -linkpkg actors.ml test.ml -dsource -o test.covered
 
+fast:
+	ocamlfind ocamlc -w @44 -package bisect_ppx.fast -linkpkg actors.ml test.ml -o test.covered
+
+fast_with_source:
+	ocamlfind ocamlc -w @44 -package bisect_ppx.fast -linkpkg actors.ml test.ml -dsource -o test.covered
+
 run:
 	./test.covered
 
