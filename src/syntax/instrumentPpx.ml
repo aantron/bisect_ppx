@@ -400,6 +400,12 @@ class instrumenter = object (self)
               head :: rest
           | InstrumentArgs.Fast
           | InstrumentArgs.Faster ->
+              (* We have to add this here, before we process the rest of the
+                 structure, because that may also have structures contained
+                 there-in, but we'll add the header after processing all of
+                 those declarations so that we know how many instrumentations
+                 there are. *)
+              InstrumentState.add_file file;
               let rest = super#structure ast in
               let head = faster file in
               head :: rest
