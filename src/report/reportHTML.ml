@@ -285,7 +285,7 @@ let output_html verbose tab_size title no_navbar no_folding in_file out_file scr
                      ReportStat.update stats p.Common.kind (nb > 0);
                      (p.Common.offset, nb))
                    cmp_content) in
-  let in_channel, out_channel = open_both in_file out_file in
+  let in_channel, out_channel = open_both (resolver in_file) out_file in
   (try
     let navbar_script =
       if no_navbar then
