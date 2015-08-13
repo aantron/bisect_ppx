@@ -33,15 +33,19 @@
     variable. The actual file name is the first non-existing
     "<base><n>.out" file where <base> is the base name and <n> a natural
     number value padded with zeroes to 4 digits (i.e. "0001", "0002", and
-    so on).
+    so on). This behavior is modified to be a random 4 digits, if
+    {!random_suffix} is set, as in thread mode to avoid race conditions.
 
     Another environment variable can be used to customize the behaviour of
     Bisect: "BISECT_SILENT". If this variable is set to "YES" or "ON"
     (ignoring case) then Bisect will not output any message (its default
-    value is "OFF"). If not silent, Bisect will output a message on the
-    standard error in various situations such as:
+    value is "OFF"). Otherwise Bisect will output a message in various
+    situations such as:
     - when the file cannot be created at program initialization;
     - when the data cannot be written at program termination.
+    If "BISECT_SILENT" is set to "ERR" (ignoring case) these error messages are
+    routed to stderr, otherwise "BISECT_SILENT" is used to determine a filename
+    for this output, defaults to "bisect.log".
 
     Because of the initialization part of Bisect, one is advised to link
     this module as one of the first ones of the program. Indeed, when
