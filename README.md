@@ -101,4 +101,7 @@ A list of changes from the original `Bisect` implementation.
   clashes and in case we make future non-backwards compatible changes.
   Furthermore, the most efficient (native) version of the tool is installed
   if available.
-
+- Runtime logging now default to a file: bisect.log. To regain original
+  behavior set `BISECT_SILENT=ERR`. You can use the same variable to set
+  a filename; `"YES"` or `"ON"` will still turn off runtime logging
+  altogether. 
