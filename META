@@ -1,11 +1,11 @@
 description="code coverage tool via ppx"
 requires="bisect_ppx.runtime"
-version="0.2.3"
+version="0.2.4"
 
 ppx = "./bisect_ppx.byte"
 
 package "runtime" (
-  version="0.2.3"
+  version="0.2.4"
   description="The Bisect modules needed for instrumentation."
 
   archive(byte)="bisect.cma"

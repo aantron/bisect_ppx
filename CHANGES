@@ -1,5 +1,16 @@
+Version 0.2.4 (2015-08-14):
+---------------------------
+  - Fast mode returns: create one array to track instrumented points per
+    implementation file (module). Created a separate findlib package:
+    bisect_ppx.fast to implement this method (just calls the ppx rewriter
+    with the appropriate argument).
+  - Runtime logging now default to a file: bisect.log. To regain original
+    behavior set BISECT_SILENT=ERR. You can use the same variable to set
+    a filename.
+  - Fixed bug for creating html reports off of implicit filenames.
+
 Version 0.2.3 (2015-06-17):
-------------------
+--------------------------
   - @hnrgrgr Fixed more comment lexing bugs
 
 Version 0.2.2 (2015-06-12):
