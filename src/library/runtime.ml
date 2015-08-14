@@ -44,7 +44,10 @@ let verbose =
   | "ERR"        -> fun msg -> prerr_endline (string_of_message msg)
   | _uc_fname    ->
       let oc_l = lazy (
-        let oc = open_out_gen [Open_append] 0o244 (full_path fname) in
+        (* A weird race condition is caused if we use this invocation instead
+          let oc = open_out_gen [Open_append] 0o244 (full_path fname) in
+          Note that verbose is called only inside of critical sections. *)
+        let oc = open_out_bin (full_path fname) in
         at_exit (fun () -> close_out_noerr oc);
         oc)
       in
@@ -144,8 +147,6 @@ let dump () =
       with _ ->
         verbose Unable_to_write_file);
       close_out_noerr channel
-
-
 
 let () =
   at_exit dump
