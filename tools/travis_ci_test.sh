@@ -22,7 +22,7 @@ travis_install_on_osx () {
     sudo installer -verbose -pkg /Volumes/XQuartz-2.7.6/XQuartz.pkg -target /
 
     brew update
-    brew install opam --HEAD
+    brew install opam
     export opam_init_options="--comp=$OCAML_VERSION"
     export opam_pin_add="add"
 }
