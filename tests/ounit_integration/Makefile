@@ -4,7 +4,7 @@ XMLLINT=$(shell which xmllint)
 OUNIT=$(shell ocamlfind query ounit 2>/dev/null; echo $?)
 
 ifneq ($(OUNIT),)
-default: clean compile run report
+default: clean compile run ls report
 else
 default:
 endif
@@ -17,6 +17,9 @@ compile::
 
 run::
 	@./test.covered
+
+ls::
+	ls
 
 report::
 	@rm -fr result.csv
