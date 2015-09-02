@@ -111,31 +111,24 @@ let mark fn pt =
 let mark_array fn pts =
   Array.iter (mark fn) pts
 
-let random_suffix = ref false
-
 let file_channel () =
   !hook_before ();
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
   let suffix = ref 0 in
-  if !random_suffix then Random.self_init ();
   let next_name () =
-    if !random_suffix
-    then suffix := Random.int 10000
-    else incr suffix;
-    Printf.sprintf "%s%04d.out" base_name !suffix in
-  let actual_name = ref (next_name ()) in
-  while Sys.file_exists !actual_name do
-    actual_name := next_name ()
-  done;
-  let ic_opt =
-    try
-      Some (open_out_bin !actual_name)
-    with _ ->
-      verbose Unable_to_create_file;
-      None
+    incr suffix;
+    Printf.sprintf "%s%04d.out" base_name !suffix
   in
+  let rec ic_opt_loop actual_name =
+    try
+      Some (open_out_gen [Open_wronly; Open_binary; Open_creat; Open_excl] 0o644 actual_name)
+    with Sys_error _ -> ic_opt_loop (next_name ())
+       | _ -> verbose Unable_to_create_file;
+              None
+  in
+  let channel_opt = ic_opt_loop (next_name ()) in
   !hook_after ();
-  ic_opt
+  channel_opt
 
 let dump () =
   match file_channel () with

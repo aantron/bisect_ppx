@@ -1,3 +1,7 @@
+Version 0.2.5
+-------------
+  - Revert the _Random_ indices for output files, just create multiple
+
 Version 0.2.4 (2015-08-14):
 ---------------------------
   - Fast mode returns: create one array to track instrumented points per

@@ -18,7 +18,6 @@
 
 let () =
   let mutex = Mutex.create () in
-  Bisect.Runtime.random_suffix := true;
   Bisect.Runtime.register_hooks
     (fun () -> Mutex.lock mutex)
     (fun () -> Mutex.unlock mutex)
