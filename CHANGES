@@ -1,6 +1,7 @@
 Version 0.2.5
 -------------
   - Revert the _Random_ indices for output files, just create multiple
+  - Correct dependency on Str in META.
 
 Version 0.2.4 (2015-08-14):
 ---------------------------
