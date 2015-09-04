@@ -27,16 +27,21 @@ let get filename =
   try
     Hashtbl.find comments_cache filename
   with Not_found ->
-    let comments = { ignored_intervals = []; marked_lines = [] } in
-    Hashtbl.add comments_cache filename comments;
+    (* We many have multiple 'filenames' inside of a file
+       because of the line directive. *)
     let chan = open_in filename in
     try
       let lexbuf = Lexing.from_channel chan in
-      let ignored, marked = CommentsLexer.normal [] [] (Stack.create ()) lexbuf in
-      comments.ignored_intervals <- ignored;
-      comments.marked_lines <- marked;
+      let stack = Stack.create () in
+      let lst = CommentsLexer.normal [] [] stack (filename,[]) lexbuf in
+      let as_comments =
+        List.map (fun (filename, (ignored_intervals,marked_lines)) ->
+          let comments = { ignored_intervals ; marked_lines } in
+          Hashtbl.add comments_cache filename comments;
+          (filename, comments)) lst
+      in
       close_in_noerr chan;
-      comments
+      List.assoc filename as_comments
     with e ->
       close_in_noerr chan;
       raise e

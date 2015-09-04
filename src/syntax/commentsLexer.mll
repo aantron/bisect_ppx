@@ -56,17 +56,44 @@ let report_unmatched () =
 let report_unmatched_pair () =
   prerr_endline "unmatched '(*BISECT-IGNORE-BEGIN*)' and '(*BISECT-IGNORE-END*)' comments"
 
+(* From the OCaml source code *)
+let update_loc lexbuf opt_file line =
+  let pos = lexbuf.Lexing.lex_curr_p in
+  let new_file = match opt_file with
+                 | None -> pos.Lexing.pos_fname
+                 | Some f -> f
+  in
+  lexbuf.Lexing.lex_curr_p <- { pos with
+    Lexing.pos_fname = new_file;
+    Lexing.pos_lnum = line;
+    Lexing.pos_bol = pos.Lexing.pos_cnum;
+  }
+
+let name_to_new_state ignored marked stack (old_filename,acc as files) = function
+  | Some new_filename when new_filename <> old_filename ->
+      if not (Stack.is_empty stack) then report_unmatched_pair();
+      let nacc = (old_filename, (ignored, marked))::acc in
+      ([],[],Stack.create (),(new_filename, nacc))
+  | _ -> (ignored, marked, stack, files)
 }
 
 let eol = ('\010' | '\013' |"\013\010" | "\010\013")
 
-rule normal ignored marked stack = parse
-| "'\"'"                    { normal ignored marked stack lexbuf }
-| "'\\\"'"                  { normal ignored marked stack lexbuf }
-| "\""                      { string 0 ignored marked stack lexbuf }
+rule normal ignored marked stack files = parse
+| "#" [' ' '\t']* (['0'-'9']+ as num) [' ' '\t']*
+    ('\"' ([^ '\010' '\013' '\"']* as name) '\"')?
+    [^ '\010' '\013']* '\010'
+    { update_loc lexbuf name (int_of_string num);
+      let (i,m,s,f) = name_to_new_state ignored marked stack files name in
+      normal i m s f lexbuf
+    }
+
+| "'\"'"                    { normal ignored marked stack files lexbuf }
+| "'\\\"'"                  { normal ignored marked stack files lexbuf }
+| "\""                      { string 0 ignored marked stack files lexbuf }
 | "(*BISECT-IGNORE-BEGIN*)" { let line = get_line lexbuf in
                               Stack.push line stack;
-                              normal ignored marked stack lexbuf }
+                              normal ignored marked stack files lexbuf }
 | "(*BISECT-IGNORE-END*)"   { let ignored =
                                 try
                                   let bib = Stack.pop stack in
@@ -74,37 +101,40 @@ rule normal ignored marked stack = parse
                                 with Stack.Empty ->
                                   report_unmatched ();
                                   ignored in
-                              normal ignored marked stack lexbuf }
+                              normal ignored marked stack files lexbuf }
 | "(*BISECT-IGNORE*)"       { let line = get_line lexbuf in
-                              normal ((line, line) :: ignored) marked stack lexbuf }
-| "(*BISECT-VISIT*)"        { normal ignored (get_line lexbuf :: marked) stack lexbuf }
-| "(*BISECT-MARK*)"         { normal ignored (get_line lexbuf :: marked) stack lexbuf }
-| "(*"                      { comment 1 ignored marked stack lexbuf }
-| eol                       { incr_line lexbuf; normal ignored marked stack lexbuf }
+                              normal ((line, line) :: ignored) marked stack files lexbuf }
+| "(*BISECT-VISIT*)"        { normal ignored (get_line lexbuf :: marked) stack files lexbuf }
+| "(*BISECT-MARK*)"         { normal ignored (get_line lexbuf :: marked) stack files lexbuf }
+| "(*"                      { comment 1 ignored marked stack files lexbuf }
+| eol                       { incr_line lexbuf;
+                              normal ignored marked stack files lexbuf }
 | eof                       { if not (Stack.is_empty stack) then report_unmatched_pair ();
-                              (ignored, marked) }
-| _                         { normal ignored marked stack lexbuf }
+                              let (filename,acc) = files in
+                              (filename, (ignored, marked))::acc }
+| _                         { normal ignored marked stack files lexbuf }
 
-and string n ignored marked stack = parse
-| "\\\\"                    { string n ignored marked stack lexbuf }
-| "\\\""                    { string n ignored marked stack lexbuf }
+and string n ignored marked stack files = parse
+| "\\\\"                    { string n ignored marked stack files lexbuf }
+| "\\\""                    { string n ignored marked stack files lexbuf }
 | "\""                      { if n = 0 then
-                                normal ignored marked stack lexbuf
+                                normal ignored marked stack files lexbuf
                               else
-                                comment n ignored marked stack lexbuf }
-| eol                       { incr_line lexbuf; string n ignored marked stack lexbuf }
+                                comment n ignored marked stack files lexbuf }
+| eol                       { incr_line lexbuf;
+                              string n ignored marked stack files lexbuf }
 | eof                       { fail lexbuf Unexpected_end_of_file }
-| _                         { string n ignored marked stack lexbuf }
+| _                         { string n ignored marked stack files lexbuf }
 
-and comment n ignored marked stack = parse
-| "(*"                      { comment (succ n) ignored marked stack lexbuf }
+and comment n ignored marked stack files = parse
+| "(*"                      { comment (succ n) ignored marked stack files lexbuf }
 | "*)"                      { if n = 1 then
-                                normal ignored marked stack lexbuf
+                                normal ignored marked stack files lexbuf
                               else
-                                comment (pred n) ignored marked stack lexbuf }
-| "'\"'"                    { comment n ignored marked stack lexbuf }
-| "'\\\"'"                  { comment n ignored marked stack lexbuf }
-| "\""                      { string n ignored marked stack lexbuf }
-| eol                       { incr_line lexbuf; comment n ignored marked stack lexbuf }
+                                comment (pred n) ignored marked stack files lexbuf }
+| "'\"'"                    { comment n ignored marked stack files lexbuf }
+| "'\\\"'"                  { comment n ignored marked stack files lexbuf }
+| "\""                      { string n ignored marked stack files lexbuf }
+| eol                       { incr_line lexbuf; comment n ignored marked stack files lexbuf }
 | eof                       { fail lexbuf Unexpected_end_of_file }
-| _                         { comment n ignored marked stack lexbuf }
+| _                         { comment n ignored marked stack files lexbuf }

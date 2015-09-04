@@ -112,19 +112,22 @@ let wrap_expr k e =
     e
   else
     let ofs = loc.Location.loc_start.Lexing.pos_cnum in
-    let file = !Location.input_name in
+    (* Different files because of the line directive *)
+    let file = loc.Location.loc_start.Lexing.pos_fname in
     let line = loc.Location.loc_start.Lexing.pos_lnum in
     let c = CommentsPpx.get file in
     let ignored =
       List.exists
         (fun (lo, hi) ->
           line >= lo && line <= hi)
-        c.CommentsPpx.ignored_intervals in
+        c.CommentsPpx.ignored_intervals
+    in
     if ignored then
       e
     else
       let marked = List.mem line c.CommentsPpx.marked_lines in
-      match marker file ofs k marked with
+      let marker_file = !Location.input_name in
+      match marker marker_file ofs k marked with
       | Some w -> Exp.sequence ~loc w e
       | None   -> e
 
