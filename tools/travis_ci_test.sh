@@ -59,6 +59,7 @@ sh configure
 echo Compiling
 make all
 
+opam install ppx_blob ounit # used in test suite.
 echo Testing
 make tests
 

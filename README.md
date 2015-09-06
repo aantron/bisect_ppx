@@ -99,3 +99,15 @@ A list of changes from the original `Bisect` implementation.
   behavior set `BISECT_SILENT=ERR`. You can use the same variable to set
   a filename; `"YES"` or `"ON"` will still turn off runtime logging
   altogether. 
+- Comments now obey OCaml line directives.
+
+  OCaml source code has [line directives](http://caml.inria.fr/pub/docs/manual-ocaml/lex.html#linenum-directive) (ex: `# 1 "foo.ml"`) that change the
+  position, and more importantly for our case, filenames that are being
+  lexed. `bisect_ppx` now keeps tracks of these changes only for the purposes
+  of **BISECT comments** (ex: `(*BISECT-IGNORE-BEGIN*)`).
+  
+  The overall instrumentation for code-coverage purposes ignores them as all of
+  the code of one post-preprocessed file is considered a part of the same OCaml
+  module [structure](http://caml.inria.fr/pub/docs/manual-ocaml/moduleexamples.html#sec18).
+  Code instrumented after a filename change, will still be reported as in the
+  original filename.
