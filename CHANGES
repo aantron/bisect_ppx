@@ -1,5 +1,5 @@
-Version 0.2.5
--------------
+Version 0.2.5 (2015-09-07):
+---------------------------
   - Revert the _Random_ indices for output files, just create multiple
   - Correct dependency on Str in META.
   - Obey OCamls line directive when looking for BISECT comments.
