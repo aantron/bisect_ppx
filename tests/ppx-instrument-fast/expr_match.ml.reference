@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_match =
-  let marks = Array.make 18 0
+  let marks = Array.make 30 0
   and (hook_before,hook_after) = Bisect.Runtime.get_hooks () in
   Bisect.Runtime.init_with_array "expr_match.ml" marks true;
   (function
@@ -9,7 +9,7 @@ let ___bisect_mark___expr_match =
           marks.(idx) <-
           if curr < Pervasives.max_int then Pervasives.succ curr else curr));
         hook_after ()))
-let () =
+let f x =
   match x with
   | 0 -> (___bisect_mark___expr_match 0; print_endline "abc")
   | 1 -> (___bisect_mark___expr_match 1; print_endline "def")
@@ -19,7 +19,7 @@ let f =
   | 0 -> (___bisect_mark___expr_match 3; print_endline "abc")
   | 1 -> (___bisect_mark___expr_match 4; print_endline "def")
   | _ -> (___bisect_mark___expr_match 5; print_endline "ghi")
-let () =
+let f x =
   match x with
   | 0 ->
       ((___bisect_mark___expr_match 7; print_string "abc");
@@ -47,5 +47,33 @@ let f =
       ((___bisect_mark___expr_match 17; print_string "ghi");
        ___bisect_mark___expr_match 16;
        print_newline ())
-File "expr_match.ml", line 2, characters 8-9:
-Error: Unbound value x
+type t =
+  | Foo
+  | Bar
+let f x =
+  match x with
+  | Foo  ->
+      ((___bisect_mark___expr_match 19; print_string "foo");
+       ___bisect_mark___expr_match 18;
+       print_newline ())
+  | Bar  ->
+      ((___bisect_mark___expr_match 21; print_string "bar");
+       ___bisect_mark___expr_match 20;
+       print_newline ())
+let f =
+  function
+  | Foo  ->
+      ((___bisect_mark___expr_match 23; print_string "foo");
+       ___bisect_mark___expr_match 22;
+       print_newline ())
+  | Bar  ->
+      ((___bisect_mark___expr_match 25; print_string "bar");
+       ___bisect_mark___expr_match 24;
+       print_newline ())
+let f x =
+  (___bisect_mark___expr_match 29;
+   ((function
+     | Foo  -> (___bisect_mark___expr_match 26; "foo")
+     | Bar  -> (___bisect_mark___expr_match 27; "bar")) x) |> print_string);
+  ___bisect_mark___expr_match 28;
+  print_newline ()
