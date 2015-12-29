@@ -325,6 +325,9 @@ class instrumenter = object (self)
       | Pexp_match (e, l) ->
           List.map (wrap_case Common.Match) l
           |> Exp.match_ ~loc e
+      | Pexp_function l ->
+          List.map (wrap_case Common.Match) l
+          |> Exp.function_ ~loc
       | Pexp_try (e, l) ->
           List.map (wrap_case Common.Try) l
           |> Exp.try_ ~loc (wrap_expr Common.Sequence e)

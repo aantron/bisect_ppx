@@ -32,3 +32,11 @@ let f x =
 let f = function
   | Foo -> print_string "foo"; print_newline ()
   | Bar -> print_string "bar"; print_newline ()
+
+let f x =
+  (function
+  | Foo -> "foo"
+  | Bar -> "bar")
+  x
+  |> print_string;
+  print_newline ()

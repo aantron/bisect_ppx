@@ -60,3 +60,11 @@ let f =
       ((Bisect.Runtime.mark "expr_match.ml" 25; print_string "bar");
        Bisect.Runtime.mark "expr_match.ml" 24;
        print_newline ())
+let f x =
+  (Bisect.Runtime.mark "expr_match.ml" 29;
+   ((function
+     | Foo  -> (Bisect.Runtime.mark "expr_match.ml" 26; "foo")
+     | Bar  -> (Bisect.Runtime.mark "expr_match.ml" 27; "bar")) x) |>
+     print_string);
+  Bisect.Runtime.mark "expr_match.ml" 28;
+  print_newline ()
