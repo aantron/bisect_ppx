@@ -12,3 +12,10 @@ let g' x y =
   (Bisect.Runtime.mark "expr_binding.ml" 9; print_endline x);
   Bisect.Runtime.mark "expr_binding.ml" 8;
   print_endline y
+let () =
+  Bisect.Runtime.mark "expr_binding.ml" 14;
+  (let f _ = Bisect.Runtime.mark "expr_binding.ml" 12; 0 in
+   Bisect.Runtime.mark "expr_binding.ml" 13;
+   (let _g _ = Bisect.Runtime.mark "expr_binding.ml" 10; 1 in
+    Bisect.Runtime.mark "expr_binding.ml" 11;
+    print_endline (string_of_int (f ()))))

@@ -313,6 +313,9 @@ class instrumenter = object (self)
             List.map (fun vb ->
             {vb with pvb_expr = wrap_expr Common.Binding vb.pvb_expr}) l in
           Exp.let_ ~loc rec_flag l (wrap_expr Common.Binding e)
+      | Pexp_fun (al, eo, p, e) ->
+          let eo = map_opt (wrap_expr Common.Binding) eo in
+          Exp.fun_ ~loc al eo p (wrap_func Common.Binding e)
       | Pexp_apply (e1, [l2, e2; l3, e3]) ->
           (match e1.pexp_desc with
           | Pexp_ident ident

@@ -15,3 +15,8 @@ let g x y z = (x + y) * z
 let g' x y =
   print_endline x;
   print_endline y
+
+let () =
+  let f _ = 0 in
+  let _g _ = 1 in
+  print_endline (string_of_int (f ()))
