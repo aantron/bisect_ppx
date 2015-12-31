@@ -21,3 +21,15 @@ setup.data
 setup.log
 
 Makefile.config
+
+# test results
+tests/report/result.*
+*.result
+tests/_log
+
+# targets
+bisect-report
+bisect-report.opt
+bisect.itarget
+bisect.mlpack
+bisect.odocl
