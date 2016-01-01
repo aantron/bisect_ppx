@@ -1,4 +1,3 @@
-PATH_OCAML_BIN=/Users/leonidrozenberg/.opam/4.02.1/bin/
 
 default: clean
 	@sh m1_blob.sh 2> blob1.result; \
