@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_binding =
-  let marks = Array.make 10 0
+  let marks = Array.make 15 0
   and (hook_before,hook_after) = Bisect.Runtime.get_hooks () in
   Bisect.Runtime.init_with_array "expr_binding.ml" marks true;
   (function
@@ -22,3 +22,9 @@ let g' x y =
   (___bisect_mark___expr_binding 9; print_endline x);
   ___bisect_mark___expr_binding 8;
   print_endline y
+let () =
+  ___bisect_mark___expr_binding 14;
+  (let f _ = ___bisect_mark___expr_binding 12; 0 in
+   ___bisect_mark___expr_binding 13;
+   (let _g _ = ___bisect_mark___expr_binding 10; 1 in
+    ___bisect_mark___expr_binding 11; print_endline (string_of_int (f ()))))
