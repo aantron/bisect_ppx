@@ -1,0 +1,2 @@
+<*>: include
+<**/test*>: package(oUnit)

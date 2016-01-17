@@ -23,9 +23,7 @@ setup.log
 Makefile.config
 
 # test results
-tests/report/result.*
-*.result
-tests/_log
+tests/_scratch
 
 # targets
 bisect-report

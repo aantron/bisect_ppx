@@ -65,7 +65,7 @@ doc: FORCE
 	cp $(PATH_BUILD)/$(PROJECT_NAME).docdir/*.html $(PATH_BUILD)/$(PROJECT_NAME).docdir/*.css $(PATH_OCAMLDOC)
 
 tests: FORCE
-	test -f $(PATH_TESTS)/Makefile && (cd $(PATH_TESTS) && $(MAKE) $(MAKE_QUIET) all && cd ..) || true
+	make $(MAKE_QUIET) -C $(PATH_TESTS) all
 
 clean: FORCE
 	rm -rf bisect-report bisect-report.opt

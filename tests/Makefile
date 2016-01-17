@@ -1,56 +1,48 @@
 #
-# This file is part of Bisect.
-# Copyright (C) 2009-2012 Xavier Clerc.
+# This file is part of Bisect_ppx.
+# Copyright (C) 2016 Anton Bachin.
 #
 # Bisect is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published by
+# it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # Bisect is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
+# GNU General Public License for more details.
 #
-# You should have received a copy of the GNU Lesser General Public License
+# You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include ../Makefile.config
+CFLAGS := -cflags -w,+A-4-48
+OCAMLBUILD_FLAGS := -use-ocamlfind -no-links $(CFLAGS)
+
+RUN := ocamlbuild $(OCAMLBUILD_FLAGS) test_main.native -- -runner sequential
 
 default: FORCE
 	@echo 'Available targets:'
 	@echo '  all              runs all tests'
-	@echo '  one NAME=dir     runs the test whose name is passed'
-	@echo '  clean            deletes log and result files'
-	@echo '  log              print log for last execution'
+	@echo '  one NAME=name    runs the test whose name is passed'
+	@echo '  list             list available tests'
+	@echo '  log              show log for last execution'
+	@echo '  clean            deletes build and log files'
 
-all: clean
-	@for file in *; do \
-	  if [ -d $$file ]; then \
-	    $(MAKE) one NAME=$$file; \
-	  fi \
-	done
-	@echo ''
-	@echo "`grep '^ error' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
+all: FORCE
+	$(RUN)
 
 one: FORCE
-	@if [ -z $(NAME) ]; then echo "*** value for 'NAME' is missing"; exit 1; fi
-	@echo "Running tests for '$(NAME)'..." | tee -a _log
-	@(cd $(NAME) && \
-	  $(MAKE) PATH_OCAML_BIN=$(PATH_OCAML_PREFIX)/bin \
-	  COMPILER=ocamlc EXECUTABLE=bytecode RUN=./ LIB_EXT=cma EXE_SUFFIX='' \
-	  REPORT=../../_build/src/report/report.byte && \
-	cd ..) || echo '*** error' >> _log
+	$(RUN) -only-test $(NAME)
 
-clean: FORCE
-	@rm -f _log
-	@rm -f */*.result */result */*.cm*
-	@cd report && make clean && cd -
+list: FORCE
+	$(RUN) -list-test
 
 log: FORCE
-	@cat _log
-	@echo ''
-	@echo "`grep '^ error' _log | wc -l` error(s) in `grep '^Running tests for' _log | wc -l` test(s)"
+	less -N _build/oUnit-bisect_ppx*.log
+
+clean: FORCE
+	ocamlbuild -clean
+	rm -rf _scratch
 
 FORCE:

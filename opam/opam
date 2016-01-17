@@ -10,10 +10,14 @@ build: [
   ["sh" "configure"]
   [make "all"]
 ]
+build-test: [
+  [make "tests"]
+]
 install: [make "install"]
 remove: ["ocamlfind" "remove" "bisect_ppx"]
 depends: [
   "ocamlfind" {build}
   "ppx_tools" {build}
   "ocamlbuild" {build}
+  "ounit" {test}
 ]

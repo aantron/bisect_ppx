@@ -14,6 +14,7 @@ travis_install_on_linux () {
 
     sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam time git
     sudo apt-get install liblapack-dev
+    sudo apt-get install libxml2-utils
 }
 
 travis_install_on_osx () {
@@ -23,6 +24,7 @@ travis_install_on_osx () {
 
     brew update > /dev/null
     brew install opam
+    brew install libxml2
     export opam_pin_add="add"
 }
 
@@ -59,6 +61,6 @@ sh configure
 echo "\nCompiling\n"
 make all
 
-opam install ppx_blob ounit # used in test suite.
+opam install ounit ppx_blob ppx_deriving # used in test suite.
 echo "\nTesting\n"
-make tests
+make tests STRICT_DEPENDENCIES=yes
