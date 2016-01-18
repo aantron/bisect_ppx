@@ -43,7 +43,7 @@ single value `tests : OUnit2.test`.
 The `test_*.ml` files in some test subdirectories, such as `report/`, directly
 contain a bunch of test cases. It should be obvious what to do in this case.
 
-In other subdirectories, such as `ppx-instrument/`, `tests` is defined using
+In other subdirectories, such as `instrument/`, `tests` is defined using
 `Test_helpers.compile_compare`. This is a function that lists all `.ml` files in
 that subdirectory, and generates OUnit test cases for each one of them. Each
 test case compiles its file, then compares it against the correspodning
@@ -72,6 +72,6 @@ The tests work by starting commands using `Test_helpers.run` (which uses
 `Unix.system`). Various helpers in `Test_helpers` simplify running common
 commands such as `ocamlc` and `diff`.
 
-Even though OUnit2 supports parallel execution of tests, the Bisect_ppx tests
+Even though OUnit2 supports parallel execution of tests, the `bisect_ppx` tests
 are run sequentially. It should be obvious that the `_scratch/` subdirectory is
 not multithreading- or multiprocessing-safe.
