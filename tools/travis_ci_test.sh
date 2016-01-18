@@ -50,12 +50,7 @@ git config --global user.name "Your Name"
 echo
 echo "Install dependencies"
 echo
-opam install ocamlfind ppx_tools
-
-echo
-echo "Configuring"
-echo
-sh configure
+opam install ocamlfind ocamlbuild ppx_tools
 
 echo
 echo "Compiling"

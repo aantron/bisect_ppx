@@ -11,11 +11,9 @@ package "runtime" (
 
   archive(byte)="bisect.cma"
   archive(native)="bisect.cmxa"
-  archive(java)="bisect.cmja"
 
   archive(byte,mt)="bisect.cma bisectThread.cmo"
   archive(native,mt)="bisect.cmxa bisectThread.cmx"
-  archive(java,mt)="bisect.cmja bisectThread.cmj"
 )
 
 package "fast" (

@@ -16,94 +16,59 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include Makefile.config
-
-# PATHS
-
-PATH_BASE=`pwd`
-PATH_BUILD=$(PATH_BASE)/_build
-PATH_OCAMLDOC=$(PATH_BASE)/ocamldoc
-PATH_SRC=$(PATH_BASE)/src
-PATH_TESTS=$(PATH_BASE)/tests
-
-
 # DEFINITIONS
 
-PROJECT_NAME=bisect
-INSTALL_NAME=$(PROJECT_NAME)_ppx
-OCAMLBUILD=$(PATH_OCAML_PREFIX)/bin/ocamlbuild
-OCAMLBUILD_ENV=WARNINGS=$(WARNINGS) PATH_OCAML_PREFIX=$(PATH_OCAML_PREFIX)
-OCAMLBUILD_FLAGS=-classic-display -no-links -cflag -annot
-MODULES_ODOCL=$(PROJECT_NAME).odocl
-MODULES_MLPACK=$(PROJECT_NAME).mlpack
+INSTALL_NAME=bisect_ppx
+MODULES_ODOCL=bisect.odocl
+MODULES_MLPACK=bisect.mlpack
 
+# Assume that ocamlbuild, ocamlfind, ocamlopt are found in path.
+OCAMLBUILD_FLAGS=-use-ocamlfind -no-links -cflag -annot
+MAKE_QUIET=--no-print-directory
 
 # TARGETS
 
 default:
 	@echo "available targets:"
-	@echo "  all         compiles all files"
-	@echo "  doc         generates ocamldoc documentations"
-	@echo "  tests       runs tests"
-	@echo "  clean       deletes all produced files (excluding documentation)"
-	@echo "  veryclean   deletes all produced files (including documentation)"
-	@echo "  install     copies executable and library files"
-	@echo "  generate    generates files needed for build"
+	@echo "  all        compiles all files"
+	@echo "  doc        generates ocamldoc documentations"
+	@echo "  tests      runs tests"
+	@echo "  clean      deletes all produced files (excluding documentation)"
+	@echo "  distclean  deletes all produced files (including documentation)"
+	@echo "  install    copies executable and library files"
 
-all: generate
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME).otarget
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)_ppx.byte
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmo
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME)Thread.cmx
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) report.byte
-	$(OCAMLBUILD_ENV) $(OCAMLBUILD) $(OCAMLBUILD_FLAGS) report.native
-	ln -fs $(PATH_BUILD)/src/report/report.byte bisect-report
-	ln -fs $(PATH_BUILD)/src/report/report.native bisect-report.opt
+all:
+	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.otarget
 
 doc: FORCE
-	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) $(PROJECT_NAME).docdir/index.html
-	cp $(PATH_BUILD)/$(PROJECT_NAME).docdir/*.html $(PATH_BUILD)/$(PROJECT_NAME).docdir/*.css $(PATH_OCAMLDOC)
+	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.docdir/index.html && \
+	mkdir -p ocamldoc && \
+	cp _build/bisect.docdir/*.html _build/bisect.docdir/*.css ocamldoc
 
 tests: FORCE
-	make $(MAKE_QUIET) -C $(PATH_TESTS) all
+	make $(MAKE_QUIET) -C tests all
 
 clean: FORCE
-	rm -rf bisect-report bisect-report.opt
-	$(OCAMLBUILD) $(OCAMLBUILD_FLAGS) -clean
-	test -f $(PATH_TESTS)/Makefile && (cd $(PATH_TESTS) && $(MAKE) $(MAKE_QUIET) clean && cd ..) || true
-	rm -f $(MODULES_ODOCL) $(MODULES_MLPACK) $(PROJECT_NAME).itarget
+	ocamlbuild -clean
+	cd tests && make $(MAKE_QUIET) clean
 
-veryclean: clean
-	rm -f $(PATH_OCAMLDOC)/*.html $(PATH_OCAMLDOC)/*.css
-
-#	cp $(PATH_BUILD)/src/report/report.byte $(PATH_OCAML_PREFIX)/bin/bisect-report; \
-#	cp $(PATH_BUILD)/src/syntax/bisect_ppx.byte $(PATH_OCAML_PREFIX)/bin; \
-# (test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && cp $(PATH_BUILD)/src/report/report.native $(PATH_OCAML_PREFIX)/bin/bisect-report.opt || true); \
+distclean: clean
+	rm -rf ocamldoc
+	rm -f $(MODULES_ODOCL) $(MODULES_MLPACK)
 
 install: FORCE
-	if [ -x "$(PATH_OCAMLFIND)" ]; then \
-	  $(PATH_OCAMLFIND) query $(INSTALL_NAME) && $(PATH_OCAMLFIND) remove $(INSTALL_NAME) || true; \
-	  $(PATH_OCAMLFIND) install $(INSTALL_NAME) META -optional \
-	    $(PATH_BUILD)/$(PROJECT_NAME)_ppx.cmo \
-	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.cm* \
-	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.o \
-	    $(PATH_BUILD)/src/threads/$(PROJECT_NAME)Thread.jo \
-	    $(PATH_BUILD)/src/syntax/$(PROJECT_NAME)_ppx.cmo \
-	    $(PATH_BUILD)/src/syntax/$(PROJECT_NAME)_ppx.byte \
-	    $(PATH_BUILD)/$(PROJECT_NAME).a \
-	    $(PATH_BUILD)/$(PROJECT_NAME).o \
-	    $(PATH_BUILD)/$(PROJECT_NAME).cma \
-	    $(PATH_BUILD)/$(PROJECT_NAME).cmi \
-	    $(PATH_BUILD)/$(PROJECT_NAME).cmo \
-	    $(PATH_BUILD)/$(PROJECT_NAME).cmx \
-	    $(PATH_BUILD)/$(PROJECT_NAME).cmxa \
-	    $(PATH_BUILD)/$(PROJECT_NAME).cmja \
-	    $(PATH_BUILD)/$(PROJECT_NAME).ja; \
-	fi
-
-generate: FORCE
-	echo '$(PROJECT_NAME).cma' > $(PROJECT_NAME).itarget
-	(test -x $(PATH_OCAML_PREFIX)/bin/ocamlopt && echo '$(PROJECT_NAME).cmxa' >> $(PROJECT_NAME).itarget) || true
-	(test -x $(PATH_OCAML_PREFIX)/bin/ocamljava && echo '$(PROJECT_NAME).cmja' >> $(PROJECT_NAME).itarget) || true
+	ocamlfind query $(INSTALL_NAME) && ocamlfind remove $(INSTALL_NAME) || true; \
+	ocamlfind install $(INSTALL_NAME) META -optional \
+		_build/bisect_ppx.cmo \
+		_build/src/threads/bisectThread.cm* \
+		_build/src/threads/bisectThread.o \
+		_build/src/syntax/bisect_ppx.byte \
+		_build/bisect.a \
+		_build/bisect.o \
+		_build/bisect.cma \
+		_build/bisect.cmi \
+		_build/bisect.cmo \
+		_build/bisect.cmx \
+		_build/bisect.cmxa
 
 FORCE:

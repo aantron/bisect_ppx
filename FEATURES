@@ -1,6 +1,0 @@
-- code coverage for OCaml programs
-- flexible control of covered areas
-- flexible combination of results
-- reports in bare text, CSV, HTML, and XML
-- support for threads
-- support for ocamlfind
