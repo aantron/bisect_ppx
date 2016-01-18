@@ -67,3 +67,4 @@ echo
 echo "Testing"
 echo
 make tests STRICT_DEPENDENCIES=yes
+( cd tests && make performance )

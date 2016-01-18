@@ -1,8 +1,8 @@
 Running tests
 -------------
 
-To run all tests, run `make tests` in the project directory, or `make all` in
-subdirectory `tests/`.
+To run all unit tests, run `make tests` in the project directory, or `make all`
+in subdirectory `tests/`.
 
 If a test fails, you will see an error message describing the problem. If you
 want to re-run only that test, you can do `make one NAME=test_name` in `tests/`.
@@ -32,6 +32,8 @@ make tests STRICT_DEPENDENCIES=yes
 
 If an external command run by a test fails, its output ends up woven in before
 the error message, for the time being.
+
+To run the performance test, run `make performance` in `tests/`.
 
 Writing tests
 -------------

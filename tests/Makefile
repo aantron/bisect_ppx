@@ -19,27 +19,34 @@
 CFLAGS := -cflags -w,+A-4-48
 OCAMLBUILD_FLAGS := -use-ocamlfind -no-links $(CFLAGS)
 
-RUN := ocamlbuild $(OCAMLBUILD_FLAGS) test_main.native -- -runner sequential
+UNIT := ocamlbuild $(OCAMLBUILD_FLAGS) test_main.native -- -runner sequential
+PERFORMANCE := \
+	ocamlbuild $(OCAMLBUILD_FLAGS) performance/test_performance.native -- \
+		-runner sequential -display false
 
 default: FORCE
 	@echo 'Available targets:'
-	@echo '  all              runs all tests'
-	@echo '  one NAME=name    runs the test whose name is passed'
-	@echo '  list             list available tests'
-	@echo '  log              show log for last execution'
+	@echo '  all              runs all unit tests'
+	@echo '  one NAME=name    runs the unit test whose name is passed'
+	@echo '  list             list available unit tests'
+	@echo '  log              show log for last unit test execution'
+	@echo '  performance      runs the performance tests'
 	@echo '  clean            deletes build and log files'
 
 all: FORCE
-	$(RUN)
+	$(UNIT)
 
 one: FORCE
-	$(RUN) -only-test $(NAME)
+	$(UNIT) -only-test $(NAME)
 
 list: FORCE
-	$(RUN) -list-test
+	$(UNIT) -list-test
 
 log: FORCE
 	less -N _build/oUnit-bisect_ppx*.log
+
+performance: FORCE
+	$(PERFORMANCE)
 
 clean: FORCE
 	ocamlbuild -clean
