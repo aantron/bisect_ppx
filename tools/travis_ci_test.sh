@@ -4,8 +4,8 @@ export opam_pin_add=""
 travis_install_on_linux () {
     # Install OCaml and OPAM PPAs
     case "$OCAML_VERSION,$OPAM_VERSION" in
-        4.02.0,1.1.0) ppa=avsm/ocaml42+opam11 ;;
-        4.02.0,1.2.0) ppa=avsm/ocaml42+opam12; export opam_pin_add="add" ;;
+        4.02,1.1.0) ppa=avsm/ocaml42+opam11 ;;
+        4.02,1.2.0) ppa=avsm/ocaml42+opam12; export opam_pin_add="add" ;;
       *) echo Unknown $OCAML_VERSION,$OPAM_VERSION; exit 1 ;;
     esac
 
@@ -21,9 +21,8 @@ travis_install_on_osx () {
     #sudo hdiutil attach XQuartz-2.7.6.dmg
     #sudo installer -verbose -pkg /Volumes/XQuartz-2.7.6/XQuartz.pkg -target /
 
-    brew update
+    brew update > /dev/null
     brew install opam
-    export opam_init_options="--comp=$OCAML_VERSION"
     export opam_pin_add="add"
 }
 
@@ -33,8 +32,13 @@ case $TRAVIS_OS_NAME in
   *) echo "Unknown $TRAVIS_OS_NAME"; exit 1
 esac
 
-# configure and view settings
 export OPAMYES=1
+
+# set up OPAM
+opam init $opam_init_options
+eval `opam config env`
+
+# configure and view settings
 echo "ocaml -version"
 ocaml -version
 echo "opam --version"
@@ -42,24 +46,19 @@ opam --version
 echo "git --version"
 git --version
 
-# install OCaml packages
-opam init $opam_init_options
-eval `opam config env`
-
 # Bypass opam bug #1747
 git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 
-echo Install dependencies
+echo "\nInstall dependencies\n"
 opam install ocamlfind ppx_tools
 
-echo Configuring
+echo "\nConfiguring\n"
 sh configure
 
-echo Compiling
+echo "\nCompiling\n"
 make all
 
 opam install ppx_blob ounit # used in test suite.
-echo Testing
+echo "\nTesting\n"
 make tests
-
