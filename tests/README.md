@@ -43,7 +43,7 @@ single value `tests : OUnit2.test`.
 The `test_*.ml` files in some test subdirectories, such as `report/`, directly
 contain a bunch of test cases. It should be obvious what to do in this case.
 
-In other subdirectories, such as `ppx-instrument/`, `tests` is defined using
+In other subdirectories, such as `instrument/`, `tests` is defined using
 `Test_helpers.compile_compare`. This is a function that lists all `.ml` files in
 that subdirectory, and generates OUnit test cases for each one of them. Each
 test case compiles its file, then compares it against the correspodning
