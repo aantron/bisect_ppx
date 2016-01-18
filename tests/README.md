@@ -72,6 +72,6 @@ The tests work by starting commands using `Test_helpers.run` (which uses
 `Unix.system`). Various helpers in `Test_helpers` simplify running common
 commands such as `ocamlc` and `diff`.
 
-Even though OUnit2 supports parallel execution of tests, the `bisect_ppx` tests
+Even though OUnit2 supports parallel execution of tests, the Bisect_ppx tests
 are run sequentially. It should be obvious that the `_scratch/` subdirectory is
 not multithreading- or multiprocessing-safe.
