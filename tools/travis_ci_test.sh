@@ -18,13 +18,8 @@ travis_install_on_linux () {
 }
 
 travis_install_on_osx () {
-    #curl -OL "http://xquartz.macosforge.org/downloads/SL/XQuartz-2.7.6.dmg"
-    #sudo hdiutil attach XQuartz-2.7.6.dmg
-    #sudo installer -verbose -pkg /Volumes/XQuartz-2.7.6/XQuartz.pkg -target /
-
     brew update > /dev/null
     brew install opam
-    brew install libxml2
     export opam_pin_add="add"
 }
 
@@ -36,11 +31,11 @@ esac
 
 export OPAMYES=1
 
-# set up OPAM
+# Set up OPAM
 opam init $opam_init_options
 eval `opam config env`
 
-# configure and view settings
+# Configure and view settings
 echo "ocaml -version"
 ocaml -version
 echo "opam --version"
@@ -52,15 +47,23 @@ git --version
 git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 
-echo "\nInstall dependencies\n"
+echo
+echo "Install dependencies"
+echo
 opam install ocamlfind ppx_tools
 
-echo "\nConfiguring\n"
+echo
+echo "Configuring"
+echo
 sh configure
 
-echo "\nCompiling\n"
+echo
+echo "Compiling"
+echo
 make all
 
-opam install ounit ppx_blob ppx_deriving # used in test suite.
-echo "\nTesting\n"
+opam install ounit ppx_blob ppx_deriving # Used in test suite.
+echo
+echo "Testing"
+echo
 make tests STRICT_DEPENDENCIES=yes
