@@ -21,9 +21,9 @@ open Test_helpers
 
 let tests = "ounit-integration" >:: fun context ->
   with_directory context begin fun () ->
-    compile ~packages:["oUnit"]
-      (with_bisect_ppx ^
-       " -thread -linkall ../../_build/src/threads/bisectThread.cmo")
+    compile
+      (with_bisect_ppx ^ " -package oUnit -thread -linkall " ^
+       "../../_build/src/threads/bisectThread.cmo")
       "ounit-integration/test.ml";
     run "./a.out > /dev/null";
     report "-csv output";

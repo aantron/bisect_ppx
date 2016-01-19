@@ -47,18 +47,15 @@ val run : string -> unit
 
 
 
-val compile : ?packages:string list -> ?r:string -> string -> string -> unit
-(** [compile flags ml_file] uses [ocamlc] to compile [file] with the given
+val compile : ?r:string -> string -> string -> unit
+(** [compile flags ml_file] uses [ocamlfind c] to compile [file] with the given
     compiler [flags]. [file] is given relative to the [tests/] directory, for
     example ["report/source.ml"]. The result of compilation is a number of
     output files in the current directory [_scratch/], depending on the [flags].
+    [flags] may include options such for [ocamlfind], such as [-package].
 
     If [~r] is supplied, that string is appended to the end of the command
     invocation. This is intended for redirections, e.g. [~r:"2> output"].
-
-    If [~packages] is supplied, this function uses [ocamlfind ocamlc] instead of
-    [ocamlc]. Each package is added to the arguments with the [-package]
-    option.
 
     Raises [Failure] if the exit code is not zero. *)
 

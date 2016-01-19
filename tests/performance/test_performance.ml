@@ -37,7 +37,7 @@ let test ?(uninstrumented = false) ?(cflags = "") ?(bisect = "") name =
 
 let with_threads =
   "-thread -linkall " ^
-  "unix.cma threads.cma ../../_build/src/threads/bisectThread.cmo"
+  "-package threads.posix ../../_build/src/threads/bisectThread.cmo"
 
 let tests = "performance" >::: [
   test "uninstrumented" ~uninstrumented:true;

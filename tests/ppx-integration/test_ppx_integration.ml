@@ -28,7 +28,7 @@ let tests = "ppx-integration" >::: [
     if_package "ppx_blob";
     with_directory context begin fun () ->
 
-      compile ~packages:["ppx_blob"] (with_bisect_ppx ^ " -dsource")
+      compile (with_bisect_ppx ^ " -package ppx_blob -dsource")
         "ppx-integration/expr_blob.ml" ~r:"2> output";
 
       diff "ppx-integration/blob1.reference"
@@ -40,7 +40,7 @@ let tests = "ppx-integration" >::: [
 
     with_directory context begin fun () ->
 
-      compile ~packages:["ppx_blob"] "-dsource"
+      compile " -package ppx_blob -dsource"
         "ppx-integration/expr_blob.ml" ~r:"2> expr_blob_part2.ml";
 
       compile (with_bisect_ppx ^ " -dsource")
@@ -56,7 +56,7 @@ let tests = "ppx-integration" >::: [
     if_package "ppx_deriving";
     with_directory context begin fun () ->
 
-      compile ~packages:["ppx_deriving.show"] " -dsource"
+      compile " -package ppx_deriving.show -dsource"
         "ppx-integration/expr_deriving.ml" ~r:"2> expr_deriving_part2.ml";
 
       compile (with_bisect_ppx ^ " -dsource")

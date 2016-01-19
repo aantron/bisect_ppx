@@ -92,7 +92,7 @@ let have_package package =
 let if_package package =
   skip_if (not @@ have_package package) (package ^ " not installed")
 
-let compile ?packages ?(r = "") arguments source =
+let compile ?(r = "") arguments source =
   let source_copy = Filename.basename source in
 
   let intermediate = Filename.dirname source = _directory in
@@ -102,17 +102,7 @@ let compile ?packages ?(r = "") arguments source =
       run ("cp " ^ source_actual ^ " " ^ source_copy)
   end;
 
-  let prefix =
-    match packages with
-    | None -> "ocamlc "
-    | Some packages ->
-      packages
-      |> List.map ((^) "-package ")
-      |> String.concat " "
-      |> fun s -> "ocamlfind c -linkpkg " ^ s ^ " "
-  in
-
-  run (prefix ^ arguments ^ " " ^ source_copy ^ " " ^ r)
+  run ("ocamlfind ocamlc -linkpkg " ^ arguments ^ " " ^ source_copy ^ " " ^ r)
 
 let with_bisect_ppx =
   "-I ../../_build bisect.cma -ppx ../../_build/src/syntax/bisect_ppx.byte"
