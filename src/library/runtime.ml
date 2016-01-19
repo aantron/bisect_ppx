@@ -17,13 +17,10 @@
  *)
 
 type message =
-  | Compiled_in_unsafe_mode of string
   | Unable_to_create_file
   | Unable_to_write_file
 
 let string_of_message = function
-  | Compiled_in_unsafe_mode fn ->
-      Printf.sprintf " *** Bisect: %S was compiled in unsafe mode." fn
   | Unable_to_create_file ->
       " *** Bisect runtime was unable to create file."
   | Unable_to_write_file ->
@@ -46,7 +43,7 @@ let verbose =
       let oc_l = lazy (
         (* A weird race condition is caused if we use this invocation instead
           let oc = open_out_gen [Open_append] 0o244 (full_path fname) in
-          Note that verbose is called only inside of critical sections. *)
+          Note that verbose is called only during [at_exit]. *)
         let oc = open_out_bin (full_path fname) in
         at_exit (fun () -> close_out_noerr oc);
         oc)
@@ -54,65 +51,13 @@ let verbose =
       fun msg ->
         Printf.fprintf (Lazy.force oc_l) "%s\n" (string_of_message msg)
 
-let no_hook = fun () -> ()
-
-let hook_before = ref no_hook
-
-let hook_after = ref no_hook
-
-let registered_hook () =
-  (!hook_before != no_hook) || (!hook_after != no_hook)
-
-let register_hooks f1 f2 =
-  hook_before := f1;
-  hook_after := f2
-
-let get_hooks () =
-  !hook_before, !hook_after
-
 let table : (string, (int array)) Hashtbl.t = Hashtbl.create 17
 
-let init fn =
-  !hook_before ();
+let init_with_array fn arr =
   if not (Hashtbl.mem table fn) then
-    Hashtbl.add table fn [| |];
-  !hook_after ()
-
-let init_with_array fn arr unsafe =
-  !hook_before ();
-  if not (Hashtbl.mem table fn) then
-    Hashtbl.add table fn arr;
-  if unsafe && (registered_hook ()) then
-    verbose (Compiled_in_unsafe_mode fn);
-  !hook_after ()
-
-let mark fn pt =
-  !hook_before ();
-  let enlarge n = if n = 0 then 1 else if n < 1024 then n * 2 else n + 1024 in
-  let arr =
-    try
-      let tmp = Hashtbl.find table fn in
-      let len = Array.length tmp in
-      if pt >= len then
-        let len' = ref len in
-        while pt >= !len' do len' := enlarge !len' done;
-        let tmp' = Array.make !len' 0 in
-        Array.blit tmp 0 tmp' 0 len;
-        tmp'
-      else
-        tmp
-    with Not_found ->
-      Array.make (succ pt) 0 in
-  let curr = arr.(pt) in
-  arr.(pt) <- if curr < max_int then (succ curr) else curr;
-  Hashtbl.replace table fn arr;
-  !hook_after ()
-
-let mark_array fn pts =
-  Array.iter (mark fn) pts
+    Hashtbl.add table fn arr
 
 let file_channel () =
-  !hook_before ();
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
   let suffix = ref 0 in
   let next_name () =
@@ -127,7 +72,6 @@ let file_channel () =
               None
   in
   let channel_opt = ic_opt_loop (next_name ()) in
-  !hook_after ();
   channel_opt
 
 let dump () =

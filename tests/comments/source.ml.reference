@@ -1,15 +1,21 @@
-let _ = Bisect.Runtime.init "source.ml"
+let ___bisect_mark___source =
+  let marks = Array.make 8 0 in
+  (Bisect.Runtime.init_with_array "source.ml" marks; marks.(1) <- 1);
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let f1 x y = if x = y then x + y else x - y
 let g s =
-  Bisect.Runtime.mark "source.ml" 3;
+  ___bisect_mark___source 3;
   if true
   then
-    (Bisect.Runtime.mark "source.ml" 2;
-     for i = 1 to 5 do (Bisect.Runtime.mark "source.ml" 0; print_endline s)
-     done)
-  else (Bisect.Runtime.mark "source.ml" 1; assert false)
+    (___bisect_mark___source 2;
+     for i = 1 to 5 do (___bisect_mark___source 0; print_endline s) done)
+  else (___bisect_mark___source 1; assert false)
 let f2 b x = if b then x * x else x
-let s1 = Bisect.Runtime.mark "source.ml" 4; "\\\\"
-let s2 = Bisect.Runtime.mark "source.ml" 5; '"'
-let s3 = Bisect.Runtime.mark "source.ml" 6; '"'
-let s4 = Bisect.Runtime.mark "source.ml" 7; "a\"a"
+let s1 = ___bisect_mark___source 4; "\\\\"
+let s2 = ___bisect_mark___source 5; '"'
+let s3 = ___bisect_mark___source 6; '"'
+let s4 = ___bisect_mark___source 7; "a\"a"

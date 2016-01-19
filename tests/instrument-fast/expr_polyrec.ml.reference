@@ -1,14 +1,11 @@
 let ___bisect_mark___expr_polyrec =
-  let marks = Array.make 7 0
-  and (hook_before,hook_after) = Bisect.Runtime.get_hooks () in
-  Bisect.Runtime.init_with_array "expr_polyrec.ml" marks true;
+  let marks = Array.make 7 0 in
+  Bisect.Runtime.init_with_array "expr_polyrec.ml" marks;
   (function
    | idx ->
-       ((hook_before ();
-         (let curr = marks.(idx) in
-          marks.(idx) <-
-          if curr < Pervasives.max_int then Pervasives.succ curr else curr));
-        hook_after ()))
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let rec f : 'a . 'a -> unit=
   fun _  ->
     (___bisect_mark___expr_polyrec 1; f 0);

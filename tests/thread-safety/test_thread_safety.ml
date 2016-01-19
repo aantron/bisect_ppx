@@ -25,7 +25,7 @@ open Test_helpers
 let count = 1000000
 let command = Printf.sprintf "./a.out %i" count
 
-let test ?(with_threads = false) ?(bisect = "") name expect_correctness =
+let test ?(bisect = "") name expect_correctness =
   test
     (if expect_correctness then name else name ^ ".should-have-diff")
     begin fun () ->
@@ -34,11 +34,6 @@ let test ?(with_threads = false) ?(bisect = "") name expect_correctness =
 
     let cflags =
       "-thread -package threads.posix " ^ (with_bisect_args bisect) in
-
-    let cflags =
-      if not with_threads then cflags
-      else cflags ^ " " ^ (with_bisect_thread ())
-    in
 
     compile cflags "thread-safety/source.ml";
     run command;
@@ -51,10 +46,6 @@ let test ?(with_threads = false) ?(bisect = "") name expect_correctness =
   end
 
 let tests = "thread-safety" >::: [
-  test "safe"           ~bisect:"-mode safe"                      false;
-  test "safe-threads"   ~bisect:"-mode safe" ~with_threads:true   true;
-  test "fast"           ~bisect:"-mode fast"                      false;
-  test "fast-threads"   ~bisect:"-mode fast" ~with_threads:true   true;
-  test "faster"         ~bisect:"-mode faster"                    false;
-  test "faster-threads" ~bisect:"-mode faster" ~with_threads:true false
+  test "bisect"         true;
+  test "bisect-threads" false
 ]

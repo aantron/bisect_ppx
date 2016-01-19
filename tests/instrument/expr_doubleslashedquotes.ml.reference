@@ -1,9 +1,0 @@
-let _ = Bisect.Runtime.init "expr_doubleslashedquotes.ml"
-type t =
-  | Anthony
-  | Caesar
-let message =
-  function
-  | Anthony  ->
-      (Bisect.Runtime.mark "expr_doubleslashedquotes.ml" 0; "foo\\")
-  | Caesar  -> (Bisect.Runtime.mark "expr_doubleslashedquotes.ml" 1; "\\bar")

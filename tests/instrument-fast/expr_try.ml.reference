@@ -1,14 +1,11 @@
 let ___bisect_mark___expr_try =
-  let marks = Array.make 12 0
-  and (hook_before,hook_after) = Bisect.Runtime.get_hooks () in
-  Bisect.Runtime.init_with_array "expr_try.ml" marks true;
+  let marks = Array.make 12 0 in
+  Bisect.Runtime.init_with_array "expr_try.ml" marks;
   (function
    | idx ->
-       ((hook_before ();
-         (let curr = marks.(idx) in
-          marks.(idx) <-
-          if curr < Pervasives.max_int then Pervasives.succ curr else curr));
-        hook_after ()))
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let () =
   (___bisect_mark___expr_try 6; print_endline "before");
   (___bisect_mark___expr_try 5;

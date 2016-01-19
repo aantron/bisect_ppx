@@ -19,18 +19,8 @@
 (** This module defines the values related to command-line analysis. *)
 
 
-type mode =
-  | Safe (** Original mode: calls to Bisect functions. *)
-  | Fast (** Fast mode: storage/function local to module. *)
-  | Faster (** Like fast mode, but thread-unsafe. *)
-(** The type of instrumentation modes. *)
-
-val mode : mode ref
-(** Instrumentation mode. *)
-
 val kinds : (Common.point_kind * (bool ref)) list
 (* Association list mapping points kinds to whether they are activated. *)
 
 val switches : (Arg.key * Arg.spec * Arg.doc) list
 (** Command-line switches. *)
-

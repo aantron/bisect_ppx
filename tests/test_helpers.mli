@@ -80,9 +80,6 @@ val with_bisect_args : string -> string
 (** The same as [with_bisect], but passes the given flags to the ppx
     extension. *)
 
-val with_bisect_thread : unit -> string
-(** Flags for including the additional [BisectThread] module. *)
-
 
 
 val report : ?f:string -> ?r:string -> string -> unit

@@ -22,7 +22,6 @@ open Test_helpers
 let tests = "bisect_ppx" >::: [
   Test_report.tests;
   Test_combine.tests;
-  Test_instrument.tests;
   Test_instrument_fast.tests;
   Test_line_number_directive.tests;
   Test_comments.tests;
@@ -30,7 +29,8 @@ let tests = "bisect_ppx" >::: [
   Test_exclude_file.tests;
   Test_ppx_integration.tests;
   Test_thread_safety.tests;
-  Test_ounit_integration.tests
+  Test_ounit_integration.tests;
+  Test_legacy_arguments.tests
 ]
 
 let () =

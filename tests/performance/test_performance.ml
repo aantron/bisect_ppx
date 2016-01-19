@@ -31,7 +31,7 @@ let test ?(uninstrumented = false) ?(with_threads = false) ?(bisect = "") name =
 
     let cflags =
       if not with_threads then cflags
-      else cflags ^ " -package threads.posix " ^ (with_bisect_thread ())
+      else cflags ^ " -package threads.posix"
     in
 
     compile cflags "performance/source.ml";
@@ -41,12 +41,7 @@ let test ?(uninstrumented = false) ?(with_threads = false) ?(bisect = "") name =
 
 let tests = "performance" >::: [
   test "uninstrumented" ~uninstrumented:true;
-  test "safe"           ~bisect:"-mode safe";
-  test "safe-threads"   ~bisect:"-mode safe" ~with_threads:true;
-  test "fast"           ~bisect:"-mode fast";
-  test "fast-threads"   ~bisect:"-mode safe" ~with_threads:true;
-  test "faster"         ~bisect:"-mode faster";
-  test "faster-threads" ~bisect:"-mode faster" ~with_threads:true
+  test "instrumented"
 ]
 
 let () =
