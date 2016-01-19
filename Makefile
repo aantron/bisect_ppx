@@ -18,15 +18,12 @@
 
 # DEFINITIONS
 
-INSTALL_NAME=bisect_ppx
-MODULES_ODOCL=bisect.odocl
-MODULES_MLPACK=bisect.mlpack
+INSTALL_NAME := bisect_ppx
+MODULES_ODOCL := bisect.odocl
+MODULES_MLPACK := bisect.mlpack
 
 # Assume that ocamlbuild, ocamlfind, ocamlopt are found in path.
-OCAMLBUILD_FLAGS=-use-ocamlfind -no-links -cflag -annot
-MAKE_QUIET=--no-print-directory
-
-# TARGETS
+OCAMLBUILD_FLAGS := -use-ocamlfind -no-links -cflag -annot
 
 default:
 	@echo "available targets:"
@@ -41,23 +38,23 @@ all:
 	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.otarget
 
 doc: FORCE
-	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.docdir/index.html && \
-	mkdir -p ocamldoc && \
+	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.docdir/index.html
+	mkdir -p ocamldoc
 	cp _build/bisect.docdir/*.html _build/bisect.docdir/*.css ocamldoc
 
 tests: FORCE
-	make $(MAKE_QUIET) -C tests unit
+	make -C tests unit
 
 clean: FORCE
 	ocamlbuild -clean
-	make $(MAKE_QUIET) -C tests clean
+	make -C tests clean
 
 distclean: clean
 	rm -rf ocamldoc
 	rm -f $(MODULES_ODOCL) $(MODULES_MLPACK)
 
 install: FORCE
-	ocamlfind query $(INSTALL_NAME) && ocamlfind remove $(INSTALL_NAME) || true; \
+	! ocamlfind query $(INSTALL_NAME) || ocamlfind remove $(INSTALL_NAME)
 	ocamlfind install $(INSTALL_NAME) META -optional \
 		_build/src/syntax/bisect_ppx.byte \
 		_build/bisect.a \
