@@ -1,7 +1,7 @@
 Running tests
 -------------
 
-To run all unit tests, run `make tests` in the project directory, or `make all`
+To run all unit tests, run `make tests` in the project directory, or `make unit`
 in subdirectory `tests/`.
 
 If a test fails, you will see an error message describing the problem. If you

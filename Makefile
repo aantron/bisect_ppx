@@ -46,7 +46,7 @@ doc: FORCE
 	cp _build/bisect.docdir/*.html _build/bisect.docdir/*.css ocamldoc
 
 tests: FORCE
-	make $(MAKE_QUIET) -C tests all
+	make $(MAKE_QUIET) -C tests unit
 
 clean: FORCE
 	ocamlbuild -clean

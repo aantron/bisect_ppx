@@ -26,17 +26,18 @@ PERFORMANCE := \
 
 default: FORCE
 	@echo 'Available targets:'
-	@echo '  all              runs all unit tests'
+	@echo '  unit             runs unit tests'
 	@echo '  one NAME=name    runs the unit test whose name is passed'
 	@echo '  list             list available unit tests'
 	@echo '  log              show log for last unit test execution'
 	@echo '  performance      runs the performance tests'
+	@echo '  all              runs all tests'
 	@echo '  clean            deletes build and log files'
 
-all: FORCE
+unit: binaries-may-exist
 	$(UNIT)
 
-one: FORCE
+one: binaries-may-exist
 	$(UNIT) -only-test $(NAME)
 
 list: FORCE
@@ -45,11 +46,17 @@ list: FORCE
 log: FORCE
 	less -N _build/oUnit-bisect_ppx*.log
 
-performance: FORCE
+performance: binaries-may-exist
 	$(PERFORMANCE)
+
+all: unit performance
 
 clean: FORCE
 	ocamlbuild -clean
 	rm -rf _scratch
+
+binaries-may-exist:
+	@test -d ../_build || \
+		( echo "Run' make all' in the project root directory"; false )
 
 FORCE:
