@@ -16,14 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-open OUnit2
 open Test_helpers
 
 let report ~f = report "-dump output" ~f
 
-let tests = "combine" >:: fun context ->
-  with_directory context begin fun () ->
-    compile with_bisect_ppx "combine-expr/source.ml";
+let tests =
+  test "combine" begin fun () ->
+    compile (with_bisect ()) "combine-expr/source.ml";
     run "export BISECT_FILE=first && ./a.out first > /dev/null";
     run "export BISECT_FILE=second && ./a.out second > /dev/null";
     report ~f:"first*.out";

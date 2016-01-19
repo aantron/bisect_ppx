@@ -16,14 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-open OUnit2
 open Test_helpers
 
-let tests = "ounit-integration" >:: fun context ->
-  with_directory context begin fun () ->
-    compile
-      (with_bisect_ppx ^ " -package oUnit -thread -linkall " ^
-       "../../_build/src/threads/bisectThread.cmo")
+let tests =
+  test "ounit-integration" begin fun () ->
+    compile ((with_bisect ()) ^ " -package oUnit " ^ (with_bisect_thread ()))
       "ounit-integration/test.ml";
     run "./a.out > /dev/null";
     report "-csv output";

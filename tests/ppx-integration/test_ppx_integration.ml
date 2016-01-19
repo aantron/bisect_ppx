@@ -22,47 +22,38 @@ open Test_helpers
 let _issue = "https://github.com/johnwhitington/ppx_blob/issues/1"
 
 let tests = "ppx-integration" >::: [
-  ("m1_blob" >:: fun context ->
+  test "m1_blob" begin fun () ->
     skip_if true ("ppx_blob install broken: " ^ _issue);
-
     if_package "ppx_blob";
-    with_directory context begin fun () ->
 
-      compile (with_bisect_ppx ^ " -package ppx_blob -dsource")
-        "ppx-integration/expr_blob.ml" ~r:"2> output";
+    compile ((with_bisect ()) ^ " -package ppx_blob -dsource")
+      "ppx-integration/expr_blob.ml" ~r:"2> output";
+    diff "ppx-integration/blob1.reference"
+  end;
 
-      diff "ppx-integration/blob1.reference"
-
-    end);
-
-  ("m2_blob" >:: fun context ->
+  test "m2_blob" begin fun () ->
     skip_if true ("ppx_blob install broken: " ^ _issue);
+    if_package "ppx_blob";
 
-    with_directory context begin fun () ->
+    compile " -package ppx_blob -dsource"
+      "ppx-integration/expr_blob.ml" ~r:"2> expr_blob_part2.ml";
 
-      compile " -package ppx_blob -dsource"
-        "ppx-integration/expr_blob.ml" ~r:"2> expr_blob_part2.ml";
+    compile ((with_bisect ()) ^ " -dsource")
+      "_scratch/expr_blob_part2.ml" ~r:"2> output";
 
-      compile (with_bisect_ppx ^ " -dsource")
-        "_scratch/expr_blob_part2.ml" ~r:"2> output";
+    diff "ppx-integration/blob2.reference"
+  end;
 
-      diff "ppx-integration/blob2.reference"
-
-    end);
-
-  ("m2_deriving" >:: fun context ->
+  test "m2_deriving" begin fun () ->
     skip_if true ("Test was broken since before rewrite");
-
     if_package "ppx_deriving";
-    with_directory context begin fun () ->
 
-      compile " -package ppx_deriving.show -dsource"
-        "ppx-integration/expr_deriving.ml" ~r:"2> expr_deriving_part2.ml";
+    compile " -package ppx_deriving.show -dsource"
+      "ppx-integration/expr_deriving.ml" ~r:"2> expr_deriving_part2.ml";
 
-      compile (with_bisect_ppx ^ " -dsource")
-        "_scratch/expr_deriving_part2.ml" ~r:"2> output";
+    compile ((with_bisect ()) ^ " -dsource")
+      "_scratch/expr_deriving_part2.ml" ~r:"2> output";
 
-      diff "ppx-integration/deriving2.reference"
-
-    end)
+    diff "ppx-integration/deriving2.reference"
+  end
 ]

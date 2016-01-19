@@ -22,31 +22,31 @@ open Test_helpers
 let count = 1000000
 let command = Printf.sprintf "time ./a.out %i" count
 
-let test ?(uninstrumented = false) ?(cflags = "") ?(bisect = "") name =
-  name >:: fun context ->
+let test ?(uninstrumented = false) ?(with_threads = false) ?(bisect = "") name =
+  test name begin fun () ->
     let cflags =
-      if uninstrumented then cflags
-      else (with_bisect_ppx_args bisect) ^ " " ^ cflags
+      if uninstrumented then ""
+      else with_bisect_args bisect
     in
 
-    with_directory context begin fun () ->
-      compile cflags "performance/source.ml";
-      print_endline ("\n " ^ name);
-      run command
-    end
+    let cflags =
+      if not with_threads then cflags
+      else cflags ^ " -package threads.posix " ^ (with_bisect_thread ())
+    in
 
-let with_threads =
-  "-thread -linkall " ^
-  "-package threads.posix ../../_build/src/threads/bisectThread.cmo"
+    compile cflags "performance/source.ml";
+    Printf.printf "\n %s (%s)\n%!" name (compiler ());
+    run command
+  end
 
 let tests = "performance" >::: [
   test "uninstrumented" ~uninstrumented:true;
   test "safe"           ~bisect:"-mode safe";
-  test "safe-threads"   ~bisect:"-mode safe" ~cflags:with_threads;
+  test "safe-threads"   ~bisect:"-mode safe" ~with_threads:true;
   test "fast"           ~bisect:"-mode fast";
-  test "fast-threads"   ~bisect:"-mode safe" ~cflags:with_threads;
+  test "fast-threads"   ~bisect:"-mode safe" ~with_threads:true;
   test "faster"         ~bisect:"-mode faster";
-  test "faster-threads" ~bisect:"-mode faster" ~cflags:with_threads
+  test "faster-threads" ~bisect:"-mode faster" ~with_threads:true
 ]
 
 let () =

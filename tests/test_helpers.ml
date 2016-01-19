@@ -62,7 +62,7 @@ let run command =
 
 let _run_bool command = _run_int command = 0
 
-let with_directory context f =
+let _with_directory context f =
   if Sys.file_exists _directory then run ("rm -r " ^ _directory);
   Unix.mkdir _directory 0o755;
 
@@ -83,6 +83,49 @@ let with_directory context f =
   try f (); restore ()
   with exn -> restore (); raise exn
 
+let _compiler = ref "none"
+let _object = ref "none"
+let _library = ref "none"
+
+let compiler () = !_compiler
+
+let with_bisect_args arguments =
+  "-I ../../_build bisect." ^ !_library ^ " -ppx " ^
+  "\"../../_build/src/syntax/bisect_ppx.byte " ^ arguments ^ " \""
+
+let with_bisect () = with_bisect_args ""
+
+let with_bisect_thread () =
+  "-thread -linkall ../../_build/src/threads/bisectThread." ^ !_object
+
+type compiler = Ocamlc | Ocamlopt
+
+let _with_compiler compiler f =
+  begin
+    match compiler with
+    | Ocamlc ->
+      _compiler := "ocamlc";
+      _object := "cmo";
+      _library := "cma"
+    | Ocamlopt ->
+      _compiler := "ocamlopt";
+      _object := "cmx";
+      _library := "cmxa"
+  end;
+
+  f ()
+
+let test name f =
+  name >::: [
+    ("byte" >:: fun context ->
+      _with_directory context (fun () ->
+        _with_compiler Ocamlc f));
+
+    ("native" >:: fun context ->
+      _with_directory context (fun () ->
+        _with_compiler Ocamlopt f))
+  ]
+
 let have_binary binary =
   _run_bool ("which " ^ binary ^ " > /dev/null 2> /dev/null")
 
@@ -102,14 +145,9 @@ let compile ?(r = "") arguments source =
       run ("cp " ^ source_actual ^ " " ^ source_copy)
   end;
 
-  run ("ocamlfind ocamlc -linkpkg " ^ arguments ^ " " ^ source_copy ^ " " ^ r)
-
-let with_bisect_ppx =
-  "-I ../../_build bisect.cma -ppx ../../_build/src/syntax/bisect_ppx.byte"
-
-let with_bisect_ppx_args arguments =
-  "-I ../../_build bisect.cma -ppx " ^
-  "\"../../_build/src/syntax/bisect_ppx.byte " ^ arguments ^ " \""
+  Printf.sprintf
+    "ocamlfind %s -linkpkg %s %s %s" !_compiler arguments source_copy r
+  |> run
 
 let report ?(f = "bisect*.out") ?(r = "") arguments =
   Printf.sprintf "../../_build/src/report/report.byte %s %s %s" arguments f r
@@ -133,7 +171,7 @@ let xmllint arguments =
   skip_if (not @@ have_binary "xmllint") "xmllint not installed";
   run ("xmllint " ^ arguments)
 
-let compile_compare arguments directory =
+let compile_compare cflags directory =
   let tests =
     Sys.readdir directory
     |> Array.to_list
@@ -148,11 +186,9 @@ let compile_compare arguments directory =
       let title = Filename.chop_suffix f ".ml" in
       let reference = Filename.concat directory (f ^ ".reference") in
 
-      title >:: begin fun context ->
-        with_directory context (fun () ->
-          compile (arguments ^ " -dsource") source ~r:"2> output";
-          diff reference)
-      end
+      test title (fun () ->
+        compile ((cflags ()) ^ " -dsource") source ~r:"2> output";
+        diff reference)
     end
   in
 

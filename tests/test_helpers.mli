@@ -18,12 +18,17 @@
 
 (** Helpers for the testing framework. *)
 
-val with_directory : OUnit2.test_ctxt -> (unit -> unit) -> unit
-(** [with_directory context f] creates a [tests/_scratch/] subdirectory and
-    changes the process' current directory to it (calls [Sys.chdir]), then calls
-    [f ()]. When [f ()] completes, removes the [tests/_scratch/]
-    subdirectory. The [context] parameter is the one passed by OUnit to the test
-    case that is calling [with_directory]. *)
+val test : string -> (unit -> unit) -> OUnit2.test
+(** [test name f] creates two tests that run [f], one that uses [ocamlc] and one
+    that uses [ocamlopt]. Each time [f] is run, some global state is updated so
+    that {!compile} calls the appropriate compiler, and {!with_bisect} and
+    similar functions expand to the right flags for that compiler. [f] is run
+    with the process switched to a temporary directory [tests/_scratch].
+
+    The OUnit path of both generated tests includes [name]. *)
+
+val compiler : unit -> string
+(** Evaluates to the name of the current compiler. *)
 
 
 
@@ -48,31 +53,35 @@ val run : string -> unit
 
 
 val compile : ?r:string -> string -> string -> unit
-(** [compile flags ml_file] uses [ocamlfind c] to compile [file] with the given
-    compiler [flags]. [file] is given relative to the [tests/] directory, for
-    example ["report/source.ml"]. The result of compilation is a number of
-    output files in the current directory [_scratch/], depending on the [flags].
-    [flags] may include options such for [ocamlfind], such as [-package].
+(** [compile flags ml_file] uses [ocamlfind] to compile [file] with the current
+    compiler and the given compiler [flags]. [file] is given relative to the
+    [tests/] directory, for example ["report/source.ml"]. The result of
+    compilation is a number of output files in the current directory
+    [_scratch/], depending on the [flags]. [flags] may include options such for
+    [ocamlfind], such as [-package].
 
     If [~r] is supplied, that string is appended to the end of the command
     invocation. This is intended for redirections, e.g. [~r:"2> output"].
 
     Raises [Failure] if the exit code is not zero. *)
 
-val compile_compare : string -> string -> OUnit2.test
+val compile_compare : (unit -> string) -> string -> OUnit2.test
 (** [compile_compare flags directory] lists [.ml] files in [directory], and for
-    each one [x.ml] whose name does not begin with [test_], creates a test case
-    that compiles [x.ml] with the given flags and [-dsource], then compares the
-    dumped output to [x.ml.reference] in [directory]. *)
+    each one [x.ml] whose name does not begin with [test_], creates test cases
+    using {!test} that compile [x.ml] with flags [flags ()] and [-dsource], then
+    compare the dumped output to [x.ml.reference] in [directory]. *)
 
-val with_bisect_ppx : string
+val with_bisect : unit -> string
 (** Flags for compiling with Bisect_ppx built by [make all] in the root
     directory of the project working tree. If concatenating these with other
     flags, be sure to separate them with spaces. *)
 
-val with_bisect_ppx_args : string -> string
-(** The same as [with_bisect_ppx], but passes the given flags to the ppx
+val with_bisect_args : string -> string
+(** The same as [with_bisect], but passes the given flags to the ppx
     extension. *)
+
+val with_bisect_thread : unit -> string
+(** Flags for including the additional [BisectThread] module. *)
 
 
 

@@ -19,61 +19,52 @@
 open OUnit2
 open Test_helpers
 
-let with_common_steps context f =
-  with_directory context begin fun () ->
-    compile with_bisect_ppx "report/source.ml";
+let test name f =
+  test name begin fun () ->
+    compile (with_bisect ()) "report/source.ml";
     run "./a.out -inf 0 -sup 3 > /dev/null";
     run "./a.out -inf 7 -sup 11 > /dev/null";
     f ()
   end
 
 let tests = "report" >::: [
-  ("bisect" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-bisect output";
-      diff "report/reference.bisect"));
+  test "bisect" (fun () ->
+    report "-bisect output";
+    diff "report/reference.bisect");
 
-  ("csv" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-csv output";
-      diff "report/reference.csv"));
+  test "csv" (fun () ->
+    report "-csv output";
+    diff "report/reference.csv");
 
-  ("dtd" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-dump-dtd output";
-      diff "report/reference.dtd"));
+  test "dtd" (fun () ->
+    report "-dump-dtd output";
+    diff "report/reference.dtd");
 
-  ("dump" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-dump output";
-      diff "report/reference.dump"));
+  test "dump" (fun () ->
+    report "-dump output";
+    diff "report/reference.dump");
 
-  ("html" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-no-navbar -no-folding -html html_dir";
-      run "grep -v 'class=\"footer\"' html_dir/file0000.html > output";
-      diff "report/reference.html"));
+  test "html" (fun () ->
+    report "-no-navbar -no-folding -html html_dir";
+    run "grep -v 'class=\"footer\"' html_dir/file0000.html > output";
+    diff "report/reference.html");
 
-  ("text" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-text output";
-      diff "report/reference.text"));
+  test "text" (fun () ->
+    report "-text output";
+    diff "report/reference.text");
 
-  ("xml" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-xml -" ~r:"| grep -v '<!--.*Bisect' > output";
-      diff "report/reference.xml"));
+  test "xml" (fun () ->
+    report "-xml -" ~r:"| grep -v '<!--.*Bisect' > output";
+    diff "report/reference.xml");
 
-  ("xml-emma" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-xml-emma -" ~r:"| grep -v '<!--.*Bisect' > output";
-      diff "report/reference.xml-emma"));
+  test "xml-emma" (fun () ->
+    report "-xml-emma -" ~r:"| grep -v '<!--.*Bisect' > output";
+    diff "report/reference.xml-emma");
 
-  ("xml.lint" >:: fun context ->
-    with_common_steps context (fun () ->
-      report "-xml report.xml";
-      report "-dump-dtd report.dtd";
-      xmllint "--noout --dtdvalid report.dtd report.xml";
-      report "-xml-emma report.xml-emma";
-      xmllint "--noout report.xml-emma"))
+  test "xml.lint" (fun () ->
+    report "-xml report.xml";
+    report "-dump-dtd report.dtd";
+    xmllint "--noout --dtdvalid report.dtd report.xml";
+    report "-xml-emma report.xml-emma";
+    xmllint "--noout report.xml-emma")
 ]
