@@ -49,16 +49,13 @@ let () =
   close_out_noerr odocl_chan
 
 let () =
-  write_lines ["Common"; "Runtime"] mlpack_file
-  (* write_lines ["Common"; "Exclusions"; "InstrumentState"; "InstrumentArgs"; "Exclude"; "ExcludeParser"; "ExcludeLexer"] mlpack_pp *)
-
+  write_lines ["Common"; "Runtime"; "Version"] mlpack_file
 
 let version_tag = "src_library_version_ml"
 let version_ml = "src/library/version.ml"
-let version_file = "../VERSION"
 
-let lib_dir pkg =
-  let ic = Unix.open_process_in ("ocamlfind query " ^ pkg) in
+let read_line_from_cmd cmd =
+  let ic = Unix.open_process_in cmd in
   let line = input_line ic in
   close_in ic;
   line
@@ -73,15 +70,6 @@ let () =
     cp src dst in
   dispatch begin function
     | After_rules ->
-        let ppx_dir = lib_dir "ppx_tools" in
-        flag ["ocaml"; "compile"; "use_ppx_tools"]
-          (S[A"-I"; A"+compiler-libs"; A"-I"; A ppx_dir]);
-        flag ["ocaml"; "link"; "byte"; "use_ppx_tools"]
-          (S[A"-I"; A"+compiler-libs"; A"ocamlcommon.cma"; A"-I"; A ppx_dir; A"ppx_tools.cma"]);
-        flag ["ocaml"; "link"; "native"; "use_ppx_tools"]
-          (S[A"-I"; A"+compiler-libs"; A"ocamlcommon.cmxa"; A"-I"; A ppx_dir; A"ppx_tools.cma"]);
-        if String.uppercase (try Sys.getenv "WARNINGS" with _ -> "") = "TRUE" then
-          flag ["ocaml"; "compile"; "warnings"] (S[A"-w"; A"Ae"; A"-warn-error"; A"A"]);
         dep [version_tag] [version_ml];
         mark_tag_used version_tag;
         rule ("generation of " ^ version_ml)
@@ -89,9 +77,9 @@ let () =
           ~insert:`bottom
           (fun _ _ ->
             let version =
-              try
-                List.hd (string_list_of_file (Pathname.mk version_file))
-              with _ -> "unknown" in
+              try read_line_from_cmd "git describe --abbrev=0"
+              with _ -> "unknown"
+            in
             let name, channel = Filename.open_temp_file "version" ".ml" in
             Printf.fprintf channel "let value = %S\n" version;
             close_out_noerr channel;

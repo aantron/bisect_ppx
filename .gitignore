@@ -16,18 +16,11 @@ _build/
 *.byte
 *.native
 
-# oasis generated files
-setup.data
-setup.log
-
-Makefile.config
-
 # test results
 tests/_scratch
 
 # targets
 bisect-report
 bisect-report.opt
-bisect.itarget
 bisect.mlpack
 bisect.odocl

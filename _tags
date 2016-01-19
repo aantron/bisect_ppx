@@ -16,17 +16,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Directories
-true: -traverse
+# Disable looking at all files, so test directory has separate compilation
+true: -traverse, warn_error(Ae)
 <src/**>: include
 
 # Options
 <src/**>: use_unix
 <src/**> and not "src/threads/bisectThread.ml": for-pack(Bisect)
-"src/syntax/instrumentPpx.ml": use_ppx_tools
-"src/syntax/instrumentPpx.mli": use_ppx_tools
-"src/syntax/bisect_ppx.ml": use_ppx_tools
-<src/syntax/bisect_ppx.{byte,native,jar}>: use_str, use_ppx_tools
+"src/syntax/instrumentPpx.ml": package(ppx_tools)
+"src/syntax/instrumentPpx.mli": package(ppx_tools)
+"src/syntax/bisect_ppx.ml": package(ppx_tools)
+<src/syntax/bisect_ppx.{byte,native,jar}>: use_str, package(ppx_tools)
 "src/threads/bisectThread.ml": thread
 <src/report/report.{byte,native,jar}>: use_str
 
