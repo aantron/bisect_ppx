@@ -2,7 +2,7 @@ description="code coverage tool via ppx"
 requires="bisect_ppx.runtime"
 version="0.2.6"
 
-ppx = "./bisect_ppx.byte"
+ppx="./bisect_ppx.byte"
 
 package "runtime" (
   version="0.2.6"
@@ -19,6 +19,7 @@ package "runtime" (
 package "fast" (
   requires="bisect_ppx.runtime"
   ppx="./bisect_ppx.byte"
-  ppxopt = "bisect_ppx.fast,-mode bisect_ppx.fast,fast"
+  ppxopt="bisect_ppx.fast,-mode bisect_ppx.fast,fast"
   description="The Bisect modules needed for instrumentation, running in fast mode."
+  version="0.2.6"
 )

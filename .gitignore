@@ -1,26 +1,13 @@
-*.annot
-*.cmo
-*.cma
-*.cmi
-*.cmp
-*.a
-*.o
-*.cmx
-*.cmxs
-*.cmxa
-
-# ocamlbuild working directory
+# working and output directories
 _build/
+ocamldoc/
 
-# ocamlbuild targets
-*.byte
-*.native
-
-# test results
+# test working directory
 tests/_scratch
 
-# targets
-bisect-report
-bisect-report.opt
+# generated module lists
 bisect.mlpack
 bisect.odocl
+
+# scratch directory for notes, etc.
+scratch/

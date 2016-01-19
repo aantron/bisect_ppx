@@ -50,7 +50,7 @@ tests: FORCE
 
 clean: FORCE
 	ocamlbuild -clean
-	cd tests && make $(MAKE_QUIET) clean
+	make $(MAKE_QUIET) -C tests clean
 
 distclean: clean
 	rm -rf ocamldoc
@@ -59,7 +59,6 @@ distclean: clean
 install: FORCE
 	ocamlfind query $(INSTALL_NAME) && ocamlfind remove $(INSTALL_NAME) || true; \
 	ocamlfind install $(INSTALL_NAME) META -optional \
-		_build/bisect_ppx.cmo \
 		_build/src/threads/bisectThread.cm* \
 		_build/src/threads/bisectThread.o \
 		_build/src/syntax/bisect_ppx.byte \
