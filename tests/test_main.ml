@@ -22,7 +22,7 @@ open Test_helpers
 let tests = "bisect_ppx" >::: [
   Test_report.tests;
   Test_combine.tests;
-  Test_instrument_fast.tests;
+  Test_instrument.tests;
   Test_line_number_directive.tests;
   Test_comments.tests;
   Test_exclude.tests;
