@@ -1,5 +1,0 @@
-let _ = Bisect.Runtime.init "nested_module.ml"
-let x = Bisect.Runtime.mark "nested_module.ml" 0; 3
-module F =
-  struct let y x = Bisect.Runtime.mark "nested_module.ml" 1; x + 4 end
-let z x = Bisect.Runtime.mark "nested_module.ml" 2; x + 5
