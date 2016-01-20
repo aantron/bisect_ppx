@@ -51,6 +51,6 @@
 
 
 val init_with_array : string -> int array -> unit
-(** [init file marks] indicates that the file [file] is part of the application
-    that has been instrumented, using the passed array [marks] to store
-    marks. *)
+(** [init_with_array file marks] indicates that the file [file] is part of the
+    application that has been instrumented, using the passed array [marks] to
+    store marks. *)
