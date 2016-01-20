@@ -21,7 +21,8 @@ true: -traverse, warn_error(Ae)
 <src/**>: include
 
 # Options
-<src/**>: use_unix, for-pack(Bisect)
+<src/**>: use_unix
+<src/library/*>: runtime
 "src/syntax/instrumentPpx.ml": package(ppx_tools)
 "src/syntax/instrumentPpx.mli": package(ppx_tools)
 "src/syntax/bisect_ppx.ml": package(ppx_tools)
@@ -30,3 +31,7 @@ true: -traverse, warn_error(Ae)
 
 # Generation of version file
 "src/library/version.mli": src_library_version_ml
+
+# Self-instrumentation for testing and showing off
+<src/**>: instrument
+"src/library/extension.mli": src_library_extension_ml

@@ -1,8 +1,11 @@
 Running tests
 -------------
 
-To run all unit tests, run `make tests` in the project directory, or `make unit`
-in subdirectory `tests/`.
+To run all unit tests, run `make tests` in the project root directory, or
+`make unit` in subdirectory `tests/`. You must have first done `make dev` in the
+project root directory. At the end of testing, you will get a summary coverage
+report courtesy of Bisect_ppx itself. If you want a more detailed view, run
+`make coverage` and view `tests/_report/index.html`.
 
 If a test fails, you will see an error message describing the problem. If you
 want to re-run only that test, you can do `make one NAME=test_name` in `tests/`.

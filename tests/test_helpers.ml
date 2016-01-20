@@ -19,6 +19,7 @@
 open OUnit2
 
 let _directory = "_scratch"
+let _coverage = "_coverage"
 
 let _test_context = ref None
 
@@ -75,6 +76,32 @@ let _with_directory context f =
   let restore () =
     _test_context := None;
     Sys.chdir old_wd;
+
+    let move =
+      if Sys.file_exists _coverage then true
+      else
+        try Unix.mkdir _coverage 0o755; true
+        with _ -> false
+    in
+
+    if move then begin
+      let files =
+        Sys.readdir _directory
+        |> Array.to_list
+        |> List.filter (fun s -> Filename.check_suffix s ".out.meta")
+      in
+
+      let rec destination_file n =
+        let candidate =
+          Printf.sprintf "meta%04d.out" n |> Filename.concat _coverage in
+        if Sys.file_exists candidate then destination_file (n + 1)
+        else candidate
+      in
+
+      files |> List.iter (fun source ->
+        Sys.rename (Filename.concat _directory source) (destination_file 0))
+    end;
+
     run ("rm -r " ^ _directory)
   in
 
@@ -90,8 +117,11 @@ let _library = ref "none"
 let compiler () = !_compiler
 
 let with_bisect_args arguments =
-  "-I ../../_build bisect." ^ !_library ^ " -ppx " ^
-  "\"../../_build/src/syntax/bisect_ppx.byte " ^ arguments ^ " \""
+  "-I ../../_build.instrumented " ^
+  "../../_build.meta/meta_bisect." ^ !_library ^ " " ^
+  "bisect." ^ !_library ^ " " ^
+  "-ppx \"../../_build.instrumented/src/syntax/bisect_ppx.byte " ^
+    arguments ^ "\""
 
 let with_bisect () = with_bisect_args ""
 
@@ -147,7 +177,8 @@ let compile ?(r = "") arguments source =
   |> run
 
 let report ?(f = "bisect*.out") ?(r = "") arguments =
-  Printf.sprintf "../../_build/src/report/report.byte %s %s %s" arguments f r
+  Printf.sprintf
+    "../../_build.instrumented/src/report/report.byte %s %s %s" arguments f r
   |> run
 
 let diff reference =

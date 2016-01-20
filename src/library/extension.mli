@@ -1,6 +1,6 @@
 (*
- * This file is part of Bisect.
- * Copyright (C) 2008-2012 Xavier Clerc.
+ * This file is part of Bisect_ppx.
+ * Copyright (C) 2016 Anton Bachin.
  *
  * Bisect is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-(** This module defines the values related to command-line analysis. *)
+(** Bisect output files extension. *)
 
-
-val kinds : (Common.point_kind * (bool ref)) list
-(** Association list mapping points kinds to whether they are activated. *)
-
-val runtime_name : string ref
-(** Runtime module name. Defaults to [Bisect], but should be set to
-    [Meta_bisect] when applying Bisect_ppx to itself. *)
-
-val switches : (Arg.key * Arg.spec * Arg.doc) list
-(** Command-line switches. *)
+val value : string
+(** Output file extension. This is [out], except when built as [Meta_bisect] for
+    self-instrumentation. Then, it is [out.meta]. *)

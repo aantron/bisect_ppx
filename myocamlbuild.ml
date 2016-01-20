@@ -20,7 +20,10 @@ open Ocamlbuild_plugin
 
 let odocl_file = Pathname.pwd / "bisect.odocl"
 let mlpack_file = Pathname.pwd / "bisect.mlpack"
+let meta_mlpack_file = Pathname.pwd / "meta_bisect.mlpack"
 let src_path = Pathname.pwd / "src"
+
+let mlpack_modules = ["Common"; "Extension"; "Runtime"; "Version"]
 
 let write_lines lines filename =
   let chan = open_out filename in
@@ -30,6 +33,10 @@ let write_lines lines filename =
       output_char chan '\n')
     lines;
   close_out_noerr chan
+
+let () =
+  write_lines mlpack_modules mlpack_file;
+  write_lines mlpack_modules meta_mlpack_file
 
 let () =
   let odocl_chan = open_out odocl_file in
@@ -48,9 +55,6 @@ let () =
     (Array.concat (List.map Pathname.readdir paths));
   close_out_noerr odocl_chan
 
-let () =
-  write_lines ["Common"; "Runtime"; "Version"] mlpack_file
-
 let version_tag = "src_library_version_ml"
 let version_ml = "src/library/version.ml"
 
@@ -60,14 +64,60 @@ let read_line_from_cmd cmd =
   close_in ic;
   line
 
+let safe_cp src dst =
+  let src = Pathname.mk src in
+  let dst = Pathname.mk dst in
+  let dir = Pathname.dirname dst in
+  let cmd = Printf.sprintf "mkdir -p %s" (Pathname.to_string dir) in
+  if Sys.command cmd <> 0 then failwith ("cannot run " ^ cmd);
+  cp src dst
+
+module Self_instrumentation :
+sig
+  val maybe_meta_build : unit -> unit
+  val maybe_instrumented_build : unit -> unit
+end =
+struct
+  let maybe_meta_build () =
+    let meta_build = getenv ~default:"no" "META_BISECT" = "yes" in
+
+    let pack_name = if meta_build then "Meta_bisect" else "Bisect" in
+    flag ["ocaml"; "compile"; "runtime"]
+      (S [A "-for-pack"; A pack_name]);
+
+    let extension_tag = "src_library_extension_ml" in
+    let extension_ml = "src/library/extension.ml" in
+    let extension = if meta_build then "out.meta" else "out" in
+
+    dep [extension_tag] [extension_ml];
+    rule ("generation of " ^ extension_ml)
+      ~prod:extension_ml
+      ~insert:`bottom
+      begin fun _ _ ->
+        let name, channel = Filename.open_temp_file "extension" ".ml" in
+        Printf.fprintf channel "let value = %S\n" extension;
+        close_out_noerr channel;
+        safe_cp name extension_ml
+      end
+
+  let maybe_instrumented_build () =
+    if getenv ~default:"no" "INSTRUMENT" <> "yes" then
+      mark_tag_used "instrument"
+    else begin
+      flag ["ocaml"; "compile"; "instrument"]
+        (S [A "-ppx";
+            A "../_build.meta/src/syntax/bisect_ppx.byte -runtime Meta_bisect";
+            A "-I"; A "../_install.meta"]);
+
+      flag ["ocaml"; "link"; "byte"; "instrument"]
+        (S [A "../_build.meta/meta_bisect.cma"]);
+
+      flag ["ocaml"; "link"; "native"; "instrument"]
+        (S [A "../_build.meta/meta_bisect.cmxa"])
+    end
+end
+
 let () =
-  let safe_cp src dst =
-    let src = Pathname.mk src in
-    let dst = Pathname.mk dst in
-    let dir = Pathname.dirname dst in
-    let cmd = Printf.sprintf "mkdir -p %s" (Pathname.to_string dir) in
-    if Sys.command cmd <> 0 then failwith ("cannot run " ^ cmd);
-    cp src dst in
   dispatch begin function
     | After_rules ->
         dep [version_tag] [version_ml];
@@ -75,7 +125,7 @@ let () =
         rule ("generation of " ^ version_ml)
           ~prod:version_ml
           ~insert:`bottom
-          (fun _ _ ->
+          begin fun _ _ ->
             let version =
               try read_line_from_cmd "git describe --abbrev=0"
               with _ -> "unknown"
@@ -83,6 +133,11 @@ let () =
             let name, channel = Filename.open_temp_file "version" ".ml" in
             Printf.fprintf channel "let value = %S\n" version;
             close_out_noerr channel;
-            safe_cp name version_ml);
+            safe_cp name version_ml
+          end;
+
+      Self_instrumentation.maybe_meta_build ();
+      Self_instrumentation.maybe_instrumented_build ()
+
     | _ -> ()
   end

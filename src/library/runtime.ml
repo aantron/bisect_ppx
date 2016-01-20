@@ -62,7 +62,7 @@ let file_channel () =
   let suffix = ref 0 in
   let next_name () =
     incr suffix;
-    Printf.sprintf "%s%04d.out" base_name !suffix
+    Printf.sprintf "%s%04d.%s" base_name !suffix Extension.value
   in
   let rec ic_opt_loop actual_name =
     try

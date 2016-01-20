@@ -24,6 +24,12 @@ PERFORMANCE := \
 	ocamlbuild $(OCAMLBUILD_FLAGS) performance/test_performance.native -- \
 		-runner sequential -display false
 
+COVERAGE := _coverage
+REPORT := \
+	../_build.meta/src/report/report.byte -I ../_build.instrumented \
+	$(COVERAGE)/*.out
+REPORT_DIR := _report
+
 default: FORCE
 	@echo 'Available targets:'
 	@echo '  unit             runs unit tests'
@@ -32,10 +38,14 @@ default: FORCE
 	@echo '  log              show log for last unit test execution'
 	@echo '  performance      runs the performance tests'
 	@echo '  all              runs all tests'
+	@echo '  coverage         generate HTML coverage report'
 	@echo '  clean            deletes build and log files'
 
 unit: binaries-may-exist
-	$(UNIT)
+	@rm -rf $(COVERAGE)
+	@$(UNIT)
+	@echo " Coverage:"
+	@$(REPORT) -summary-only -text - | grep --color=none total
 
 one: binaries-may-exist
 	$(UNIT) -only-test $(NAME)
@@ -51,12 +61,17 @@ performance: binaries-may-exist
 
 all: unit performance
 
+coverage: FORCE
+	test -d $(COVERAGE) || make unit
+	$(REPORT) -html $(REPORT_DIR)
+	@echo "\nSee _report/index.html"
+
 clean: FORCE
 	ocamlbuild -clean
-	rm -rf _scratch
+	rm -rf _scratch $(COVERAGE) $(REPORT_DIR)
 
 binaries-may-exist:
-	@test -d ../_build || \
-		( echo "Run' make all' in the project root directory"; false )
+	@test -d ../_build.instrumented || \
+		( echo "Run' make dev' in the project root directory"; false )
 
 FORCE:

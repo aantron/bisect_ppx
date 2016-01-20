@@ -55,11 +55,12 @@ opam install ocamlfind ocamlbuild ppx_tools
 echo
 echo "Compiling"
 echo
-make all
+make build
 
 opam install ounit ppx_blob ppx_deriving # Used in test suite.
 echo
 echo "Testing"
 echo
+make dev
 make tests STRICT_DEPENDENCIES=yes
 ( cd tests && make performance )

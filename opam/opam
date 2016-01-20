@@ -6,7 +6,7 @@ authors: "Leonid Rozenberg <leonidr@gmail.com>"
 homepage: "https://github.com/rleonid/bisect_ppx"
 bug-reports: "https://github.com/rleonid/bisect_ppx/issues"
 dev-repo: "https://github.com/rleonid/bisect_ppx.git"
-build: [make "all"]
+build: [make "build"]
 build-test: [make "tests"]
 install: [make "install"]
 remove: ["ocamlfind" "remove" "bisect_ppx"]

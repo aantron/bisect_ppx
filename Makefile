@@ -19,23 +19,34 @@
 # DEFINITIONS
 
 INSTALL_NAME := bisect_ppx
-MODULES_ODOCL := bisect.odocl
-MODULES_MLPACK := bisect.mlpack
 
 # Assume that ocamlbuild, ocamlfind, ocamlopt are found in path.
 OCAMLBUILD_FLAGS := -use-ocamlfind -no-links -cflag -annot
 
+META_BISECT_DIR := -build-dir _build.meta
+INSTRUMENTED_DIR := -build-dir _build.instrumented
+META_BISECT_INSTALL_DIR := _install.meta
+
 default:
 	@echo "available targets:"
-	@echo "  all        compiles all files"
+	@echo "  build      compiles bisect_ppx (release mode)"
+	@echo "  dev        compiles instrumented bisect_ppx (development mode)"
 	@echo "  doc        generates ocamldoc documentations"
 	@echo "  tests      runs tests"
 	@echo "  clean      deletes all produced files (excluding documentation)"
 	@echo "  distclean  deletes all produced files (including documentation)"
 	@echo "  install    copies executable and library files"
 
-all:
+build:
 	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.otarget
+
+dev:
+	META_BISECT=yes ocamlbuild $(OCAMLBUILD_FLAGS) $(META_BISECT_DIR) \
+		meta_bisect.otarget
+	mkdir -p $(META_BISECT_INSTALL_DIR)
+	cp _build.meta/meta_bisect.cmi $(META_BISECT_INSTALL_DIR)/
+	INSTRUMENT=yes ocamlbuild $(OCAMLBUILD_FLAGS) $(INSTRUMENTED_DIR) \
+		bisect.otarget
 
 doc: FORCE
 	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.docdir/index.html
@@ -47,11 +58,13 @@ tests: FORCE
 
 clean: FORCE
 	ocamlbuild -clean
+	ocamlbuild $(META_BISECT_DIR) -clean
+	ocamlbuild $(INSTRUMENTED_DIR) -clean
+	rm -rf $(META_BISECT_INSTALL_DIR)
 	make -C tests clean
 
 distclean: clean
-	rm -rf ocamldoc
-	rm -f $(MODULES_ODOCL) $(MODULES_MLPACK)
+	rm -rf ocamldoc *.odocl *.mlpack
 
 install: FORCE
 	! ocamlfind query $(INSTALL_NAME) || ocamlfind remove $(INSTALL_NAME)

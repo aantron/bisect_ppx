@@ -1,12 +1,16 @@
 # working and output directories
 _build/
+_build.*/
+_install.meta/
 ocamldoc/
 
-# test working directory
+# test working and coverage directories
 tests/_scratch
+tests/_coverage
+tests/_report
 
 # generated module lists
-bisect.mlpack
+*.mlpack
 bisect.odocl
 
 # scratch directory for notes, etc.

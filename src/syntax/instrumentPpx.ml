@@ -153,7 +153,8 @@ let faster file =
   let nb = List.length (InstrumentState.get_points_for_file file) in
   let ilid s = Exp.ident (lid s) in
   let init =
-    apply_nolabs (lid "Bisect.Runtime.init_with_array")
+    apply_nolabs
+      (lid ((!InstrumentArgs.runtime_name) ^ ".Runtime.init_with_array"))
       [strconst file; ilid "marks"]
   in
   let make = apply_nolabs (lid "Array.make") [intconst nb; intconst 0] in

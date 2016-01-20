@@ -28,6 +28,8 @@ let set_kinds v s =
       with _ -> raise (Arg.Bad (Printf.sprintf "unknown point kind: %C" ch)))
     s
 
+let runtime_name = ref "Bisect"
+
 let desc_kinds =
   let lines =
     List.map
@@ -58,5 +60,9 @@ let switches = [
   ("-mode",
    (Arg.Symbol (["safe"; "fast"; "faster"], ignore)),
    "  Ignored") ;
+
+  ("-runtime",
+   Arg.String ((:=) runtime_name),
+   "  Set runtime module name; used for testing")
 
 ]
