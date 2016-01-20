@@ -52,10 +52,17 @@ let css =  [
   "    width: 75%;" ;
   "}" ;
   "" ;
-  ".lineNone { white-space: nowrap; background: white; font-family: monospace; }" ;
-  ".lineAllVisited { white-space: nowrap; background: #30FF6A; font-family: monospace; }" ;
-  ".lineAllUnvisited { white-space: nowrap; background: #FF4423; font-family: monospace; }" ;
-  ".lineMixed { white-space: nowrap; background: #E4FF5B; font-family: monospace; }" ;
+  ".lineNone { white-space: nowrap; background: white; }" ;
+  ".lineAllVisited { white-space: nowrap; background: #AAFFC2; }" ;
+  ".lineAllUnvisited { white-space: nowrap; background: #FFCAC0; }" ;
+  ".lineMixed { white-space: nowrap; background: #F4FFBE; }" ;
+  "" ;
+  ".lineNone, .lineAllVisited, .lineAllUnvisited, .lineMixed {" ;
+  "    font-family: Consolas, \"Liberation Mono\", Menlo, Courier, monospace;" ;
+  "    font-size: 12px;" ;
+  "    line-height: 1.45;" ;
+  "}" ;
+  "" ;
   "" ;
   "table.simple {" ;
   "    border-width: 1px;" ;
@@ -98,8 +105,8 @@ let css =  [
   "    border-collapse: collapse;" ;
   "}" ;
   "" ;
-  ".gaugeOK { background: green; }" ;
-  ".gaugeKO { background: red; }" ;
+  ".gaugeOK { background: #61B961; }" ;
+  ".gaugeKO { background: #FF5757; }" ;
   ".gaugeNO { background: gray; }" ;
   ""
 ]
