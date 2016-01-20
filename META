@@ -11,15 +11,11 @@ package "runtime" (
 
   archive(byte)="bisect.cma"
   archive(native)="bisect.cmxa"
-
-  archive(byte,mt)="bisect.cma bisectThread.cmo"
-  archive(native,mt)="bisect.cmxa bisectThread.cmx"
 )
 
 package "fast" (
   requires="bisect_ppx.runtime"
   ppx="./bisect_ppx.byte"
-  ppxopt="bisect_ppx.fast,-mode bisect_ppx.fast,fast"
-  description="The Bisect modules needed for instrumentation, running in fast mode."
+  description="Code coverage (obsolete fast mode - now always fast)"
   version="0.2.6"
 )

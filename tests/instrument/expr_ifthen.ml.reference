@@ -1,17 +1,24 @@
-let _ = Bisect.Runtime.init "expr_ifthen.ml"
+let ___bisect_mark___expr_ifthen =
+  let marks = Array.make 8 0 in
+  Bisect.Runtime.init_with_array "expr_ifthen.ml" marks;
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let () =
-  Bisect.Runtime.mark "expr_ifthen.ml" 2;
+  ___bisect_mark___expr_ifthen 2;
   if true
-  then (Bisect.Runtime.mark "expr_ifthen.ml" 1; print_endline "abc")
-  else (Bisect.Runtime.mark "expr_ifthen.ml" 0; print_endline "def")
+  then (___bisect_mark___expr_ifthen 1; print_endline "abc")
+  else (___bisect_mark___expr_ifthen 0; print_endline "def")
 let () =
-  Bisect.Runtime.mark "expr_ifthen.ml" 7;
+  ___bisect_mark___expr_ifthen 7;
   if true
   then
-    ((Bisect.Runtime.mark "expr_ifthen.ml" 6; print_string "abc");
-     Bisect.Runtime.mark "expr_ifthen.ml" 5;
+    ((___bisect_mark___expr_ifthen 6; print_string "abc");
+     ___bisect_mark___expr_ifthen 5;
      print_newline ())
   else
-    ((Bisect.Runtime.mark "expr_ifthen.ml" 4; print_string "def");
-     Bisect.Runtime.mark "expr_ifthen.ml" 3;
+    ((___bisect_mark___expr_ifthen 4; print_string "def");
+     ___bisect_mark___expr_ifthen 3;
      print_newline ())

@@ -1,20 +1,25 @@
-let _ = Bisect.Runtime.init "expr_for.ml"
+let ___bisect_mark___expr_for =
+  let marks = Array.make 10 0 in
+  Bisect.Runtime.init_with_array "expr_for.ml" marks;
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let () =
-  (Bisect.Runtime.mark "expr_for.ml" 5; print_endline "before");
-  (Bisect.Runtime.mark "expr_for.ml" 4;
+  (___bisect_mark___expr_for 5; print_endline "before");
+  (___bisect_mark___expr_for 4;
    for i = 1 to 3 do
-     ((Bisect.Runtime.mark "expr_for.ml" 2; print_endline "abc");
-      (Bisect.Runtime.mark "expr_for.ml" 1; print_endline "def");
-      Bisect.Runtime.mark "expr_for.ml" 0;
+     ((___bisect_mark___expr_for 2; print_endline "abc");
+      (___bisect_mark___expr_for 1; print_endline "def");
+      ___bisect_mark___expr_for 0;
       print_endline "ghi")
    done);
-  Bisect.Runtime.mark "expr_for.ml" 3;
+  ___bisect_mark___expr_for 3;
   print_endline "after"
 let () =
-  (Bisect.Runtime.mark "expr_for.ml" 9; print_endline "before");
-  (Bisect.Runtime.mark "expr_for.ml" 8;
-   for i = 1 to 3 do
-     (Bisect.Runtime.mark "expr_for.ml" 6; print_endline "abc")
-   done);
-  Bisect.Runtime.mark "expr_for.ml" 7;
+  (___bisect_mark___expr_for 9; print_endline "before");
+  (___bisect_mark___expr_for 8;
+   for i = 1 to 3 do (___bisect_mark___expr_for 6; print_endline "abc") done);
+  ___bisect_mark___expr_for 7;
   print_endline "after"

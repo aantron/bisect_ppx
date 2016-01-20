@@ -27,22 +27,11 @@ let intconst x =
 let lid ?(loc = Location.none) s =
   Location.mkloc (Longident.parse s) loc
 
-let constr id =
-  let t = Location.mkloc (Longident.parse id) Location.none in
-  Exp.construct t None
-
-let trueconst () = constr "true"
-
-let unitconst () = constr "()"
-
 let strconst s =
   Exp.constant (Const_string (s, None)) (* What's the option for? *)
 
 let string_of_ident ident =
   String.concat "." (Longident.flatten ident.txt)
-
-(* To be raised when an offset is already marked. *)
-exception Already_marked
 
 let apply_nolabs ?loc lid el =
   Exp.apply ?loc
@@ -57,9 +46,7 @@ let custom_mark_function file =
     (Filename.chop_extension file)
 
 (* Creates the marking expression for given file, offset, and kind.
-   Populates the 'points' global variable.
-   Raises 'Already_marked' when the passed file is already marked for the
-   passed offset. *)
+   Populates the 'points' global variable. *)
 let marker file ofs kind marked =
   let lst = InstrumentState.get_points_for_file file in
   if List.exists (fun p -> p.Common.offset = ofs) lst then
@@ -78,13 +65,7 @@ let marker file ofs kind marked =
     InstrumentState.set_points_for_file file (pt :: lst);
     let loc = Location.none in
     let wrapped =
-      match !InstrumentArgs.mode with
-      | InstrumentArgs.Safe ->
-          apply_nolabs ~loc (lid "Bisect.Runtime.mark") [strconst file; intconst idx]
-      | InstrumentArgs.Fast
-      | InstrumentArgs.Faster ->
-          apply_nolabs ~loc (lid (custom_mark_function file)) [intconst idx]
-    in
+      apply_nolabs ~loc (lid (custom_mark_function file)) [intconst idx] in
     Some wrapped
 
 (* Tests whether the passed expression is a bare mapping,
@@ -163,26 +144,6 @@ let wrap_class_field_kind k = function
   | Cfk_virtual _ as cf -> cf
   | Cfk_concrete (o,e)  -> Cf.concrete o (wrap_func k e)
 
-let safe file =
-  let e = apply_nolabs (lid "Bisect.Runtime.init") [strconst file] in
-  let tab =
-    List.fold_right
-      (fun idx acc -> (intconst idx) :: acc)
-      (InstrumentState.get_marked_points ())
-      []
-  in
-  let mark_array =
-    apply_nolabs (lid "Bisect.Runtime.mark_array") [strconst file; Exp.array tab]
-  in
-  let e =
-    if tab <> [] then
-      Exp.sequence e mark_array
-    else
-      e
-  in
-  InstrumentState.add_file file;
-  Str.eval e
-
 let pattern_var id =
   Pat.var (Location.mkloc id Location.none)
 
@@ -193,7 +154,7 @@ let faster file =
   let ilid s = Exp.ident (lid s) in
   let init =
     apply_nolabs (lid "Bisect.Runtime.init_with_array")
-      [strconst file; ilid "marks"; trueconst ()]
+      [strconst file; ilid "marks"]
   in
   let make = apply_nolabs (lid "Array.make") [intconst nb; intconst 0] in
   let marks =
@@ -222,25 +183,9 @@ let faster file =
               (lid "Array.set")
               [ilid "marks"; ilid "idx"; if_then_else])
     in
-    let body =
-      if !InstrumentArgs.mode = InstrumentArgs.Fast then
-        let before = apply_nolabs (lid "hook_before") [unitconst ()] in
-        let after = apply_nolabs (lid "hook_after") [unitconst ()] in
-        Exp.(sequence (sequence before body) after)
-      else
-        body
-    in
     Exp.(function_ [ case (pattern_var "idx") body ])
   in
-  let hooks =
-    if !InstrumentArgs.mode = InstrumentArgs.Fast then
-      let exp = apply_nolabs (lid "Bisect.Runtime.get_hooks") [unitconst ()] in
-      let pat = Pat.tuple [ pattern_var "hook_before" ; pattern_var "hook_after" ] in
-      [ Vb.mk pat exp ]
-    else
-      []
-  in
-  let vb = (Vb.mk (pattern_var "marks") make) :: hooks in
+  let vb = [(Vb.mk (pattern_var "marks") make)] in
   let e =
     Exp.(let_ Nonrecursive vb (sequence marks func))
   in
@@ -402,22 +347,17 @@ class instrumenter = object (self)
         ast
       else
         if not (InstrumentState.is_file file) then
-          match !InstrumentArgs.mode with
-          | InstrumentArgs.Safe   ->
-              let head = safe file in
-              let rest = super#structure ast in
-              head :: rest
-          | InstrumentArgs.Fast
-          | InstrumentArgs.Faster ->
-              (* We have to add this here, before we process the rest of the
-                 structure, because that may also have structures contained
-                 there-in, but we'll add the header after processing all of
-                 those declarations so that we know how many instrumentations
-                 there are. *)
-              InstrumentState.add_file file;
-              let rest = super#structure ast in
-              let head = faster file in
-              head :: rest
+          begin
+            (* We have to add this here, before we process the rest of the
+               structure, because that may also have structures contained
+               there-in, but we'll add the header after processing all of those
+               declarations so that we know how many instrumentations there
+               are. *)
+            InstrumentState.add_file file;
+            let rest = super#structure ast in
+            let head = faster file in
+            head :: rest
+          end
         else
           super#structure ast
 

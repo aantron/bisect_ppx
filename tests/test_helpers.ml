@@ -95,9 +95,6 @@ let with_bisect_args arguments =
 
 let with_bisect () = with_bisect_args ""
 
-let with_bisect_thread () =
-  "-thread -linkall ../../_build/src/threads/bisectThread." ^ !_object
-
 type compiler = Ocamlc | Ocamlopt
 
 let _with_compiler compiler f =

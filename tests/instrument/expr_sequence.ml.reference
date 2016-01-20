@@ -1,11 +1,18 @@
-let _ = Bisect.Runtime.init "expr_sequence.ml"
-let () = Bisect.Runtime.mark "expr_sequence.ml" 0; print_endline "abc"
+let ___bisect_mark___expr_sequence =
+  let marks = Array.make 6 0 in
+  Bisect.Runtime.init_with_array "expr_sequence.ml" marks;
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+let () = ___bisect_mark___expr_sequence 0; print_endline "abc"
 let () =
-  (Bisect.Runtime.mark "expr_sequence.ml" 2; print_endline "abc");
-  Bisect.Runtime.mark "expr_sequence.ml" 1;
+  (___bisect_mark___expr_sequence 2; print_endline "abc");
+  ___bisect_mark___expr_sequence 1;
   print_endline "def"
 let () =
-  (Bisect.Runtime.mark "expr_sequence.ml" 5; print_endline "abc");
-  (Bisect.Runtime.mark "expr_sequence.ml" 4; print_endline "def");
-  Bisect.Runtime.mark "expr_sequence.ml" 3;
+  (___bisect_mark___expr_sequence 5; print_endline "abc");
+  (___bisect_mark___expr_sequence 4; print_endline "def");
+  ___bisect_mark___expr_sequence 3;
   print_endline "ghi"

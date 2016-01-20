@@ -59,8 +59,6 @@ distclean: clean
 install: FORCE
 	ocamlfind query $(INSTALL_NAME) && ocamlfind remove $(INSTALL_NAME) || true; \
 	ocamlfind install $(INSTALL_NAME) META -optional \
-		_build/src/threads/bisectThread.cm* \
-		_build/src/threads/bisectThread.o \
 		_build/src/syntax/bisect_ppx.byte \
 		_build/bisect.a \
 		_build/bisect.o \

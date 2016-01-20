@@ -1,7 +1,14 @@
-let _ = Bisect.Runtime.init "expr_lazyop.ml"
+let ___bisect_mark___expr_lazyop =
+  let marks = Array.make 4 0 in
+  Bisect.Runtime.init_with_array "expr_lazyop.ml" marks;
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let f x y =
-  (Bisect.Runtime.mark "expr_lazyop.ml" 1; x > 0) &&
-    (Bisect.Runtime.mark "expr_lazyop.ml" 0; y > 0)
+  (___bisect_mark___expr_lazyop 1; x > 0) &&
+    (___bisect_mark___expr_lazyop 0; y > 0)
 let g x y =
-  (Bisect.Runtime.mark "expr_lazyop.ml" 3; x > 0) ||
-    (Bisect.Runtime.mark "expr_lazyop.ml" 2; y > 0)
+  (___bisect_mark___expr_lazyop 3; x > 0) ||
+    (___bisect_mark___expr_lazyop 2; y > 0)

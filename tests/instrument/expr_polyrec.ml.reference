@@ -1,15 +1,22 @@
-let _ = Bisect.Runtime.init "expr_polyrec.ml"
+let ___bisect_mark___expr_polyrec =
+  let marks = Array.make 7 0 in
+  Bisect.Runtime.init_with_array "expr_polyrec.ml" marks;
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let rec f : 'a . 'a -> unit=
   fun _  ->
-    (Bisect.Runtime.mark "expr_polyrec.ml" 1; f 0);
-    Bisect.Runtime.mark "expr_polyrec.ml" 0;
+    (___bisect_mark___expr_polyrec 1; f 0);
+    ___bisect_mark___expr_polyrec 0;
     f ""
 let () =
-  Bisect.Runtime.mark "expr_polyrec.ml" 6;
+  ___bisect_mark___expr_polyrec 6;
   (let rec f : 'a . 'a -> unit=
-     Bisect.Runtime.mark "expr_polyrec.ml" 4;
+     ___bisect_mark___expr_polyrec 4;
      (fun _  ->
-        (Bisect.Runtime.mark "expr_polyrec.ml" 3; f 0);
-        Bisect.Runtime.mark "expr_polyrec.ml" 2;
+        (___bisect_mark___expr_polyrec 3; f 0);
+        ___bisect_mark___expr_polyrec 2;
         f "") in
-   Bisect.Runtime.mark "expr_polyrec.ml" 5; f 0)
+   ___bisect_mark___expr_polyrec 5; f 0)

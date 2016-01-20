@@ -1,14 +1,21 @@
-let _ = Bisect.Runtime.init "expr_binding.ml"
-let x = Bisect.Runtime.mark "expr_binding.ml" 0; 3
-let y = Bisect.Runtime.mark "expr_binding.ml" 1; [1; 2; 3]
-let z = Bisect.Runtime.mark "expr_binding.ml" 2; [|1;2;3|]
-let f x = Bisect.Runtime.mark "expr_binding.ml" 3; print_endline x
+let ___bisect_mark___expr_binding =
+  let marks = Array.make 10 0 in
+  Bisect.Runtime.init_with_array "expr_binding.ml" marks;
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+let x = ___bisect_mark___expr_binding 0; 3
+let y = ___bisect_mark___expr_binding 1; [1; 2; 3]
+let z = ___bisect_mark___expr_binding 2; [|1;2;3|]
+let f x = ___bisect_mark___expr_binding 3; print_endline x
 let f' x =
-  Bisect.Runtime.mark "expr_binding.ml" 6;
-  (let x' = Bisect.Runtime.mark "expr_binding.ml" 4; String.uppercase x in
-   Bisect.Runtime.mark "expr_binding.ml" 5; print_endline x')
-let g x y z = Bisect.Runtime.mark "expr_binding.ml" 7; (x + y) * z
+  ___bisect_mark___expr_binding 6;
+  (let x' = ___bisect_mark___expr_binding 4; String.uppercase x in
+   ___bisect_mark___expr_binding 5; print_endline x')
+let g x y z = ___bisect_mark___expr_binding 7; (x + y) * z
 let g' x y =
-  (Bisect.Runtime.mark "expr_binding.ml" 9; print_endline x);
-  Bisect.Runtime.mark "expr_binding.ml" 8;
+  (___bisect_mark___expr_binding 9; print_endline x);
+  ___bisect_mark___expr_binding 8;
   print_endline y

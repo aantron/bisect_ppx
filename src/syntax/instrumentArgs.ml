@@ -17,18 +17,6 @@
  *)
 
 
-type mode =
-  | Safe
-  | Fast
-  | Faster
-
-let modes =
-  ["safe", Safe;
-   "fast", Fast;
-   "faster", Faster]
-
-let mode = ref Safe
-
 let kinds = List.map (fun x -> (x, ref true)) Common.all_point_kinds
 
 let set_kinds v s =
@@ -68,9 +56,7 @@ let switches = [
    "<filename>  Exclude functions listed in given file") ;
 
   ("-mode",
-   (let mode_names = List.map fst modes in
-   Arg.Symbol (mode_names, (fun s -> mode := List.assoc s modes))),
-   "  Set instrumentation mode") ;
+   (Arg.Symbol (["safe"; "fast"; "faster"], ignore)),
+   "  Ignored") ;
 
 ]
-
