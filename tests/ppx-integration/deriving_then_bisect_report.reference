@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<bisect-report>
+  <summary>
+    <element kind="binding" count="2" total="2"/>
+    <element kind="sequence" count="0" total="0"/>
+    <element kind="for" count="0" total="0"/>
+    <element kind="if/then" count="0" total="0"/>
+    <element kind="try" count="0" total="0"/>
+    <element kind="while" count="0" total="0"/>
+    <element kind="match/function" count="1" total="1"/>
+    <element kind="class expression" count="0" total="0"/>
+    <element kind="class initializer" count="0" total="0"/>
+    <element kind="class method" count="0" total="0"/>
+    <element kind="class value" count="0" total="0"/>
+    <element kind="toplevel expression" count="0" total="0"/>
+    <element kind="lazy operator" count="0" total="0"/>
+    <element kind="total" count="3" total="3"/>
+  </summary>
+  <file path="deriving.ml">
+    <summary>
+      <element kind="binding" count="2" total="2"/>
+      <element kind="sequence" count="0" total="0"/>
+      <element kind="for" count="0" total="0"/>
+      <element kind="if/then" count="0" total="0"/>
+      <element kind="try" count="0" total="0"/>
+      <element kind="while" count="0" total="0"/>
+      <element kind="match/function" count="1" total="1"/>
+      <element kind="class expression" count="0" total="0"/>
+      <element kind="class initializer" count="0" total="0"/>
+      <element kind="class method" count="0" total="0"/>
+      <element kind="class value" count="0" total="0"/>
+      <element kind="toplevel expression" count="0" total="0"/>
+      <element kind="lazy operator" count="0" total="0"/>
+      <element kind="total" count="3" total="3"/>
+    </summary>
+    <point offset="9" count="1" kind="binding"/>
+    <point offset="13" count="1" kind="match/function"/>
+    <point offset="54" count="1" kind="binding"/>
+  </file>
+</bisect-report>
