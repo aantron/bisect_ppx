@@ -50,13 +50,6 @@ let custom_mark_function file =
 let marker file ofs kind marked =
   let lst = InstrumentState.get_points_for_file file in
   if List.exists (fun p -> p.Common.offset = ofs) lst then
-    let currentl, rest = List.partition (fun p -> p.Common.offset = ofs) lst in
-    let current = List.hd currentl in
-    if Common.preference ~current:current.Common.kind ~replace:kind then
-      begin
-        let nlst = { current with Common.kind = kind } :: rest in
-        InstrumentState.set_points_for_file file nlst
-      end;
     None
   else
     let idx = List.length lst in
