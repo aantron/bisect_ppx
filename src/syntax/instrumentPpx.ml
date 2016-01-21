@@ -96,23 +96,9 @@ let wrap_case k case =
   | None   -> Exp.case case.pc_lhs (wrap_expr k case.pc_rhs)
   | Some e -> Exp.case case.pc_lhs ~guard:(wrap_expr k e) (wrap_expr k case.pc_rhs)
 
-(* Wraps an expression possibly denoting a function. *)
-let rec wrap_func k e =
-  let loc = e.pexp_loc in
-  match e.pexp_desc with
-  | Pexp_function clst ->
-      List.map (wrap_case k) clst |> Exp.function_ ~loc
-  | Pexp_poly (e, ct) ->
-      Exp.poly ~loc (wrap_func k e) ct
-  | Pexp_fun (al, eo, p, e) ->
-      let eo = map_opt (wrap_expr k) eo in
-      Exp.fun_ ~loc al eo p (wrap_func k e)
-  | _ ->
-      wrap_expr k e
-
 let wrap_class_field_kind k = function
   | Cfk_virtual _ as cf -> cf
-  | Cfk_concrete (o,e)  -> Cf.concrete o (wrap_func k e)
+  | Cfk_concrete (o,e)  -> Cf.concrete o (wrap_expr k e)
 
 let pattern_var id =
   Pat.var (Location.mkloc id Location.none)
@@ -229,9 +215,11 @@ class instrumenter = object (self)
             List.map (fun vb ->
             {vb with pvb_expr = wrap_expr Common.Binding vb.pvb_expr}) l in
           Exp.let_ ~loc rec_flag l (wrap_expr Common.Binding e)
+      | Pexp_poly (e, ct) ->
+          Exp.poly ~loc (wrap_expr Common.Binding e) ct
       | Pexp_fun (al, eo, p, e) ->
           let eo = map_opt (wrap_expr Common.Binding) eo in
-          Exp.fun_ ~loc al eo p (wrap_func Common.Binding e)
+          Exp.fun_ ~loc al eo p (wrap_expr Common.Binding e)
       | Pexp_apply (e1, [l2, e2; l3, e3]) ->
           (match e1.pexp_desc with
           | Pexp_ident ident
@@ -281,10 +269,10 @@ class instrumenter = object (self)
                           (ident.loc.Location.loc_start.Lexing.pos_fname)
                             ident.txt -> vb.pvb_expr
                       | _ ->
-                        wrap_func Common.Binding (self#expr vb.pvb_expr)
+                        wrap_expr Common.Binding (self#expr vb.pvb_expr)
                     end
                 | _ ->
-                    wrap_func Common.Binding (self#expr vb.pvb_expr)})
+                    wrap_expr Common.Binding (self#expr vb.pvb_expr)})
           l
         in
           Str.value ~loc rec_flag l

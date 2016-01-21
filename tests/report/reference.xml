@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <bisect-report>
   <summary>
-    <element kind="binding" count="5" total="10"/>
+    <element kind="binding" count="6" total="11"/>
     <element kind="sequence" count="3" total="4"/>
     <element kind="for" count="1" total="1"/>
     <element kind="if/then" count="0" total="4"/>
@@ -14,11 +14,11 @@
     <element kind="class value" count="0" total="0"/>
     <element kind="toplevel expression" count="0" total="0"/>
     <element kind="lazy operator" count="2" total="2"/>
-    <element kind="total" count="13" total="26"/>
+    <element kind="total" count="14" total="27"/>
   </summary>
   <file path="source.ml">
     <summary>
-      <element kind="binding" count="5" total="10"/>
+      <element kind="binding" count="6" total="11"/>
       <element kind="sequence" count="3" total="4"/>
       <element kind="for" count="1" total="1"/>
       <element kind="if/then" count="0" total="4"/>
@@ -31,11 +31,12 @@
       <element kind="class value" count="0" total="0"/>
       <element kind="toplevel expression" count="0" total="0"/>
       <element kind="lazy operator" count="2" total="2"/>
-      <element kind="total" count="13" total="26"/>
+      <element kind="total" count="14" total="27"/>
     </summary>
     <point offset="10" count="2" kind="binding"/>
     <point offset="26" count="2" kind="binding"/>
     <point offset="44" count="2" kind="binding"/>
+    <point offset="158" count="2" kind="binding"/>
     <point offset="178" count="9" kind="lazy operator"/>
     <point offset="187" count="7" kind="lazy operator"/>
     <point offset="196" count="2" kind="match/function"/>
