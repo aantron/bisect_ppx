@@ -194,7 +194,7 @@ let _preserve file destination =
 
 let diff reference =
   let reference_actual = Filename.concat Filename.parent_dir_name reference in
-  let command = "diff " ^ reference_actual ^ " output" in
+  let command = "diff -a " ^ reference_actual ^ " output" in
 
   let status = _run_int (command ^ " > /dev/null") in
   match status with
