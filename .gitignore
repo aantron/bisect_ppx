@@ -8,6 +8,7 @@ ocamldoc/
 tests/_scratch
 tests/_coverage
 tests/_report
+tests/_preserve
 
 # generated module lists
 *.mlpack

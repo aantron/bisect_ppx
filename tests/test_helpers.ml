@@ -20,6 +20,7 @@ open OUnit2
 
 let _directory = "_scratch"
 let _coverage = "_coverage"
+let _preserve_directory = "_preserve"
 
 let _test_context = ref None
 
@@ -181,6 +182,16 @@ let report ?(f = "bisect*.out") ?(r = "") arguments =
     "../../_build.instrumented/src/report/report.byte %s %s %s" arguments f r
   |> run
 
+let _preserve file destination =
+  let destination =
+    destination
+    |> Filename.concat _preserve_directory
+    |> Filename.concat Filename.parent_dir_name
+  in
+
+  run ("mkdir -p " ^ (Filename.dirname destination));
+  run ("cp " ^ file ^ " " ^ destination)
+
 let diff reference =
   let reference_actual = Filename.concat Filename.parent_dir_name reference in
   let command = "diff " ^ reference_actual ^ " output" in
@@ -190,6 +201,7 @@ let diff reference =
   | 0 -> ()
   | v when v <> 1 -> _command_failed command ~status:v
   | _ ->
+    _preserve "output" reference;
     _run_int (command ^ " > delta") |> ignore;
     let delta = _read_file "delta" in
     Printf.sprintf "Difference against '%s':\n\n%s" reference delta

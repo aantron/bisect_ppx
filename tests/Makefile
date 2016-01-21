@@ -30,6 +30,8 @@ REPORT := \
 	$(COVERAGE)/*.out
 REPORT_DIR := _report
 
+PRESERVE := _preserve
+
 default: FORCE
 	@echo 'Available targets:'
 	@echo '  unit             runs unit tests'
@@ -42,12 +44,13 @@ default: FORCE
 	@echo '  clean            deletes build and log files'
 
 unit: binaries-may-exist
-	@rm -rf $(COVERAGE)
+	@rm -rf $(COVERAGE) $(PRESERVE)
 	@$(UNIT)
 	@echo " Coverage:"
 	@$(REPORT) -summary-only -text - | grep --color=none total
 
 one: binaries-may-exist
+	@rm -rf $(COVERAGE) $(PRESERVE)
 	$(UNIT) -only-test $(NAME)
 
 list: FORCE
@@ -68,7 +71,7 @@ coverage: FORCE
 
 clean: FORCE
 	ocamlbuild -clean
-	rm -rf _scratch $(COVERAGE) $(REPORT_DIR)
+	rm -rf _scratch $(COVERAGE) $(REPORT_DIR) $(PRESERVE)
 
 binaries-may-exist:
 	@test -d ../_build.instrumented || \
