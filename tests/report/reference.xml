@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <bisect-report>
   <summary>
-    <element kind="binding" count="3" total="8"/>
-    <element kind="sequence" count="5" total="6"/>
+    <element kind="binding" count="5" total="10"/>
+    <element kind="sequence" count="3" total="4"/>
     <element kind="for" count="1" total="1"/>
     <element kind="if/then" count="0" total="4"/>
     <element kind="try" count="0" total="1"/>
@@ -18,8 +18,8 @@
   </summary>
   <file path="source.ml">
     <summary>
-      <element kind="binding" count="3" total="8"/>
-      <element kind="sequence" count="5" total="6"/>
+      <element kind="binding" count="5" total="10"/>
+      <element kind="sequence" count="3" total="4"/>
       <element kind="for" count="1" total="1"/>
       <element kind="if/then" count="0" total="4"/>
       <element kind="try" count="0" total="1"/>
@@ -40,9 +40,9 @@
     <point offset="187" count="7" kind="lazy operator"/>
     <point offset="196" count="2" kind="match/function"/>
     <point offset="233" count="7" kind="match/function"/>
-    <point offset="272" count="9" kind="sequence"/>
+    <point offset="272" count="9" kind="binding"/>
     <point offset="287" count="9" kind="sequence"/>
-    <point offset="316" count="2" kind="sequence"/>
+    <point offset="316" count="2" kind="binding"/>
     <point offset="355" count="2" kind="sequence"/>
     <point offset="383" count="9" kind="for"/>
     <point offset="395" count="9" kind="sequence"/>

@@ -15,10 +15,12 @@ let () =
   ___bisect_mark___expr_ifthen 7;
   if true
   then
-    ((___bisect_mark___expr_ifthen 6; print_string "abc");
-     ___bisect_mark___expr_ifthen 5;
+    (___bisect_mark___expr_ifthen 6;
+     print_string "abc";
+     ___bisect_mark___expr_ifthen 4;
      print_newline ())
   else
-    ((___bisect_mark___expr_ifthen 4; print_string "def");
+    (___bisect_mark___expr_ifthen 5;
+     print_string "def";
      ___bisect_mark___expr_ifthen 3;
      print_newline ())

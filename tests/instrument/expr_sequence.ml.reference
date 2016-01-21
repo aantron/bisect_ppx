@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_sequence =
-  let marks = Array.make 11 0 in
+  let marks = Array.make 10 0 in
   Bisect.Runtime.init_with_array "expr_sequence.ml" marks;
   (function
    | idx ->
@@ -8,17 +8,20 @@ let ___bisect_mark___expr_sequence =
        if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let () = ___bisect_mark___expr_sequence 0; print_endline "abc"
 let () =
-  (___bisect_mark___expr_sequence 2; print_endline "abc");
+  ___bisect_mark___expr_sequence 2;
+  print_endline "abc";
   ___bisect_mark___expr_sequence 1;
   print_endline "def"
 let () =
-  (___bisect_mark___expr_sequence 5; print_endline "abc");
-  (___bisect_mark___expr_sequence 4; print_endline "def");
+  ___bisect_mark___expr_sequence 5;
+  print_endline "abc";
+  ___bisect_mark___expr_sequence 4;
+  print_endline "def";
   ___bisect_mark___expr_sequence 3;
   print_endline "ghi"
 let () =
-  ___bisect_mark___expr_sequence 10;
-  ((___bisect_mark___expr_sequence 9; print_endline "abc");
+  ___bisect_mark___expr_sequence 9;
+  (print_endline "abc";
    ___bisect_mark___expr_sequence 8;
    (function
     | 0 -> (___bisect_mark___expr_sequence 6; print_endline "def")

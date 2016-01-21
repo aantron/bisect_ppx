@@ -16,7 +16,8 @@ let f' x =
    ___bisect_mark___expr_binding 5; print_endline x')
 let g x y z = ___bisect_mark___expr_binding 7; (x + y) * z
 let g' x y =
-  (___bisect_mark___expr_binding 9; print_endline x);
+  ___bisect_mark___expr_binding 9;
+  print_endline x;
   ___bisect_mark___expr_binding 8;
   print_endline y
 let () =

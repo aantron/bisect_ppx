@@ -6,9 +6,9 @@ file "source.ml"
   point        lazy operator at offset    187:      7
   point       match/function at offset    196:      2
   point       match/function at offset    233:      7
-  point             sequence at offset    272:      9
+  point              binding at offset    272:      9
   point             sequence at offset    287:      9
-  point             sequence at offset    316:      2
+  point              binding at offset    316:      2
   point             sequence at offset    355:      2
   point                  for at offset    383:      9
   point             sequence at offset    395:      9

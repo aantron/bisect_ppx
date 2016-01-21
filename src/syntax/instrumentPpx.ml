@@ -98,15 +98,6 @@ let wrap_expr k e =
       | Some w -> Exp.sequence ~loc w e
       | None   -> e
 
-(* Wraps a sequence. *)
-let rec wrap_seq k e =
-  let _loc = e.pexp_loc in
-  match e.pexp_desc with
-  | Pexp_sequence (e1, e2) ->
-      Exp.sequence (wrap_expr k e1) (wrap_seq Common.Sequence e2)
-  | _ ->
-      wrap_expr k e
-
 let wrap_case k case =
   match case.pc_guard with
   | None   -> Exp.case case.pc_lhs (wrap_expr k case.pc_rhs)
@@ -269,12 +260,12 @@ class instrumenter = object (self)
       | Pexp_ifthenelse (e1, e2, e3) ->
           Exp.ifthenelse ~loc e1 (wrap_expr Common.If_then e2)
             (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None)
-      | Pexp_sequence _ ->
-          wrap_seq Common.Sequence e'
+      | Pexp_sequence (e1, e2) ->
+          Exp.sequence ~loc e1 (wrap_expr Common.Sequence e2)
       | Pexp_while (e1, e2) ->
-          Exp.while_ ~loc e1 (wrap_seq Common.While e2)
+          Exp.while_ ~loc e1 (wrap_expr Common.While e2)
       | Pexp_for (id, e1, e2, dir, e3) ->
-          Exp.for_ ~loc id e1 e2 dir (wrap_seq Common.For e3)
+          Exp.for_ ~loc id e1 e2 dir (wrap_expr Common.For e3)
       | _ -> e'
 
   method! structure_item si =

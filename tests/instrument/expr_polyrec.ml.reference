@@ -8,7 +8,8 @@ let ___bisect_mark___expr_polyrec =
        if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let rec f : 'a . 'a -> unit=
   fun _  ->
-    (___bisect_mark___expr_polyrec 1; f 0);
+    ___bisect_mark___expr_polyrec 1;
+    f 0;
     ___bisect_mark___expr_polyrec 0;
     f ""
 let () =
@@ -16,7 +17,8 @@ let () =
   (let rec f : 'a . 'a -> unit=
      ___bisect_mark___expr_polyrec 4;
      (fun _  ->
-        (___bisect_mark___expr_polyrec 3; f 0);
+        ___bisect_mark___expr_polyrec 3;
+        f 0;
         ___bisect_mark___expr_polyrec 2;
         f "") in
    ___bisect_mark___expr_polyrec 5; f 0)

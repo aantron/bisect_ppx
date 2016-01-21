@@ -1,8 +1,8 @@
 file "source.ml"
-  point             sequence at offset     17:      0
+  point              binding at offset     17:      0
   point             sequence at offset     42:      0
   point                  for at offset     64:      0
-  point             sequence at offset    118:      1
+  point              binding at offset    118:      1
   point             sequence at offset    144:      1
   point                  for at offset    166:      3
   point              binding at offset    214:      1
