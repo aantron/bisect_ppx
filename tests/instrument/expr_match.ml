@@ -40,3 +40,11 @@ let f x =
   x
   |> print_string;
   print_newline ()
+
+let f x =
+  match x with
+  | Foo -> print_endline "foo"
+  | Bar ->
+    match x with
+    | Foo -> print_endline "foobar"
+    | Bar -> print_endline "barbar"

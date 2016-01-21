@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <bisect-report>
   <summary>
-    <element kind="binding" count="3" total="7"/>
+    <element kind="binding" count="3" total="8"/>
     <element kind="sequence" count="5" total="6"/>
     <element kind="for" count="1" total="1"/>
     <element kind="if/then" count="0" total="4"/>
@@ -14,11 +14,11 @@
     <element kind="class value" count="0" total="0"/>
     <element kind="toplevel expression" count="0" total="0"/>
     <element kind="lazy operator" count="2" total="2"/>
-    <element kind="total" count="13" total="25"/>
+    <element kind="total" count="13" total="26"/>
   </summary>
   <file path="source.ml">
     <summary>
-      <element kind="binding" count="3" total="7"/>
+      <element kind="binding" count="3" total="8"/>
       <element kind="sequence" count="5" total="6"/>
       <element kind="for" count="1" total="1"/>
       <element kind="if/then" count="0" total="4"/>
@@ -31,7 +31,7 @@
       <element kind="class value" count="0" total="0"/>
       <element kind="toplevel expression" count="0" total="0"/>
       <element kind="lazy operator" count="2" total="2"/>
-      <element kind="total" count="13" total="25"/>
+      <element kind="total" count="13" total="26"/>
     </summary>
     <point offset="10" count="2" kind="binding"/>
     <point offset="26" count="2" kind="binding"/>
@@ -49,6 +49,7 @@
     <point offset="429" count="0" kind="binding"/>
     <point offset="449" count="0" kind="if/then"/>
     <point offset="459" count="0" kind="if/then"/>
+    <point offset="487" count="0" kind="binding"/>
     <point offset="533" count="0" kind="match/function"/>
     <point offset="547" count="0" kind="match/function"/>
     <point offset="565" count="0" kind="if/then"/>

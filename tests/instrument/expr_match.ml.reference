@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_match =
-  let marks = Array.make 30 0 in
+  let marks = Array.make 38 0 in
   Bisect.Runtime.init_with_array "expr_match.ml" marks;
   (function
    | idx ->
@@ -7,70 +7,82 @@ let ___bisect_mark___expr_match =
        marks.(idx) <-
        if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let f x =
-  match x with
-  | 0 -> (___bisect_mark___expr_match 0; print_endline "abc")
-  | 1 -> (___bisect_mark___expr_match 1; print_endline "def")
-  | _ -> (___bisect_mark___expr_match 2; print_endline "ghi")
+  ___bisect_mark___expr_match 3;
+  (match x with
+   | 0 -> (___bisect_mark___expr_match 0; print_endline "abc")
+   | 1 -> (___bisect_mark___expr_match 1; print_endline "def")
+   | _ -> (___bisect_mark___expr_match 2; print_endline "ghi"))
 let f =
   function
-  | 0 -> (___bisect_mark___expr_match 3; print_endline "abc")
-  | 1 -> (___bisect_mark___expr_match 4; print_endline "def")
-  | _ -> (___bisect_mark___expr_match 5; print_endline "ghi")
+  | 0 -> (___bisect_mark___expr_match 4; print_endline "abc")
+  | 1 -> (___bisect_mark___expr_match 5; print_endline "def")
+  | _ -> (___bisect_mark___expr_match 6; print_endline "ghi")
 let f x =
-  match x with
-  | 0 ->
-      ((___bisect_mark___expr_match 7; print_string "abc");
-       ___bisect_mark___expr_match 6;
-       print_newline ())
-  | 1 ->
-      ((___bisect_mark___expr_match 9; print_string "def");
-       ___bisect_mark___expr_match 8;
-       print_newline ())
-  | _ ->
-      ((___bisect_mark___expr_match 11; print_string "ghi");
-       ___bisect_mark___expr_match 10;
-       print_newline ())
+  ___bisect_mark___expr_match 13;
+  (match x with
+   | 0 ->
+       ((___bisect_mark___expr_match 8; print_string "abc");
+        ___bisect_mark___expr_match 7;
+        print_newline ())
+   | 1 ->
+       ((___bisect_mark___expr_match 10; print_string "def");
+        ___bisect_mark___expr_match 9;
+        print_newline ())
+   | _ ->
+       ((___bisect_mark___expr_match 12; print_string "ghi");
+        ___bisect_mark___expr_match 11;
+        print_newline ()))
 let f =
   function
   | 0 ->
-      ((___bisect_mark___expr_match 13; print_string "abc");
-       ___bisect_mark___expr_match 12;
-       print_newline ())
-  | 1 ->
-      ((___bisect_mark___expr_match 15; print_string "def");
+      ((___bisect_mark___expr_match 15; print_string "abc");
        ___bisect_mark___expr_match 14;
        print_newline ())
-  | _ ->
-      ((___bisect_mark___expr_match 17; print_string "ghi");
+  | 1 ->
+      ((___bisect_mark___expr_match 17; print_string "def");
        ___bisect_mark___expr_match 16;
+       print_newline ())
+  | _ ->
+      ((___bisect_mark___expr_match 19; print_string "ghi");
+       ___bisect_mark___expr_match 18;
        print_newline ())
 type t =
   | Foo
   | Bar
 let f x =
-  match x with
-  | Foo  ->
-      ((___bisect_mark___expr_match 19; print_string "foo");
-       ___bisect_mark___expr_match 18;
-       print_newline ())
-  | Bar  ->
-      ((___bisect_mark___expr_match 21; print_string "bar");
-       ___bisect_mark___expr_match 20;
-       print_newline ())
+  ___bisect_mark___expr_match 24;
+  (match x with
+   | Foo  ->
+       ((___bisect_mark___expr_match 21; print_string "foo");
+        ___bisect_mark___expr_match 20;
+        print_newline ())
+   | Bar  ->
+       ((___bisect_mark___expr_match 23; print_string "bar");
+        ___bisect_mark___expr_match 22;
+        print_newline ()))
 let f =
   function
   | Foo  ->
-      ((___bisect_mark___expr_match 23; print_string "foo");
-       ___bisect_mark___expr_match 22;
+      ((___bisect_mark___expr_match 26; print_string "foo");
+       ___bisect_mark___expr_match 25;
        print_newline ())
   | Bar  ->
-      ((___bisect_mark___expr_match 25; print_string "bar");
-       ___bisect_mark___expr_match 24;
+      ((___bisect_mark___expr_match 28; print_string "bar");
+       ___bisect_mark___expr_match 27;
        print_newline ())
 let f x =
-  (___bisect_mark___expr_match 29;
+  (___bisect_mark___expr_match 32;
    ((function
-     | Foo  -> (___bisect_mark___expr_match 26; "foo")
-     | Bar  -> (___bisect_mark___expr_match 27; "bar")) x) |> print_string);
-  ___bisect_mark___expr_match 28;
+     | Foo  -> (___bisect_mark___expr_match 29; "foo")
+     | Bar  -> (___bisect_mark___expr_match 30; "bar")) x) |> print_string);
+  ___bisect_mark___expr_match 31;
   print_newline ()
+let f x =
+  ___bisect_mark___expr_match 37;
+  (match x with
+   | Foo  -> (___bisect_mark___expr_match 35; print_endline "foo")
+   | Bar  ->
+       (___bisect_mark___expr_match 36;
+        (match x with
+         | Foo  -> (___bisect_mark___expr_match 33; print_endline "foobar")
+         | Bar  -> (___bisect_mark___expr_match 34; print_endline "barbar"))))

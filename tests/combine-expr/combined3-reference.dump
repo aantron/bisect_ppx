@@ -5,6 +5,7 @@ file "source.ml"
   point             sequence at offset    118:      1
   point             sequence at offset    144:      1
   point                  for at offset    166:      1
+  point              binding at offset    214:      3
   point       match/function at offset    253:      2
   point       match/function at offset    278:      1
   point       match/function at offset    297:      0

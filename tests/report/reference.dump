@@ -15,6 +15,7 @@ file "source.ml"
   point              binding at offset    429:      0
   point              if/then at offset    449:      0
   point              if/then at offset    459:      0
+  point              binding at offset    487:      0
   point       match/function at offset    533:      0
   point       match/function at offset    547:      0
   point              if/then at offset    565:      0

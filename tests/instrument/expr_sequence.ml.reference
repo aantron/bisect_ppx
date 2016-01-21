@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_sequence =
-  let marks = Array.make 6 0 in
+  let marks = Array.make 11 0 in
   Bisect.Runtime.init_with_array "expr_sequence.ml" marks;
   (function
    | idx ->
@@ -16,3 +16,11 @@ let () =
   (___bisect_mark___expr_sequence 4; print_endline "def");
   ___bisect_mark___expr_sequence 3;
   print_endline "ghi"
+let () =
+  ___bisect_mark___expr_sequence 10;
+  ((___bisect_mark___expr_sequence 9; print_endline "abc");
+   ___bisect_mark___expr_sequence 8;
+   (function
+    | 0 -> (___bisect_mark___expr_sequence 6; print_endline "def")
+    | _ -> (___bisect_mark___expr_sequence 7; print_endline "ghi"))) |>
+    ignore

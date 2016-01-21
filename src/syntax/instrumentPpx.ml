@@ -68,28 +68,14 @@ let marker file ofs kind marked =
       apply_nolabs ~loc (lid (custom_mark_function file)) [intconst idx] in
     Some wrapped
 
-(* Tests whether the passed expression is a bare mapping,
-   or starts with a bare mapping (if the expression is a sequence).
-   Used to avoid unnecessary marking. *)
-let rec is_bare_mapping e =
-  match e.pexp_desc with
-  | Pexp_function _ -> true
-  | Pexp_match _ -> true
-  | Pexp_sequence (e', _) -> is_bare_mapping e'
-  | _ -> false
-
 (* Wraps an expression with a marker, returning the passed expression
-   unmodified if the expression is already marked, is a bare mapping,
-   has a ghost location, construct instrumentation is disabled, or a
-   special comments indicates to ignore line. *)
+   unmodified if the expression is already marked, has a ghost location,
+   construct instrumentation is disabled, or a special comments indicates to
+   ignore line. *)
 let wrap_expr k e =
   let enabled = List.assoc k InstrumentArgs.kinds in
   let loc = e.pexp_loc in
-  let dont_wrap =
-    (is_bare_mapping e)
-    || (loc.Location.loc_ghost)
-    || (not !enabled) in
-  if dont_wrap then
+  if loc.Location.loc_ghost || not !enabled then
     e
   else
     let ofs = loc.Location.loc_start.Lexing.pos_cnum in
