@@ -105,15 +105,11 @@ struct
       mark_tag_used "instrument"
     else begin
       flag ["ocaml"; "compile"; "instrument"]
-        (S [A "-ppx";
-            A "../_build.meta/src/syntax/bisect_ppx.byte -runtime Meta_bisect";
-            A "-I"; A "../_install.meta"]);
+        (S [A "-package"; A "bisect_ppx_meta";
+            A "-ppxopt"; A "bisect_ppx_meta,-runtime Meta_bisect"]);
 
-      flag ["ocaml"; "link"; "byte"; "instrument"]
-        (S [A "../_build.meta/meta_bisect.cma"]);
-
-      flag ["ocaml"; "link"; "native"; "instrument"]
-        (S [A "../_build.meta/meta_bisect.cmxa"])
+      flag ["ocaml"; "link"; "instrument"]
+        (S [A "-package"; A "bisect_ppx_meta"])
     end
 end
 

@@ -74,7 +74,7 @@ clean: FORCE
 	rm -rf _scratch $(COVERAGE) $(REPORT_DIR) $(PRESERVE)
 
 binaries-may-exist:
-	@test -d ../_build.instrumented || \
+	@test -d ../_findlib || \
 		( echo "Run' make dev' in the project root directory"; false )
 
 FORCE:
