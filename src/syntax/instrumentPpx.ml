@@ -302,7 +302,9 @@ class instrumenter = object (self)
       super#structure ast
     else
       let file = !Location.input_name in
-      if file = "//toplevel//" then
+      if file = "//toplevel//" ||
+         file = "(stdin)" ||
+         List.mem (Filename.basename file) [".ocamlinit"; "topfind"] then
         ast
       else
         if not (InstrumentState.is_file file) then

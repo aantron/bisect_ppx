@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_ifthen =
-  let marks = Array.make 8 0 in
+  let marks = Array.make 11 0 in
   Bisect.Runtime.init_with_array "expr_ifthen.ml" marks;
   (function
    | idx ->
@@ -23,4 +23,12 @@ let () =
     (___bisect_mark___expr_ifthen 5;
      print_string "def";
      ___bisect_mark___expr_ifthen 3;
+     print_newline ())
+let () =
+  ___bisect_mark___expr_ifthen 10;
+  if true
+  then
+    (___bisect_mark___expr_ifthen 9;
+     print_string "abc";
+     ___bisect_mark___expr_ifthen 8;
      print_newline ())

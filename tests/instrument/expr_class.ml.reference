@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_class =
-  let marks = Array.make 15 0 in
+  let marks = Array.make 18 0 in
   Bisect.Runtime.init_with_array "expr_class.ml" marks;
   (function
    | idx ->
@@ -36,3 +36,11 @@ class c' =
       print_newline ()
   end
 let i = ___bisect_mark___expr_class 14; new c
+class virtual c'' =
+  object
+    method virtual  get_x : int
+    method set_x = ___bisect_mark___expr_class 15; ()
+  end
+class p (v : int) =
+  object method get_v = ___bisect_mark___expr_class 16; v end
+class p' = object inherit  (p (___bisect_mark___expr_class 17; 0)) end
