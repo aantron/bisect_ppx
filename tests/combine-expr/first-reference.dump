@@ -6,6 +6,6 @@ file "source.ml"
   point             sequence at offset    144:      0
   point                  for at offset    166:      0
   point              binding at offset    214:      1
-  point       match/function at offset    253:      1
-  point       match/function at offset    278:      0
-  point       match/function at offset    297:      0
+  point       match/function at offset    242:      1
+  point       match/function at offset    266:      0
+  point       match/function at offset    292:      0

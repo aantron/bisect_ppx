@@ -38,3 +38,11 @@ let is_zero x =
     let _ = 20 / x in
     false
   with Division_by_zero -> true
+
+let () =
+  (fun x ->
+    match x with
+    | 0, 0 -> 0
+    | _ -> 1)
+  (0, 0)
+  |> ignore

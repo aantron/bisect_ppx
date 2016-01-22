@@ -14,13 +14,13 @@
         <td valign="top">
           <table class="simple">
             <tr><th>kind</th><th width="16px">&nbsp;</th><th>coverage</th></tr>
-            <tr><td>binding</td><td width="16px">&nbsp;</td><td>6 / 11 (54%)</td></tr>
+            <tr><td>binding</td><td width="16px">&nbsp;</td><td>8 / 13 (61%)</td></tr>
             <tr><td>sequence</td><td width="16px">&nbsp;</td><td>3 / 4 (75%)</td></tr>
             <tr><td>for</td><td width="16px">&nbsp;</td><td>1 / 1 (100%)</td></tr>
             <tr><td>if/then</td><td width="16px">&nbsp;</td><td>0 / 4 (0%)</td></tr>
             <tr><td>try</td><td width="16px">&nbsp;</td><td>0 / 1 (0%)</td></tr>
             <tr><td>while</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>match/function</td><td width="16px">&nbsp;</td><td>2 / 4 (50%)</td></tr>
+            <tr><td>match/function</td><td width="16px">&nbsp;</td><td>3 / 10 (30%)</td></tr>
           </table>
         </td>
         <td valign="top">
@@ -52,8 +52,8 @@
       <div id="line000007" class="lineNone">000007| ]</div>
       <div id="line000008" class="lineNone">000008| &nbsp;</div>
       <div id="line000009" class="lineAllVisited">000009| let&nbsp;kind&nbsp;=&nbsp;(*[2]*)function</div>
-      <div id="line000010" class="lineAllVisited">000010| &nbsp;&nbsp;|&nbsp;x&nbsp;when&nbsp;(*[9]*)x&nbsp;&gt;&nbsp;9&nbsp;||&nbsp;(*[7]*)x&nbsp;&lt;&nbsp;0&nbsp;-&gt;&nbsp;(*[2]*)print_endline&nbsp;&quot;not&nbsp;a&nbsp;digit&quot;</div>
-      <div id="line000011" class="lineAllVisited">000011| &nbsp;&nbsp;|&nbsp;_&nbsp;-&gt;&nbsp;(*[7]*)print_endline&nbsp;&quot;digit&quot;</div>
+      <div id="line000010" class="lineAllVisited">000010| &nbsp;&nbsp;|&nbsp;(*[2]*)x&nbsp;when&nbsp;(*[9]*)x&nbsp;&gt;&nbsp;9&nbsp;||&nbsp;(*[7]*)x&nbsp;&lt;&nbsp;0&nbsp;-&gt;&nbsp;print_endline&nbsp;&quot;not&nbsp;a&nbsp;digit&quot;</div>
+      <div id="line000011" class="lineAllVisited">000011| &nbsp;&nbsp;|&nbsp;(*[7]*)_&nbsp;-&gt;&nbsp;print_endline&nbsp;&quot;digit&quot;</div>
       <div id="line000012" class="lineNone">000012| &nbsp;</div>
       <div id="line000013" class="lineNone">000013| let&nbsp;print&nbsp;x&nbsp;=</div>
       <div id="line000014" class="lineAllVisited">000014| &nbsp;&nbsp;(*[9]*)print_int&nbsp;x;</div>
@@ -74,14 +74,12 @@
       <div id="line000027" class="lineNone">000027| let&nbsp;rec&nbsp;is_odd&nbsp;x&nbsp;=</div>
       </div>
       <div id="line000028" class="lineAllUnvisited">000028| &nbsp;&nbsp;(*[0]*)match&nbsp;x&nbsp;with</div>
-      <div id="fold000029">
-      <div id="line000029" class="lineNone">000029| &nbsp;&nbsp;|&nbsp;1</div>
-      <div id="line000030" class="lineNone">000030| &nbsp;&nbsp;|&nbsp;3</div>
-      <div id="line000031" class="lineNone">000031| &nbsp;&nbsp;|&nbsp;5</div>
-      <div id="line000032" class="lineNone">000032| &nbsp;&nbsp;|&nbsp;7</div>
-      </div>
-      <div id="line000033" class="lineAllUnvisited">000033| &nbsp;&nbsp;|&nbsp;9&nbsp;-&gt;&nbsp;(*[0]*)true</div>
-      <div id="line000034" class="lineAllUnvisited">000034| &nbsp;&nbsp;|&nbsp;x&nbsp;-&gt;&nbsp;(*[0]*)if&nbsp;is_even&nbsp;x&nbsp;then&nbsp;(*[0]*)false&nbsp;else&nbsp;(*[0]*)is_odd&nbsp;(x&nbsp;mod&nbsp;10)</div>
+      <div id="line000029" class="lineAllUnvisited">000029| &nbsp;&nbsp;|&nbsp;(*[0]*)1</div>
+      <div id="line000030" class="lineAllUnvisited">000030| &nbsp;&nbsp;|&nbsp;(*[0]*)3</div>
+      <div id="line000031" class="lineAllUnvisited">000031| &nbsp;&nbsp;|&nbsp;(*[0]*)5</div>
+      <div id="line000032" class="lineAllUnvisited">000032| &nbsp;&nbsp;|&nbsp;(*[0]*)7</div>
+      <div id="line000033" class="lineAllUnvisited">000033| &nbsp;&nbsp;|&nbsp;(*[0]*)9&nbsp;-&gt;&nbsp;true</div>
+      <div id="line000034" class="lineAllUnvisited">000034| &nbsp;&nbsp;|&nbsp;(*[0]*)x&nbsp;-&gt;&nbsp;if&nbsp;is_even&nbsp;x&nbsp;then&nbsp;(*[0]*)false&nbsp;else&nbsp;(*[0]*)is_odd&nbsp;(x&nbsp;mod&nbsp;10)</div>
       <div id="fold000035">
       <div id="line000035" class="lineNone">000035| &nbsp;</div>
       <div id="line000036" class="lineNone">000036| let&nbsp;is_zero&nbsp;x&nbsp;=</div>
@@ -89,7 +87,19 @@
       <div id="line000037" class="lineAllUnvisited">000037| &nbsp;&nbsp;(*[0]*)try</div>
       <div id="line000038" class="lineAllUnvisited">000038| &nbsp;&nbsp;&nbsp;&nbsp;(*[0]*)let&nbsp;_&nbsp;=&nbsp;(*[0]*)20&nbsp;/&nbsp;x&nbsp;in</div>
       <div id="line000039" class="lineAllUnvisited">000039| &nbsp;&nbsp;&nbsp;&nbsp;(*[0]*)false</div>
-      <div id="line000040" class="lineAllUnvisited">000040| &nbsp;&nbsp;with&nbsp;Division_by_zero&nbsp;-&gt;&nbsp;(*[0]*)true</div>
+      <div id="line000040" class="lineAllUnvisited">000040| &nbsp;&nbsp;with&nbsp;(*[0]*)Division_by_zero&nbsp;-&gt;&nbsp;true</div>
+      <div id="fold000041">
+      <div id="line000041" class="lineNone">000041| &nbsp;</div>
+      <div id="line000042" class="lineNone">000042| let&nbsp;()&nbsp;=</div>
+      <div id="line000043" class="lineAllVisited">000043| &nbsp;&nbsp;(*[2]*)(fun&nbsp;x&nbsp;-&gt;</div>
+      <div id="line000044" class="lineAllVisited">000044| &nbsp;&nbsp;&nbsp;&nbsp;(*[2]*)match&nbsp;x&nbsp;with</div>
+      <div id="line000045" class="lineAllVisited">000045| &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(*[2]*)0,&nbsp;0&nbsp;-&gt;&nbsp;0</div>
+      </div>
+      <div id="line000046" class="lineAllUnvisited">000046| &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(*[0]*)_&nbsp;-&gt;&nbsp;1)</div>
+      <div id="fold000047">
+      <div id="line000047" class="lineNone">000047| &nbsp;&nbsp;(0,&nbsp;0)</div>
+      <div id="line000048" class="lineNone">000048| &nbsp;&nbsp;|&gt;&nbsp;ignore</div>
+      </div>
     </code>
     <br/>
     <div class="section">Legend:</div>
