@@ -11,7 +11,7 @@
     <all name="all classes">
       <coverage type="class, %" value="100% (1/1)"/>
       <coverage type="method, %" value="100% (1/1)"/>
-      <coverage type="block, %" value="48%  (17/35)"/>
+      <coverage type="block, %" value="50%  (18/36)"/>
       <coverage type="line, %" value="100% (1/1)"/>
     </all>
   </data>

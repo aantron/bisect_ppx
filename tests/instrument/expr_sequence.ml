@@ -18,3 +18,7 @@ let () =
     | _ -> print_endline "ghi"
   end
   |> ignore
+
+let () =
+  let f ?maybe () = ignore maybe in
+  () |> f

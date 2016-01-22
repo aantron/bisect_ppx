@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_sequence =
-  let marks = Array.make 10 0 in
+  let marks = Array.make 15 0 in
   Bisect.Runtime.init_with_array "expr_sequence.ml" marks;
   (function
    | idx ->
@@ -20,10 +20,17 @@ let () =
   ___bisect_mark___expr_sequence 3;
   print_endline "ghi"
 let () =
-  ___bisect_mark___expr_sequence 9;
+  ___bisect_mark___expr_sequence 10;
   (print_endline "abc";
    ___bisect_mark___expr_sequence 8;
    (function
     | 0 -> (___bisect_mark___expr_sequence 6; print_endline "def")
     | _ -> (___bisect_mark___expr_sequence 7; print_endline "ghi"))) |>
-    ignore
+    ((___bisect_mark___expr_sequence 9; ignore))
+let () =
+  ___bisect_mark___expr_sequence 14;
+  (let f ?maybe  () = ___bisect_mark___expr_sequence 12; ignore maybe in
+   ___bisect_mark___expr_sequence 13;
+   () |> ((___bisect_mark___expr_sequence 11; f)))
+File "expr_sequence.ml", line 24, characters 8-9:
+Warning 48: implicit elimination of optional argument ?maybe

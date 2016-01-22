@@ -398,6 +398,9 @@ class instrumenter = object (self)
                 Exp.apply ~loc ~attrs e1
                   [l2, (wrap_expr Common.Lazy_operator e2);
                   l3, (wrap_expr Common.Lazy_operator e3)]
+          | Pexp_ident ident when string_of_ident ident = "|>" ->
+            Exp.apply ~loc ~attrs e1
+              [l2, e2; l3, (wrap_expr Common.Sequence e3)]
           | _ -> e')
       | Pexp_match (e, l) ->
           List.map (wrap_case Common.Match) l

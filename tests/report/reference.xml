@@ -2,7 +2,7 @@
 <bisect-report>
   <summary>
     <element kind="binding" count="8" total="13"/>
-    <element kind="sequence" count="3" total="4"/>
+    <element kind="sequence" count="4" total="5"/>
     <element kind="for" count="1" total="1"/>
     <element kind="if/then" count="0" total="4"/>
     <element kind="try" count="0" total="1"/>
@@ -14,12 +14,12 @@
     <element kind="class value" count="0" total="0"/>
     <element kind="toplevel expression" count="0" total="0"/>
     <element kind="lazy operator" count="2" total="2"/>
-    <element kind="total" count="17" total="35"/>
+    <element kind="total" count="18" total="36"/>
   </summary>
   <file path="source.ml">
     <summary>
       <element kind="binding" count="8" total="13"/>
-      <element kind="sequence" count="3" total="4"/>
+      <element kind="sequence" count="4" total="5"/>
       <element kind="for" count="1" total="1"/>
       <element kind="if/then" count="0" total="4"/>
       <element kind="try" count="0" total="1"/>
@@ -31,7 +31,7 @@
       <element kind="class value" count="0" total="0"/>
       <element kind="toplevel expression" count="0" total="0"/>
       <element kind="lazy operator" count="2" total="2"/>
-      <element kind="total" count="17" total="35"/>
+      <element kind="total" count="18" total="36"/>
     </summary>
     <point offset="10" count="2" kind="binding"/>
     <point offset="26" count="2" kind="binding"/>
@@ -68,5 +68,6 @@
     <point offset="707" count="2" kind="binding"/>
     <point offset="726" count="2" kind="match/function"/>
     <point offset="742" count="0" kind="match/function"/>
+    <point offset="764" count="2" kind="sequence"/>
   </file>
 </bisect-report>

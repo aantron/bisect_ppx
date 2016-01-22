@@ -1,5 +1,5 @@
 let ___bisect_mark___deriving =
-  let marks = Array.make 2 0 in
+  let marks = Array.make 3 0 in
   Bisect.Runtime.init_with_array "deriving.ml" marks;
   (function
    | idx ->
@@ -17,4 +17,6 @@ let rec pp_a : Format.formatter -> a -> Ppx_deriving_runtime.unit=
     [@ocaml.warning "-A"])
 and show_a : a -> Ppx_deriving_runtime.string=
   fun x  -> Format.asprintf "%a" pp_a x
-let () = ___bisect_mark___deriving 1; (show_a Foo) |> print_endline
+let () =
+  ___bisect_mark___deriving 2;
+  (show_a Foo) |> ((___bisect_mark___deriving 1; print_endline))
