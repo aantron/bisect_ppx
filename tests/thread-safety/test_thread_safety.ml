@@ -33,7 +33,9 @@ let test ?(bisect = "") name expect_correctness =
     skip_if (not @@ expect_correctness) "No pre-emptive threads";
 
     let cflags =
-      "-thread -package threads.posix " ^ (with_bisect_args bisect) in
+      "-thread -package threads.posix " ^
+      (with_bisect_args (bisect ^ " -inexhaustive-matching"))
+    in
 
     compile cflags "thread-safety/source.ml";
     run command;
