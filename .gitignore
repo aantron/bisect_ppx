@@ -1,13 +1,14 @@
 # working and output directories
 _build/
 _build.*/
-_install.meta/
+_findlib/
 ocamldoc/
 
 # test working and coverage directories
 tests/_scratch
 tests/_coverage
 tests/_report
+tests/_preserve
 
 # generated module lists
 *.mlpack

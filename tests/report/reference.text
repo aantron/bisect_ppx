@@ -1,6 +1,6 @@
 Summary:
- - 'binding' points: 3/7 (42.86%)
- - 'sequence' points: 5/6 (83.33%)
+ - 'binding' points: 6/11 (54.55%)
+ - 'sequence' points: 3/4 (75.00%)
  - 'for' points: 1/1 (100.00%)
  - 'if/then' points: 0/4 (0.00%)
  - 'try' points: 0/1 (0.00%)
@@ -12,10 +12,10 @@ Summary:
  - 'class value' points: none
  - 'toplevel expression' points: none
  - 'lazy operator' points: 2/2 (100.00%)
- - total: 13/25 (52.00%)
+ - total: 14/27 (51.85%)
 File 'source.ml':
- - 'binding' points: 3/7 (42.86%)
- - 'sequence' points: 5/6 (83.33%)
+ - 'binding' points: 6/11 (54.55%)
+ - 'sequence' points: 3/4 (75.00%)
  - 'for' points: 1/1 (100.00%)
  - 'if/then' points: 0/4 (0.00%)
  - 'try' points: 0/1 (0.00%)
@@ -27,4 +27,4 @@ File 'source.ml':
  - 'class value' points: none
  - 'toplevel expression' points: none
  - 'lazy operator' points: 2/2 (100.00%)
- - total: 13/25 (52.00%)
+ - total: 14/27 (51.85%)

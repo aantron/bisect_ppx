@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_doubleslashedquotes =
-  let marks = Array.make 2 0 in
+  let marks = Array.make 3 0 in
   Bisect.Runtime.init_with_array "expr_doubleslashedquotes.ml" marks;
   (function
    | idx ->
@@ -10,6 +10,7 @@ type t =
   | Anthony
   | Caesar
 let message =
-  function
-  | Anthony  -> (___bisect_mark___expr_doubleslashedquotes 0; "foo\\")
-  | Caesar  -> (___bisect_mark___expr_doubleslashedquotes 1; "\\bar")
+  ___bisect_mark___expr_doubleslashedquotes 2;
+  (function
+   | Anthony  -> (___bisect_mark___expr_doubleslashedquotes 0; "foo\\")
+   | Caesar  -> (___bisect_mark___expr_doubleslashedquotes 1; "\\bar"))

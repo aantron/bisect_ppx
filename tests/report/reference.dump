@@ -2,19 +2,21 @@ file "source.ml"
   point              binding at offset     10:      2
   point              binding at offset     26:      2
   point              binding at offset     44:      2
+  point              binding at offset    158:      2
   point        lazy operator at offset    178:      9
   point        lazy operator at offset    187:      7
   point       match/function at offset    196:      2
   point       match/function at offset    233:      7
-  point             sequence at offset    272:      9
+  point              binding at offset    272:      9
   point             sequence at offset    287:      9
-  point             sequence at offset    316:      2
+  point              binding at offset    316:      2
   point             sequence at offset    355:      2
   point                  for at offset    383:      9
   point             sequence at offset    395:      9
   point              binding at offset    429:      0
   point              if/then at offset    449:      0
   point              if/then at offset    459:      0
+  point              binding at offset    487:      0
   point       match/function at offset    533:      0
   point       match/function at offset    547:      0
   point              if/then at offset    565:      0

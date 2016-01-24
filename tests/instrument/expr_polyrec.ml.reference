@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_polyrec =
-  let marks = Array.make 7 0 in
+  let marks = Array.make 8 0 in
   Bisect.Runtime.init_with_array "expr_polyrec.ml" marks;
   (function
    | idx ->
@@ -7,16 +7,19 @@ let ___bisect_mark___expr_polyrec =
        marks.(idx) <-
        if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let rec f : 'a . 'a -> unit=
-  fun _  ->
-    (___bisect_mark___expr_polyrec 1; f 0);
-    ___bisect_mark___expr_polyrec 0;
-    f ""
+  ___bisect_mark___expr_polyrec 2;
+  (fun _  ->
+     ___bisect_mark___expr_polyrec 1;
+     f 0;
+     ___bisect_mark___expr_polyrec 0;
+     f "")
 let () =
-  ___bisect_mark___expr_polyrec 6;
+  ___bisect_mark___expr_polyrec 7;
   (let rec f : 'a . 'a -> unit=
-     ___bisect_mark___expr_polyrec 4;
+     ___bisect_mark___expr_polyrec 5;
      (fun _  ->
-        (___bisect_mark___expr_polyrec 3; f 0);
-        ___bisect_mark___expr_polyrec 2;
+        ___bisect_mark___expr_polyrec 4;
+        f 0;
+        ___bisect_mark___expr_polyrec 3;
         f "") in
-   ___bisect_mark___expr_polyrec 5; f 0)
+   ___bisect_mark___expr_polyrec 6; f 0)

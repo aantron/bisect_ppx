@@ -20,6 +20,7 @@ open OUnit2
 
 let _directory = "_scratch"
 let _coverage = "_coverage"
+let _preserve_directory = "_preserve"
 
 let _test_context = ref None
 
@@ -117,11 +118,12 @@ let _library = ref "none"
 let compiler () = !_compiler
 
 let with_bisect_args arguments =
-  "-I ../../_build.instrumented " ^
-  "../../_build.meta/meta_bisect." ^ !_library ^ " " ^
-  "bisect." ^ !_library ^ " " ^
-  "-ppx \"../../_build.instrumented/src/syntax/bisect_ppx.byte " ^
-    arguments ^ "\""
+  let ppxopt =
+    if String.trim arguments = "" then ""
+    else "-ppxopt 'bisect_ppx_instrumented," ^ arguments ^ "'"
+  in
+
+  "-package bisect_ppx_meta.runtime -package bisect_ppx_instrumented " ^ ppxopt
 
 let with_bisect () = with_bisect_args ""
 
@@ -173,7 +175,8 @@ let compile ?(r = "") arguments source =
   end;
 
   Printf.sprintf
-    "ocamlfind %s -linkpkg %s %s %s" !_compiler arguments source_copy r
+    "OCAMLPATH=../../_findlib:$OCAMLPATH ocamlfind %s -linkpkg %s %s %s"
+    !_compiler arguments source_copy r
   |> run
 
 let report ?(f = "bisect*.out") ?(r = "") arguments =
@@ -181,15 +184,26 @@ let report ?(f = "bisect*.out") ?(r = "") arguments =
     "../../_build.instrumented/src/report/report.byte %s %s %s" arguments f r
   |> run
 
+let _preserve file destination =
+  let destination =
+    destination
+    |> Filename.concat _preserve_directory
+    |> Filename.concat Filename.parent_dir_name
+  in
+
+  run ("mkdir -p " ^ (Filename.dirname destination));
+  run ("cp " ^ file ^ " " ^ destination)
+
 let diff reference =
   let reference_actual = Filename.concat Filename.parent_dir_name reference in
-  let command = "diff " ^ reference_actual ^ " output" in
+  let command = "diff -a " ^ reference_actual ^ " output" in
 
   let status = _run_int (command ^ " > /dev/null") in
   match status with
   | 0 -> ()
   | v when v <> 1 -> _command_failed command ~status:v
   | _ ->
+    _preserve "output" reference;
     _run_int (command ^ " > delta") |> ignore;
     let delta = _read_file "delta" in
     Printf.sprintf "Difference against '%s':\n\n%s" reference delta

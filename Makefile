@@ -16,18 +16,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# DEFINITIONS
-
 INSTALL_NAME := bisect_ppx
+RUNTIME := bisect
+DEV_INSTALL_DIR := _findlib
+INSTALL_SOURCE_DIR := _build
+
+ifdef INSTALL_VARIANT
+INSTALL_FLAGS := -destdir $(DEV_INSTALL_DIR)
+INSTALL_NAME := $(INSTALL_NAME)_$(INSTALL_VARIANT)
+INSTALL_SOURCE_DIR := $(INSTALL_SOURCE_DIR).$(INSTALL_VARIANT)
+OCAMLPATH := $(DEV_INSTALL_DIR):$(OCAMLPATH)
+export OCAMLPATH
+endif
+
+ifeq ($(INSTALL_VARIANT),meta)
+RUNTIME := meta_$(RUNTIME)
+endif
+
 
 # Assume that ocamlbuild, ocamlfind, ocamlopt are found in path.
 OCAMLBUILD_FLAGS := -use-ocamlfind -no-links -cflag -annot
 
 META_BISECT_DIR := -build-dir _build.meta
 INSTRUMENTED_DIR := -build-dir _build.instrumented
-META_BISECT_INSTALL_DIR := _install.meta
 
-default:
+default: FORCE
 	@echo "available targets:"
 	@echo "  build      compiles bisect_ppx (release mode)"
 	@echo "  dev        compiles instrumented bisect_ppx (development mode)"
@@ -43,10 +56,19 @@ build:
 dev:
 	META_BISECT=yes ocamlbuild $(OCAMLBUILD_FLAGS) $(META_BISECT_DIR) \
 		meta_bisect.otarget
-	mkdir -p $(META_BISECT_INSTALL_DIR)
-	cp _build.meta/meta_bisect.cmi $(META_BISECT_INSTALL_DIR)/
-	INSTRUMENT=yes ocamlbuild $(OCAMLBUILD_FLAGS) $(INSTRUMENTED_DIR) \
-		bisect.otarget
+	mkdir -p $(DEV_INSTALL_DIR)
+	make install INSTALL_VARIANT=meta
+	cd $(DEV_INSTALL_DIR)/$(INSTALL_NAME)_meta && \
+		sed 's/bisect\./meta_bisect./' META | \
+		sed 's/bisect_ppx\.runtime/bisect_ppx_meta.runtime/' > META.fixed && \
+		mv META.fixed META
+	OCAMLPATH=`pwd`/$(DEV_INSTALL_DIR) INSTRUMENT=yes \
+		ocamlbuild $(OCAMLBUILD_FLAGS) $(INSTRUMENTED_DIR) bisect.otarget
+	make install INSTALL_VARIANT=instrumented
+	cd $(DEV_INSTALL_DIR)/$(INSTALL_NAME)_instrumented && \
+		sed 's/bisect_ppx\.runtime/bisect_ppx_instrumented.runtime/' META \
+			> META.fixed && \
+		mv META.fixed META
 
 doc: FORCE
 	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.docdir/index.html
@@ -60,22 +82,23 @@ clean: FORCE
 	ocamlbuild -clean
 	ocamlbuild $(META_BISECT_DIR) -clean
 	ocamlbuild $(INSTRUMENTED_DIR) -clean
-	rm -rf $(META_BISECT_INSTALL_DIR)
+	rm -rf $(DEV_INSTALL_DIR)
 	make -C tests clean
 
 distclean: clean
 	rm -rf ocamldoc *.odocl *.mlpack
 
 install: FORCE
-	! ocamlfind query $(INSTALL_NAME) || ocamlfind remove $(INSTALL_NAME)
-	ocamlfind install $(INSTALL_NAME) META -optional \
-		_build/src/syntax/bisect_ppx.byte \
-		_build/bisect.a \
-		_build/bisect.o \
-		_build/bisect.cma \
-		_build/bisect.cmi \
-		_build/bisect.cmo \
-		_build/bisect.cmx \
-		_build/bisect.cmxa
+	@! ocamlfind query $(INSTALL_NAME) > /dev/null 2> /dev/null || \
+		ocamlfind remove $(INSTALL_FLAGS) $(INSTALL_NAME)
+	@ocamlfind install $(INSTALL_FLAGS) $(INSTALL_NAME) META -optional \
+		$(INSTALL_SOURCE_DIR)/src/syntax/bisect_ppx.byte \
+		$(INSTALL_SOURCE_DIR)/$(RUNTIME).a \
+		$(INSTALL_SOURCE_DIR)/$(RUNTIME).o \
+		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cma \
+		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cmi \
+		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cmo \
+		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cmx \
+		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cmxa
 
 FORCE:

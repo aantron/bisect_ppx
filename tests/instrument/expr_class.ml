@@ -17,3 +17,16 @@ class c' = object
 end
 
 let i = new c
+
+class virtual c'' = object
+  method virtual get_x : int
+  method set_x = ()
+end
+
+class p (v : int) = object
+  method get_v = v
+end
+
+class p' = object
+  inherit p 0
+end

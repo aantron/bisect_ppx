@@ -1,0 +1,9 @@
+let ___bisect_mark___source =
+  let marks = Array.make 1 0 in
+  Bisect.Runtime.init_with_array "source.ml" marks;
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+let () = ___bisect_mark___source 0; print_endline "foo"

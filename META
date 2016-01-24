@@ -7,7 +7,6 @@ ppx="./bisect_ppx.byte"
 package "runtime" (
   version="0.2.6"
   description="The Bisect modules needed for instrumentation."
-  requires="str"
 
   archive(byte)="bisect.cma"
   archive(native)="bisect.cmxa"

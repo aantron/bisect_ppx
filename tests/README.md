@@ -1,11 +1,13 @@
 Running tests
 -------------
 
-To run all unit tests, run `make tests` in the project root directory, or
-`make unit` in subdirectory `tests/`. You must have first done `make dev` in the
-project root directory. At the end of testing, you will get a summary coverage
-report courtesy of Bisect_ppx itself. If you want a more detailed view, run
-`make coverage` and view `tests/_report/index.html`.
+Before running any tests, you must run `make dev` in the project root directory.
+
+To run all unit tests, either `make tests` in the project root, or `make unit`
+in `tests/`.
+
+If testing is successful, you will get a coverage summary. To view a more
+detailed report, run `make coverage` and view `tests/_report/index.html`.
 
 If a test fails, you will see an error message describing the problem. If you
 want to re-run only that test, you can do `make one NAME=test_name` in `tests/`.
@@ -22,8 +24,23 @@ So,
 make one NAME=bisect_ppx:0:report:4:html
 ```
 
+If the test failed on a `diff` command, the test's output will have been saved
+in `tests/_preserve/`. For example, if the diff failure was against
+`report/reference.xml`, the actual output will be in
+
+```
+tests/_preserve/report/reference.xml
+```
+
+If you are confident that the actual output is correct and the reference needs
+to be updated, you can use this file to overwrite the reference.
+
 To view the log from the latest test run, run `make log`. If there was an error,
 the error message gives the line number where the error can be found in the log.
+The lines before that will show which external commands were run by the test.
+Their output will not be in the log. For now, it is woven into the test runner's
+output (the dots). A good way to debug state that is not visible in the log is
+to insert calls like `run "ls"` or `run "cat some_file"`.
 
 The test runner automatically checks for some optional binaries and packages on
 startup. To fail the tests if that check fails, define the environment variable
@@ -32,9 +49,6 @@ startup. To fail the tests if that check fails, define the environment variable
 ```
 make tests STRICT_DEPENDENCIES=yes
 ```
-
-If an external command run by a test fails, its output ends up woven in before
-the error message, for the time being.
 
 To run the performance test, run `make performance` in `tests/`.
 
