@@ -19,8 +19,6 @@
 open OUnit2
 open Test_helpers
 
-(* TODO Make sure attributes are preserved during expression reassembly. *)
-
 (* Needed because of https://github.com/johnwhitington/ppx_blob/issues/1. *)
 let _ppx_tools_workaround source destination =
   run ("cat " ^ source ^ " | grep -v '\\[WARNING\\]' > " ^ destination)
