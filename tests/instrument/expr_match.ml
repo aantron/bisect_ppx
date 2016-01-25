@@ -48,3 +48,74 @@ let f x =
     match x with
     | Foo -> print_endline "foobar"
     | Bar -> print_endline "barbar"
+
+let f x =
+  match x with
+  | Foo | Bar -> print_endline "foo"
+
+let f x =
+  match x with
+  | (Foo, _) | (Bar, _) -> print_endline "foo"
+
+let f x =
+  match x with
+  | (Foo | Bar), (Foo | Bar) -> print_endline "foo"
+
+let f x =
+  match x with
+  | 'a'..'z' -> print_endline "foo"
+  | _ -> print_endline "bar"
+
+let f x =
+  match x with
+  | `A -> print_endline "foo"
+  | `B -> print_endline "bar"
+
+type u = [ `A | `B ]
+
+let f x =
+  match x with
+  | #u -> print_endline "foo"
+
+module type S = sig end
+
+let f x =
+  match x with
+  | (module X : S) -> print_endline "foo"
+
+let f x =
+  match x with
+  | Foo | Bar as y -> y
+
+let f x =
+  match x with
+  | (Foo | Bar)::_ -> print_endline "foo"
+  | [] -> print_endline "bar"
+
+let f x =
+  match x with
+  | `A _ -> print_endline "foo"
+  | `B (Foo | Bar) -> print_endline "bar"
+
+type v = {a : t; b : t}
+
+let f x =
+  match x with
+  | {a = (Foo | Bar); b = (Foo | Bar)} -> print_endline "foo"
+
+let f x =
+  match x with
+  | [||] -> print_endline "foo"
+  | [|(Foo | Bar); (Foo | Bar); _|] -> print_endline "bar"
+  | _ -> print_newline ()
+
+let f x =
+  match x with
+  | lazy (Foo | Bar) -> print_endline "foo"
+
+exception Exn of t
+
+let f x =
+  match x with
+  | exception Exn (Foo | Bar) -> print_endline "foo"
+  | _ -> print_endline "bar"

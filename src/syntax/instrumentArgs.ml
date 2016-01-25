@@ -28,8 +28,6 @@ let set_kinds v s =
       with _ -> raise (Arg.Bad (Printf.sprintf "unknown point kind: %C" ch)))
     s
 
-let runtime_name = ref "Bisect"
-
 let desc_kinds =
   let lines =
     List.map
@@ -39,6 +37,12 @@ let desc_kinds =
 	  (Common.string_of_point_kind k))
       Common.all_point_kinds in
   String.concat "" lines
+
+let runtime_name = ref "Bisect"
+
+let simple_cases = ref false
+
+let inexhaustive_matching = ref false
 
 let switches = [
   ("-disable",
@@ -62,7 +66,14 @@ let switches = [
    "  Ignored") ;
 
   ("-runtime",
-   Arg.String ((:=) runtime_name),
-   "  Set runtime module name; used for testing")
+   Arg.Set_string runtime_name,
+   "<module name>  Set runtime module name; used for testing") ;
 
+  ("-simple-cases",
+   Arg.Set simple_cases,
+   "  Do not generate separate points for clauses of or-patterns") ;
+
+  ("-inexhaustive-matching",
+   Arg.Set inexhaustive_matching,
+   "  Generate inexhaustive match expressions in cases; used for testing")
 ]

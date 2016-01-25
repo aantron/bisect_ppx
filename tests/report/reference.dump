@@ -3,10 +3,10 @@ file "source.ml"
   point              binding at offset     26:      2
   point              binding at offset     44:      2
   point              binding at offset    158:      2
+  point       match/function at offset    171:      2
   point        lazy operator at offset    178:      9
   point        lazy operator at offset    187:      7
-  point       match/function at offset    196:      2
-  point       match/function at offset    233:      7
+  point       match/function at offset    228:      7
   point              binding at offset    272:      9
   point             sequence at offset    287:      9
   point              binding at offset    316:      2
@@ -17,12 +17,20 @@ file "source.ml"
   point              if/then at offset    449:      0
   point              if/then at offset    459:      0
   point              binding at offset    487:      0
-  point       match/function at offset    533:      0
-  point       match/function at offset    547:      0
+  point       match/function at offset    504:      0
+  point       match/function at offset    510:      0
+  point       match/function at offset    516:      0
+  point       match/function at offset    522:      0
+  point       match/function at offset    528:      0
+  point       match/function at offset    542:      0
   point              if/then at offset    565:      0
   point              if/then at offset    576:      0
   point              binding at offset    613:      0
   point             sequence at offset    621:      0
   point              binding at offset    629:      0
   point              binding at offset    643:      0
-  point                  try at offset    676:      0
+  point                  try at offset    656:      0
+  point              binding at offset    693:      2
+  point              binding at offset    707:      2
+  point       match/function at offset    726:      2
+  point       match/function at offset    742:      0

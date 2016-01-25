@@ -27,8 +27,14 @@ let intconst x =
 let lid ?(loc = Location.none) s =
   Location.mkloc (Longident.parse s) loc
 
+let constr id =
+  let t = Location.mkloc (Longident.parse id) Location.none in
+  Exp.construct t None
+
+let unitconst () = constr "()"
+
 let strconst s =
-  Exp.constant (Const_string (s, None)) (* What's the option for? *)
+  Exp.constant (Const_string (s, None))
 
 let string_of_ident ident =
   String.concat "." (Longident.flatten ident.txt)
@@ -45,17 +51,36 @@ let custom_mark_function file =
        and this extension chop might not be necessary. *)
     (Filename.chop_extension file)
 
-(* Creates the marking expression for given file, offset, and kind.
-   Populates the 'points' global variable. *)
-let marker file ofs kind marked =
+let case_variable = "___bisect_matched_value___"
+
+(* Evaluates to a point at the given location. If the point does not yet exist,
+   creates it with the given kind. The point is paired with a flag indicating
+   whether it exited before this function was called. *)
+let get_point file ofs kind marked =
   let lst = InstrumentState.get_points_for_file file in
-  if List.exists (fun p -> p.Common.offset = ofs) lst then
-    None
-  else
+
+  let maybe_existing =
+    try Some (List.find (fun p -> p.Common.offset = ofs) lst)
+    with Not_found -> None
+  in
+
+  match maybe_existing with
+  | Some pt -> pt, true
+  | None ->
     let idx = List.length lst in
     if marked then InstrumentState.add_marked_point idx;
     let pt = { Common.offset = ofs; identifier = idx; kind = kind } in
     InstrumentState.set_points_for_file file (pt :: lst);
+    pt, false
+
+(* Creates the marking expression for given file, offset, and kind.
+   Populates the 'points' global variable. *)
+let marker must_be_unique file ofs kind marked =
+  let { Common.identifier = idx; _ }, existing =
+    get_point file ofs kind marked in
+  if must_be_unique && existing then
+    None
+  else
     let loc = Location.none in
     let wrapped =
       apply_nolabs ~loc (lid (custom_mark_function file)) [intconst idx] in
@@ -65,9 +90,13 @@ let marker file ofs kind marked =
    unmodified if the expression is already marked, has a ghost location,
    construct instrumentation is disabled, or a special comments indicates to
    ignore line. *)
-let wrap_expr k e =
+let wrap_expr ?(must_be_unique = true) ?loc k e =
   let enabled = List.assoc k InstrumentArgs.kinds in
-  let loc = e.pexp_loc in
+  let loc =
+    match loc with
+    | None -> e.pexp_loc
+    | Some loc -> loc
+  in
   if loc.Location.loc_ghost || not !enabled then
     e
   else
@@ -87,14 +116,172 @@ let wrap_expr k e =
     else
       let marked = List.mem line c.CommentsPpx.marked_lines in
       let marker_file = !Location.input_name in
-      match marker marker_file ofs k marked with
+      match marker must_be_unique marker_file ofs k marked with
       | Some w -> Exp.sequence ~loc w e
       | None   -> e
 
+(* Given a pattern and a location, transforms the pattern into pattern list by
+   eliminating all or-patterns and promoting them into separate cases. Each
+   resulting case is paired with a list of locations to mark if that case is
+   reached.
+
+   The location argument to this function is used for assembling these location
+   lists. It is set to the location of the nearest enclosing or-pattern clause.
+   When there is no such clause, it is set to the location of the entire
+   enclosing pattern. *)
+let translate_pattern =
+  (* n-ary Cartesion product of case patterns. Used for assembling case lists
+     for "and-patterns" such as tuples and arrays. *)
+  let product = function
+    | [] -> []
+    | cases::more ->
+      let multiply product cases =
+        product |> List.map (fun (marks_1, ps) ->
+          cases |> List.map (fun (marks_2, p) ->
+            marks_1 @ marks_2, ps @ [p]))
+        |> List.flatten
+      in
+
+      let initial = cases |> List.map (fun (marks, p) -> marks, [p]) in
+
+      List.fold_left multiply initial more
+  in
+
+  let rec translate mark p =
+    let loc = p.ppat_loc in
+    let attrs = p.ppat_attributes in
+
+    match p.ppat_desc with
+    | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
+    | Ppat_construct (_, None) | Ppat_variant (_, None) | Ppat_type _
+    | Ppat_unpack _ | Ppat_extension _ ->
+      [[mark], p]
+
+    | Ppat_alias (p', x) ->
+      translate mark p'
+      |> List.map (fun (marks, p'') -> marks, Pat.alias ~loc ~attrs p'' x)
+
+    | Ppat_tuple ps ->
+      ps
+      |> List.map (translate mark)
+      |> product
+      |> List.map (fun (marks, ps') -> marks, Pat.tuple ~loc ~attrs ps')
+
+    | Ppat_construct (c, Some p') ->
+      translate mark p'
+      |> List.map (fun (marks, p'') ->
+        marks, Pat.construct ~loc ~attrs c (Some p''))
+
+    | Ppat_variant (c, Some p') ->
+      translate mark p'
+      |> List.map (fun (marks, p'') ->
+        marks, Pat.variant ~loc ~attrs c (Some p''))
+
+    | Ppat_record (entries, closed) ->
+      let labels, ps = List.split entries in
+      ps
+      |> List.map (translate mark)
+      |> product
+      |> List.map (fun (marks, ps') ->
+        marks, Pat.record ~loc ~attrs (List.combine labels ps') closed)
+
+    | Ppat_array ps ->
+      ps
+      |> List.map (translate mark)
+      |> product
+      |> List.map (fun (marks, ps') -> marks, Pat.array ~loc ~attrs ps')
+
+    | Ppat_or (p_1, p_2) ->
+      let ps_1 = translate p_1.ppat_loc p_1 in
+      let ps_2 = translate p_2.ppat_loc p_2 in
+      ps_1 @ ps_2
+
+    | Ppat_constraint (p', t) ->
+      translate mark p'
+      |> List.map (fun (marks, p'') -> marks, Pat.constraint_ ~loc ~attrs p'' t)
+
+    | Ppat_lazy p' ->
+      translate mark p'
+      |> List.map (fun (marks, p'') -> marks, Pat.lazy_ ~loc ~attrs p'')
+
+    (* This should be unreachable in well-formed code, but, if it is reached,
+       do not generate any cases. The cases would be used in a secondary match
+       expression that works on the same value as the match expression (or
+       function expression) that is being instrumented. Inside that expression,
+       it makes no sense to match a second time for effects such as
+       exceptions. *)
+    | Ppat_exception _ -> []
+  in
+
+  translate
+
+(* Wraps a match or function case. A transformed pattern list is first created,
+   where all or-patterns are promoted to top-level patterns. If there is only
+   one resulting top-level pattern, wrap_case inserts a single point and marking
+   expression. If there are multiple top-level patterns, wrap_case inserts a
+   match expression that determines, at runtime, which one is matched, and
+   increments the appropriate point counts. *)
 let wrap_case k case =
-  match case.pc_guard with
-  | None   -> Exp.case case.pc_lhs (wrap_expr k case.pc_rhs)
-  | Some e -> Exp.case case.pc_lhs ~guard:(wrap_expr k e) (wrap_expr k case.pc_rhs)
+  let maybe_guard =
+    match case.pc_guard with
+    | None -> None
+    | Some guard -> Some (wrap_expr k guard)
+  in
+
+  let pattern = case.pc_lhs in
+  let loc = pattern.ppat_loc in
+
+  if !InstrumentArgs.simple_cases then
+    Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc k case.pc_rhs)
+  else
+    (* If this is an exception case, work with the pattern inside the exception
+       instead. *)
+    let pure_pattern, reassemble =
+      match pattern.ppat_desc with
+      | Ppat_exception p ->
+        p, (fun p' -> {pattern with ppat_desc = Ppat_exception p'})
+      | _ -> pattern, (fun p -> p)
+    in
+
+    let increments e marks =
+      marks
+      |> List.sort_uniq (fun l l' ->
+        l.Location.loc_start.Lexing.pos_cnum -
+        l'.Location.loc_start.Lexing.pos_cnum)
+      |> List.fold_left (fun e l ->
+        wrap_expr ~must_be_unique:false ~loc:l k e) e
+    in
+
+    match translate_pattern loc pure_pattern with
+    | [] ->
+      Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc k case.pc_rhs)
+    | [marks, _] ->
+      Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
+    | cases ->
+      let cases =
+        if !InstrumentArgs.inexhaustive_matching then cases
+        else cases @ [[], Pat.any ~loc ()]
+      in
+
+      let wrapped_pattern =
+        Pat.alias ~loc pure_pattern (Location.mkloc case_variable loc) in
+
+      let marks_expr =
+        cases
+        |> List.map (fun (marks, pattern) ->
+          Exp.case pattern (increments (unitconst ()) marks))
+        |> Exp.match_ ~loc (Exp.ident (lid ~loc case_variable))
+      in
+
+      (* Suppress warnings because the generated match expression will almost
+         never be exhaustive. *)
+      let marks_expr =
+        Exp.attr marks_expr
+          (Location.mkloc "ocaml.warning" loc, PStr [Str.eval (strconst "-8-11")])
+      in
+
+      Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
+        (Exp.sequence ~loc marks_expr case.pc_rhs)
 
 let wrap_class_field_kind k = function
   | Cfk_virtual _ as cf -> cf

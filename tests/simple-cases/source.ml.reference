@@ -1,0 +1,13 @@
+let ___bisect_mark___source =
+  let marks = Array.make 3 0 in
+  Bisect.Runtime.init_with_array "source.ml" marks;
+  (function
+   | idx ->
+       let curr = marks.(idx) in
+       marks.(idx) <-
+       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+let f x =
+  ___bisect_mark___source 2;
+  (match x with
+   | `A|`B -> (___bisect_mark___source 0; ())
+   | exception (Failure _|End_of_file ) -> (___bisect_mark___source 1; ()))

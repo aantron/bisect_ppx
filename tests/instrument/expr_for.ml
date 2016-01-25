@@ -1,6 +1,6 @@
 let () =
   print_endline "before";
-  for i = 1 to 3 do
+  for _i = 1 to 3 do
     print_endline "abc";
     print_endline "def";
     print_endline "ghi"
@@ -9,7 +9,7 @@ let () =
 
 let () =
   print_endline "before";
-  for i = 1 to 3 do
+  for _i = 1 to 3 do
     print_endline "abc"
   done;
   print_endline "after"
