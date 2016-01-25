@@ -231,53 +231,57 @@ let wrap_case k case =
   let pattern = case.pc_lhs in
   let loc = pattern.ppat_loc in
 
-  (* If this is an exception case, work with the pattern inside the exception
-     instead. *)
-  let pure_pattern, reassemble =
-    match pattern.ppat_desc with
-    | Ppat_exception p ->
-      p, (fun p' -> {pattern with ppat_desc = Ppat_exception p'})
-    | _ -> pattern, (fun p -> p)
-  in
-
-  let increments e marks =
-    marks
-    |> List.sort_uniq (fun l l' ->
-      l.Location.loc_start.Lexing.pos_cnum -
-      l'.Location.loc_start.Lexing.pos_cnum)
-    |> List.fold_left (fun e l -> wrap_expr ~must_be_unique:false ~loc:l k e) e
-  in
-
-  match translate_pattern loc pure_pattern with
-  | [] ->
+  if !InstrumentArgs.simple_cases then
     Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc k case.pc_rhs)
-  | [marks, _] ->
-    Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
-  | cases ->
-    let cases =
-      if !InstrumentArgs.inexhaustive_matching then cases
-      else cases @ [[], Pat.any ~loc ()]
+  else
+    (* If this is an exception case, work with the pattern inside the exception
+       instead. *)
+    let pure_pattern, reassemble =
+      match pattern.ppat_desc with
+      | Ppat_exception p ->
+        p, (fun p' -> {pattern with ppat_desc = Ppat_exception p'})
+      | _ -> pattern, (fun p -> p)
     in
 
-    let wrapped_pattern =
-      Pat.alias ~loc pure_pattern (Location.mkloc case_variable loc) in
-
-    let marks_expr =
-      cases
-      |> List.map (fun (marks, pattern) ->
-        Exp.case pattern (increments (unitconst ()) marks))
-      |> Exp.match_ ~loc (Exp.ident (lid ~loc case_variable))
+    let increments e marks =
+      marks
+      |> List.sort_uniq (fun l l' ->
+        l.Location.loc_start.Lexing.pos_cnum -
+        l'.Location.loc_start.Lexing.pos_cnum)
+      |> List.fold_left (fun e l ->
+        wrap_expr ~must_be_unique:false ~loc:l k e) e
     in
 
-    (* Suppress warnings because the generated match expression will almost
-       never be exhaustive. *)
-    let marks_expr =
-      Exp.attr marks_expr
-        (Location.mkloc "ocaml.warning" loc, PStr [Str.eval (strconst "-8-11")])
-    in
+    match translate_pattern loc pure_pattern with
+    | [] ->
+      Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc k case.pc_rhs)
+    | [marks, _] ->
+      Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
+    | cases ->
+      let cases =
+        if !InstrumentArgs.inexhaustive_matching then cases
+        else cases @ [[], Pat.any ~loc ()]
+      in
 
-    Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
-      (Exp.sequence ~loc marks_expr case.pc_rhs)
+      let wrapped_pattern =
+        Pat.alias ~loc pure_pattern (Location.mkloc case_variable loc) in
+
+      let marks_expr =
+        cases
+        |> List.map (fun (marks, pattern) ->
+          Exp.case pattern (increments (unitconst ()) marks))
+        |> Exp.match_ ~loc (Exp.ident (lid ~loc case_variable))
+      in
+
+      (* Suppress warnings because the generated match expression will almost
+         never be exhaustive. *)
+      let marks_expr =
+        Exp.attr marks_expr
+          (Location.mkloc "ocaml.warning" loc, PStr [Str.eval (strconst "-8-11")])
+      in
+
+      Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
+        (Exp.sequence ~loc marks_expr case.pc_rhs)
 
 let wrap_class_field_kind k = function
   | Cfk_virtual _ as cf -> cf

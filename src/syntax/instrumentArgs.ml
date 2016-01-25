@@ -40,6 +40,8 @@ let desc_kinds =
 
 let runtime_name = ref "Bisect"
 
+let simple_cases = ref false
+
 let inexhaustive_matching = ref false
 
 let switches = [
@@ -64,8 +66,12 @@ let switches = [
    "  Ignored") ;
 
   ("-runtime",
-   Arg.String ((:=) runtime_name),
+   Arg.Set_string runtime_name,
    "<module name>  Set runtime module name; used for testing") ;
+
+  ("-simple-cases",
+   Arg.Set simple_cases,
+   "  Do not generate separate points for clauses of or-patterns") ;
 
   ("-inexhaustive-matching",
    Arg.Set inexhaustive_matching,

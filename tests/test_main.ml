@@ -23,6 +23,7 @@ let tests = "bisect_ppx" >::: [
   Test_report.tests;
   Test_combine.tests;
   Test_instrument.tests;
+  Test_simple_cases.tests;
   Test_line_number_directive.tests;
   Test_comments.tests;
   Test_exclude.tests;
