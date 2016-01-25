@@ -13,7 +13,6 @@ travis_install_on_linux () {
     sudo apt-get update -qq
 
     sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam time git
-    sudo apt-get install liblapack-dev
     sudo apt-get install libxml2-utils
 }
 
