@@ -1,6 +1,6 @@
 sudo: required
 language: c
-script: bash -e ./tools/travis_ci_test.sh
+script: bash -e ./src/travis_ci_test.sh
 os:
   - linux
   - osx

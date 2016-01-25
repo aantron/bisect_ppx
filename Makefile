@@ -35,7 +35,7 @@ endif
 
 
 # Assume that ocamlbuild, ocamlfind, ocamlopt are found in path.
-OCAMLBUILD_FLAGS := -use-ocamlfind -no-links -cflag -annot
+OCAMLBUILD_FLAGS := -use-ocamlfind -no-links
 
 META_BISECT_DIR := -build-dir _build.meta
 INSTRUMENTED_DIR := -build-dir _build.instrumented
@@ -46,16 +46,15 @@ default: FORCE
 	@echo "  dev        compiles instrumented bisect_ppx (development mode)"
 	@echo "  doc        generates ocamldoc documentations"
 	@echo "  tests      runs tests"
-	@echo "  clean      deletes all produced files (excluding documentation)"
-	@echo "  distclean  deletes all produced files (including documentation)"
+	@echo "  clean      deletes all produced files"
 	@echo "  install    copies executable and library files"
 
-build:
-	ocamlbuild $(OCAMLBUILD_FLAGS) bisect.otarget
+build: FORCE
+	ocamlbuild $(OCAMLBUILD_FLAGS) src/bisect.otarget
 
-dev:
+dev: FORCE
 	META_BISECT=yes ocamlbuild $(OCAMLBUILD_FLAGS) $(META_BISECT_DIR) \
-		meta_bisect.otarget
+		src/meta_bisect.otarget
 	mkdir -p $(DEV_INSTALL_DIR)
 	make install INSTALL_VARIANT=meta
 	cd $(DEV_INSTALL_DIR)/$(INSTALL_NAME)_meta && \
@@ -63,7 +62,7 @@ dev:
 		sed 's/bisect_ppx\.runtime/bisect_ppx_meta.runtime/' > META.fixed && \
 		mv META.fixed META
 	OCAMLPATH=`pwd`/$(DEV_INSTALL_DIR) INSTRUMENT=yes \
-		ocamlbuild $(OCAMLBUILD_FLAGS) $(INSTRUMENTED_DIR) bisect.otarget
+		ocamlbuild $(OCAMLBUILD_FLAGS) $(INSTRUMENTED_DIR) src/bisect.otarget
 	make install INSTALL_VARIANT=instrumented
 	cd $(DEV_INSTALL_DIR)/$(INSTALL_NAME)_instrumented && \
 		sed 's/bisect_ppx\.runtime/bisect_ppx_instrumented.runtime/' META \
@@ -82,23 +81,20 @@ clean: FORCE
 	ocamlbuild -clean
 	ocamlbuild $(META_BISECT_DIR) -clean
 	ocamlbuild $(INSTRUMENTED_DIR) -clean
-	rm -rf $(DEV_INSTALL_DIR)
+	rm -rf $(DEV_INSTALL_DIR) ocamldoc *.odocl src/*.mlpack
 	make -C tests clean
-
-distclean: clean
-	rm -rf ocamldoc *.odocl *.mlpack
 
 install: FORCE
 	@! ocamlfind query $(INSTALL_NAME) > /dev/null 2> /dev/null || \
 		ocamlfind remove $(INSTALL_FLAGS) $(INSTALL_NAME)
-	@ocamlfind install $(INSTALL_FLAGS) $(INSTALL_NAME) META -optional \
+	@ocamlfind install $(INSTALL_FLAGS) $(INSTALL_NAME) src/META -optional \
 		$(INSTALL_SOURCE_DIR)/src/syntax/bisect_ppx.byte \
-		$(INSTALL_SOURCE_DIR)/$(RUNTIME).a \
-		$(INSTALL_SOURCE_DIR)/$(RUNTIME).o \
-		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cma \
-		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cmi \
-		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cmo \
-		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cmx \
-		$(INSTALL_SOURCE_DIR)/$(RUNTIME).cmxa
+		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).a \
+		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).o \
+		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cma \
+		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cmi \
+		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cmo \
+		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cmx \
+		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cmxa
 
 FORCE:

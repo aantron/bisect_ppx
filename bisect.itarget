@@ -1,5 +1,0 @@
-bisect.cma
-bisect.cmxa
-src/syntax/bisect_ppx.byte
-src/report/report.byte
-src/report/report.native

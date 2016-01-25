@@ -19,8 +19,8 @@
 open Ocamlbuild_plugin
 
 let odocl_file = Pathname.pwd / "bisect.odocl"
-let mlpack_file = Pathname.pwd / "bisect.mlpack"
-let meta_mlpack_file = Pathname.pwd / "meta_bisect.mlpack"
+let mlpack_file = Pathname.pwd / "src" / "bisect.mlpack"
+let meta_mlpack_file = Pathname.pwd / "src" / "meta_bisect.mlpack"
 let src_path = Pathname.pwd / "src"
 
 let mlpack_modules = ["Common"; "Extension"; "Runtime"; "Version"]
@@ -54,9 +54,6 @@ let () =
       end)
     (Array.concat (List.map Pathname.readdir paths));
   close_out_noerr odocl_chan
-
-let version_tag = "src_library_version_ml"
-let version_ml = "src/library/version.ml"
 
 let read_line_from_cmd cmd =
   let ic = Unix.open_process_in cmd in
@@ -116,22 +113,6 @@ end
 let () =
   dispatch begin function
     | After_rules ->
-        dep [version_tag] [version_ml];
-        mark_tag_used version_tag;
-        rule ("generation of " ^ version_ml)
-          ~prod:version_ml
-          ~insert:`bottom
-          begin fun _ _ ->
-            let version =
-              try read_line_from_cmd "git describe --abbrev=0"
-              with _ -> "unknown"
-            in
-            let name, channel = Filename.open_temp_file "version" ".ml" in
-            Printf.fprintf channel "let value = %S\n" version;
-            close_out_noerr channel;
-            safe_cp name version_ml
-          end;
-
       Self_instrumentation.maybe_meta_build ();
       Self_instrumentation.maybe_instrumented_build ()
 
