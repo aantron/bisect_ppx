@@ -44,12 +44,14 @@ default: FORCE
 	@echo '  clean            deletes build and log files'
 
 unit: binaries-may-exist
+	@make -C .. dev
 	@rm -rf $(COVERAGE) $(PRESERVE)
 	@$(UNIT)
 	@echo " Coverage:"
 	@$(REPORT) -summary-only -text - | grep --color=none total
 
 one: binaries-may-exist
+	@make -C .. dev
 	@rm -rf $(COVERAGE) $(PRESERVE)
 	$(UNIT) -only-test $(NAME)
 

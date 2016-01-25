@@ -1,113 +1,189 @@
 <html>
   <head>
-    <title>Bisect report</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Coverage report</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta charset="utf-8" />
   </head>
   <body>
-    <div class="section">File: source.ml (<a href="index.html">return to index</a>)</div>
-    <br/>
-    <hr class="codeSep"/>
-    <br/>
-    <table>
-      <tr>
-        <td valign="top" class="section">Statistics:&nbsp;&nbsp;</td>
-        <td valign="top">
-          <table class="simple">
-            <tr><th>kind</th><th width="16px">&nbsp;</th><th>coverage</th></tr>
-            <tr><td>binding</td><td width="16px">&nbsp;</td><td>8 / 13 (61%)</td></tr>
-            <tr><td>sequence</td><td width="16px">&nbsp;</td><td>4 / 5 (80%)</td></tr>
-            <tr><td>for</td><td width="16px">&nbsp;</td><td>1 / 1 (100%)</td></tr>
-            <tr><td>if/then</td><td width="16px">&nbsp;</td><td>0 / 4 (0%)</td></tr>
-            <tr><td>try</td><td width="16px">&nbsp;</td><td>0 / 1 (0%)</td></tr>
-            <tr><td>while</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>match/function</td><td width="16px">&nbsp;</td><td>3 / 10 (30%)</td></tr>
-          </table>
-        </td>
-        <td valign="top">
-          <table class="simple">
-            <tr><th>kind</th><th width="16px">&nbsp;</th><th>coverage</th></tr>
-            <tr><td>class expression</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>class initializer</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>class method</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>class value</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>toplevel expression</td><td width="16px">&nbsp;</td><td>0 / 0 (-%)</td></tr>
-            <tr><td>lazy operator</td><td width="16px">&nbsp;</td><td>2 / 2 (100%)</td></tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-    <br/>
-    <hr class="codeSep"/>
-    <br/>
-    <div class="section">Source:</div>
-    <br/>
-    <code>
-      <div id="fold000001">
-      <div id="line000001" class="lineAllVisited">000001| let&nbsp;inf&nbsp;=&nbsp;(*[2]*)ref&nbsp;0</div>
-      <div id="line000002" class="lineAllVisited">000002| let&nbsp;sup&nbsp;=&nbsp;(*[2]*)ref&nbsp;3</div>
-      <div id="line000003" class="lineNone">000003| &nbsp;</div>
-      <div id="line000004" class="lineAllVisited">000004| let&nbsp;args&nbsp;=&nbsp;(*[2]*)[</div>
-      <div id="line000005" class="lineNone">000005| &nbsp;&nbsp;(&quot;-inf&quot;,&nbsp;(Arg.Set_int&nbsp;inf),&nbsp;&quot;inferior&nbsp;bound&quot;)&nbsp;;</div>
-      <div id="line000006" class="lineNone">000006| &nbsp;&nbsp;(&quot;-sup&quot;,&nbsp;(Arg.Set_int&nbsp;sup),&nbsp;&quot;superior&nbsp;bound&quot;)</div>
-      <div id="line000007" class="lineNone">000007| ]</div>
-      <div id="line000008" class="lineNone">000008| &nbsp;</div>
-      <div id="line000009" class="lineAllVisited">000009| let&nbsp;kind&nbsp;=&nbsp;(*[2]*)function</div>
-      <div id="line000010" class="lineAllVisited">000010| &nbsp;&nbsp;|&nbsp;(*[2]*)x&nbsp;when&nbsp;(*[9]*)x&nbsp;&gt;&nbsp;9&nbsp;||&nbsp;(*[7]*)x&nbsp;&lt;&nbsp;0&nbsp;-&gt;&nbsp;print_endline&nbsp;&quot;not&nbsp;a&nbsp;digit&quot;</div>
-      <div id="line000011" class="lineAllVisited">000011| &nbsp;&nbsp;|&nbsp;(*[7]*)_&nbsp;-&gt;&nbsp;print_endline&nbsp;&quot;digit&quot;</div>
-      <div id="line000012" class="lineNone">000012| &nbsp;</div>
-      <div id="line000013" class="lineNone">000013| let&nbsp;print&nbsp;x&nbsp;=</div>
-      <div id="line000014" class="lineAllVisited">000014| &nbsp;&nbsp;(*[9]*)print_int&nbsp;x;</div>
-      <div id="line000015" class="lineAllVisited">000015| &nbsp;&nbsp;(*[9]*)print_newline&nbsp;()</div>
-      <div id="line000016" class="lineNone">000016| &nbsp;</div>
-      <div id="line000017" class="lineNone">000017| let&nbsp;()&nbsp;=</div>
-      <div id="line000018" class="lineAllVisited">000018| &nbsp;&nbsp;(*[2]*)Arg.parse&nbsp;args&nbsp;ignore&nbsp;&quot;report&nbsp;test&quot;;</div>
-      <div id="line000019" class="lineAllVisited">000019| &nbsp;&nbsp;(*[2]*)for&nbsp;i&nbsp;=&nbsp;!inf&nbsp;to&nbsp;!sup&nbsp;do</div>
-      <div id="line000020" class="lineAllVisited">000020| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)kind&nbsp;i;</div>
-      <div id="line000021" class="lineAllVisited">000021| &nbsp;&nbsp;&nbsp;&nbsp;(*[9]*)print&nbsp;i</div>
-      <div id="line000022" class="lineNone">000022| &nbsp;&nbsp;done</div>
-      <div id="line000023" class="lineNone">000023| &nbsp;</div>
-      <div id="line000024" class="lineNone">000024| let&nbsp;is_even&nbsp;x&nbsp;=</div>
+    <div id="header">
+      <h1>
+        <a href="index.html">
+          <span class="dirname"></span>source.ml
+        </a>
+      </h1>
+      <h2>50.00%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:52.08%"></span>
+      <span class="unvisited" style="top:58.33%"></span>
+      <span class="unvisited" style="top:60.42%"></span>
+      <span class="unvisited" style="top:62.50%"></span>
+      <span class="unvisited" style="top:64.58%"></span>
+      <span class="unvisited" style="top:66.67%"></span>
+      <span class="unvisited" style="top:68.75%"></span>
+      <span class="unvisited" style="top:70.83%"></span>
+      <span class="unvisited" style="top:77.08%"></span>
+      <span class="unvisited" style="top:79.17%"></span>
+      <span class="unvisited" style="top:81.25%"></span>
+      <span class="unvisited" style="top:83.33%"></span>
+      <span class="unvisited" style="top:95.83%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span class="visited"> </span>
+<a id="L2"></a><span class="visited"> </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span class="visited"> </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="unvisited"> </span>
+<a id="L29"></a><span class="unvisited"> </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span class="unvisited"> </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="unvisited"> </span>
+<a id="L34"></a><span class="unvisited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="unvisited"> </span>
+<a id="L38"></a><span class="unvisited"> </span>
+<a id="L39"></a><span class="unvisited"> </span>
+<a id="L40"></a><span class="unvisited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="unvisited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="visited"> </span>
+</pre>
       </div>
-      <div id="line000025" class="lineAllUnvisited">000025| &nbsp;&nbsp;(*[0]*)if&nbsp;x&nbsp;mod&nbsp;2&nbsp;=&nbsp;0&nbsp;then&nbsp;(*[0]*)true&nbsp;else&nbsp;(*[0]*)false</div>
-      <div id="fold000026">
-      <div id="line000026" class="lineNone">000026| &nbsp;</div>
-      <div id="line000027" class="lineNone">000027| let&nbsp;rec&nbsp;is_odd&nbsp;x&nbsp;=</div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+</pre>
+        <pre id="code">
+let inf = <span data-count="2">r</span>ef 0
+let sup = <span data-count="2">r</span>ef 3
+
+let args = <span data-count="2">[</span>
+  ("-inf", (Arg.Set_int inf), "inferior bound") ;
+  ("-sup", (Arg.Set_int sup), "superior bound")
+]
+
+let kind = <span data-count="2">f</span>unction
+  | <span data-count="2">x</span> when <span data-count="9">x</span> &gt; 9 || <span data-count="7">x</span> &lt; 0 -&gt; print_endline "not a digit"
+  | <span data-count="7">_</span> -&gt; print_endline "digit"
+
+let print x =
+  <span data-count="9">p</span>rint_int x;
+  <span data-count="9">p</span>rint_newline ()
+
+let () =
+  <span data-count="2">A</span>rg.parse args ignore "report test";
+  <span data-count="2">f</span>or i = !inf to !sup do
+    <span data-count="9">k</span>ind i;
+    <span data-count="9">p</span>rint i
+  done
+
+let is_even x =
+  <span data-count="0">i</span>f x mod 2 = 0 then <span data-count="0">t</span>rue else <span data-count="0">f</span>alse
+
+let rec is_odd x =
+  <span data-count="0">m</span>atch x with
+  | <span data-count="0">1</span>
+  | <span data-count="0">3</span>
+  | <span data-count="0">5</span>
+  | <span data-count="0">7</span>
+  | <span data-count="0">9</span> -&gt; true
+  | <span data-count="0">x</span> -&gt; if is_even x then <span data-count="0">f</span>alse else <span data-count="0">i</span>s_odd (x mod 10)
+
+let is_zero x =
+  <span data-count="0">t</span>ry
+    <span data-count="0">l</span>et _ = <span data-count="0">2</span>0 / x in
+    <span data-count="0">f</span>alse
+  with <span data-count="0">D</span>ivision_by_zero -&gt; true
+
+let () =
+  <span data-count="2">(</span>fun x -&gt;
+    <span data-count="2">m</span>atch x with
+    | <span data-count="2">0</span>, 0 -&gt; 0
+    | <span data-count="0">_</span> -&gt; 1)
+  (0, 0)
+  |&gt; <span data-count="2">i</span>gnore
+</pre>
       </div>
-      <div id="line000028" class="lineAllUnvisited">000028| &nbsp;&nbsp;(*[0]*)match&nbsp;x&nbsp;with</div>
-      <div id="line000029" class="lineAllUnvisited">000029| &nbsp;&nbsp;|&nbsp;(*[0]*)1</div>
-      <div id="line000030" class="lineAllUnvisited">000030| &nbsp;&nbsp;|&nbsp;(*[0]*)3</div>
-      <div id="line000031" class="lineAllUnvisited">000031| &nbsp;&nbsp;|&nbsp;(*[0]*)5</div>
-      <div id="line000032" class="lineAllUnvisited">000032| &nbsp;&nbsp;|&nbsp;(*[0]*)7</div>
-      <div id="line000033" class="lineAllUnvisited">000033| &nbsp;&nbsp;|&nbsp;(*[0]*)9&nbsp;-&gt;&nbsp;true</div>
-      <div id="line000034" class="lineAllUnvisited">000034| &nbsp;&nbsp;|&nbsp;(*[0]*)x&nbsp;-&gt;&nbsp;if&nbsp;is_even&nbsp;x&nbsp;then&nbsp;(*[0]*)false&nbsp;else&nbsp;(*[0]*)is_odd&nbsp;(x&nbsp;mod&nbsp;10)</div>
-      <div id="fold000035">
-      <div id="line000035" class="lineNone">000035| &nbsp;</div>
-      <div id="line000036" class="lineNone">000036| let&nbsp;is_zero&nbsp;x&nbsp;=</div>
-      </div>
-      <div id="line000037" class="lineAllUnvisited">000037| &nbsp;&nbsp;(*[0]*)try</div>
-      <div id="line000038" class="lineAllUnvisited">000038| &nbsp;&nbsp;&nbsp;&nbsp;(*[0]*)let&nbsp;_&nbsp;=&nbsp;(*[0]*)20&nbsp;/&nbsp;x&nbsp;in</div>
-      <div id="line000039" class="lineAllUnvisited">000039| &nbsp;&nbsp;&nbsp;&nbsp;(*[0]*)false</div>
-      <div id="line000040" class="lineAllUnvisited">000040| &nbsp;&nbsp;with&nbsp;(*[0]*)Division_by_zero&nbsp;-&gt;&nbsp;true</div>
-      <div id="fold000041">
-      <div id="line000041" class="lineNone">000041| &nbsp;</div>
-      <div id="line000042" class="lineNone">000042| let&nbsp;()&nbsp;=</div>
-      <div id="line000043" class="lineAllVisited">000043| &nbsp;&nbsp;(*[2]*)(fun&nbsp;x&nbsp;-&gt;</div>
-      <div id="line000044" class="lineAllVisited">000044| &nbsp;&nbsp;&nbsp;&nbsp;(*[2]*)match&nbsp;x&nbsp;with</div>
-      <div id="line000045" class="lineAllVisited">000045| &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(*[2]*)0,&nbsp;0&nbsp;-&gt;&nbsp;0</div>
-      </div>
-      <div id="line000046" class="lineAllUnvisited">000046| &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(*[0]*)_&nbsp;-&gt;&nbsp;1)</div>
-      <div id="fold000047">
-      <div id="line000047" class="lineNone">000047| &nbsp;&nbsp;(0,&nbsp;0)</div>
-      <div id="line000048" class="lineAllVisited">000048| &nbsp;&nbsp;|&gt;&nbsp;(*[2]*)ignore</div>
-      </div>
-    </code>
-    <br/>
-    <div class="section">Legend:</div>
-    &nbsp;&nbsp;&nbsp;<span class="lineNone">some code</span>&nbsp;-&nbsp;line containing no point<br/>
-    &nbsp;&nbsp;&nbsp;<span class="lineAllVisited">some code</span>&nbsp;-&nbsp;line containing only visited points<br/>
-    &nbsp;&nbsp;&nbsp;<span class="lineAllUnvisited">some code</span>&nbsp;-&nbsp;line containing only unvisited points<br/>
-    &nbsp;&nbsp;&nbsp;<span class="lineMixed">some code</span>&nbsp;-&nbsp;line containing both visited and unvisited points<br/>
-    <br/>
-    <hr class="codeSep"/>
+    </div>
+    <script src="coverage.js"></script>
   </body>
 </html>

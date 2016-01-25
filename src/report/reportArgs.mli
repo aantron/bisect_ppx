@@ -44,12 +44,6 @@ val title : string ref
 val separator : string ref
 (** Separator (CSV only). *)
 
-val no_navbar : bool ref
-(** Whether navigation bar is disabled (HTML only). *)
-
-val no_folding : bool ref
-(** Whether folding is disabled (HTML only). *)
-
 val search_path : string list ref
 (** Search path for files. *)
 

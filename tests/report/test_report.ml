@@ -45,8 +45,8 @@ let tests = "report" >::: [
     diff "report/reference.dump");
 
   test "html" (fun () ->
-    report "-no-navbar -no-folding -html html_dir";
-    run "grep -v 'class=\"footer\"' html_dir/file0000.html > output";
+    report "-html html_dir";
+    run "grep -v 'id=\"footer\"' html_dir/file0000.html > output";
     diff "report/reference.html");
 
   test "text" (fun () ->

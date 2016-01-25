@@ -34,13 +34,9 @@ let verbose = ref false
 
 let tab_size = ref 8
 
-let title = ref "Bisect report"
+let title = ref "Coverage report"
 
 let separator = ref ";"
-
-let no_navbar = ref false
-
-let no_folding = ref false
 
 let search_path = ref [""]
 
@@ -89,11 +85,11 @@ let options = [
    Arg.String add_search_path,
    "<dir>  Add the directory to the search path") ;
   ("-no-folding",
-   Arg.Set no_folding,
-   " Disable code folding (HTML only)") ;
+   Arg.Unit ignore,
+   " Ignored") ;
   ("-no-navbar",
-   Arg.Set no_navbar,
-   " Disable navigation bar (HTML only)") ;
+   Arg.Unit ignore,
+   " Ignored") ;
   ("-separator",
    Arg.Set_string separator,
    "<string>  Set the separator for generated output (CSV only)") ;
