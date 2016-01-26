@@ -383,13 +383,13 @@ class instrumenter = object (self)
       | Pexp_let (rec_flag, l, e) ->
           let l =
             List.map (fun vb ->
-            {vb with pvb_expr = wrap_expr Common.Binding vb.pvb_expr}) l in
-          Exp.let_ ~loc ~attrs rec_flag l (wrap_expr Common.Binding e)
+            {vb with pvb_expr = wrap_expr Common.Sequence vb.pvb_expr}) l in
+          Exp.let_ ~loc ~attrs rec_flag l (wrap_expr Common.Sequence e)
       | Pexp_poly (e, ct) ->
-          Exp.poly ~loc ~attrs (wrap_expr Common.Binding e) ct
+          Exp.poly ~loc ~attrs (wrap_expr Common.Sequence e) ct
       | Pexp_fun (al, eo, p, e) ->
-          let eo = map_opt (wrap_expr Common.Binding) eo in
-          Exp.fun_ ~loc ~attrs al eo p (wrap_expr Common.Binding e)
+          let eo = map_opt (wrap_expr Common.Match) eo in
+          Exp.fun_ ~loc ~attrs al eo p (wrap_expr Common.Match e)
       | Pexp_apply (e1, [l2, e2; l3, e3]) ->
           (match e1.pexp_desc with
           | Pexp_ident ident
@@ -410,7 +410,7 @@ class instrumenter = object (self)
           |> Exp.function_ ~loc ~attrs
       | Pexp_try (e, l) ->
           List.map (wrap_case Common.Try) l
-          |> Exp.try_ ~loc ~attrs (wrap_expr Common.Sequence e)
+          |> Exp.try_ ~loc ~attrs e
       | Pexp_ifthenelse (e1, e2, e3) ->
           Exp.ifthenelse ~loc ~attrs e1 (wrap_expr Common.If_then e2)
             (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None)

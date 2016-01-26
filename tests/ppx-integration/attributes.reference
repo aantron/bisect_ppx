@@ -1,5 +1,5 @@
 let ___bisect_mark___attributes =
-  let marks = Array.make 23 0 in
+  let marks = Array.make 22 0 in
   Bisect.Runtime.init_with_array "attributes.ml" marks;
   (function
    | idx ->
@@ -7,31 +7,29 @@ let ___bisect_mark___attributes =
        marks.(idx) <-
        if curr < Pervasives.max_int then Pervasives.succ curr else curr)
 let () =
-  ___bisect_mark___attributes 22;
-  ((let x = ___bisect_mark___attributes 18; 1 in
-    ___bisect_mark___attributes 19; x)[@testing ]) |>
-    ((___bisect_mark___attributes 20; ignore));
   ___bisect_mark___attributes 21;
-  ((fun x  -> ___bisect_mark___attributes 15; x)[@testing ]) |>
-    ((___bisect_mark___attributes 16; ignore));
-  ___bisect_mark___attributes 17;
+  ((let x = ___bisect_mark___attributes 17; 1 in
+    ___bisect_mark___attributes 18; x)[@testing ]) |>
+    ((___bisect_mark___attributes 19; ignore));
+  ___bisect_mark___attributes 20;
+  ((fun x  -> ___bisect_mark___attributes 14; x)[@testing ]) |>
+    ((___bisect_mark___attributes 15; ignore));
+  ___bisect_mark___attributes 16;
   ((string_of_int 0)[@testing ]) |>
-    ((___bisect_mark___attributes 13; ignore));
-  ___bisect_mark___attributes 14;
+    ((___bisect_mark___attributes 12; ignore));
+  ___bisect_mark___attributes 13;
   (((match 0 with
-     | 0 -> (___bisect_mark___attributes 10; ())
-     | _ -> (___bisect_mark___attributes 11; ())))[@testing ]);
-  ___bisect_mark___attributes 12;
+     | 0 -> (___bisect_mark___attributes 9; ())
+     | _ -> (___bisect_mark___attributes 10; ())))[@testing ]);
+  ___bisect_mark___attributes 11;
   ((function
-    | 0 -> (___bisect_mark___attributes 6; 0)
-    | x -> (___bisect_mark___attributes 7; x))[@testing ]) |>
-    ((___bisect_mark___attributes 8; ignore));
-  ___bisect_mark___attributes 9;
-  (((try
-       ___bisect_mark___attributes 4;
-       (string_of_int 0) |> ((___bisect_mark___attributes 2; ignore))
+    | 0 -> (___bisect_mark___attributes 5; 0)
+    | x -> (___bisect_mark___attributes 6; x))[@testing ]) |>
+    ((___bisect_mark___attributes 7; ignore));
+  ___bisect_mark___attributes 8;
+  (((try (string_of_int 0) |> (___bisect_mark___attributes 2; ignore)
      with | _ -> (___bisect_mark___attributes 3; ())))[@testing ]);
-  ___bisect_mark___attributes 5;
+  ___bisect_mark___attributes 4;
   ((if true
     then (___bisect_mark___attributes 1; ())
     else (___bisect_mark___attributes 0; ()))[@testing ])

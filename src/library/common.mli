@@ -23,8 +23,8 @@
 (** {6 Point kinds} *)
 
 type point_kind =
-  | Binding (** Point kind for bindings ([let ... in ...], as well as toplevel bindings). *)
-  | Sequence (** Point kind for sequences. *)
+  | Binding (** Point kind for toplevel bindings). *)
+  | Sequence (** Point kind for sequences, including [;], [|>], and [let]. *)
   | For (** Point kind for [for] loops. *)
   | If_then (** Point kind for [if/then] constructs. *)
   | Try (** Point kind for [try/with] constructs. *)
