@@ -277,7 +277,7 @@ let wrap_case k case =
          never be exhaustive. *)
       let marks_expr =
         Exp.attr marks_expr
-          (Location.mkloc "ocaml.warning" loc, PStr [Str.eval (strconst "-8-11")])
+          (Location.mkloc "ocaml.warning" loc, PStr [Str.eval (strconst "-8-11-27")])
       in
 
       Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
