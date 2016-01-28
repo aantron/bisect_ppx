@@ -53,18 +53,47 @@ let add_file f =
   files := f :: !files
 
 let options = [
+  ("-I",
+   Arg.String add_search_path,
+   "<dir>  Look for .cmp and/or .ml files in the given directory") ;
+  ("-html",
+   Arg.String (fun s -> add_output (Html_output s)),
+   "<dir>  Output html to the given directory") ;
+  ("-title",
+   Arg.Set_string title,
+   "<string>  Set the title for generated output (HTML only)") ;
+  ("-tab-size",
+   Arg.Int
+     (fun x ->
+       if x < 0 then
+         (print_endline " *** error: tab size should be positive"; exit 1)
+       else
+         tab_size := x),
+   "<int>  Set tabulation size in output (HTML only)") ;
+  ("-text",
+   Arg.String (fun s -> add_output (Text_output s)),
+   "<file>  Output plain text to the given file") ;
+    ("-summary-only",
+   Arg.Set summary_only,
+   " Output only a summary (text only)") ;
   ("-bisect",
    Arg.String (fun s -> add_output (Bisect_output s)),
-   "<file>  Set output to bisect, data being written to given file") ;
+   "<file>  Output bisect data to the given file") ;
   ("-combine-expr",
    Arg.String (fun s -> combine_expr := Some s),
-   "<expr>  Combine file according to given expression to produce data") ;
+   "<expr>  Combine files according to given expression to produce counts") ;
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
-   "<file>  Set output to csv, data being written to given file") ;
+   "<file>  Output CSV to the given file") ;
+  ("-separator",
+   Arg.Set_string separator,
+   "<string>  Set the separator for generated output (CSV only)") ;
   ("-dump",
    Arg.String (fun s -> add_output (Dump_output s)),
-   "<file>  Set output to bare dump, data being written to given file") ;
+   "<file>  Output bare dump to the given file") ;
+  ("-xml",
+   Arg.String (fun s -> add_output (Xml_output s)),
+   "<file>  Output XML to the given file") ;
   ("-dump-dtd",
    Arg.String
      (function
@@ -77,55 +106,31 @@ let options = [
              s
              (ReportUtils.output_strings ReportXML.dtd []);
            exit 0),
-   "<file>  Dump the DTD to the given file") ;
-  ("-html",
-   Arg.String (fun s -> add_output (Html_output s)),
-   "<dir>  Set output to html, files being written in given directory") ;
-  ("-I",
-   Arg.String add_search_path,
-   "<dir>  Add the directory to the search path") ;
-  ("-no-folding",
-   Arg.Unit ignore,
-   " Ignored") ;
-  ("-no-navbar",
-   Arg.Unit ignore,
-   " Ignored") ;
-  ("-separator",
-   Arg.Set_string separator,
-   "<string>  Set the separator for generated output (CSV only)") ;
-  ("-summary-only",
-   Arg.Set summary_only,
-   " Output only a summary (text only)") ;
-  ("-tab-size",
-   Arg.Int
-     (fun x ->
-       if x < 0 then
-         (print_endline " *** error: tab size should be positive"; exit 1)
-       else
-         tab_size := x),
-   "<int>  Set tabulation size in output (HTML only)") ;
-  ("-text",
-   Arg.String (fun s -> add_output (Text_output s)),
-   "<file>  Set output to text, data being written to given file") ;
-  ("-title",
-   Arg.Set_string title,
-   "<string>  Set the title for generated output (HTML only)") ;
+   "<file>  Output XML DTD to the given file") ;
+  ("-xml-emma",
+   Arg.String (fun s -> add_output (Xml_emma_output s)),
+   "<file>  Output EMMA XML to the given file") ;
   ("-verbose",
    Arg.Set verbose,
    " Set verbose mode") ;
   ("-version",
    Arg.Unit (fun () -> print_endline Version.value; exit 0),
    " Print version and exit") ;
-  ("-xml",
-   Arg.String (fun s -> add_output (Xml_output s)),
-   "<file>  Set output to xml, data being written to given file") ;
-  ("-xml-emma",
-   Arg.String (fun s -> add_output (Xml_emma_output s)),
-   "<file>  Set output to EMMA xml, data being written to given file")
+  ("-no-folding",
+   Arg.Unit ignore,
+   " Deprecated") ;
+  ("-no-navbar",
+   Arg.Unit ignore,
+   " Deprecated")
 ]
 
 let parse () =
   Arg.parse
-    options
+    (Arg.align options)
     add_file
-    "Usage: bisect <options> <files>\nOptions are:"
+    ("Usage:\n\n  bisect-ppx-report <options> <.out files>\n\n" ^
+     "Where a file is required, '-' may be used to specify STDOUT\n\n" ^
+     "Examples:\n\n" ^
+     "  bisect-ppx-report -I build/ -I src/ -html coverage/ bisect*.out\n" ^
+     "  bisect-ppx-report -I _build/ -summary-only -text - bisect*.out\n\n" ^
+     "Options are:")
