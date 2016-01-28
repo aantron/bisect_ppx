@@ -63,3 +63,17 @@ echo
 make dev
 make tests STRICT_DEPENDENCIES=yes
 ( cd tests && make performance )
+
+echo
+echo "Testing documentation generation"
+echo
+make doc
+
+echo
+echo "Testing installation"
+echo
+make clean
+opam pin add -yn .
+opam install -yt bisect_ppx
+ocamlfind query bisect_ppx bisect_ppx.runtime bisect_ppx.fast
+which bisect-ppx-report
