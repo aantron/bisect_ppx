@@ -10,7 +10,7 @@ let tests = "top-level" >::: [
   test "stdin" (fun () ->
     skip_if (compiler () = "ocamlopt") "Top-level accepts only bytecode";
     run ("cat ../top-level/source.ml | ocaml " ^
-         "-ppx ../../_findlib/bisect_ppx_instrumented/bisect_ppx.byte " ^
+         "-ppx ../../_findlib/bisect_ppx_instrumented/bisect_ppx " ^
          "-stdin > /dev/null");
     run "ls *.meta > /dev/null";
     run "! ls bisect0001.out 2> /dev/null")

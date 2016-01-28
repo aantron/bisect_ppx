@@ -144,16 +144,24 @@ let _with_compiler compiler f =
 
   f ()
 
-let test name f =
-  name >::: [
-    ("byte" >:: fun context ->
-      _with_directory context (fun () ->
-        _with_compiler Ocamlc f));
+let _bytecode_only =
+  try Sys.getenv "BYTECODE_ONLY" <> ""
+  with Not_found -> false
 
-    ("native" >:: fun context ->
+let test name f =
+  let bytecode =
+    "byte" >:: fun context ->
       _with_directory context (fun () ->
-        _with_compiler Ocamlopt f))
-  ]
+      _with_compiler Ocamlc f)
+  in
+
+  let native =
+    "native" >:: fun context ->
+      _with_directory context (fun () ->
+      _with_compiler Ocamlopt f)
+  in
+
+  name >::: (if _bytecode_only then [bytecode] else [bytecode; native])
 
 let have_binary binary =
   _run_bool ("which " ^ binary ^ " > /dev/null 2> /dev/null")
@@ -181,7 +189,7 @@ let compile ?(r = "") arguments source =
 
 let report ?(f = "bisect*.out") ?(r = "") arguments =
   Printf.sprintf
-    "../../_build.instrumented/src/report/report.byte %s %s %s" arguments f r
+    "../../_build.instrumented/bisect-ppx-report %s %s %s" arguments f r
   |> run
 
 let _preserve file destination =

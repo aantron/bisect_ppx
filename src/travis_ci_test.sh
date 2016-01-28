@@ -51,12 +51,34 @@ echo "Install dependencies"
 echo
 opam install ocamlfind ocamlbuild ppx_tools
 
+GENERAL_PATH=$PATH
+RESTRICTED_PATH=$PATH
+
+if [ "$BYTECODE_ONLY" = yes ]
+then
+  echo
+  echo "Shadowing ocamlopt"
+  echo
+  mkdir ocamlopt-shadow
+  echo "#! /bin/bash" > ocamlopt-shadow/ocamlopt.opt
+  echo "exit 2" >> ocamlopt-shadow/ocamlopt.opt
+  chmod +x ocamlopt-shadow/ocamlopt.opt
+  cp ocamlopt-shadow/ocamlopt.opt ocamlopt-shadow/ocamlopt
+  RESTRICTED_PATH=`pwd`/ocamlopt-shadow:$PATH
+  export PATH=$RESTRICTED_PATH
+  which ocamlopt.opt
+  which ocamlopt
+fi
+
 echo
 echo "Compiling"
 echo
 make build
 
+export PATH=$GENERAL_PATH
 opam install ounit ppx_blob ppx_deriving # Used in test suite.
+export PATH=$RESTRICTED_PATH
+
 echo
 echo "Testing"
 echo

@@ -19,15 +19,14 @@
 CFLAGS := -cflags -w,+A-4-48
 OCAMLBUILD_FLAGS := -use-ocamlfind -no-links $(CFLAGS)
 
-UNIT := ocamlbuild $(OCAMLBUILD_FLAGS) test_main.native -- -runner sequential
+UNIT := ocamlbuild $(OCAMLBUILD_FLAGS) test_main.byte -- -runner sequential
 PERFORMANCE := \
-	ocamlbuild $(OCAMLBUILD_FLAGS) performance/test_performance.native -- \
+	ocamlbuild $(OCAMLBUILD_FLAGS) performance/test_performance.byte -- \
 		-runner sequential -display false
 
 COVERAGE := _coverage
 REPORT := \
-	../_build.meta/src/report/report.byte -I ../_build.instrumented \
-	$(COVERAGE)/*.out
+	../_build.meta/bisect-ppx-report -I ../_build.instrumented $(COVERAGE)/*.out
 REPORT_DIR := _report
 
 PRESERVE := _preserve

@@ -1,7 +1,7 @@
 version="0.2.6"
 description="Code coverage for OCaml"
 requires="bisect_ppx.runtime"
-ppx="./bisect_ppx.byte"
+ppx="./bisect_ppx"
 
 package "runtime" (
   version="0.2.6"
@@ -13,6 +13,5 @@ package "runtime" (
 package "fast" (
   version="0.2.6"
   description="Code coverage for OCaml (deprecated package)"
-  requires="bisect_ppx.runtime"
-  ppx="./bisect_ppx.byte"
+  requires="bisect_ppx"
 )
