@@ -119,3 +119,11 @@ let f x =
   match x with
   | exception Exn (Foo | Bar) -> print_endline "foo"
   | _ -> print_endline "bar"
+
+let f x =
+  match x with
+  | (Foo as x) | (Bar as x) -> x
+
+let f x =
+  match x with
+  | `Foo x | `Bar x -> x

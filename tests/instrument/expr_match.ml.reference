@@ -1,5 +1,5 @@
 let ___bisect_mark___expr_match =
-  let marks = Array.make 95 0 in
+  let marks = Array.make 101 0 in
   Bisect.Runtime.init_with_array "expr_match.ml" marks;
   (function
    | idx ->
@@ -107,7 +107,7 @@ let f x =
        ((((match ___bisect_matched_value___ with
            | Foo  -> (___bisect_mark___expr_match 42; ())
            | Bar  -> (___bisect_mark___expr_match 43; ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
 let f x =
   ___bisect_mark___expr_match 47;
@@ -116,7 +116,7 @@ let f x =
        ((((match ___bisect_matched_value___ with
            | (Foo ,_) -> (___bisect_mark___expr_match 45; ())
            | (Bar ,_) -> (___bisect_mark___expr_match 46; ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
 let f x =
   ___bisect_mark___expr_match 52;
@@ -139,7 +139,7 @@ let f x =
                (___bisect_mark___expr_match 50;
                 ___bisect_mark___expr_match 51;
                 ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
 let f x =
   ___bisect_mark___expr_match 55;
@@ -168,7 +168,7 @@ let f x =
        ((((match ___bisect_matched_value___ with
            | Foo  as y -> (___bisect_mark___expr_match 63; ())
            | Bar  as y -> (___bisect_mark___expr_match 64; ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         y))
 let f x =
   ___bisect_mark___expr_match 70;
@@ -183,7 +183,7 @@ let f x =
                (___bisect_mark___expr_match 68;
                 ___bisect_mark___expr_match 66;
                 ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo")
    | [] -> (___bisect_mark___expr_match 69; print_endline "bar"))
 let f x =
@@ -194,7 +194,7 @@ let f x =
        ((((match ___bisect_matched_value___ with
            | `B (Foo ) -> (___bisect_mark___expr_match 72; ())
            | `B (Bar ) -> (___bisect_mark___expr_match 73; ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "bar"))
 type v = {
   a: t;
@@ -220,7 +220,7 @@ let f x =
                (___bisect_mark___expr_match 77;
                 ___bisect_mark___expr_match 78;
                 ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
 let f x =
   ___bisect_mark___expr_match 87;
@@ -248,7 +248,7 @@ let f x =
                 ___bisect_mark___expr_match 85;
                 ___bisect_mark___expr_match 81;
                 ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "bar")
    | _ -> (___bisect_mark___expr_match 86; print_newline ()))
 let f x =
@@ -258,7 +258,7 @@ let f x =
        ((((match ___bisect_matched_value___ with
            | (lazy Foo ) -> (___bisect_mark___expr_match 88; ())
            | (lazy Bar ) -> (___bisect_mark___expr_match 89; ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
 exception Exn of t
 let f x =
@@ -268,6 +268,24 @@ let f x =
        ((((match ___bisect_matched_value___ with
            | Exn (Foo ) -> (___bisect_mark___expr_match 91; ())
            | Exn (Bar ) -> (___bisect_mark___expr_match 92; ())
-           | _ -> ()))[@ocaml.warning "-8-11-27"]);
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo")
    | _ -> (___bisect_mark___expr_match 93; print_endline "bar"))
+let f x =
+  ___bisect_mark___expr_match 97;
+  (match x with
+   | Foo  as x|Bar  as x as ___bisect_matched_value___ ->
+       ((((match ___bisect_matched_value___ with
+           | Foo  as x -> (___bisect_mark___expr_match 95; ())
+           | Bar  as x -> (___bisect_mark___expr_match 96; ())
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
+        x))
+let f x =
+  ___bisect_mark___expr_match 100;
+  (match x with
+   | `Foo x|`Bar x as ___bisect_matched_value___ ->
+       ((((match ___bisect_matched_value___ with
+           | `Foo x -> (___bisect_mark___expr_match 98; ())
+           | `Bar x -> (___bisect_mark___expr_match 99; ())
+           | _ -> ()))[@ocaml.warning "-4-8-9-11-26-27-28"]);
+        x))
