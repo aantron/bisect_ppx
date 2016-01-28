@@ -21,13 +21,14 @@ true: -traverse, warn_error(Ae)
 <src/**>: include
 
 # Options
-<src/*/*/**>: use_unix
+<src/*/*.{byte,native}>: use_unix
 <src/library/*>: runtime
 "src/syntax/instrumentPpx.ml": package(ppx_tools)
 "src/syntax/instrumentPpx.mli": package(ppx_tools)
 "src/syntax/bisect_ppx.ml": package(ppx_tools)
-<src/syntax/bisect_ppx.{byte,native,jar}>: use_str, package(ppx_tools)
-<src/report/report.{byte,native,jar}>: use_str
+<src/syntax/bisect_ppx.{byte,native}>: use_str, package(ppx_tools)
+<src/report/report.{byte,native}>: use_str
+<src/ocamlbuild/*>: package(ocamlbuild)
 
 # Self-instrumentation for testing and showing off
 <src/*/*/**>: instrument

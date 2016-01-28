@@ -15,3 +15,10 @@ package "fast" (
   description="Code coverage for OCaml (deprecated package)"
   requires="bisect_ppx"
 )
+
+package "plugin" (
+  version="0.2.6"
+  description="Bisect_ppx Ocamlbuild plugin"
+  archive(byte)="bisect_ppx_plugin.cma"
+  archive(native)="bisect_ppx_plugin.cmxa"
+)

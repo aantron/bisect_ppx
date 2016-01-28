@@ -54,15 +54,21 @@ endif
 
 
 # Targets.
+PLUGIN_TARGETS := \
+	$(foreach extension,$(LIB_EXTENSIONS),\
+		src/ocamlbuild/bisect_ppx_plugin.$(extension))
+
 TARGETS := \
 	$(foreach binary,syntax/bisect_ppx report/report,\
 		src/$(binary).$(BIN_EXTESION)) \
-	$(foreach extension,$(LIB_EXTENSIONS),src/bisect.$(extension))
+	$(foreach extension,$(LIB_EXTENSIONS),src/bisect.$(extension)) \
+	$(PLUGIN_TARGETS)
 
 META_TARGETS := \
 	$(foreach binary,syntax/bisect_ppx report/report,\
 		src/$(binary).$(BIN_EXTESION)) \
-	$(foreach extension,$(LIB_EXTENSIONS),src/meta_bisect.$(extension))
+	$(foreach extension,$(LIB_EXTENSIONS),src/meta_bisect.$(extension)) \
+	$(PLUGIN_TARGETS)
 
 
 # Ocamlbuild flags. Assume that ocamlbuild, ocamlfind, ocamlc are found in path.
@@ -91,7 +97,8 @@ dev: FORCE
 	cd $(DEV_INSTALL_DIR)/$(INSTALL_NAME)_meta && \
 		sed 's/bisect\./meta_bisect./' META | \
 		sed 's/bisect_ppx\.runtime/bisect_ppx_meta.runtime/' > META.fixed && \
-		mv META.fixed META
+		mv META.fixed META && \
+		rm -f *plugin*
 	OCAMLPATH=`pwd`/$(DEV_INSTALL_DIR) INSTRUMENT=yes \
 		ocamlbuild $(OCAMLBUILD_FLAGS) $(INSTRUMENTED_DIR) $(TARGETS)
 	make install INSTALL_VARIANT=instrumented
@@ -124,6 +131,8 @@ REPORTER := $(INSTALL_SOURCE_DIR)/bisect-ppx-report
 REPORTER_BYTE := $(INSTALL_SOURCE_DIR)/src/report/report.byte
 REPORTER_NATIVE := $(INSTALL_SOURCE_DIR)/src/report/report.native
 
+LIBRARY_FILES = $(foreach extension,a o cma cmi cmo cmx cmxa,$1.$(extension))
+
 install: FORCE
 	@! ocamlfind query $(INSTALL_NAME) > /dev/null 2> /dev/null || \
 		ocamlfind remove $(INSTALL_FLAGS) $(INSTALL_NAME)
@@ -134,12 +143,8 @@ install: FORCE
 		ln -sf `pwd`/$(REPORTER_BYTE) $(REPORTER)
 	@ocamlfind install $(INSTALL_FLAGS) $(INSTALL_NAME) src/META -optional \
 		$(REWRITER) \
-		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).a \
-		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).o \
-		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cma \
-		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cmi \
-		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cmo \
-		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cmx \
-		$(INSTALL_SOURCE_DIR)/src/$(RUNTIME).cmxa
+		$(call LIBRARY_FILES,$(INSTALL_SOURCE_DIR)/src/$(RUNTIME)) \
+		$(call LIBRARY_FILES,\
+			$(INSTALL_SOURCE_DIR)/src/ocamlbuild/bisect_ppx_plugin)
 
 FORCE:

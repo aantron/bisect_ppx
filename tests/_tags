@@ -1,2 +1,3 @@
 <*>: include
+"usage": -traverse, -include
 <**/test*>: package(oUnit)
