@@ -274,10 +274,12 @@ let wrap_case k case =
       in
 
       (* Suppress warnings because the generated match expression will almost
-         never be exhaustive. *)
+         never be exhaustive. It may also have redundant cases or unused
+         variables. *)
       let marks_expr =
         Exp.attr marks_expr
-          (Location.mkloc "ocaml.warning" loc, PStr [Str.eval (strconst "-8-11-27")])
+          (Location.mkloc "ocaml.warning" loc,
+            PStr [Str.eval (strconst "-4-8-9-11-26-27-28")])
       in
 
       Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
