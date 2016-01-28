@@ -2,7 +2,12 @@ name: "bisect_ppx"
 version: "0.2.6"
 opam-version: "1.2"
 maintainer: "Leonid Rozenberg <leonidr@gmail.com>"
-authors: "Leonid Rozenberg <leonidr@gmail.com>"
+authors: [
+  "Xavier Clerc <bisect@x9c.fr>"
+  "Leonid Rozenberg <leonidr@gmail.com>"
+  "Anton Bachin <antonbachin@yahoo.com>"
+]
+license: "GPL3"
 homepage: "https://github.com/rleonid/bisect_ppx"
 bug-reports: "https://github.com/rleonid/bisect_ppx/issues"
 dev-repo: "https://github.com/rleonid/bisect_ppx.git"

@@ -42,14 +42,14 @@ default: FORCE
 	@echo '  coverage         generate HTML coverage report'
 	@echo '  clean            deletes build and log files'
 
-unit: binaries-may-exist
+unit: FORCE
 	@make -C .. dev
 	@rm -rf $(COVERAGE) $(PRESERVE)
 	@$(UNIT)
 	@echo " Coverage:"
 	@$(REPORT) -summary-only -text - | grep --color=none total
 
-one: binaries-may-exist
+one: FORCE
 	@make -C .. dev
 	@rm -rf $(COVERAGE) $(PRESERVE)
 	$(UNIT) -only-test $(NAME)
@@ -60,7 +60,8 @@ list: FORCE
 log: FORCE
 	less -N _build/oUnit-bisect_ppx*.log
 
-performance: binaries-may-exist
+performance: FORCE
+	@make -C .. dev
 	$(PERFORMANCE)
 
 all: unit performance
@@ -73,9 +74,5 @@ coverage: FORCE
 clean: FORCE
 	ocamlbuild -clean
 	rm -rf _scratch $(COVERAGE) $(REPORT_DIR) $(PRESERVE)
-
-binaries-may-exist:
-	@test -d ../_findlib || \
-		( echo "Run' make dev' in the project root directory"; false )
 
 FORCE:
