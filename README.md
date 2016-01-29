@@ -1,113 +1,109 @@
-# Bisect Code coverage via PPX.
+# Bisect_ppx &nbsp; [![version 0.2.6][version]][releases] [![Travis status][travis-img]][travis]
 
-Instrument `OCaml` code with [Bisect](http://bisect.x9c.fr/) run time tracking information via
-[ppx](http://caml.inria.fr/pub/docs/manual-ocaml-4.02/extn.html#sec241). This is a fork of the
-original, excellent Bisect library, updated to use the new
-[Ast_mapper](https://github.com/ocaml/ocaml/blob/trunk/parsing/ast_mapper.mli) interface and
-provide instrumentation just via `ppx` .
+Bisect_ppx is a code coverage tool for OCaml. It helps you test thoroughly by
+showing which parts of your code are **not** tested.
 
-[![Build Status](https://travis-ci.org/rleonid/bisect_ppx.svg?)](https://travis-ci.org/rleonid/bisect_ppx)
+![Bisect_ppx usage example][sample]
 
-## Demo
+<br>
 
-### Files
+For a live demonstration, see the [coverage report][self-coverage] Bisect_ppx
+generates for itself.
 
-`actors.ml`:
+[releases]:      https://github.com/rleonid/bisect_ppx/releases
+[version]:       https://img.shields.io/badge/version-0.2.6-blue.svg
+[self-coverage]: http://rleonid.github.io/bisect_ppx/coverage/
+[travis]:        https://travis-ci.org/rleonid/bisect_ppx/branches
+[travis-img]:    https://img.shields.io/travis/rleonid/bisect_ppx/master.svg
+[sample]:        https://raw.githubusercontent.com/rleonid/bisect_ppx/readme/doc/sample.gif
 
-```OCaml
-type t =
-  | Anthony
-  | Caesar
-  | Cleopatra
 
-let message = function
-  | Anthony     -> "Friends, Romans, countrymen, lend me your ears;\
-                    I come to bury Caesar, not to praise him."
-  | Caesar      -> "The fault, dear Brutus, is not in our stars,\
-                    But in ourselves, that we are underlings."
-  | Cleopatra   -> "Fool! Don't you see now that I could have poisoned you\
-                    a hundred times had I been able to live without you."
+
+<br>
+
+## Instructions
+
+Most of these commands go in a `Makefile` or other script, so that you only have
+to run that script, then refresh your browser.
+
+1. Install Bisect_ppx.
+
+        opam install bisect_ppx
+
+2. When compiling for testing, include Bisect_ppx.
+   [Instructions for Ocamlbuild][ocamlbuild] are also available.
+
+        ocamlfind c -package bisect_ppx -c my_code.ml
+        ocamlfind c -c my_tests.ml
+        ocamlfind c -linkpkg -package bisect_ppx my_code.cmo my_tests.cmo
+
+3. Run your test binary. In addition to testing your code, it will produce one
+   or more files with names like `bisect0001.out`.
+
+        ./a.out             # Produces bisect0001.out
+
+4. Generate the coverage report.
+
+        bisect-ppx-report -I build/ -html coverage/ bisect*.out`
+
+5. Open `coverage/index.html`!
+
+You can submit a coverage report to Coveralls.io using [ocveralls][ocveralls].
+Note that Bisect_ppx reports are more precise than Coveralls, which only
+considers whole lines as visited or not.
+
+See also the [advanced usage][advanced].
+
+[ocamlbuild]: https://github.com/rleonid/bisect_ppx/blob/readme/doc/advanced.md#Ocamlbuild
+[ocveralls]:  https://github.com/sagotch/ocveralls
+[advanced]:   https://github.com/rleonid/bisect_ppx/blob/readme/doc/advanced.md
+
+
+
+<br>
+
+## Relation to Bisect
+
+Bisect_ppx is an advanced fork of the excellent [Bisect][bisect] by Xavier
+Clerc. As of the time of this writing, it appears that the original Bisect is
+no longer maintained.
+
+Considerable work has been done on Bisect_ppx, so that it is now a distinct
+project. In terms of the interface, Bisect_ppx is still largely compatible with
+Bisect's ppx mode, but see [here][differences] for a list of differences.
+
+[bisect]:      http://bisect.x9c.fr/
+[differences]: https://github.com/rleonid/bisect_ppx/blob/readme/doc/advanced.md#Differences
+
+
+
+<br>
+
+## License
+
+Bisect_ppx is distributed under the terms of the
+[GPL license, version 3][license]. Note, however, that Bisect_ppx does not
+"contaminate" your project with the terms of the GPL, because it is a
+development tool used only during testing. You would not want to link Bisect_ppx
+into your release files anyway, for performance reasons.
+
+[license]: https://github.com/rleonid/bisect_ppx/blob/master/doc/COPYING
+
+
+
+<br>
+
+## Contributing
+
+Bug reports and pull requests are warmly welcome. Bisect_ppx is developed on
+GitHub, so please [open an issue][issues].
+
+To get the latest development version of Bisect_ppx using OPAM, run
+
+```
+opam source --dev-repo --pin bisect_ppx
 ```
 
-`test.ml`:
+You will now have a `bisect_ppx` subdirectory to work in.
 
-```OCaml
-open Actors
-
-let () =
-  print_endline (message Cleopatra);
-  print_endline (message Anthony);
-```
-
-### Test
-
-```Bash
-# Build with coverage:
-$	ocamlfind ocamlc -package bisect_ppx -linkpkg actors.ml test.ml -o test.covered
-```
-
-Instrumented `actors.ml`
-
-```OCaml
-let _ = Bisect.Runtime.init "actors.ml"
-type t =
-  | Anthony
-  | Caesar
-  | Cleopatra
-let message =
-  function
-  | Anthony  ->
-      (Bisect.Runtime.mark "actors.ml" 0;
-       "Friends, Romans, countrymen, lend me your ears;I come to bury Caesar, not to praise him.")
-  | Caesar  ->
-      (Bisect.Runtime.mark "actors.ml" 1;
-       "The fault, dear Brutus, is not in our stars,But in ourselves, that we are underlings.")
-  | Cleopatra  ->
-      (Bisect.Runtime.mark "actors.ml" 2;
-       "Fool! Don't you see now that I could have poisoned youa hundred times had I been able to live without you.")
-```
-
-```Bash
-# Run
-$ ./test.covered
-Fool! Don't you see now that I could have poisoned youa hundred times had I been able to live without you.
-Friends, Romans, countrymen, lend me your ears;I come to bury Caesar, not to praise him.
-
-# Create report
-$ bisect-ppx-report -html report_dir bisect0001.out
-
-# See output
-$ open report_dir/index.html
-```
-
-### Inspect
-
-Overall
-![Screenshot](src/demo/img/Screenshot1.png)
-
-![Alt text](src/demo/img/Screenshot2.png)
-
-### Caveats
-
-A list of changes from the original `Bisect` implementation.
-
-- `bisect-report` has been renamed `bisect-ppx-report` in order to avoid
-  clashes and in case we make future non-backwards compatible changes.
-  Furthermore, the most efficient (native) version of the tool is installed
-  if available.
-- Runtime logging now default to a file: bisect.log. To regain original
-  behavior set `BISECT_SILENT=ERR`. You can use the same variable to set
-  a filename; `"YES"` or `"ON"` will still turn off runtime logging
-  altogether. 
-- Comments now obey OCaml line directives.
-
-  OCaml source code has [line directives](http://caml.inria.fr/pub/docs/manual-ocaml/lex.html#linenum-directive) (ex: `# 1 "foo.ml"`) that change the
-  position, and more importantly for our case, filenames that are being
-  lexed. `bisect_ppx` now keeps tracks of these changes only for the purposes
-  of **BISECT comments** (ex: `(*BISECT-IGNORE-BEGIN*)`).
-  
-  The overall instrumentation for code-coverage purposes ignores them as all of
-  the code of one post-preprocessed file is considered a part of the same OCaml
-  module [structure](http://caml.inria.fr/pub/docs/manual-ocaml/moduleexamples.html#sec18).
-  Code instrumented after a filename change, will still be reported as in the
-  original filename.
+[issues]: https://github.com/rleonid/bisect_ppx/issues
