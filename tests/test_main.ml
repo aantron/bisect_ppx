@@ -59,4 +59,4 @@ let () =
     exit 2
   end;
 
-  OUnit2.run_test_tt_main tests
+  run_test_tt_main tests
