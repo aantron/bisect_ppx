@@ -3,6 +3,7 @@ _build/
 _build.*/
 _findlib/
 ocamldoc/
+gh-pages/
 
 # test working and coverage directories
 tests/_scratch
