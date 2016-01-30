@@ -33,3 +33,6 @@ true: -traverse, warn_error(Ae)
 # Self-instrumentation for testing and showing off
 <src/*/*/**>: instrument
 "src/library/extension.mli": src_library_extension_ml
+
+# Documentation
+<doc/**>: include, package(lambdasoup)

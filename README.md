@@ -1,7 +1,7 @@
 # Bisect_ppx &nbsp; [![version 0.2.6][version]][releases] [![Travis status][travis-img]][travis]
 
-Bisect_ppx is a code coverage tool for OCaml. It helps you test thoroughly by
-showing which parts of your code are **not** tested.
+[Bisect_ppx][self] is a code coverage tool for OCaml. It helps you test
+thoroughly by showing which parts of your code are **not** tested.
 
 ![Bisect_ppx usage example][sample]
 
@@ -10,6 +10,7 @@ showing which parts of your code are **not** tested.
 For a live demonstration, see the [coverage report][self-coverage] Bisect_ppx
 generates for itself.
 
+[self]:          https://github.com/rleonid/bisect_ppx
 [releases]:      https://github.com/rleonid/bisect_ppx/releases
 [version]:       https://img.shields.io/badge/version-0.2.6-blue.svg
 [self-coverage]: http://rleonid.github.io/bisect_ppx/coverage/

@@ -67,7 +67,7 @@ all: unit performance
 
 coverage: FORCE
 	test -d $(COVERAGE) || make unit
-	$(REPORT) -html $(REPORT_DIR)
+	$(REPORT) -html $(REPORT_DIR) -title "Coverage report for Bisect_ppx"
 	@echo "\nSee _report/index.html"
 
 clean: FORCE
