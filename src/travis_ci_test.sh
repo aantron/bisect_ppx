@@ -84,7 +84,7 @@ echo "Testing"
 echo
 make dev
 make tests STRICT_DEPENDENCIES=yes
-( cd tests && make performance )
+make -C tests performance
 
 echo
 echo "Testing documentation generation"
@@ -111,3 +111,19 @@ echo
 echo "Testing package usage and Ocamlbuild plugin"
 echo
 make -C tests/usage
+
+if [ "$TRAVIS_OS_NAME" = linux ]
+then
+  if [ "$COVERALLS" = yes ]
+  then
+    echo
+    echo "Submitting coverage report"
+    echo
+    export PATH=$GENERAL_PATH
+    opam install -y ocveralls
+    make dev tests
+    make -C tests coverage
+    ocveralls --prefix _build.instrumented tests/_coverage/meta*.out --send
+    export PATH=$RESTRICTED_PATH
+  fi
+fi
