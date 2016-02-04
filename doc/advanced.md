@@ -204,7 +204,8 @@ these files.
 
 By default, the counts files are called  `bisect0001.out`, `bisect0002.out`,
 etc. The prefix `bisect` can be changed by setting the environment variable
-`BISECT_FILE`.
+`BISECT_FILE`. In particular, you can change it to something like
+`_coverage/bisect` to put the counts files in a subdirectory.
 
 <a id="Logging"></a>
 #### Logging
@@ -231,6 +232,7 @@ The remaining major differences are:
 - Modes have been eliminated. The only mode is the old "fastest" mode.
 - The default value of `BISECT_SILENT` is `bisect.log` instead of `ERR`.
 - Many bugs have been fixed.
+- There is no `BisectThread` module.
 
 
 

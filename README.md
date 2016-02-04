@@ -3,7 +3,7 @@
 [Bisect_ppx][self] is a code coverage tool for OCaml. It helps you test
 thoroughly by showing which parts of your code are **not** tested.
 
-![Bisect_ppx usage example][sample]
+[![Bisect_ppx usage example][sample]][self-coverage]
 
 <br>
 
