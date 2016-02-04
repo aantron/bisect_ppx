@@ -92,6 +92,11 @@ echo
 make doc
 
 echo
+echo "Checking OPAM file"
+echo
+opam lint opam
+
+echo
 echo "Testing installation"
 echo
 make clean
