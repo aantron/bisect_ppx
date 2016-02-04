@@ -1,5 +1,5 @@
 name: "bisect_ppx"
-version: "0.2.6"
+version: "1.0.0"
 opam-version: "1.2"
 maintainer: "Leonid Rozenberg <leonidr@gmail.com>"
 authors: [

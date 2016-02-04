@@ -1,3 +1,17 @@
+Version 1.0.0 ():
+-----------------
+  - Redesign HTML reports.
+  - Put separate points on each clause of or-patterns.
+  - Put points on applications of |>.
+  - Eliminate -safe, -fast, -faster modes. All modes now fast and thread-safe.
+  - Improve integration with other ppx preprocessors.
+  - Install native ppx rewriter when possible.
+  - Adjust which points have which kinds.
+  - Clean up command-line help of bisect-ppx-report.
+  - Add Ocamlbuild plugin helper and "coverage" tag.
+  - New documentation.
+  - Testing, build, and packaging improvements.
+
 Version 0.2.6 (2016-01-01):
 --------------------------
   - Fix missing 'function' and 'fun' expression instrumentation (Anton Bachin).
