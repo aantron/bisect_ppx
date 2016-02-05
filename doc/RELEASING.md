@@ -1,10 +1,11 @@
 ## Release checklist
 
 - Check the Travis log from the latest build(s) and make sure nothing strange is
-  happening, such as errors or warning that did not result in a command exiting
+  happening, such as errors or warnings that did not result in a command exiting
   with nonzero status.
+- Pick a version number according to [semantic versioning][semver].
 - Update the `CHANGES` file.
-- `grep` for the previous version number. Replace all occurences with the new
+- `grep` for the previous version number. Replace occurences with the new
   version number. This should include `META`, `opam`, `version.ml`, and
   `README.md`,
 - Tag (`tag -a`) the release and push the tag.
@@ -13,3 +14,5 @@
   the changes there. The reason this is done after OPAM is that the OPAM release
   may have to be amended before it is accepted.
 - Update GitHub Pages.
+
+[semver]: http://semver.org/
