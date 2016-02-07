@@ -1,7 +1,8 @@
 # Bisect_ppx &nbsp; [![version 0.2.6][version]][releases] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
 [Bisect_ppx][self] is a code coverage tool for OCaml. It helps you test
-thoroughly by showing which parts of your code are **not** tested.
+thoroughly by showing which parts of your code are **not** tested. You can also
+use it for tracing: run one test, and see what is visited.
 
 [![Bisect_ppx usage example][sample]][self-coverage]
 
@@ -74,6 +75,8 @@ no longer maintained.
 Considerable work has been done on Bisect_ppx, so that it is now a distinct
 project. In terms of the interface, Bisect_ppx is still largely compatible with
 Bisect's ppx mode, but see [here][differences] for a list of differences.
+
+If you use Camlp4, you will want to use the original Bisect.
 
 [bisect]:      http://bisect.x9c.fr/
 [differences]: https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#Differences

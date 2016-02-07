@@ -51,8 +51,10 @@ ocamlfind c -linkpkg -package bisect_ppx src/source.cmo tests/tests.ml
 The easiest way with Ocamlbuild is to use
 [`Bisect_ppx_plugin`][Bisect_ppx_plugin]. This gives you a new tag, `coverage`,
 which you can use to mark your source files for coverage analysis by Bisect_ppx.
+The plugin is in the [public domain][unlicense], so you can freely link with it,
+customize and incorporate it, and/or include it in releases.
 
-It is done like this:
+It is used like this:
 
 - Create a `myocamlbuild.ml` file in your project root, with the following
   contents:
@@ -60,7 +62,7 @@ It is done like this:
         open Ocamlbuild_plugin
         let () = dispatch Bisect_ppx_plugin.dispatch
 
-- If you already have `myocamlbuild.ml`, you just need to call
+  If you already have `myocamlbuild.ml`, you just need to call
   `Bisect_ppx_plugin.handle_coverage ()` somewhere in it.
 - Add `-use-ocamlfind -plugin-tag 'package(bisect_ppx.plugin)'` to your
   Ocamlbuild invocation.
@@ -73,7 +75,7 @@ It is done like this:
 - Now, if you build while the environment variable `BISECT_COVERAGE` is set to
   `YES`, the files in `src` will be instrumented for coverage analysis.
   Otherwise, the tag does nothing, so you can build the files for release. So,
-  to build, you want to run something like:
+  to build, you will have two targets with commands like these:
 
         # For tests
         BISECT_COVERAGE=YES ocamlbuild -use-ocamlfind \
@@ -81,7 +83,11 @@ It is done like this:
 
         # For release
         ocamlbuild -use-ocamlfind \
-            -plugin-tag 'package(bisect_ppx.plugin)' src/my_program.native
+            -plugin-tag 'package(bisect_ppx.plugin)' src/my_project.native
+
+If you don't want to make Bisect_ppx a hard build dependency just for the
+`coverage` tag, you can work the [contents][plugin-code] of `Bisect_ppx_plugin`
+directly into your `myocamlbuild.ml`.
 
 
 
@@ -236,5 +242,7 @@ The remaining major differences are:
 
 
 
-[Str]: http://caml.inria.fr/pub/docs/manual-ocaml/libref/Str.html#VALregexp
+[Str]:               http://caml.inria.fr/pub/docs/manual-ocaml/libref/Str.html#VALregexp
 [Bisect_ppx_plugin]: https://github.com/rleonid/bisect_ppx/blob/master/src/ocamlbuild/bisect_ppx_plugin.mli
+[plugin-code]:       https://github.com/rleonid/bisect_ppx/blob/master/src/ocamlbuild/bisect_ppx_plugin.ml
+[unlicense]:         http://unlicense.org/
