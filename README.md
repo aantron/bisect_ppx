@@ -9,7 +9,8 @@ use it for tracing: run one test, and see what is visited.
 <br>
 
 For a live demonstration, see the [coverage report][self-coverage] Bisect_ppx
-generates for itself.
+generates for itself. You may also want to see
+[projects that use Bisect_ppx](#bisect_ppx-in-practice).
 
 [self]:          https://github.com/rleonid/bisect_ppx
 [releases]:      https://github.com/rleonid/bisect_ppx/releases
@@ -61,6 +62,25 @@ See also the [advanced usage][advanced].
 [ocamlbuild]: https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
 [ocveralls]:  https://github.com/sagotch/ocveralls
 [advanced]:   https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md
+
+
+
+<br>
+
+## Bisect_ppx in practice
+
+A small sample of projects using Bisect_ppx:
+
+- [Oml][oml]: [report][oml-coveralls]
+- [ctypes][ctypes]: [report][ctypes-coveralls]
+- [Markup.ml][markupml]: [report][markupml-coveralls]
+
+[oml]:                https://github.com/hammerlab/oml
+[oml-coveralls]:      https://coveralls.io/github/hammerlab/oml?branch=HEAD
+[ctypes]:             https://github.com/ocamllabs/ocaml-ctypes
+[ctypes-coveralls]:   https://coveralls.io/github/ocamllabs/ocaml-ctypes
+[markupml]:           https://github.com/aantron/markup.ml
+[markupml-coveralls]: https://coveralls.io/github/aantron/markup.ml?branch=master
 
 
 
