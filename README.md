@@ -76,6 +76,7 @@ A small sample of projects using Bisect_ppx:
 
 - [Oml][oml]: [report][oml-coveralls]
 - [ctypes][ctypes]: [report][ctypes-coveralls]
+- [ocaml-irc-client][ocaml-irc-client]: [report][irc-coveralls]
 - [Markup.ml][markupml]: [report][markupml-coveralls]
 - [Ketrew][ketrew]
 - [Sosa][sosa]
@@ -84,6 +85,8 @@ A small sample of projects using Bisect_ppx:
 [oml-coveralls]:      https://coveralls.io/github/hammerlab/oml?branch=HEAD
 [ctypes]:             https://github.com/ocamllabs/ocaml-ctypes
 [ctypes-coveralls]:   https://coveralls.io/github/ocamllabs/ocaml-ctypes
+[ocaml-irc-client]:   https://github.com/johnelse/ocaml-irc-client
+[irc-coveralls]:      https://coveralls.io/github/johnelse/ocaml-irc-client
 [markupml]:           https://github.com/aantron/markup.ml
 [markupml-coveralls]: https://coveralls.io/github/aantron/markup.ml?branch=master
 [ketrew]:             https://github.com/hammerlab/ketrew
