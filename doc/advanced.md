@@ -6,7 +6,7 @@ passed using Ocamlbuild, using the tag `ppxopt`.
 
 #### Table of contents
 
-- [Building](#Building)
+- [Building with coverage](#Building)
   - [With Ocamlfind](#Ocamlfind)
   - [With Ocamlbuild](#Ocamlbuild)
 - [Excluding code from coverage](#Excluding)
@@ -17,6 +17,7 @@ passed using Ocamlbuild, using the tag `ppxopt`.
 - [Environment variables](#EnvironmentVariables)
   - [Naming the visitation count files](#OutFiles)
   - [Logging](#Logging)
+- [Installing without OPAM](#WithoutOPAM)
 - [Differences from Bisect](#Bisect)
 
 
@@ -24,7 +25,7 @@ passed using Ocamlbuild, using the tag `ppxopt`.
 <br>
 
 <a id="Building"></a>
-## Building
+## Building with coverage
 
 While developing your project, you typically have some source files, for example
 in `src/`, and some files with tests, for example in `tests/`. For testing, you
@@ -220,6 +221,24 @@ If the instrumented program fails to write an `.out` file, it will log a
 message. By default, these messages go to a file `bisect.log`. `BISECT_SILENT`
 can be set to `YES` to turn off logging completely. Alternatively, it can be set
 to another filename, or to `ERR` in order to log to `STDERR`.
+
+
+
+<br>
+
+<a id="WithoutOPAM"></a>
+## Installing without OPAM
+
+If you are not using OPAM, clone or extract Bisect_ppx to a directory, then run
+`make build install`. Usage should be unaffected, with the exception that
+instead of running `bisect-ppx-report`, you will have to run
+
+```
+ocamlfind bisect_ppx/bisect-ppx-report
+```
+
+unless you add the `bisect_ppx` package directory to your `PATH`, or symlink the
+`bisect-ppx-report` binary from a directory in your `PATH`.
 
 
 

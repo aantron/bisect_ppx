@@ -143,7 +143,6 @@ REWRITER := $(INSTALL_SOURCE_DIR)/bisect_ppx
 REWRITER_BYTE := $(INSTALL_SOURCE_DIR)/src/syntax/bisect_ppx.byte
 REWRITER_NATIVE := $(INSTALL_SOURCE_DIR)/src/syntax/bisect_ppx.native
 
-# The reporter is symlinked only to make testing easier.
 REPORTER := $(INSTALL_SOURCE_DIR)/bisect-ppx-report
 REPORTER_BYTE := $(INSTALL_SOURCE_DIR)/src/report/report.byte
 REPORTER_NATIVE := $(INSTALL_SOURCE_DIR)/src/report/report.native
@@ -155,11 +154,10 @@ install: FORCE
 		ocamlfind remove $(INSTALL_FLAGS) $(INSTALL_NAME)
 	@cp $(REWRITER_NATIVE) $(REWRITER) 2> /dev/null || \
 		cp $(REWRITER_BYTE) $(REWRITER)
-	@test -f $(REPORTER_NATIVE) && \
-		ln -sf `pwd`/$(REPORTER_NATIVE) $(REPORTER) || \
-		ln -sf `pwd`/$(REPORTER_BYTE) $(REPORTER)
+	cp $(REPORTER_NATIVE) $(REPORTER) 2> /dev/null || \
+		cp $(REPORTER_BYTE) $(REPORTER)
 	@ocamlfind install $(INSTALL_FLAGS) $(INSTALL_NAME) src/META -optional \
-		$(REWRITER) \
+		$(REWRITER) $(REPORTER) \
 		$(call LIBRARY_FILES,$(INSTALL_SOURCE_DIR)/src/$(RUNTIME)) \
 		$(call LIBRARY_FILES,\
 			$(INSTALL_SOURCE_DIR)/src/ocamlbuild/bisect_ppx_plugin)

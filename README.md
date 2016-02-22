@@ -35,6 +35,8 @@ to run that script, then refresh your browser.
 
         opam install bisect_ppx
 
+   You can also install [without OPAM][without-opam].
+
 2. When compiling for testing, include Bisect_ppx.
    [Instructions for Ocamlbuild][ocamlbuild] are also available.
 
@@ -59,9 +61,10 @@ considers whole lines as visited or not.
 
 See also the [advanced usage][advanced].
 
-[ocamlbuild]: https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
-[ocveralls]:  https://github.com/sagotch/ocveralls
-[advanced]:   https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md
+[without-opam]: https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#WithoutOPAM
+[ocamlbuild]:   https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
+[ocveralls]:    https://github.com/sagotch/ocveralls
+[advanced]:     https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md
 
 
 
