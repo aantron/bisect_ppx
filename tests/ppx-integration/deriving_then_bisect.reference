@@ -9,8 +9,7 @@ let ___bisect_mark___deriving =
 let () = ___bisect_mark___deriving 0; ()
 type a =
   | Foo[@@deriving show]
-let rec pp_a : Format.formatter -> a -> Ppx_deriving_runtime.unit=
-   in
+let rec (pp_a : Format.formatter -> a -> Ppx_deriving_runtime.unit) =
   ((let open! Ppx_deriving_runtime in
       fun fmt  ->
         function
