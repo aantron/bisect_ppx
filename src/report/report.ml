@@ -22,7 +22,7 @@ open ReportUtils
 let main () =
   ReportArgs.parse ();
   if !ReportArgs.outputs = [] then begin
-    prerr_endline " *** warning: no output requested";
+    ReportArgs.print_usage ();
     exit 0
   end;
   let data =

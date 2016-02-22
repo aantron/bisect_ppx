@@ -57,4 +57,7 @@ val summary_only : bool ref
 (** Whether to ouput onlly summary (text only). *)
 
 val parse : unit -> unit
-(** Parses the command-line. *)
+(** Parses the command line. *)
+
+val print_usage : unit -> unit
+(** Prints the usage message to [STDERR]. *)

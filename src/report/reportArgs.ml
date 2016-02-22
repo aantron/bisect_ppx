@@ -52,7 +52,7 @@ let summary_only = ref false
 let add_file f =
   files := f :: !files
 
-let options = [
+let options = Arg.align [
   ("-I",
    Arg.String add_search_path,
    "<dir>  Look for .cmp and/or .ml files in the given directory") ;
@@ -124,13 +124,14 @@ let options = [
    " Deprecated")
 ]
 
-let parse () =
-  Arg.parse
-    (Arg.align options)
-    add_file
-    ("Usage:\n\n  bisect-ppx-report <options> <.out files>\n\n" ^
-     "Where a file is required, '-' may be used to specify STDOUT\n\n" ^
-     "Examples:\n\n" ^
-     "  bisect-ppx-report -I build/ -I src/ -html coverage/ bisect*.out\n" ^
-     "  bisect-ppx-report -I _build/ -summary-only -text - bisect*.out\n\n" ^
-     "Options are:")
+let usage =
+  "Usage:\n\n  bisect-ppx-report <options> <.out files>\n\n" ^
+  "Where a file is required, '-' may be used to specify STDOUT\n\n" ^
+  "Examples:\n\n" ^
+  "  bisect-ppx-report -I build/ -I src/ -html coverage/ bisect*.out\n" ^
+  "  bisect-ppx-report -I _build/ -summary-only -text - bisect*.out\n\n" ^
+  "Options are:"
+
+let parse () = Arg.parse options add_file usage
+
+let print_usage () = Arg.usage options usage
