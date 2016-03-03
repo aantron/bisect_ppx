@@ -57,7 +57,7 @@ val compile : ?r:string -> string -> string -> unit
     compiler and the given compiler [flags]. [file] is given relative to the
     [tests/] directory, for example ["report/source.ml"]. The result of
     compilation is a number of output files in the current directory
-    [_scratch/], depending on the [flags]. [flags] may include options such for
+    [_scratch/], depending on the [flags]. [flags] may include options for
     [ocamlfind], such as [-package].
 
     If [~r] is supplied, that string is appended to the end of the command
