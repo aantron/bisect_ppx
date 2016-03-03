@@ -20,7 +20,7 @@
 
 
 val output :
-  (string -> unit) -> string -> int -> string -> (string -> string) ->
+  (string -> unit) -> string -> int -> string -> (string -> string option) ->
   (string, int array) Hashtbl.t ->
     unit
 (** [output verbose dir tab_size title resolver data] writes all the HTML files

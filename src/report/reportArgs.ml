@@ -49,6 +49,8 @@ let combine_expr = ref None
 
 let summary_only = ref false
 
+let ignore_missing_files = ref false
+
 let add_file f =
   files := f :: !files
 
@@ -110,6 +112,9 @@ let options = Arg.align [
   ("-xml-emma",
    Arg.String (fun s -> add_output (Xml_emma_output s)),
    "<file>  Output EMMA XML to the given file") ;
+  ("-ignore-missing-files",
+   Arg.Set ignore_missing_files,
+   " Do not fail if an .ml file can't be found") ;
   ("-verbose",
    Arg.Set verbose,
    " Set verbose mode") ;

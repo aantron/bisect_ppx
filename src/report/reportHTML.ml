@@ -547,157 +547,162 @@ let output_html
     resolver visited =
 
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
-  let cmp_content = Common.read_points (resolver in_file) in
-  verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
-  let len = Array.length visited in
-  let stats = ReportStat.make () in
-  let pts = ref (List.map
-                   (fun p ->
-                     let nb =
-                       if p.Common.identifier < len then
-                         visited.(p.Common.identifier)
-                       else
-                         0 in
-                     ReportStat.update stats p.Common.kind (nb > 0);
-                     (p.Common.offset, nb))
-                   cmp_content) in
-  let dirname, basename = split_filename in_file in
-  let in_channel, out_channel = open_both (resolver in_file) out_file in
-  (try
-    let lines, line_count =
-      let rec read number acc =
-        let start_ofs = pos_in in_channel in
-        try
-          let line = input_line in_channel in
-          let end_ofs = pos_in in_channel in
-          let before, after = split (fun (o, _) -> o < end_ofs) !pts in
-          pts := after;
-          let line' = escape_line tab_size line start_ofs before in
-          let visited, unvisited =
-            List.fold_left
-              (fun (v, u) (_, nb) ->
-                ((v || (nb > 0)), (u || (nb = 0))))
-              (false, false)
-              before
-          in
-          read (number + 1) ((number, line', visited, unvisited)::acc)
+  match resolver in_file with
+  | None ->
+    verbose "... file not found";
+    None
+  | Some resolved_in_file ->
+    let cmp_content = Common.read_points resolved_in_file in
+    verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
+    let len = Array.length visited in
+    let stats = ReportStat.make () in
+    let pts = ref (List.map
+                     (fun p ->
+                       let nb =
+                         if p.Common.identifier < len then
+                           visited.(p.Common.identifier)
+                         else
+                           0 in
+                       ReportStat.update stats p.Common.kind (nb > 0);
+                       (p.Common.offset, nb))
+                     cmp_content) in
+    let dirname, basename = split_filename in_file in
+    let in_channel, out_channel = open_both resolved_in_file out_file in
+    (try
+      let lines, line_count =
+        let rec read number acc =
+          let start_ofs = pos_in in_channel in
+          try
+            let line = input_line in_channel in
+            let end_ofs = pos_in in_channel in
+            let before, after = split (fun (o, _) -> o < end_ofs) !pts in
+            pts := after;
+            let line' = escape_line tab_size line start_ofs before in
+            let visited, unvisited =
+              List.fold_left
+                (fun (v, u) (_, nb) ->
+                  ((v || (nb > 0)), (u || (nb = 0))))
+                (false, false)
+                before
+            in
+            read (number + 1) ((number, line', visited, unvisited)::acc)
 
-        with End_of_file -> List.rev acc, number - 1
+          with End_of_file -> List.rev acc, number - 1
+        in
+        read 1 []
       in
-      read 1 []
-    in
 
-    let class_of_visited = function
-      | true, false -> "class=\"visited\""
-      | false, true -> "class=\"unvisited\""
-      | true, true -> "class=\"some-visited\""
-      | false, false -> ""
-    in
+      let class_of_visited = function
+        | true, false -> "class=\"visited\""
+        | false, true -> "class=\"unvisited\""
+        | true, true -> "class=\"some-visited\""
+        | false, false -> ""
+      in
 
-    (* Head and header. *)
-    output_strings
-      [  "<html>" ;
-         "  <head>" ;
-         "    <title>$(title)</title>" ;
-         "    <link rel=\"stylesheet\" href=\"style.css\" />" ;
-         "    <meta charset=\"utf-8\" />" ;
-         "  </head>" ;
-         "  <body>" ;
-         "    <div id=\"header\">" ;
-         "      <h1>" ;
-         "        <a href=\"index.html\">" ;
-         "          <span class=\"dirname\">$(dir)</span>$(name)" ;
-         "        </a>" ;
-         "      </h1>" ;
-         "      <h2>$(percentage)%</h2>" ;
-         "    </div>" ;
-         "    <div id=\"navbar\">" ; ]
-      [ "dir", dirname ;
-        "name", basename ;
-        "title", title ;
-        "percentage", Printf.sprintf "%.02f" (percentage stats) ]
-      out_channel;
+      (* Head and header. *)
+      output_strings
+        [  "<html>" ;
+           "  <head>" ;
+           "    <title>$(title)</title>" ;
+           "    <link rel=\"stylesheet\" href=\"style.css\" />" ;
+           "    <meta charset=\"utf-8\" />" ;
+           "  </head>" ;
+           "  <body>" ;
+           "    <div id=\"header\">" ;
+           "      <h1>" ;
+           "        <a href=\"index.html\">" ;
+           "          <span class=\"dirname\">$(dir)</span>$(name)" ;
+           "        </a>" ;
+           "      </h1>" ;
+           "      <h2>$(percentage)%</h2>" ;
+           "    </div>" ;
+           "    <div id=\"navbar\">" ; ]
+        [ "dir", dirname ;
+          "name", basename ;
+          "title", title ;
+          "percentage", Printf.sprintf "%.02f" (percentage stats) ]
+        out_channel;
 
-    (* Navigation bar items. *)
-    lines |> List.iter (fun (number, _, visited, unvisited) ->
-      if unvisited then begin
-        let offset =
-          (float_of_int number) /. (float_of_int line_count) *. 100. in
+      (* Navigation bar items. *)
+      lines |> List.iter (fun (number, _, visited, unvisited) ->
+        if unvisited then begin
+          let offset =
+            (float_of_int number) /. (float_of_int line_count) *. 100. in
+          output_strings
+            ["      <span $(visited) style=\"top:$(offset)%\"></span>"]
+            ["visited", class_of_visited (visited, unvisited);
+             "offset", Printf.sprintf "%.02f" offset;
+             "n", string_of_int number]
+            out_channel
+        end);
+
+      output_strings
+        ["    </div>";
+         "    <div id=\"report\">";
+         "      <div id=\"lines-layer\">";
+         "        <pre>"]
+        []
+        out_channel;
+
+      (* Line highlights. *)
+      lines |> List.iter (fun (number, _, visited, unvisited) ->
         output_strings
-          ["      <span $(visited) style=\"top:$(offset)%\"></span>"]
-          ["visited", class_of_visited (visited, unvisited);
-           "offset", Printf.sprintf "%.02f" offset;
-           "n", string_of_int number]
-          out_channel
-      end);
-
-    output_strings
-      ["    </div>";
-       "    <div id=\"report\">";
-       "      <div id=\"lines-layer\">";
-       "        <pre>"]
-      []
-      out_channel;
-
-    (* Line highlights. *)
-    lines |> List.iter (fun (number, _, visited, unvisited) ->
-      output_strings
-        ["<a id=\"L$(n)\"></a><span $(visited)> </span>"]
-        ["n", string_of_int number;
-         "visited", class_of_visited (visited, unvisited)]
-        out_channel);
-
-    output_strings
-      ["</pre>";
-       "      </div>";
-       "      <div id=\"text-layer\">";
-       "        <pre id=\"line-numbers\">"]
-      []
-      out_channel;
-
-    let width = string_of_int line_count |> String.length in
-
-    (* Line numbers. *)
-    lines |> List.iter (fun (number, _, _, _) ->
-      let formatted = string_of_int number in
-      let padded =
-        (String.make (width - String.length formatted) ' ') ^  formatted in
+          ["<a id=\"L$(n)\"></a><span $(visited)> </span>"]
+          ["n", string_of_int number;
+           "visited", class_of_visited (visited, unvisited)]
+          out_channel);
 
       output_strings
-        ["<a href=\"#L$(n)\">$(padded)</a>"]
-        ["n", formatted;
-         "padded", padded]
-        out_channel);
+        ["</pre>";
+         "      </div>";
+         "      <div id=\"text-layer\">";
+         "        <pre id=\"line-numbers\">"]
+        []
+        out_channel;
 
-    output_strings
-      ["</pre>";
-       "        <pre id=\"code\">"]
-      []
-      out_channel;
+      let width = string_of_int line_count |> String.length in
 
-    (* Code lines. *)
-    lines |> List.iter (fun (number, markup, _, _) ->
-      output_strings [markup] [] out_channel);
+      (* Line numbers. *)
+      lines |> List.iter (fun (number, _, _, _) ->
+        let formatted = string_of_int number in
+        let padded =
+          (String.make (width - String.length formatted) ' ') ^  formatted in
 
-    output_strings
-      ["</pre>";
-       "      </div>";
-       "    </div>";
-       "    <div id=\"footer\">$(footer)</div>";
-       "    <script src=\"coverage.js\"></script>";
-       "  </body>";
-       "</html>"]
-      ["footer", html_footer]
-      out_channel
+        output_strings
+          ["<a href=\"#L$(n)\">$(padded)</a>"]
+          ["n", formatted;
+           "padded", padded]
+          out_channel);
 
-  with e ->
+      output_strings
+        ["</pre>";
+         "        <pre id=\"code\">"]
+        []
+        out_channel;
+
+      (* Code lines. *)
+      lines |> List.iter (fun (number, markup, _, _) ->
+        output_strings [markup] [] out_channel);
+
+      output_strings
+        ["</pre>";
+         "      </div>";
+         "    </div>";
+         "    <div id=\"footer\">$(footer)</div>";
+         "    <script src=\"coverage.js\"></script>";
+         "  </body>";
+         "</html>"]
+        ["footer", html_footer]
+        out_channel
+
+    with e ->
+      close_in_noerr in_channel;
+      close_out_noerr out_channel;
+      raise e);
+
     close_in_noerr in_channel;
     close_out_noerr out_channel;
-    raise e);
-
-  close_in_noerr in_channel;
-  close_out_noerr out_channel;
-  stats
+    Some stats
 
 let output verbose dir tab_size title resolver data =
   let files = Hashtbl.fold
@@ -707,10 +712,12 @@ let output verbose dir tab_size title resolver data =
         let out_file = (Filename.concat dir basename) ^ ".html" in
         let script_file = (Filename.concat dir basename) ^ ".js" in
         let script_file_basename = basename ^ ".js" in
-        let stats =
+        let maybe_stats =
           output_html verbose tab_size title in_file out_file script_file
             script_file_basename resolver visited in
-        (in_file, (basename ^ ".html"), stats) :: acc)
+        match maybe_stats with
+        | None -> acc
+        | Some stats -> (in_file, (basename ^ ".html"), stats) :: acc)
       data
       [] in
   output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);

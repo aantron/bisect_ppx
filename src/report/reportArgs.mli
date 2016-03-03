@@ -54,7 +54,10 @@ val combine_expr : string option ref
 (** Expression used to combine data files. *)
 
 val summary_only : bool ref
-(** Whether to ouput onlly summary (text only). *)
+(** Whether to output only summary (text only). *)
+
+val ignore_missing_files : bool ref
+(** Whether to silently ignore missing source files, instead of failing. *)
 
 val parse : unit -> unit
 (** Parses the command line. *)

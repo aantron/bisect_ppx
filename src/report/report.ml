@@ -58,16 +58,19 @@ let main () =
         exit 1 in
   let verbose = if !ReportArgs.verbose then print_endline else ignore in
   let search_file l f =
-    let fail () = raise (Sys_error (f ^ ": No such file or directory")) in
+    let fail () =
+      if !ReportArgs.ignore_missing_files then None
+      else
+        raise (Sys_error (f ^ ": No such file or directory")) in
     let rec search = function
       | hd :: tl ->
           let f' = Filename.concat hd f in
-          if Sys.file_exists f' then f' else search tl
+          if Sys.file_exists f' then Some f' else search tl
       | [] -> fail () in
     if Filename.is_implicit f then
       search l
     else if Sys.file_exists f then
-      f
+      Some f
     else
       fail () in
   let search_in_path = search_file !ReportArgs.search_path in
