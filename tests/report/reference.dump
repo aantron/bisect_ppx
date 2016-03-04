@@ -34,3 +34,4 @@ file "source.ml"
   point       match/function at offset    726:      2
   point       match/function at offset    742:      0
   point             sequence at offset    764:      2
+  point  toplevel expression at offset    780:      2

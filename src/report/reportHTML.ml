@@ -682,7 +682,8 @@ let output_html
 
       (* Code lines. *)
       lines |> List.iter (fun (number, markup, _, _) ->
-        output_strings [markup] [] out_channel);
+        output_string out_channel markup;
+        output_char out_channel '\n');
 
       output_strings
         ["</pre>";

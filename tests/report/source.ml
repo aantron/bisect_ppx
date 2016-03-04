@@ -46,3 +46,5 @@ let () =
     | _ -> 1)
   (0, 0)
   |> ignore
+
+let _ = "a string to confound Buffer.add_substitute $("

@@ -10,9 +10,9 @@ Summary:
  - 'class initializer' points: none
  - 'class method' points: none
  - 'class value' points: none
- - 'toplevel expression' points: none
+ - 'toplevel expression' points: 1/1 (100.00%)
  - 'lazy operator' points: 2/2 (100.00%)
- - total: 18/35 (51.43%)
+ - total: 19/36 (52.78%)
 File 'source.ml':
  - 'binding' points: 6/6 (100.00%)
  - 'sequence' points: 4/6 (66.67%)
@@ -25,6 +25,6 @@ File 'source.ml':
  - 'class initializer' points: none
  - 'class method' points: none
  - 'class value' points: none
- - 'toplevel expression' points: none
+ - 'toplevel expression' points: 1/1 (100.00%)
  - 'lazy operator' points: 2/2 (100.00%)
- - total: 18/35 (51.43%)
+ - total: 19/36 (52.78%)
