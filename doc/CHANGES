@@ -1,3 +1,14 @@
+Version 1.0.1 (2016-03-04):
+---------------------------
+  - Add option -ignore-missing-files to bisect-ppx-report, which allows the
+    reporter to silently ignore missing source files instead of failing. This is
+    intended for build processes that generate temporary source files, but
+    delete them before the reporter is run (requested Ivan Gotovchits).
+  - Fix bug in which bisect-ppx-report treated source code as format strings for
+    Buffer.add_substitute. This caused wrong behavior on source code substrings
+    that looked like Buffer.add_substitute patterns (reported Ivan Gotovchits).
+  - Various minor documentation and internal build fixes.
+
 Version 1.0.0 (2016-02-09):
 ---------------------------
   - Redesign HTML reports.
