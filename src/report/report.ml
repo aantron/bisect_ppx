@@ -7,6 +7,7 @@
 type output_kind =
   | Html_output of string
   | Csv_output of string
+  | Csv_line_output of string
   | Text_output of string
   | Dump_output of string
 
@@ -74,6 +75,10 @@ let options = Arg.align [
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Output CSV report to <file>");
+
+  ("-csv-line",
+   Arg.String (fun s -> add_output (Csv_line_output s)),
+   "<file>  Output line coverage CSV report to <file>");
 
   ("-separator",
    Arg.Set_string csv_separator,
@@ -173,6 +178,9 @@ let main () =
           search_in_path data points
     | Csv_output file ->
         generic_output file (Report_csv.make !csv_separator)
+    | Csv_line_output file ->
+        Report_csv_line.output verbose file !csv_separator search_in_path data
+          points
     | Text_output file ->
         generic_output file (Report_text.make !summary_only)
     | Dump_output file ->
