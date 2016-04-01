@@ -12,8 +12,7 @@ passed using Ocamlbuild, using the tag `ppxopt`.
   - [With OASIS](#OASIS)
 - [Excluding code from coverage](#Excluding)
   - [Individual lines and line ranges](#ExcludingLines)
-  - [Unreachable code](#UnreachableCode)
-  - [Top-level values](#ExcludingValues)
+  - [Files and top-level values](#ExcludingValues)
   - [Language constructs](#ExcludingConstructs)
 - [Environment variables](#EnvironmentVariables)
   - [Naming the visitation count files](#OutFiles)
@@ -144,73 +143,58 @@ fields in the first step into your `_oasis` file.
 ## Excluding code from coverage
 
 The easiest way to exclude a file from coverage is simply not to build it with
-`-package bisect_ppx`, or not tag it with `coverage`. However, sometimes you
-need finer control. There are three ways to disable coverage analysis for
+`-package bisect_ppx`, or not to tag it with `coverage`. However, sometimes you
+need finer control. There are several ways to disable coverage analysis for
 portions of code.
 
 <a id="ExcludingLines"></a>
 #### Individual lines and line ranges
 
 If a comment `(*BISECT-IGNORE*)` is found on a line, that line is excluded from
-coverage analysis.
+coverage analysis. If `(*BISECT-VISIT*)` is found, all points on that line are
+unconditionally marked as visited.
+
+Note that both comments affect the entire line they are found on. For example,
+if you have an `if`-`then`-`else` on one line, the comments will affect the
+overall expression and both branches.
 
 If there is a range of lines delimited by `(*BISECT-IGNORE-BEGIN*)` and
 `(*BISECT-IGNORE-END*)`, all the lines in the range, including the ones with the
 comments, are excluded.
 
-<a id="UnreachableCode"></a>
-#### Unreachable code
-
-You may have expressions such as
-
-```ocaml
-if some_condition then
-  do_something ()
-else
-  assert false
-```
-
-If the `else` case is meant to be unreachable, it is very likely that there will
-be no way to positively test it, so it will not be covered. Apart from ignoring
-it, you have two options in this case: mark it with `(*BISECT-IGNORE*)` to
-prevent it from being part of coverage analysis, or with `(*BISECT-VISIT*)` to
-force it to be counted as visited.
-
-Note that both comments affect the entire line they are found on, so it is best
-not to write the whole `if`-`then`-`else` on one line.
-
 <a id="ExcludingValues"></a>
-#### Top-level values
+#### Files and top-level values
 
-You can pass the `-exclude` option to the Bisect_ppx preprocessor. For example,
-
-```
-ocamlfind c \
-  -package bisect_ppx -ppxopt "bisect_ppx,-exclude dbg_." -c my_code.ml
-```
-
-The argument to `-exclude` is a comma-separated list of regular expressions,
-each following the syntax of the [`Str`][Str] module. Any top-level value whose
-name matches one of the regular expressions will not be instrumented. The
-example above excludes all values whose names start with `dbg_`.
-
-It is also possible to create an exclusion file, and specify it with
+You can pass the `-exclude-file` option to the Bisect_ppx preprocessor:
 
 ```
 ocamlfind c \
-  -package bisect_ppx -ppxopt "bisect_ppx,-exclude_file .exclude" -c my_code.ml
+  -package bisect_ppx -ppxopt "bisect_ppx,-exclude-file .exclude" -c my_code.ml
 ```
 
-The syntax of the exclusion file is given by the grammar
+Here is what the `.exclude` file can look like:
 
 ```
-contents        ::= file-list
-file-list       ::= file-list file | ε
-file            ::= file string [ exclusion-list ] opt-separator
-opt-separator   ::= ; | ε
-exclusion-list  ::= exclusion-list exclusion | ε
-exclusion       ::= name string opt-separator | regexp string opt-separator
+(* OCaml-style comments are okay. *)
+
+(* Exclude the file "foo.ml": *)
+file "foo.ml"
+
+(* Exclude all files whose names start with "test_": *)
+file regexp "test_.*"
+
+(* Exclude the top-level values "foo" and "bar" in "baz.ml": *)
+file "baz.ml" [
+  name "foo"
+  name "bar"
+]
+
+(* Exclude all top-level values whose names begin with "dbg_" in all
+   files in "src/": *)
+file regexp "src/.*" [ regexp "dbg_.*" ]
 ```
+
+All regular expressions are in the syntax of the [`Str`][Str] module.
 
 <a id="ExcludingConstructs"></a>
 #### Language constructs
