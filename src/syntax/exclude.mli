@@ -28,7 +28,7 @@ type t =
 (** The type of an exclusion. *)
 
 type file = {
-    path : string; (** The path to the file. *)
-    exclusions : t list; (** The list of exclusions. *)
+    path : t; (** The path to the file. *)
+    exclusions : t list option; (** The list of exclusions. *)
   }
 (** The type describing the contents of an exclusion file. *)

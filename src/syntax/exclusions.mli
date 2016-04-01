@@ -29,6 +29,12 @@ val add_file : string -> unit
     Raises [Sys_error] if an i/o error occurs, [Exclude.Exception] if
     an error occurs while parsing the file. *)
 
-val contains : string -> string -> bool
-(** [contains file name] tests whether toplevel value with name
+val contains_value : string -> string -> bool
+(** [contains_value file name] tests whether toplevel value with name
     [name] from file [file] is in excluded list. *)
+
+val contains_file : string -> bool
+(** [contains_file file] tests whether the entire file with name [name] is in
+    the excluded {e files} list. A file is completely excluded (and not
+    instrumented) when a list of excluded top-level values is not given for that
+    file at all. *)

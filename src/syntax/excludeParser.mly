@@ -35,6 +35,10 @@ let fail error =
   let line = pos.Lexing.pos_lnum in
   raise (Exclude.Exception (line, string_of_error error))
 
+let make_regexp s =
+  try Str.regexp s
+  with _ -> fail (Invalid_regular_expression s)
+
 %}
 
 %token CLOSING_BRACKET OPENING_BRACKET
@@ -52,19 +56,27 @@ file: file_decl_list EOF         { List.rev $1 }
 file_decl_list: /* epsilon */    { [] }
 | file_decl_list file_decl       { $2 :: $1 }
 
-file_decl: FILE STRING OPENING_BRACKET exclusion_list CLOSING_BRACKET separator_opt
+file_decl: FILE file_pattern exclusion_list separator_opt
                                  { { Exclude.path = $2;
-                                     Exclude.exclusions = List.rev $4; } }
+                                     Exclude.exclusions = $3; } }
 | FILE error                     { fail Invalid_file_declaration }
 
-exclusion_list: /* epsilon */    { [] }
-| exclusion_list exclusion       { $2 :: $1 }
+file_pattern:
+| STRING                         { Exclude.Name $1 }
+| REGEXP STRING                  { Exclude.Regexp (make_regexp $2) }
+
+exclusion_list :
+|                                { None }
+| OPENING_BRACKET exclusions CLOSING_BRACKET
+                                 { Some (List.rev $2) }
+
+exclusions :
+|                                { [] }
+| exclusions exclusion           { $2::$1 }
 
 exclusion: NAME STRING separator_opt
                                  { Exclude.Name $2 }
-| REGEXP STRING separator_opt    { try
-                                     Exclude.Regexp (Str.regexp $2)
-                                   with _ -> fail (Invalid_regular_expression $2) }
+| REGEXP STRING separator_opt    { Exclude.Regexp (make_regexp $2) }
 | error                          { fail Invalid_exclusion }
 
 separator_opt: /* epsilon */     { }
