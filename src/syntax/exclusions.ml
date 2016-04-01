@@ -47,19 +47,33 @@ let add_file filename =
       close_in_noerr ch;
       raise e
 
-let contains file name =
-  let match_pattern patt =
-    (Str.string_match patt name 0)
-      && ((Str.match_end ()) = (String.length name)) in
+let match_pattern pattern name =
+  Str.string_match pattern name 0 && Str.match_end () = String.length name
+
+let file_name_matches exclusion file =
+  match exclusion.Exclude.path with
+  | Exclude.Name file' -> file = file'
+  | Exclude.Regexp pattern -> match_pattern pattern file
+
+let contains_value file name =
   List.exists
     (function
       | Regular_expression patt ->
-          match_pattern patt
+          match_pattern patt name
       | Exclude_file ef ->
-          (ef.Exclude.path = file)
-            && (List.exists
-                  (function
-                    | Exclude.Name en -> name = en
-                    | Exclude.Regexp patt -> match_pattern patt)
-                  ef.Exclude.exclusions))
+        let in_value_list () =
+          match ef.Exclude.exclusions with
+          | None -> true
+          | Some exclusions ->
+            exclusions |> List.exists (function
+              | Exclude.Name en -> name = en
+              | Exclude.Regexp patt -> match_pattern patt name)
+        in
+        file_name_matches ef file && in_value_list ())
     !excluded
+
+let contains_file file =
+  !excluded |> List.exists (function
+    | Regular_expression _ -> false
+    | Exclude_file exclusion ->
+      exclusion.Exclude.exclusions = None && file_name_matches exclusion file)

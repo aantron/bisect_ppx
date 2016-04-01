@@ -23,6 +23,6 @@ type t =
   | Regexp of Str.regexp
 
 type file = {
-    path : string;
-    exclusions : t list;
+    path : t;
+    exclusions : t list option;
   }

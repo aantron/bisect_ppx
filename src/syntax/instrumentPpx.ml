@@ -433,14 +433,14 @@ class instrumenter = object (self)
             { vb with pvb_expr =
                 match vb.pvb_pat.ppat_desc with
                   (* Match the 'f' in 'let f x = ... ' *)
-                | Ppat_var ident when Exclusions.contains
+                | Ppat_var ident when Exclusions.contains_value
                       (ident.loc.Location.loc_start.Lexing.pos_fname)
                     ident.txt -> vb.pvb_expr
                   (* Match the 'f' in 'let f : type a. a -> string = ...' *)
                 | Ppat_constraint (p,_) ->
                     begin
                       match p.ppat_desc with
-                      | Ppat_var ident when Exclusions.contains
+                      | Ppat_var ident when Exclusions.contains_value
                           (ident.loc.Location.loc_start.Lexing.pos_fname)
                             ident.txt -> vb.pvb_expr
                       | _ ->
@@ -482,7 +482,8 @@ class instrumenter = object (self)
         ast
       else
         if not (InstrumentState.is_file file) then
-          begin
+          if Exclusions.contains_file file then ast
+          else begin
             (* We have to add this here, before we process the rest of the
                structure, because that may also have structures contained
                there-in, but we'll add the header after processing all of those
