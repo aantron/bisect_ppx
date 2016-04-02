@@ -542,10 +542,7 @@ let escape_line tab_size line offset points =
     line;
   Buffer.contents buff
 
-let output_html
-    verbose tab_size title in_file out_file script_file script_file_basename
-    resolver visited =
-
+let output_html verbose tab_size title in_file out_file resolver visited =
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
   match resolver in_file with
   | None ->
@@ -681,7 +678,7 @@ let output_html
         out_channel;
 
       (* Code lines. *)
-      lines |> List.iter (fun (number, markup, _, _) ->
+      lines |> List.iter (fun (_, markup, _, _) ->
         output_string out_channel markup;
         output_char out_channel '\n');
 
@@ -711,11 +708,10 @@ let output verbose dir tab_size title resolver data =
         let l = List.length acc in
         let basename = Printf.sprintf "file%04d" l in
         let out_file = (Filename.concat dir basename) ^ ".html" in
-        let script_file = (Filename.concat dir basename) ^ ".js" in
-        let script_file_basename = basename ^ ".js" in
         let maybe_stats =
-          output_html verbose tab_size title in_file out_file script_file
-            script_file_basename resolver visited in
+          output_html verbose tab_size title in_file out_file resolver
+            visited
+        in
         match maybe_stats with
         | None -> acc
         | Some stats -> (in_file, (basename ^ ".html"), stats) :: acc)
