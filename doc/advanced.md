@@ -292,6 +292,6 @@ The remaining major differences are:
 
 
 [Str]:               http://caml.inria.fr/pub/docs/manual-ocaml/libref/Str.html#VALregexp
-[Bisect_ppx_plugin]: https://github.com/rleonid/bisect_ppx/blob/master/src/ocamlbuild/bisect_ppx_plugin.mli
-[plugin-code]:       https://github.com/rleonid/bisect_ppx/blob/master/src/ocamlbuild/bisect_ppx_plugin.ml
+[Bisect_ppx_plugin]: https://github.com/aantron/bisect_ppx/blob/master/src/ocamlbuild/bisect_ppx_plugin.mli
+[plugin-code]:       https://github.com/aantron/bisect_ppx/blob/master/src/ocamlbuild/bisect_ppx_plugin.ml
 [unlicense]:         http://unlicense.org/

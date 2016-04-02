@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-let url = "https://github.com/rleonid/bisect_ppx"
+let url = "https://github.com/aantron/bisect_ppx"
 
 let (++) x y =
   if ((x > 0) && (y > 0) && (x > max_int - y)) then

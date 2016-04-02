@@ -12,15 +12,15 @@ For a live demonstration, see the [coverage report][self-coverage] Bisect_ppx
 generates for itself. You may also want to see
 [projects that use Bisect_ppx](#bisect_ppx-in-practice).
 
-[self]:          https://github.com/rleonid/bisect_ppx
-[releases]:      https://github.com/rleonid/bisect_ppx/releases
+[self]:          https://github.com/aantron/bisect_ppx
+[releases]:      https://github.com/aantron/bisect_ppx/releases
 [version]:       https://img.shields.io/badge/version-1.0.1-blue.svg
-[self-coverage]: http://rleonid.github.io/bisect_ppx/coverage/
-[travis]:        https://travis-ci.org/rleonid/bisect_ppx/branches
-[travis-img]:    https://img.shields.io/travis/rleonid/bisect_ppx/master.svg
-[coveralls]:     https://coveralls.io/github/rleonid/bisect_ppx?branch=master
-[coveralls-img]: https://img.shields.io/coveralls/rleonid/bisect_ppx/master.svg
-[sample]:        https://raw.githubusercontent.com/rleonid/bisect_ppx/master/doc/sample.gif
+[self-coverage]: http://aantron.github.io/bisect_ppx/coverage/
+[travis]:        https://travis-ci.org/aantron/bisect_ppx/branches
+[travis-img]:    https://img.shields.io/travis/aantron/bisect_ppx/master.svg
+[coveralls]:     https://coveralls.io/github/aantron/bisect_ppx?branch=master
+[coveralls-img]: https://img.shields.io/coveralls/aantron/bisect_ppx/master.svg
+[sample]:        https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
 
 
 
@@ -61,11 +61,11 @@ considers whole lines as visited or not.
 
 See also the [advanced usage][advanced].
 
-[without-opam]: https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#WithoutOPAM
-[ocamlbuild]:   https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
-[oasis]:        https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#OASIS
+[without-opam]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#WithoutOPAM
+[ocamlbuild]:   https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
+[oasis]:        https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#OASIS
 [ocveralls]:    https://github.com/sagotch/ocveralls
-[advanced]:     https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md
+[advanced]:     https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md
 
 
 
@@ -110,7 +110,7 @@ Bisect's ppx mode, but see [here][differences] for a list of differences.
 If you use Camlp4, you will want to use the original Bisect.
 
 [bisect]:      http://bisect.x9c.fr/
-[differences]: https://github.com/rleonid/bisect_ppx/blob/master/doc/advanced.md#Differences
+[differences]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Differences
 
 
 
@@ -124,7 +124,7 @@ Bisect_ppx is distributed under the terms of the
 development tool used only during testing. You would not want to link Bisect_ppx
 into your release files anyway, for performance reasons.
 
-[license]: https://github.com/rleonid/bisect_ppx/blob/master/doc/COPYING
+[license]: https://github.com/aantron/bisect_ppx/blob/master/doc/COPYING
 
 
 
@@ -143,4 +143,4 @@ opam source --dev-repo --pin bisect_ppx
 
 You will now have a `bisect_ppx` subdirectory to work in.
 
-[issues]: https://github.com/rleonid/bisect_ppx/issues
+[issues]: https://github.com/aantron/bisect_ppx/issues

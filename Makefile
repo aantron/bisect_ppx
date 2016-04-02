@@ -127,7 +127,7 @@ gh-pages: FORCE
 	omd README.md | _build/doc/postprocess.byte > $(GH_PAGES)/index.html
 	cd $(GH_PAGES) && \
 		git init && \
-		git remote add github git@github.com:rleonid/bisect_ppx.git && \
+		git remote add github git@github.com:aantron/bisect_ppx.git && \
 		mkdir -p coverage && \
 		cp -r ../tests/_report/* coverage/ && \
 		git add -A && \
