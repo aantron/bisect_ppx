@@ -21,8 +21,7 @@ open Asttypes
 open Ast_mapper
 open Ast_helper
 
-let intconst x =
-  Exp.constant (Const_int x)
+let intconst = Ast_convenience.int
 
 let lid ?(loc = Location.none) s =
   Location.mkloc (Longident.parse s) loc
@@ -33,8 +32,7 @@ let constr id =
 
 let unitconst () = constr "()"
 
-let strconst s =
-  Exp.constant (Const_string (s, None))
+let strconst = Ast_convenience.str
 
 let string_of_ident ident =
   String.concat "." (Longident.flatten ident.txt)
@@ -42,7 +40,7 @@ let string_of_ident ident =
 let apply_nolabs ?loc lid el =
   Exp.apply ?loc
     (Exp.ident ?loc lid)
-    (List.map (fun e -> ("",e)) el)
+    (List.map (fun e -> (Ast_convenience.Label.nolabel, e)) el)
 
 let custom_mark_function file =
   Printf.sprintf "___bisect_mark___%s"
