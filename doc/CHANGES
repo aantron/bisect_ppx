@@ -1,3 +1,11 @@
+Version 1.1.0 (2016-04-02):
+---------------------------
+  - Port to 4.03.
+  - Allow exclusion of entire files, instead of only top-level values (prompted
+    @solongordon).
+  - Allow files to be excluded by regular expression, instead of only by exact
+    string match (requested @solongordon).
+
 Version 1.0.1 (2016-03-04):
 ---------------------------
   - Add option -ignore-missing-files to bisect-ppx-report, which allows the
