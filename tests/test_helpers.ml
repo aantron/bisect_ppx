@@ -202,7 +202,10 @@ let _preserve file destination =
   run ("mkdir -p " ^ (Filename.dirname destination));
   run ("cp " ^ file ^ " " ^ destination)
 
-let diff reference =
+(* Runs a diff between [reference] and [_scratch/output], but reports the file
+   name of [reference] as [reference_original], because [reference] might be
+   generated from [reference_original]. *)
+let _diff reference_original reference =
   let reference_actual = Filename.concat Filename.parent_dir_name reference in
   let command = "diff -a " ^ reference_actual ^ " output" in
 
@@ -211,11 +214,35 @@ let diff reference =
   | 0 -> ()
   | v when v <> 1 -> _command_failed command ~status:v
   | _ ->
-    _preserve "output" reference;
+    _preserve "output" reference_original;
     _run_int (command ^ " > delta") |> ignore;
     let delta = _read_file "delta" in
-    Printf.sprintf "Difference against '%s':\n\n%s" reference delta
+    Printf.sprintf "Difference against '%s':\n\n%s" reference_original delta
     |> assert_failure
+
+let diff reference = _diff reference reference
+
+let normalize_source source normalized =
+  let source = _read_file source in
+  let normalized_file = open_out normalized in
+  try
+    let lexbuf = Lexing.from_string source in
+    let structure = Parse.implementation lexbuf in
+
+    let formatter = Format.formatter_of_out_channel normalized_file in
+    Pprintast.structure formatter structure;
+    Format.pp_print_newline formatter ();
+
+    close_out_noerr normalized_file
+
+  with e ->
+    close_out_noerr normalized_file;
+    raise e
+
+let diff_ast reference =
+  let reference_actual = Filename.concat Filename.parent_dir_name reference in
+  normalize_source reference_actual "_dsource";
+  _diff reference "_scratch/_dsource"
 
 let xmllint arguments =
   skip_if (not @@ have_binary "xmllint") "xmllint not installed";
@@ -238,7 +265,7 @@ let compile_compare cflags directory =
 
       test title (fun () ->
         compile ((cflags ()) ^ " -w -A -dsource") source ~r:"2> output";
-        diff reference)
+        diff_ast reference)
     end
   in
 

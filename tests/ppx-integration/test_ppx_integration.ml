@@ -30,7 +30,7 @@ let tests = "ppx-integration" >::: [
     compile ((with_bisect ()) ^ " -package ppx_blob -dsource")
       "ppx-integration/blob.ml" ~r:"2> buggy_output";
     _ppx_tools_workaround "buggy_output" "output";
-    diff "ppx-integration/bisect_then_blob.reference"
+    diff_ast "ppx-integration/bisect_then_blob.reference"
   end;
 
   test "blob_then_bisect" begin fun () ->
@@ -39,7 +39,7 @@ let tests = "ppx-integration" >::: [
     compile ("-package ppx_blob " ^ (with_bisect ()) ^ " -dsource")
       "ppx-integration/blob.ml" ~r:"2> buggy_output";
     _ppx_tools_workaround "buggy_output" "output";
-    diff "ppx-integration/blob_then_bisect.reference"
+    diff_ast "ppx-integration/blob_then_bisect.reference"
   end;
 
   test "bisect_then_deriving" begin fun () ->
@@ -47,7 +47,8 @@ let tests = "ppx-integration" >::: [
 
     compile ((with_bisect ()) ^ " -package ppx_deriving.show -dsource")
       "ppx-integration/deriving.ml" ~r:"2> output";
-    diff "ppx-integration/bisect_then_deriving.reference"
+    normalize_source "output" "output";
+    diff_ast "ppx-integration/bisect_then_deriving.reference"
   end;
 
   test "deriving_then_bisect" begin fun () ->
@@ -55,7 +56,8 @@ let tests = "ppx-integration" >::: [
 
     compile ("-package ppx_deriving.show " ^ (with_bisect ()) ^ " -dsource")
       "ppx-integration/deriving.ml" ~r:"2> output";
-    diff "ppx-integration/deriving_then_bisect.reference"
+    normalize_source "output" "output";
+    diff_ast "ppx-integration/deriving_then_bisect.reference"
   end;
 
   test "deriving_then_bisect_report" begin fun () ->
@@ -71,6 +73,6 @@ let tests = "ppx-integration" >::: [
   test "attributes" begin fun () ->
     compile ((with_bisect ()) ^ " -dsource") "ppx-integration/attributes.ml"
       ~r:"2> output";
-    diff "ppx-integration/attributes.reference"
+    diff_ast "ppx-integration/attributes.reference"
   end;
 ]

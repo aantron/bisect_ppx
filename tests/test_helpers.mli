@@ -96,7 +96,18 @@ val diff : string -> unit
 (** Runs the command [diff] between the given file and a file [_scratch/output].
     The file is given relative to [tests/], e.g. ["report/reference.html"]. If
     there is a difference, fails the current test case, including the difference
-    in the error message. *)
+    in the error message. The actual output is also written to the [_preserve]
+    subdirectory. *)
+
+val normalize_source : string -> string -> unit
+(** [normalize_source source normalized] uses [compiler-libs] to parse the file
+    [source], then prints it back to [normalized] as if by [-dsource] (i.e.,
+    using [Pprintast].) *)
+
+val diff_ast : string -> unit
+(** Same as [diff], but first applies [normalize_source] to the given reference
+    file. The [diff] command is then run between [_scratch/output] and the
+    normalized source. Use [diff_ast] for comparing [.ml] files. *)
 
 val xmllint : string -> unit
 (** Runs [xmllint] with the given arguments. Skips the current test if [xmllint]

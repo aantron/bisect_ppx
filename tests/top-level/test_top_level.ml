@@ -5,7 +5,7 @@ let tests = "top-level" >::: [
   test "batch" (fun () ->
     compile
       ((with_bisect ()) ^ " -dsource") "top-level/source.ml" ~r:"2> output";
-    diff "top-level/batch.reference");
+    diff_ast "top-level/batch.reference");
 
   test "stdin" (fun () ->
     skip_if (compiler () = "ocamlopt") "Top-level accepts only bytecode";
