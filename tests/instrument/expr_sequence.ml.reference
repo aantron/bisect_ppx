@@ -32,5 +32,3 @@ let () =
   (let f ?maybe  () = ___bisect_mark___expr_sequence 12; ignore maybe in
    ___bisect_mark___expr_sequence 13;
    () |> ((___bisect_mark___expr_sequence 11; f)))
-File "expr_sequence.ml", line 24, characters 8-9:
-Warning 48: implicit elimination of optional argument ?maybe

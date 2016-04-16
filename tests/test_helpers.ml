@@ -237,7 +237,7 @@ let compile_compare cflags directory =
       let reference = Filename.concat directory (f ^ ".reference") in
 
       test title (fun () ->
-        compile ((cflags ()) ^ " -dsource") source ~r:"2> output";
+        compile ((cflags ()) ^ " -w -A -dsource") source ~r:"2> output";
         diff reference)
     end
   in
