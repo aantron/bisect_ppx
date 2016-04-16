@@ -16,9 +16,15 @@ package "fast" (
   requires="bisect_ppx"
 )
 
-package "plugin" (
+package "ocamlbuild" (
   version="1.1.0"
   description="Bisect_ppx Ocamlbuild plugin"
   archive(byte)="bisect_ppx_plugin.cma"
   archive(native)="bisect_ppx_plugin.cmxa"
+)
+
+package "plugin" (
+  version="1.1.0"
+  description="Bisect_ppx Ocamlbuild plugin (deprecated package)"
+  requires="bisect_ppx.ocamlbuild"
 )

@@ -18,7 +18,7 @@
 
 OCAMLBUILD := \
 	ocamlbuild -use-ocamlfind -no-links -byte-plugin \
-	-plugin-tag 'package(bisect_ppx.plugin)'
+	-plugin-tag 'package(bisect_ppx.ocamlbuild)'
 
 test: FORCE
 	make clean

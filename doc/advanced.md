@@ -65,7 +65,7 @@ It is used like this:
 
    If you already have `myocamlbuild.ml`, you just need to call
    `Bisect_ppx_plugin.handle_coverage ()` somewhere in it.
-2. Add `-use-ocamlfind -plugin-tag 'package(bisect_ppx.plugin)'` to your
+2. Add `-use-ocamlfind -plugin-tag 'package(bisect_ppx.ocamlbuild)'` to your
    Ocamlbuild invocation.
 3. <a id="Tagging"></a> Now, you have a new tag available, called `coverage`.
    Make your `_tags` file look something like this:
@@ -80,11 +80,11 @@ It is used like this:
 
         # For tests
         BISECT_COVERAGE=YES ocamlbuild -use-ocamlfind \
-            -plugin-tag 'package(bisect_ppx.plugin)' tests/test.native --
+            -plugin-tag 'package(bisect_ppx.ocamlbuild)' tests/test.native --
 
         # For release
         ocamlbuild -use-ocamlfind \
-            -plugin-tag 'package(bisect_ppx.plugin)' src/my_project.native
+            -plugin-tag 'package(bisect_ppx.ocamlbuild)' src/my_project.native
 
 If you don't want to make Bisect_ppx a hard build dependency just for the
 `coverage` tag, you can work the [contents][plugin-code] of `Bisect_ppx_plugin`
@@ -101,7 +101,7 @@ Since OASIS uses Ocamlbuild, the instructions are similar:
 
         OCamlVersion:           >= 4.01
         AlphaFeatures:          ocamlbuild_more_args
-        XOCamlbuildPluginTags:  package(bisect_ppx.plugin)
+        XOCamlbuildPluginTags:  package(bisect_ppx.ocamlbuild)
 
    Then, run `oasis setup`.
 2. You should have a `myocamlbuild.ml` file in your project root. Near the
