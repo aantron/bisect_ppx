@@ -5,14 +5,14 @@ Summary:
  - 'if/then' points: 0/4 (0.00%)
  - 'try' points: 0/1 (0.00%)
  - 'while' points: none
- - 'match/function' points: 5/15 (33.33%)
+ - 'match/function' points: 5/16 (31.25%)
  - 'class expression' points: none
  - 'class initializer' points: none
  - 'class method' points: none
  - 'class value' points: none
- - 'toplevel expression' points: 1/1 (100.00%)
+ - 'toplevel expression' points: none
  - 'lazy operator' points: 2/2 (100.00%)
- - total: 19/36 (52.78%)
+ - total: 18/36 (50.00%)
 File 'source.ml':
  - 'binding' points: 6/6 (100.00%)
  - 'sequence' points: 4/6 (66.67%)
@@ -20,11 +20,11 @@ File 'source.ml':
  - 'if/then' points: 0/4 (0.00%)
  - 'try' points: 0/1 (0.00%)
  - 'while' points: none
- - 'match/function' points: 5/15 (33.33%)
+ - 'match/function' points: 5/16 (31.25%)
  - 'class expression' points: none
  - 'class initializer' points: none
  - 'class method' points: none
  - 'class value' points: none
- - 'toplevel expression' points: 1/1 (100.00%)
+ - 'toplevel expression' points: none
  - 'lazy operator' points: 2/2 (100.00%)
- - total: 19/36 (52.78%)
+ - total: 18/36 (50.00%)

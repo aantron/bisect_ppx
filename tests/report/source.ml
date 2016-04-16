@@ -47,4 +47,4 @@ let () =
   (0, 0)
   |> ignore
 
-let _ = "a string to confound Buffer.add_substitute $("
+let f _ = "a string to confound Buffer.add_substitute $("

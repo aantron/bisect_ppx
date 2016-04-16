@@ -7,14 +7,14 @@
     <element kind="if/then" count="0" total="4"/>
     <element kind="try" count="0" total="1"/>
     <element kind="while" count="0" total="0"/>
-    <element kind="match/function" count="5" total="15"/>
+    <element kind="match/function" count="5" total="16"/>
     <element kind="class expression" count="0" total="0"/>
     <element kind="class initializer" count="0" total="0"/>
     <element kind="class method" count="0" total="0"/>
     <element kind="class value" count="0" total="0"/>
-    <element kind="toplevel expression" count="1" total="1"/>
+    <element kind="toplevel expression" count="0" total="0"/>
     <element kind="lazy operator" count="2" total="2"/>
-    <element kind="total" count="19" total="36"/>
+    <element kind="total" count="18" total="36"/>
   </summary>
   <file path="source.ml">
     <summary>
@@ -24,14 +24,14 @@
       <element kind="if/then" count="0" total="4"/>
       <element kind="try" count="0" total="1"/>
       <element kind="while" count="0" total="0"/>
-      <element kind="match/function" count="5" total="15"/>
+      <element kind="match/function" count="5" total="16"/>
       <element kind="class expression" count="0" total="0"/>
       <element kind="class initializer" count="0" total="0"/>
       <element kind="class method" count="0" total="0"/>
       <element kind="class value" count="0" total="0"/>
-      <element kind="toplevel expression" count="1" total="1"/>
+      <element kind="toplevel expression" count="0" total="0"/>
       <element kind="lazy operator" count="2" total="2"/>
-      <element kind="total" count="19" total="36"/>
+      <element kind="total" count="18" total="36"/>
     </summary>
     <point offset="10" count="2" kind="binding"/>
     <point offset="26" count="2" kind="binding"/>
@@ -68,6 +68,6 @@
     <point offset="726" count="2" kind="match/function"/>
     <point offset="742" count="0" kind="match/function"/>
     <point offset="764" count="2" kind="sequence"/>
-    <point offset="780" count="2" kind="toplevel expression"/>
+    <point offset="782" count="0" kind="match/function"/>
   </file>
 </bisect-report>

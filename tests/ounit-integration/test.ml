@@ -26,7 +26,6 @@ let test_suite =
 let suite =
   "all" >::: [
     test_suite;
-  ]
+  ];;
 
-let _ =
-  run_test_tt_main suite
+run_test_tt_main suite
