@@ -110,7 +110,7 @@ which bisect-ppx-report
 echo
 echo "Testing package usage and Ocamlbuild plugin"
 echo
-make -C tests/usage
+make -C tests usage
 
 if [ "$TRAVIS_OS_NAME" = linux ]
 then

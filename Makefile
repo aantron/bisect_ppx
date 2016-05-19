@@ -23,15 +23,19 @@ DEV_INSTALL_DIR := _findlib
 INSTALL_SOURCE_DIR := _build
 
 ifdef INSTALL_VARIANT
-INSTALL_FLAGS := -destdir $(DEV_INSTALL_DIR)
+DEV_INSTALL := yes
 INSTALL_NAME := $(INSTALL_NAME)_$(INSTALL_VARIANT)
 INSTALL_SOURCE_DIR := $(INSTALL_SOURCE_DIR).$(INSTALL_VARIANT)
-OCAMLPATH := $(DEV_INSTALL_DIR):$(OCAMLPATH)
-export OCAMLPATH
 endif
 
 ifeq ($(INSTALL_VARIANT),meta)
 RUNTIME := meta_$(RUNTIME)
+endif
+
+ifeq ($(DEV_INSTALL),yes)
+INSTALL_FLAGS := -destdir $(DEV_INSTALL_DIR)
+OCAMLPATH := $(DEV_INSTALL_DIR):$(OCAMLPATH)
+export OCAMLPATH
 endif
 
 
@@ -87,7 +91,7 @@ default: FORCE
 	@echo "  build      compiles bisect_ppx (release mode)"
 	@echo "  dev        compiles instrumented bisect_ppx (development mode)"
 	@echo "  doc        generates ocamldoc documentations"
-	@echo "  tests      runs tests"
+	@echo "  tests      runs unit tests"
 	@echo "  clean      deletes all produced files"
 	@echo "  install    copies executable and library files"
 
@@ -97,7 +101,6 @@ build: FORCE
 dev: FORCE
 	META_BISECT=yes ocamlbuild $(OCAMLBUILD_FLAGS) $(META_BISECT_DIR) \
 		$(META_TARGETS)
-	mkdir -p $(DEV_INSTALL_DIR)
 	make install INSTALL_VARIANT=meta
 	cd $(DEV_INSTALL_DIR)/$(INSTALL_NAME)_meta && \
 		sed 's/bisect\./meta_bisect./' META | \
@@ -155,6 +158,7 @@ REPORTER_NATIVE := $(INSTALL_SOURCE_DIR)/src/report/report.native
 LIBRARY_FILES = $(foreach extension,a o cma cmi cmo cmx cmxa,$1.$(extension))
 
 install: FORCE
+	[ $(DEV_INSTALL) = "" ] || mkdir -p $(DEV_INSTALL_DIR)
 	@! ocamlfind query $(INSTALL_NAME) > /dev/null 2> /dev/null || \
 		ocamlfind remove $(INSTALL_FLAGS) $(INSTALL_NAME)
 	@cp $(REWRITER_NATIVE) $(REWRITER) 2> /dev/null || \

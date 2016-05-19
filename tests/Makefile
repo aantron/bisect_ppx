@@ -31,6 +31,9 @@ REPORT_DIR := _report
 
 PRESERVE := _preserve
 
+OCAMLFIND_IGNORE_DUPS_IN := $(shell ocamlfind printconf path)
+export OCAMLFIND_IGNORE_DUPS_IN
+
 default: FORCE
 	@echo 'Available targets:'
 	@echo '  unit             runs unit tests'
@@ -64,7 +67,12 @@ performance: FORCE
 	@make -C .. dev
 	$(PERFORMANCE)
 
-all: unit performance
+usage: FORCE
+	@make -C .. build
+	@DEV_INSTALL=yes make -C .. install
+	@OCAMLPATH=`pwd`/../_findlib make -C usage
+
+all: unit performance usage
 
 coverage: FORCE
 	test -d $(COVERAGE) || make unit
