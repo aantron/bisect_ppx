@@ -29,6 +29,7 @@ true: -traverse, warn(A-4), warn_error(A-3)
 <src/syntax/bisect_ppx.{byte,native}>: use_str, package(ppx_tools)
 <src/report/report.{byte,native}>: use_str
 <src/ocamlbuild/*>: package(ocamlbuild)
+<src/ocamlbuild/*>: bin_annot
 
 # Self-instrumentation for testing and showing off
 <src/*/*/**>: instrument

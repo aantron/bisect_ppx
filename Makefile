@@ -156,6 +156,10 @@ REPORTER_BYTE := $(INSTALL_SOURCE_DIR)/src/report/report.byte
 REPORTER_NATIVE := $(INSTALL_SOURCE_DIR)/src/report/report.native
 
 LIBRARY_FILES = $(foreach extension,a o cma cmi cmo cmx cmxa,$1.$(extension))
+INTERFACE_FILES = \
+	src/ocamlbuild/bisect_ppx_plugin.mli \
+	$(shell find src/library -name '*.mli') \
+	$(shell find $1/src -name '*.cmt*')
 
 install: FORCE
 	[ $(DEV_INSTALL) = "" ] || mkdir -p $(DEV_INSTALL_DIR)
@@ -169,6 +173,7 @@ install: FORCE
 		$(REWRITER) $(REPORTER) \
 		$(call LIBRARY_FILES,$(INSTALL_SOURCE_DIR)/src/$(RUNTIME)) \
 		$(call LIBRARY_FILES,\
-			$(INSTALL_SOURCE_DIR)/src/ocamlbuild/bisect_ppx_plugin)
+			$(INSTALL_SOURCE_DIR)/src/ocamlbuild/bisect_ppx_plugin) \
+		$(call INTERFACE_FILES,$(INSTALL_SOURCE_DIR))
 
 FORCE:
