@@ -28,10 +28,6 @@ let test name f =
   end
 
 let tests = "report" >::: [
-  test "bisect" (fun () ->
-    report "-bisect output";
-    diff "report/reference.bisect");
-
   test "csv" (fun () ->
     report "-csv output";
     diff "report/reference.csv");

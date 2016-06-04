@@ -21,7 +21,6 @@ type output_kind =
   | Csv_output of string
   | Text_output of string
   | Dump_output of string
-  | Bisect_output of string
 
 let outputs = ref []
 
@@ -74,9 +73,6 @@ let options = Arg.align [
     ("-summary-only",
    Arg.Set summary_only,
    " Output only a summary (text only)") ;
-  ("-bisect",
-   Arg.String (fun s -> add_output (Bisect_output s)),
-   "<file>  Output bisect data to the given file") ;
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Output CSV to the given file") ;
