@@ -14,7 +14,7 @@ passed using Ocamlbuild, using the tag `ppxopt`.
   - [Individual lines and line ranges](#ExcludingLines)
   - [Files and top-level values](#ExcludingValues)
 - [Environment variables](#EnvironmentVariables)
-  - [Naming the visitation count files](#OutFiles)
+  - [Naming the output files](#OutFiles)
   - [Logging](#Logging)
 - [Installing without OPAM](#WithoutOPAM)
 - [Differences from Bisect](#Bisect)
@@ -208,12 +208,23 @@ execution. Two environment variables are available to control the writing of
 these files.
 
 <a id="OutFiles"></a>
-#### Naming the visitation count files
+#### Naming the output files
 
 By default, the counts files are called  `bisect0001.out`, `bisect0002.out`,
 etc. The prefix `bisect` can be changed by setting the environment variable
-`BISECT_FILE`. In particular, you can change it to something like
-`_coverage/bisect` to put the counts files in a subdirectory.
+`BISECT_FILE`. In particular, you can set it to something like
+`_coverage/bisect` to put the counts files in a different directory, in this
+example `_coverage/`.
+
+`BISECT_FILE` can also be used to control the prefix programmatically. For
+example, the following code bases the prefix on the program name, and puts the
+`.out` files into the system temporary directory:
+
+    let () =
+      let (//) = Filename.concat in
+      let tmpdir = Filename.get_temp_dir_name () in
+      Unix.putenv "BISECT_FILE"
+        (tmpdir // Printf.sprintf "bisect-%s-" Sys.executable_name)
 
 <a id="Logging"></a>
 #### Logging
