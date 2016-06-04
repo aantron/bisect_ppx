@@ -90,13 +90,7 @@ let options = Arg.align [
    " Set verbose mode") ;
   ("-version",
    Arg.Unit (fun () -> print_endline Version.value; exit 0),
-   " Print version and exit") ;
-  ("-no-folding",
-   Arg.Unit ignore,
-   " Deprecated") ;
-  ("-no-navbar",
-   Arg.Unit ignore,
-   " Deprecated")
+   " Print version and exit")
 ]
 
 let usage =
