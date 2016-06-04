@@ -45,8 +45,6 @@ let add_search_path sp =
 
 let files = ref []
 
-let combine_expr = ref None
-
 let summary_only = ref false
 
 let ignore_missing_files = ref false
@@ -81,9 +79,6 @@ let options = Arg.align [
   ("-bisect",
    Arg.String (fun s -> add_output (Bisect_output s)),
    "<file>  Output bisect data to the given file") ;
-  ("-combine-expr",
-   Arg.String (fun s -> combine_expr := Some s),
-   "<expr>  Combine files according to given expression to produce counts") ;
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Output CSV to the given file") ;

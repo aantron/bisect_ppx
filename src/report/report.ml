@@ -26,11 +26,11 @@ let main () =
     exit 0
   end;
   let data =
-    match !ReportArgs.files, !ReportArgs.combine_expr with
-    | [], None ->
-        prerr_endline " *** warning: neither input file nor expression provided";
+    match !ReportArgs.files with
+    | [] ->
+        prerr_endline " *** warning: no .out files provided";
         exit 0
-    | (_ :: _), None ->
+    | (_ :: _) ->
         List.fold_right
           (fun s acc ->
             List.iter
@@ -40,22 +40,7 @@ let main () =
               (Common.read_runtime_data s);
             acc)
           !ReportArgs.files
-          (Hashtbl.create 17)
-    | [], Some expr ->
-        (try
-          Combine.eval expr
-        with
-        | Combine.Exception e ->
-            Printf.eprintf " *** combine expression error: %s\n"
-              (Combine.string_of_error e);
-            exit 1
-        | e ->
-            Printf.eprintf " *** combine expression error: %s\n"
-              (Printexc.to_string e);
-            exit 1)
-    | (_ :: _), Some _ ->
-        prerr_endline " *** error: both input file(s) and expression provided";
-        exit 1 in
+          (Hashtbl.create 17) in
   let verbose = if !ReportArgs.verbose then print_endline else ignore in
   let search_file l f =
     let fail () =

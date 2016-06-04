@@ -50,9 +50,6 @@ val search_path : string list ref
 val files : string list ref
 (** Files to gather (runtime data). *)
 
-val combine_expr : string option ref
-(** Expression used to combine data files. *)
-
 val summary_only : bool ref
 (** Whether to output only summary (text only). *)
 
