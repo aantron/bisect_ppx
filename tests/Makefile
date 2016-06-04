@@ -49,8 +49,8 @@ unit: FORCE
 	@make -C .. dev
 	@rm -rf $(COVERAGE) $(PRESERVE)
 	@$(UNIT)
-	@echo " Coverage:"
-	@$(REPORT) -summary-only -text - | grep --color=none total
+	@echo "Coverage:"
+	@$(REPORT) -summary-only -text - | grep --color=none Summary
 
 one: FORCE
 	@make -C .. dev

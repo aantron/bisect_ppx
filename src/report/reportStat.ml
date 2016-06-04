@@ -18,34 +18,16 @@
 
 open ReportUtils
 
-type single = { mutable count : int; mutable total : int }
+type counts = { mutable visited : int; mutable total : int }
 
-type all = (Common.point_kind * single) list
+let make () = { visited = 0; total = 0 }
 
-let make () =
-  List.map
-    (fun x -> (x, { count = 0; total = 0 }))
-    Common.all_point_kinds
+let update counts v =
+  counts.total <- counts.total ++ 1;
+  if v then counts.visited <- counts.visited ++ 1
 
-let update s k p =
-  assert (List.mem_assoc k s);
-  let r = List.assoc k s in
-  if p then r.count <- r.count ++ 1;
-  r.total <- r.total ++ 1
-
-let summarize s =
-  List.fold_left
-    (fun (c, t) (_, r) ->
-      ((c ++ r.count), (t ++ r.total)))
-    (0, 0)
-    s
-
-let add s1 s2 =
-  List.map2
-    (fun (k1, r1) (k2, r2) ->
-      assert (k1 = k2);
-      (k1, { count = r1.count ++ r2.count; total = r1.total ++ r2.total }))
-    s1
-    s2
+let add counts_1 counts_2 =
+  {visited = counts_1.visited ++ counts_2.visited;
+   total = counts_1.total ++ counts_2.total}
 
 let sum = List.fold_left add (make ())

@@ -24,17 +24,7 @@ let make sep =
     method file_header f = f ^ sep
     method file_footer _ = ""
     method file_summary s = self#sum s
-    method point _ _ _ = ""
+    method point _ _ = ""
     method private sum s =
-      let elems =
-        List.map
-          (fun (_, v) ->
-            Printf.sprintf "%d%s%d"
-              v.ReportStat.count
-              sep
-              v.ReportStat.total)
-          s in
-      let x, y = ReportStat.summarize s in
-      (String.concat sep elems) ^
-      (Printf.sprintf "%s%d%s%d\n" sep x sep y)
+      Printf.sprintf "%d%s%d\n" s.ReportStat.visited sep s.ReportStat.total
   end

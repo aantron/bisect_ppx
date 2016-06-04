@@ -17,90 +17,10 @@
  *)
 
 
-(* Point kinds *)
-
-type point_kind =
-  | Binding
-  | Sequence
-  | For
-  | If_then
-  | Try
-  | While
-  | Match
-  | Class_expr
-  | Class_init
-  | Class_meth
-  | Class_val
-  | Toplevel_expr
-  | Lazy_operator
-
 type point_definition = {
     offset : int;
     identifier : int;
-    kind : point_kind;
   }
-
-let all_point_kinds = [
-  Binding ;
-  Sequence ;
-  For ;
-  If_then ;
-  Try ;
-  While ;
-  Match ;
-  Class_expr ;
-  Class_init ;
-  Class_meth ;
-  Class_val ;
-  Toplevel_expr ;
-  Lazy_operator
-]
-
-let string_of_point_kind = function
-  | Binding -> "binding"
-  | Sequence -> "sequence"
-  | For -> "for"
-  | If_then -> "if/then"
-  | Try -> "try"
-  | While -> "while"
-  | Match -> "match/function"
-  | Class_expr -> "class expression"
-  | Class_init -> "class initializer"
-  | Class_meth -> "class method"
-  | Class_val -> "class value"
-  | Toplevel_expr -> "toplevel expression"
-  | Lazy_operator -> "lazy operator"
-
-let char_of_point_kind = function
-  | Binding -> 'b'
-  | Sequence -> 's'
-  | For -> 'f'
-  | If_then -> 'i'
-  | Try -> 't'
-  | While -> 'w'
-  | Match -> 'm'
-  | Class_expr -> 'c'
-  | Class_init -> 'd'
-  | Class_meth -> 'e'
-  | Class_val -> 'v'
-  | Toplevel_expr -> 'p'
-  | Lazy_operator -> 'l'
-
-let point_kind_of_char = function
-  | 'b' -> Binding
-  | 's' -> Sequence
-  | 'f' -> For
-  | 'i' -> If_then
-  | 't' -> Try
-  | 'w' -> While
-  | 'm' -> Match
-  | 'c' -> Class_expr
-  | 'd' -> Class_init
-  | 'e' -> Class_meth
-  | 'v' -> Class_val
-  | 'p' -> Toplevel_expr
-  | 'l' -> Lazy_operator
-  | _ -> invalid_arg "Bisect.Common.point_kind_of_char"
 
 (* Utility functions *)
 

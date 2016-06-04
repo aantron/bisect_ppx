@@ -52,9 +52,9 @@ let custom_mark_function file =
 let case_variable = "___bisect_matched_value___"
 
 (* Evaluates to a point at the given location. If the point does not yet exist,
-   creates it with the given kind. The point is paired with a flag indicating
-   whether it exited before this function was called. *)
-let get_point file ofs kind marked =
+   creates it.. The point is paired with a flag indicating whether it existed
+   before this function was called. *)
+let get_point file ofs marked =
   let lst = InstrumentState.get_points_for_file file in
 
   let maybe_existing =
@@ -67,15 +67,15 @@ let get_point file ofs kind marked =
   | None ->
     let idx = List.length lst in
     if marked then InstrumentState.add_marked_point idx;
-    let pt = { Common.offset = ofs; identifier = idx; kind = kind } in
+    let pt = { Common.offset = ofs; identifier = idx } in
     InstrumentState.set_points_for_file file (pt :: lst);
     pt, false
 
-(* Creates the marking expression for given file, offset, and kind.
-   Populates the 'points' global variable. *)
-let marker must_be_unique file ofs kind marked =
+(* Creates the marking expression for given file, and offset. Populates the
+   'points' global variable. *)
+let marker must_be_unique file ofs marked =
   let { Common.identifier = idx; _ }, existing =
-    get_point file ofs kind marked in
+    get_point file ofs marked in
   if must_be_unique && existing then
     None
   else
@@ -88,14 +88,13 @@ let marker must_be_unique file ofs kind marked =
    unmodified if the expression is already marked, has a ghost location,
    construct instrumentation is disabled, or a special comments indicates to
    ignore line. *)
-let wrap_expr ?(must_be_unique = true) ?loc k e =
-  let enabled = List.assoc k InstrumentArgs.kinds in
+let wrap_expr ?(must_be_unique = true) ?loc e =
   let loc =
     match loc with
     | None -> e.pexp_loc
     | Some loc -> loc
   in
-  if loc.Location.loc_ghost || not !enabled then
+  if loc.Location.loc_ghost then
     e
   else
     let ofs = loc.Location.loc_start.Lexing.pos_cnum in
@@ -114,7 +113,7 @@ let wrap_expr ?(must_be_unique = true) ?loc k e =
     else
       let marked = List.mem line c.CommentsPpx.marked_lines in
       let marker_file = !Location.input_name in
-      match marker must_be_unique marker_file ofs k marked with
+      match marker must_be_unique marker_file ofs marked with
       | Some w -> Exp.sequence ~loc w e
       | None   -> e
 
@@ -219,18 +218,18 @@ let translate_pattern =
    expression. If there are multiple top-level patterns, wrap_case inserts a
    match expression that determines, at runtime, which one is matched, and
    increments the appropriate point counts. *)
-let wrap_case k case =
+let wrap_case case =
   let maybe_guard =
     match case.pc_guard with
     | None -> None
-    | Some guard -> Some (wrap_expr k guard)
+    | Some guard -> Some (wrap_expr guard)
   in
 
   let pattern = case.pc_lhs in
   let loc = pattern.ppat_loc in
 
   if !InstrumentArgs.simple_cases then
-    Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc k case.pc_rhs)
+    Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc case.pc_rhs)
   else
     (* If this is an exception case, work with the pattern inside the exception
        instead. *)
@@ -247,12 +246,12 @@ let wrap_case k case =
         l.Location.loc_start.Lexing.pos_cnum -
         l'.Location.loc_start.Lexing.pos_cnum)
       |> List.fold_left (fun e l ->
-        wrap_expr ~must_be_unique:false ~loc:l k e) e
+        wrap_expr ~must_be_unique:false ~loc:l e) e
     in
 
     match translate_pattern loc pure_pattern with
     | [] ->
-      Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc k case.pc_rhs)
+      Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc case.pc_rhs)
     | [marks, _] ->
       Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
     | cases ->
@@ -283,9 +282,9 @@ let wrap_case k case =
       Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
         (Exp.sequence ~loc marks_expr case.pc_rhs)
 
-let wrap_class_field_kind k = function
+let wrap_class_field_kind = function
   | Cfk_virtual _ as cf -> cf
-  | Cfk_concrete (o,e)  -> Cf.concrete o (wrap_expr k e)
+  | Cfk_concrete (o,e)  -> Cf.concrete o (wrap_expr e)
 
 let pattern_var id =
   Pat.var (Location.mkloc id Location.none)
@@ -348,7 +347,7 @@ class instrumenter = object (self)
         let l =
           List.map
             (fun (l, e) ->
-              (l, (wrap_expr Common.Class_expr e)))
+              (l, (wrap_expr e)))
             l in
         Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
     | _ ->
@@ -360,12 +359,12 @@ class instrumenter = object (self)
     let cf = super#class_field cf in
     match cf.pcf_desc with
     | Pcf_val (id, mut, cf) ->
-        Cf.val_ ~loc ~attrs id mut (wrap_class_field_kind Common.Class_val cf)
+        Cf.val_ ~loc ~attrs id mut (wrap_class_field_kind cf)
     | Pcf_method (id, mut, cf) ->
         Cf.method_ ~loc ~attrs id mut
-          (wrap_class_field_kind Common.Class_meth cf)
+          (wrap_class_field_kind cf)
     | Pcf_initializer e ->
-        Cf.initializer_ ~loc ~attrs (wrap_expr Common.Class_init e)
+        Cf.initializer_ ~loc ~attrs (wrap_expr e)
     | _ ->
         cf
 
@@ -383,43 +382,43 @@ class instrumenter = object (self)
       | Pexp_let (rec_flag, l, e) ->
           let l =
             List.map (fun vb ->
-            {vb with pvb_expr = wrap_expr Common.Sequence vb.pvb_expr}) l in
-          Exp.let_ ~loc ~attrs rec_flag l (wrap_expr Common.Sequence e)
+            {vb with pvb_expr = wrap_expr vb.pvb_expr}) l in
+          Exp.let_ ~loc ~attrs rec_flag l (wrap_expr e)
       | Pexp_poly (e, ct) ->
-          Exp.poly ~loc ~attrs (wrap_expr Common.Sequence e) ct
+          Exp.poly ~loc ~attrs (wrap_expr e) ct
       | Pexp_fun (al, eo, p, e) ->
-          let eo = map_opt (wrap_expr Common.Match) eo in
-          Exp.fun_ ~loc ~attrs al eo p (wrap_expr Common.Match e)
+          let eo = map_opt wrap_expr eo in
+          Exp.fun_ ~loc ~attrs al eo p (wrap_expr e)
       | Pexp_apply (e1, [l2, e2; l3, e3]) ->
           (match e1.pexp_desc with
           | Pexp_ident ident
             when
               List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
                 Exp.apply ~loc ~attrs e1
-                  [l2, (wrap_expr Common.Lazy_operator e2);
-                  l3, (wrap_expr Common.Lazy_operator e3)]
+                  [l2, (wrap_expr e2);
+                  l3, (wrap_expr e3)]
           | Pexp_ident ident when string_of_ident ident = "|>" ->
             Exp.apply ~loc ~attrs e1
-              [l2, e2; l3, (wrap_expr Common.Sequence e3)]
+              [l2, e2; l3, (wrap_expr e3)]
           | _ -> e')
       | Pexp_match (e, l) ->
-          List.map (wrap_case Common.Match) l
+          List.map wrap_case l
           |> Exp.match_ ~loc ~attrs e
       | Pexp_function l ->
-          List.map (wrap_case Common.Match) l
+          List.map wrap_case l
           |> Exp.function_ ~loc ~attrs
       | Pexp_try (e, l) ->
-          List.map (wrap_case Common.Try) l
+          List.map wrap_case l
           |> Exp.try_ ~loc ~attrs e
       | Pexp_ifthenelse (e1, e2, e3) ->
-          Exp.ifthenelse ~loc ~attrs e1 (wrap_expr Common.If_then e2)
-            (match e3 with Some x -> Some (wrap_expr Common.If_then x) | None -> None)
+          Exp.ifthenelse ~loc ~attrs e1 (wrap_expr e2)
+            (match e3 with Some x -> Some (wrap_expr x) | None -> None)
       | Pexp_sequence (e1, e2) ->
-          Exp.sequence ~loc ~attrs e1 (wrap_expr Common.Sequence e2)
+          Exp.sequence ~loc ~attrs e1 (wrap_expr e2)
       | Pexp_while (e1, e2) ->
-          Exp.while_ ~loc ~attrs e1 (wrap_expr Common.While e2)
+          Exp.while_ ~loc ~attrs e1 (wrap_expr e2)
       | Pexp_for (id, e1, e2, dir, e3) ->
-          Exp.for_ ~loc ~attrs id e1 e2 dir (wrap_expr Common.For e3)
+          Exp.for_ ~loc ~attrs id e1 e2 dir (wrap_expr e3)
       | _ -> e'
 
   method! structure_item si =
@@ -442,15 +441,15 @@ class instrumenter = object (self)
                           (ident.loc.Location.loc_start.Lexing.pos_fname)
                             ident.txt -> vb.pvb_expr
                       | _ ->
-                        wrap_expr Common.Binding (self#expr vb.pvb_expr)
+                        wrap_expr (self#expr vb.pvb_expr)
                     end
                 | _ ->
-                    wrap_expr Common.Binding (self#expr vb.pvb_expr)})
+                    wrap_expr (self#expr vb.pvb_expr)})
           l
         in
           Str.value ~loc rec_flag l
     | Pstr_eval (e, a) when not (attribute_guard || extension_guard) ->
-        Str.eval ~loc ~attrs:a (wrap_expr Common.Toplevel_expr (self#expr e))
+        Str.eval ~loc ~attrs:a (wrap_expr (self#expr e))
     | _ ->
         super#structure_item si
 

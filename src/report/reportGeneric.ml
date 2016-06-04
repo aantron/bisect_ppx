@@ -20,11 +20,11 @@ class type converter =
   object
     method header : string
     method footer : string
-    method summary : ReportStat.all -> string
+    method summary : ReportStat.counts -> string
     method file_header : string -> string
     method file_footer : string -> string
-    method file_summary : ReportStat.all -> string
-    method point : int -> int -> Common.point_kind -> string
+    method file_summary : ReportStat.counts -> string
+    method point : int -> int -> string
   end
 
 let output_file verbose in_file conv resolver visited =
@@ -39,8 +39,8 @@ let output_file verbose in_file conv resolver visited =
     verbose (Printf.sprintf "... file has the following points: %s"
       (String.concat ","
         (List.map (fun pd ->
-          Printf.sprintf "[%d %d %s]\n" pd.Common.offset pd.Common.identifier
-            (Common.string_of_point_kind pd.Common.kind)) cmp_content)));
+          Printf.sprintf "[%d %d]\n" pd.Common.offset pd.Common.identifier)
+          cmp_content)));
     let len = Array.length visited in
     let stats = ReportStat.make () in
     let points =
@@ -51,15 +51,15 @@ let output_file verbose in_file conv resolver visited =
               visited.(p.Common.identifier)
             else
               0 in
-          ReportStat.update stats p.Common.kind (nb > 0);
-          (p.Common.offset, nb, p.Common.kind))
+          ReportStat.update stats (nb > 0);
+          (p.Common.offset, nb))
         cmp_content in
     let buffer = Buffer.create 64 in
     Buffer.add_string buffer (conv#file_header in_file);
     Buffer.add_string buffer (conv#file_summary stats);
     List.iter
-      (fun (ofs, nb, k) ->
-        Buffer.add_string buffer (conv#point ofs nb k))
+      (fun (ofs, nb) ->
+        Buffer.add_string buffer (conv#point ofs nb))
       points;
     Buffer.add_string buffer (conv#file_footer in_file);
     Some (Buffer.contents buffer, stats)

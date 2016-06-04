@@ -24,9 +24,8 @@ let make () =
     method file_header f = Printf.sprintf "file %S\n" f
     method file_footer _ = ""
     method file_summary _ = ""
-    method point ofs nb k =
-      Printf.sprintf "  point %20s at offset %6d: %6d\n"
-        (Common.string_of_point_kind k)
+    method point ofs nb =
+      Printf.sprintf "  point at offset %6d: %6d\n"
         ofs
         nb
   end

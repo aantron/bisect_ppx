@@ -20,11 +20,11 @@ let make summary_only =
   object (self)
     method header = ""
     method footer = ""
-    method summary s = "Summary:\n" ^ (self#sum s)
-    method file_header f = if not summary_only then Printf.sprintf "File '%s':\n" f else ""
+    method summary s = "Summary: " ^ (self#sum s)
+    method file_header f = if not summary_only then Printf.sprintf "File '%s': " f else ""
     method file_footer _ = ""
     method file_summary s = if not summary_only then self#sum s else ""
-    method point _ _ _ = ""
+    method point _ _ = ""
     method private sum s =
       let numbers x y =
         if y > 0 then
@@ -32,14 +32,5 @@ let make summary_only =
           Printf.sprintf "%d/%d (%.2f%%)" x y p
         else
           "none" in
-      let lines =
-        List.map
-          (fun (k, v) ->
-            Printf.sprintf " - '%s' points: %s"
-              (Common.string_of_point_kind k)
-              (numbers v.ReportStat.count v.ReportStat.total))
-          s in
-      let x, y = ReportStat.summarize s in
-      (String.concat "\n" lines) ^ "\n" ^
-      " - total: " ^ (numbers x y) ^ "\n"
+      ReportStat.(numbers s.visited s.total) ^ "\n"
   end

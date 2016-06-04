@@ -17,7 +17,7 @@
 #
 
 # Disable looking at all files, so test directory has separate compilation
-true: -traverse, warn(A-4), warn_error(A-3)
+true: -traverse, warn(A-4-48), warn_error(A-3)
 <src/**>: include
 
 # Options

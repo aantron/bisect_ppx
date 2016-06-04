@@ -17,27 +17,6 @@
  *)
 
 
-let kinds = List.map (fun x -> (x, ref true)) Common.all_point_kinds
-
-let set_kinds v s =
-  String.iter
-    (fun ch ->
-      try
-        let k = Common.point_kind_of_char ch in
-	(List.assoc k kinds) := v
-      with _ -> raise (Arg.Bad (Printf.sprintf "unknown point kind: %C" ch)))
-    s
-
-let desc_kinds =
-  let lines =
-    List.map
-      (fun k ->
-	Printf.sprintf "\n     %c %s"
-	  (Common.char_of_point_kind k)
-	  (Common.string_of_point_kind k))
-      Common.all_point_kinds in
-  String.concat "" lines
-
 let runtime_name = ref "Bisect"
 
 let simple_cases = ref false
@@ -45,14 +24,6 @@ let simple_cases = ref false
 let inexhaustive_matching = ref false
 
 let switches = [
-  ("-disable",
-   Arg.String (set_kinds false),
-   ("<kinds>  Disable point kinds:" ^ desc_kinds)) ;
-
-  ("-enable",
-   Arg.String (set_kinds true),
-   ("<kinds>  Enable point kinds:" ^ desc_kinds)) ;
-
   ("-exclude",
    Arg.String Exclusions.add,
    "<pattern>  Exclude functions matching pattern") ;

@@ -19,9 +19,6 @@
 (** This module defines the values related to command-line analysis. *)
 
 
-val kinds : (Common.point_kind * (bool ref)) list
-(** Association list mapping points kinds to whether they are activated. *)
-
 val runtime_name : string ref
 (** Runtime module name. Defaults to [Bisect], but should be set to
     [Meta_bisect] when applying Bisect_ppx to itself. *)

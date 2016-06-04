@@ -13,7 +13,6 @@ passed using Ocamlbuild, using the tag `ppxopt`.
 - [Excluding code from coverage](#Excluding)
   - [Individual lines and line ranges](#ExcludingLines)
   - [Files and top-level values](#ExcludingValues)
-  - [Language constructs](#ExcludingConstructs)
 - [Environment variables](#EnvironmentVariables)
   - [Naming the visitation count files](#OutFiles)
   - [Logging](#Logging)
@@ -195,34 +194,6 @@ file regexp "src/.*" [ regexp "dbg_.*" ]
 ```
 
 All regular expressions are in the syntax of the [`Str`][Str] module.
-
-<a id="ExcludingConstructs"></a>
-#### Language constructs
-
-You can pass the `-disable` option to the Bisect_ppx preprocessor to exclude all
-instances of a language construct from coverage analysis. For example,
-
-```
-ocamlfind c -package bisect_ppx -ppxopt "bisect_ppx,-disable bw" -c my_code.ml
-```
-
-disables coverage analysis of top-level bindings (`b`), and of `while` loops
-(`w`).
-
-The full list of construct categories that can be disabled is:
-
-- `m` – `match` expressions and functions
-- `i` - `if` expressions
-- `t` – `try` expressions
-- `l` – `||` and `&&`
-- `b` – top-level bindings
-- `s` – sequences, `let` expressions, and `|>`
-- `c` – class expressions
-- `d` – class initializers
-- `e` – class methods
-- `v` – class fields
-- `f` – `for` loops
-- `w` – `while` loops
 
 
 

@@ -28,7 +28,7 @@ class type converter =
     method footer : string
     (** Should return the overall footer for output. *)
 
-    method summary : ReportStat.all -> string
+    method summary : ReportStat.counts -> string
     (** Should return the overall summary for passed statistics. *)
 
     method file_header : string -> string
@@ -37,13 +37,12 @@ class type converter =
     method file_footer : string -> string
     (** Should return the footer for passed file. *)
 
-    method file_summary : ReportStat.all -> string
+    method file_summary : ReportStat.counts -> string
     (** Should return the file summary for passed statistics. *)
 
-    method point : int -> int -> Common.point_kind -> string
+    method point : int -> int -> string
     (** [point o n k] should return the output for a given point, [o]
-        being the offset, [n] the number of visits, and [k] the point
-        kind. *)
+        being the offset, and [n] the number of visits. *)
   end
 (** The class type defining a generic output. *)
 

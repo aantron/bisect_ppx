@@ -455,7 +455,7 @@ let split_filename name =
   dirname, basename
 
 let percentage stats =
-  let a, b = ReportStat.summarize stats in
+  let a, b = ReportStat.(stats.visited, stats.total) in
   let a, b = float_of_int a, float_of_int b in
   if b = 0. then 100. else (100. *. a) /. b
 
@@ -560,7 +560,7 @@ let output_html verbose tab_size title in_file out_file resolver visited =
                            visited.(p.Common.identifier)
                          else
                            0 in
-                       ReportStat.update stats p.Common.kind (nb > 0);
+                       ReportStat.update stats (nb > 0);
                        (p.Common.offset, nb))
                      cmp_content) in
     let dirname, basename = split_filename in_file in
