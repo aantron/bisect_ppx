@@ -57,14 +57,8 @@ let tests = "report" >::: [
     report "-xml -" ~r:"| grep -v '<!--.*Bisect' > output";
     diff "report/reference.xml");
 
-  test "xml-emma" (fun () ->
-    report "-xml-emma -" ~r:"| grep -v '<!--.*Bisect' > output";
-    diff "report/reference.xml-emma");
-
   test "xml.lint" (fun () ->
     report "-xml report.xml";
     report "-dump-dtd report.dtd";
-    xmllint "--noout --dtdvalid report.dtd report.xml";
-    report "-xml-emma report.xml-emma";
-    xmllint "--noout report.xml-emma")
+    xmllint "--noout --dtdvalid report.dtd report.xml")
 ]

@@ -69,8 +69,6 @@ let main () =
           search_in_path data
     | ReportArgs.Xml_output file ->
         generic_output file (ReportXML.make ())
-    | ReportArgs.Xml_emma_output file ->
-        generic_output file (ReportXMLEmma.make ())
     | ReportArgs.Csv_output file ->
         generic_output file (ReportCSV.make !ReportArgs.separator)
     | ReportArgs.Text_output file ->

@@ -22,7 +22,6 @@
 type output_kind =
   | Html_output of string
   | Xml_output of string
-  | Xml_emma_output of string
   | Csv_output of string
   | Text_output of string
   | Dump_output of string

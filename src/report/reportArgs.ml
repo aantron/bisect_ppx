@@ -19,7 +19,6 @@
 type output_kind =
   | Html_output of string
   | Xml_output of string
-  | Xml_emma_output of string
   | Csv_output of string
   | Text_output of string
   | Dump_output of string
@@ -104,9 +103,6 @@ let options = Arg.align [
              (ReportUtils.output_strings ReportXML.dtd []);
            exit 0),
    "<file>  Output XML DTD to the given file") ;
-  ("-xml-emma",
-   Arg.String (fun s -> add_output (Xml_emma_output s)),
-   "<file>  Output EMMA XML to the given file") ;
   ("-ignore-missing-files",
    Arg.Set ignore_missing_files,
    " Do not fail if an .ml file can't be found") ;
