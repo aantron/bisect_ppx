@@ -1,41 +1,30 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<bisect-report>
-  <summary>
-    <element kind="binding" count="2" total="2"/>
-    <element kind="sequence" count="1" total="1"/>
-    <element kind="for" count="0" total="0"/>
-    <element kind="if/then" count="0" total="0"/>
-    <element kind="try" count="0" total="0"/>
-    <element kind="while" count="0" total="0"/>
-    <element kind="match/function" count="1" total="1"/>
-    <element kind="class expression" count="0" total="0"/>
-    <element kind="class initializer" count="0" total="0"/>
-    <element kind="class method" count="0" total="0"/>
-    <element kind="class value" count="0" total="0"/>
-    <element kind="toplevel expression" count="0" total="0"/>
-    <element kind="lazy operator" count="0" total="0"/>
-    <element kind="total" count="4" total="4"/>
-  </summary>
-  <file path="deriving.ml">
-    <summary>
-      <element kind="binding" count="2" total="2"/>
-      <element kind="sequence" count="1" total="1"/>
-      <element kind="for" count="0" total="0"/>
-      <element kind="if/then" count="0" total="0"/>
-      <element kind="try" count="0" total="0"/>
-      <element kind="while" count="0" total="0"/>
-      <element kind="match/function" count="1" total="1"/>
-      <element kind="class expression" count="0" total="0"/>
-      <element kind="class initializer" count="0" total="0"/>
-      <element kind="class method" count="0" total="0"/>
-      <element kind="class value" count="0" total="0"/>
-      <element kind="toplevel expression" count="0" total="0"/>
-      <element kind="lazy operator" count="0" total="0"/>
-      <element kind="total" count="4" total="4"/>
-    </summary>
-    <point offset="9" count="1" kind="binding"/>
-    <point offset="13" count="1" kind="match/function"/>
-    <point offset="54" count="1" kind="binding"/>
-    <point offset="68" count="1" kind="sequence"/>
-  </file>
-</bisect-report>
+Summary:
+ - 'binding' points: 2/2 (100.00%)
+ - 'sequence' points: 1/1 (100.00%)
+ - 'for' points: none
+ - 'if/then' points: none
+ - 'try' points: none
+ - 'while' points: none
+ - 'match/function' points: 1/1 (100.00%)
+ - 'class expression' points: none
+ - 'class initializer' points: none
+ - 'class method' points: none
+ - 'class value' points: none
+ - 'toplevel expression' points: none
+ - 'lazy operator' points: none
+ - total: 4/4 (100.00%)
+File 'deriving.ml':
+ - 'binding' points: 2/2 (100.00%)
+ - 'sequence' points: 1/1 (100.00%)
+ - 'for' points: none
+ - 'if/then' points: none
+ - 'try' points: none
+ - 'while' points: none
+ - 'match/function' points: 1/1 (100.00%)
+ - 'class expression' points: none
+ - 'class initializer' points: none
+ - 'class method' points: none
+ - 'class value' points: none
+ - 'toplevel expression' points: none
+ - 'lazy operator' points: none
+ - total: 4/4 (100.00%)

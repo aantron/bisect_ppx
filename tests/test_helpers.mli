@@ -108,7 +108,3 @@ val diff_ast : string -> unit
 (** Same as [diff], but first applies [normalize_source] to the given reference
     file. The [diff] command is then run between [_scratch/output] and the
     normalized source. Use [diff_ast] for comparing [.ml] files. *)
-
-val xmllint : string -> unit
-(** Runs [xmllint] with the given arguments. Skips the current test if [xmllint]
-    is not installed. *)

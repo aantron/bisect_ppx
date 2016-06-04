@@ -18,7 +18,6 @@
 
 type output_kind =
   | Html_output of string
-  | Xml_output of string
   | Csv_output of string
   | Text_output of string
   | Dump_output of string
@@ -87,22 +86,6 @@ let options = Arg.align [
   ("-dump",
    Arg.String (fun s -> add_output (Dump_output s)),
    "<file>  Output bare dump to the given file") ;
-  ("-xml",
-   Arg.String (fun s -> add_output (Xml_output s)),
-   "<file>  Output XML to the given file") ;
-  ("-dump-dtd",
-   Arg.String
-     (function
-       | "-" ->
-           ReportUtils.output_strings ReportXML.dtd [] stdout;
-           exit 0
-       | s ->
-           Common.try_out_channel
-             false
-             s
-             (ReportUtils.output_strings ReportXML.dtd []);
-           exit 0),
-   "<file>  Output XML DTD to the given file") ;
   ("-ignore-missing-files",
    Arg.Set ignore_missing_files,
    " Do not fail if an .ml file can't be found") ;

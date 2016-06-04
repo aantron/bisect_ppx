@@ -16,9 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-(* Note that the reference file may have to be adjusted if point instrumentation
-   code is changed. *)
-
 open OUnit2
 open Test_helpers
 
@@ -39,7 +36,7 @@ let test ?(bisect = "") name expect_correctness =
 
     compile cflags "thread-safety/source.ml";
     run command;
-    report "-xml -" ~r:"| grep -v element | grep 'for' > output";
+    report "-dump -" ~r:" > output";
 
     if expect_correctness then
       diff "thread-safety/reference"

@@ -36,10 +36,6 @@ let tests = "report" >::: [
     report "-csv output";
     diff "report/reference.csv");
 
-  test "dtd" (fun () ->
-    report "-dump-dtd output";
-    diff "report/reference.dtd");
-
   test "dump" (fun () ->
     report "-dump output";
     diff "report/reference.dump");
@@ -51,14 +47,5 @@ let tests = "report" >::: [
 
   test "text" (fun () ->
     report "-text output";
-    diff "report/reference.text");
-
-  test "xml" (fun () ->
-    report "-xml -" ~r:"| grep -v '<!--.*Bisect' > output";
-    diff "report/reference.xml");
-
-  test "xml.lint" (fun () ->
-    report "-xml report.xml";
-    report "-dump-dtd report.dtd";
-    xmllint "--noout --dtdvalid report.dtd report.xml")
+    diff "report/reference.text")
 ]

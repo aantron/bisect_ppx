@@ -244,10 +244,6 @@ let diff_ast reference =
   normalize_source reference_actual "_dsource";
   _diff reference "_scratch/_dsource"
 
-let xmllint arguments =
-  skip_if (not @@ have_binary "xmllint") "xmllint not installed";
-  run ("xmllint " ^ arguments)
-
 let compile_compare cflags directory =
   let tests =
     Sys.readdir directory
