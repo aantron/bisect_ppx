@@ -65,7 +65,7 @@ let main () =
       fail () in
   let search_in_path = search_file !ReportArgs.search_path in
   let generic_output file conv =
-    ReportGeneric.output verbose file conv search_in_path data points in
+    ReportGeneric.output verbose file conv data points in
   let write_output = function
     | ReportArgs.Html_output dir ->
         mkdirs dir;

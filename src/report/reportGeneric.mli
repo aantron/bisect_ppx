@@ -47,11 +47,9 @@ class type converter =
 (** The class type defining a generic output. *)
 
 val output :
-  (string -> unit) -> string -> converter -> (string -> string option) ->
-  (string, int array) Hashtbl.t -> (string, string) Hashtbl.t ->
+  (string -> unit) -> string -> converter -> (string, int array) Hashtbl.t ->
+  (string, string) Hashtbl.t ->
     unit
-(** [output verbose file conv resolver data points] writes the element for
-    [data] to file [file] using [conv] for data conversion, [verbose] for
-    verbose output. [resolver] associates the actual path to a given
-    filename. [points] gives the marshalled locations of the points in the
-    file. *)
+(** [output verbose file conv data points] writes the element for [data] to file
+    [file] using [conv] for data conversion, [verbose] for verbose output.
+    [points] gives the marshalled locations of the points in the file. *)
