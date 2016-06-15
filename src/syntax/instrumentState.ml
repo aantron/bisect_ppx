@@ -19,29 +19,11 @@
 (** List of marked points (identifiers are stored). *)
 let marked_points = ref []
 
-(* List of files with a call to either "Bisect.Runtime.init" or
-   "Bisect.Runtime.init_with_array". *)
+(* List of files with a call to [Bisect.Runtime.init_with_array]. *)
 let files = ref []
 
 (* Map from file name to list of point definitions. *)
 let points : (string, (Common.point_definition list)) Hashtbl.t = Hashtbl.create 17
-
-(* Dumps the points to their respective files. *)
-let () =
-  at_exit
-    (fun () ->
-      List.iter
-        (fun f ->
-          if not (Hashtbl.mem points f) then
-            Hashtbl.add points f [])
-        !files;
-      Hashtbl.iter
-        (fun file points ->
-          Common.try_out_channel
-            true
-            (Common.cmp_file_of_ml_file file)
-            (fun channel -> Common.write_points channel points file))
-        points)
 
 let get_points_for_file file =
   try

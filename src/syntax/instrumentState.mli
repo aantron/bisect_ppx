@@ -17,8 +17,7 @@
  *)
 
 (** This stateful module maintains the information about files and points
-    that have been used by an instrumenter. It also registers a callback
-    to write this information at program termination. *)
+    that have been used by an instrumenter. *)
 
 val get_points_for_file : string -> Common.point_definition list
 (** Returns the list of point definitions for the passed file, an empty

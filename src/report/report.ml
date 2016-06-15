@@ -25,22 +25,27 @@ let main () =
     ReportArgs.print_usage ();
     exit 0
   end;
-  let data =
+  let data, points =
     match !ReportArgs.files with
     | [] ->
         prerr_endline " *** warning: no .out files provided";
         exit 0
     | (_ :: _) ->
-        List.fold_right
-          (fun s acc ->
-            List.iter
-              (fun (k, arr) ->
-                let arr' = try (Hashtbl.find acc k) +| arr with Not_found -> arr in
-                Hashtbl.replace acc k arr')
-              (Common.read_runtime_data s);
-            acc)
-          !ReportArgs.files
-          (Hashtbl.create 17) in
+      let total_counts = Hashtbl.create 17 in
+      let points = Hashtbl.create 17 in
+
+      !ReportArgs.files |> List.iter (fun out_file ->
+        Common.read_runtime_data' out_file
+        |> List.iter (fun (source_file, (file_counts, file_points)) ->
+          let file_counts =
+            try (Hashtbl.find total_counts source_file) +| file_counts
+            with Not_found -> file_counts
+          in
+          Hashtbl.replace total_counts source_file file_counts;
+          Hashtbl.replace points source_file file_points));
+
+      total_counts, points
+  in
   let verbose = if !ReportArgs.verbose then print_endline else ignore in
   let search_file l f =
     let fail () =
@@ -60,13 +65,13 @@ let main () =
       fail () in
   let search_in_path = search_file !ReportArgs.search_path in
   let generic_output file conv =
-    ReportGeneric.output verbose file conv search_in_path data in
+    ReportGeneric.output verbose file conv search_in_path data points in
   let write_output = function
     | ReportArgs.Html_output dir ->
         mkdirs dir;
         ReportHTML.output verbose dir
           !ReportArgs.tab_size !ReportArgs.title
-          search_in_path data
+          search_in_path data points
     | ReportArgs.Csv_output file ->
         generic_output file (ReportCSV.make !ReportArgs.separator)
     | ReportArgs.Text_output file ->

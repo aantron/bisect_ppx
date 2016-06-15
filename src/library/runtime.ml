@@ -51,11 +51,11 @@ let verbose =
       fun msg ->
         Printf.fprintf (Lazy.force oc_l) "%s\n" (string_of_message msg)
 
-let table : (string, (int array)) Hashtbl.t = Hashtbl.create 17
+let table : (string, int array * string) Hashtbl.t = Hashtbl.create 17
 
-let init_with_array fn arr =
+let init_with_array fn arr points =
   if not (Hashtbl.mem table fn) then
-    Hashtbl.add table fn arr
+    Hashtbl.add table fn (arr, points)
 
 let file_channel () =
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in

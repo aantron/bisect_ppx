@@ -1,11 +1,15 @@
 let ___bisect_mark___expr_while =
-  let marks = Array.make 10 0 in
-  Bisect.Runtime.init_with_array "expr_while.ml" marks;
+  let points =
+    "\132\149\166\190\000\000\000/\000\000\000\011\000\000\000)\000\000\000)\b\000\000(\000\160KE\160eD\160wB\160\000PA\160\000i@\160\001\000\135C\160\001\000\169I\160\001\000\195H\160\001\000\213F\160\001\000\243G"
+     in
+  let marks = Array.make 10 0  in
+  Bisect.Runtime.init_with_array "expr_while.ml" marks points;
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
 let () =
   ___bisect_mark___expr_while 5;
   print_endline "before";
@@ -19,11 +23,11 @@ let () =
      print_endline "ghi")
     done;
   ___bisect_mark___expr_while 3;
-  print_endline "after"
+  print_endline "after" 
 let () =
   ___bisect_mark___expr_while 9;
   print_endline "before";
   ___bisect_mark___expr_while 8;
   while true do (___bisect_mark___expr_while 6; print_endline "abc") done;
   ___bisect_mark___expr_while 7;
-  print_endline "after"
+  print_endline "after" 

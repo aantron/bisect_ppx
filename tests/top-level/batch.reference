@@ -1,9 +1,13 @@
 let ___bisect_mark___source =
-  let marks = Array.make 1 0 in
-  Bisect.Runtime.init_with_array "source.ml" marks;
+  let points =
+    "\132\149\166\190\000\000\000\004\000\000\000\002\000\000\000\005\000\000\000\005\144\160I@"
+     in
+  let marks = Array.make 1 0  in
+  Bisect.Runtime.init_with_array "source.ml" marks points;
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
-let () = ___bisect_mark___source 0; print_endline "foo"
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
+let () = ___bisect_mark___source 0; print_endline "foo" 

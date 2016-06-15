@@ -542,14 +542,16 @@ let escape_line tab_size line offset points =
     line;
   Buffer.contents buff
 
-let output_html verbose tab_size title in_file out_file resolver visited =
+let output_html
+    verbose tab_size title in_file out_file resolver visited points =
+
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
   match resolver in_file with
   | None ->
     verbose "... file not found";
     None
   | Some resolved_in_file ->
-    let cmp_content = Common.read_points resolved_in_file in
+    let cmp_content = Hashtbl.find points in_file |> Common.read_points' in
     verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
     let len = Array.length visited in
     let stats = ReportStat.make () in
@@ -702,7 +704,7 @@ let output_html verbose tab_size title in_file out_file resolver visited =
     close_out_noerr out_channel;
     Some stats
 
-let output verbose dir tab_size title resolver data =
+let output verbose dir tab_size title resolver data points =
   let files = Hashtbl.fold
       (fun in_file visited acc ->
         let l = List.length acc in
@@ -710,7 +712,7 @@ let output verbose dir tab_size title resolver data =
         let out_file = (Filename.concat dir basename) ^ ".html" in
         let maybe_stats =
           output_html verbose tab_size title in_file out_file resolver
-            visited
+            visited points
         in
         match maybe_stats with
         | None -> acc

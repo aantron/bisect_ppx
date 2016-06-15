@@ -1,23 +1,30 @@
 let ___bisect_mark___deriving =
-  let marks = Array.make 4 0 in
-  Bisect.Runtime.init_with_array "deriving.ml" marks;
+  let points =
+    "\132\149\166\190\000\000\000\014\000\000\000\005\000\000\000\017\000\000\000\017\192\160I@\160MA\160vC\160\000DB"
+     in
+  let marks = Array.make 4 0  in
+  Bisect.Runtime.init_with_array "deriving.ml" marks points;
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
-let () = ___bisect_mark___deriving 0; ()
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
+let () = ___bisect_mark___deriving 0; () 
 type a =
-  | Foo[@@deriving show]
+  | Foo [@@deriving show]
 let rec (pp_a : Format.formatter -> a -> Ppx_deriving_runtime.unit) =
   ((let open! Ppx_deriving_runtime in
       fun fmt  ->
         function
         | Foo  ->
             (___bisect_mark___deriving 1;
-             Format.pp_print_string fmt "Deriving.Foo"))[@ocaml.warning "-A"])
-and show_a : a -> Ppx_deriving_runtime.string=
+             Format.pp_print_string fmt "Deriving.Foo"))
+  [@ocaml.warning "-A"])
+
+and show_a : a -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_a x
+
 let () =
   ___bisect_mark___deriving 3;
-  (show_a Foo) |> ((___bisect_mark___deriving 2; print_endline))
+  (show_a Foo) |> ((___bisect_mark___deriving 2; print_endline)) 

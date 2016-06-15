@@ -1,16 +1,21 @@
 let ___bisect_mark___expr_doubleslashedquotes =
-  let marks = Array.make 3 0 in
-  Bisect.Runtime.init_with_array "expr_doubleslashedquotes.ml" marks;
+  let points =
+    "\132\149\166\190\000\000\000\011\000\000\000\004\000\000\000\r\000\000\000\r\176\160oB\160|@\160\000SA"
+     in
+  let marks = Array.make 3 0  in
+  Bisect.Runtime.init_with_array "expr_doubleslashedquotes.ml" marks points;
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
 type t =
-  | Anthony
-  | Caesar
+  | Anthony 
+  | Caesar 
 let message =
   ___bisect_mark___expr_doubleslashedquotes 2;
   (function
    | Anthony  -> (___bisect_mark___expr_doubleslashedquotes 0; "foo\\")
    | Caesar  -> (___bisect_mark___expr_doubleslashedquotes 1; "\\bar"))
+  

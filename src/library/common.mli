@@ -66,36 +66,32 @@ exception Modified_file of string
     instrumentation. The parameter is the name of the incriminated
     file. *)
 
-val cmp_file_of_ml_file : string -> string
-(** [cmp_file_of_ml_file f] returns the name of the {i cmp} file
-    associated with the {i ml} file named [f]. *)
-
-val write_runtime_data : out_channel -> (string * (int array)) list -> unit
+val write_runtime_data :
+  out_channel -> (string * (int array * string)) list -> unit
 (** [write_runtime_data oc d] writes the runtime data [d] to the output
     channel [oc] using the Bisect file format. The runtime data list [d]
     encodes a map (through an association list) from files to arrays of
     integers (the value at index {i i} being the number of times point
-    {i i} has been visited).
+    {i i} has been visited). The arrays are paired with point definition
+    lists, giving the location of each point in the file.
 
     Raises [Sys_error] if an i/o error occurs. *)
 
-val write_points : out_channel -> point_definition list -> string -> unit
-(** [write_points oc pts f] writes the point definitions [pts] to the
-    output channel [oc] using the Bisect file format. [f] is the name of
-    the source file related to point definitions, whose digest is written
-    to the output channel.
+val write_points : point_definition list -> string
+(** [write_points pts] converts the point definitions [pts] to a string. The
+    string is a binary byte sequence; it is not meant to be legible. *)
 
-    Raises [Sys_error] if an i/o error occurs. *)
-
-val read_runtime_data : string ->  (string * (int array)) list
+val read_runtime_data' : string -> (string * (int array * string)) list
 (** [read_runtime_data f] reads the runtime data from file [f].
 
     Raises [Sys_error] if an i/o error occurs. May also raise
     [Invalid_file], [Unsupported_version], or [Modified_file]. *)
 
-val read_points : string -> point_definition list
-(** [read_points f] reads the point definitions associated with the source
-    file named [f].
+val read_points' : string -> point_definition list
+(** [read_points s] reads point definitions from the string [s]. *)
 
-    Raises [Sys_error] if an i/o error occurs. May also raise
-    [Invalid_file], [Unsupported_version], or [Modified_file]. *)
+val read_runtime_data : string -> (string * int array) list
+  [@@ocaml.deprecated "read_runtime_data' will take the place of this function"]
+
+val read_points : string -> point_definition list
+  [@@ocaml.deprecated "read_points' will take the place of this function"]

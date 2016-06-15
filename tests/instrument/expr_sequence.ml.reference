@@ -1,24 +1,28 @@
 let ___bisect_mark___expr_sequence =
-  let marks = Array.make 15 0 in
-  Bisect.Runtime.init_with_array "expr_sequence.ml" marks;
+  let points =
+    "\132\149\166\190\000\000\000I\000\000\000\016\000\000\000=\000\000\000=\b\000\000<\000\160K@\160kB\160\000BA\160\000bE\160\000yD\160\001\000\144C\160\001\000\176J\160\001\000\211H\160\001\000\226F\160\001\001\002G\160\001\001&I\160\001\0019N\160\001\001KL\160\001\001]M\160\001\001cK"
+     in
+  let marks = Array.make 15 0  in
+  Bisect.Runtime.init_with_array "expr_sequence.ml" marks points;
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
-let () = ___bisect_mark___expr_sequence 0; print_endline "abc"
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
+let () = ___bisect_mark___expr_sequence 0; print_endline "abc" 
 let () =
   ___bisect_mark___expr_sequence 2;
   print_endline "abc";
   ___bisect_mark___expr_sequence 1;
-  print_endline "def"
+  print_endline "def" 
 let () =
   ___bisect_mark___expr_sequence 5;
   print_endline "abc";
   ___bisect_mark___expr_sequence 4;
   print_endline "def";
   ___bisect_mark___expr_sequence 3;
-  print_endline "ghi"
+  print_endline "ghi" 
 let () =
   ___bisect_mark___expr_sequence 10;
   (print_endline "abc";
@@ -27,8 +31,10 @@ let () =
     | 0 -> (___bisect_mark___expr_sequence 6; print_endline "def")
     | _ -> (___bisect_mark___expr_sequence 7; print_endline "ghi"))) |>
     ((___bisect_mark___expr_sequence 9; ignore))
+  
 let () =
   ___bisect_mark___expr_sequence 14;
-  (let f ?maybe  () = ___bisect_mark___expr_sequence 12; ignore maybe in
+  (let f ?maybe  () = ___bisect_mark___expr_sequence 12; ignore maybe  in
    ___bisect_mark___expr_sequence 13;
    () |> ((___bisect_mark___expr_sequence 11; f)))
+  

@@ -50,7 +50,9 @@
     should be specified with absolute paths. *)
 
 
-val init_with_array : string -> int array -> unit
-(** [init_with_array file marks] indicates that the file [file] is part of the
-    application that has been instrumented, using the passed array [marks] to
-    store marks. *)
+val init_with_array : string -> int array -> string -> unit
+(** [init_with_array file marks points] indicates that the file [file] is part
+    of the application that has been instrumented, using the passed array
+    [marks] to store visitation counts. [points] is a serialized
+    [Common.point_definition list] giving the locations of all points in the
+    file. *)

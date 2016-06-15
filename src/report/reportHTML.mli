@@ -21,10 +21,11 @@
 
 val output :
   (string -> unit) -> string -> int -> string -> (string -> string option) ->
-  (string, int array) Hashtbl.t ->
+  (string, int array) Hashtbl.t -> (string, string) Hashtbl.t ->
     unit
-(** [output verbose dir tab_size title resolver data] writes all the HTML files
-    for [data] in the directory [dir]. [verbose] is used for verbose output,
-    [tab_size] is the number of space characters to use as a replacement for
-    tabulations, [title] is the title for generated pages, and [resolver]
-    associates actual paths to given filenames. *)
+(** [output verbose dir tab_size title resolver data points] writes all the HTML
+    files for [data] in the directory [dir]. [verbose] is used for verbose
+    output, [tab_size] is the number of space characters to use as a replacement
+    for tabulations, [title] is the title for generated pages, and [resolver]
+    associates actual paths to given filenames. [points] gives the marshalled
+    locations of the points in the file. *)

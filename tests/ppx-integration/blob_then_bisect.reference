@@ -1,17 +1,23 @@
 let ___bisect_mark___blob =
-  let marks = Array.make 3 0 in
-  Bisect.Runtime.init_with_array "blob.ml" marks;
+  let points =
+    "\132\149\166\190\000\000\000\012\000\000\000\004\000\000\000\r\000\000\000\r\176\160L@\160\000EB\160\000aA"
+     in
+  let marks = Array.make 3 0  in
+  Bisect.Runtime.init_with_array "blob.ml" marks points;
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
 let me () =
   ___bisect_mark___blob 0;
   Printf.printf "ME: %s\n"
     "let me () = Printf.printf \"ME: %s\\n\" [%blob \"blob.ml\"]\n\nlet me' () = print_endline \"foo\"; [%blob \"blob.ml\"]\n"
+  
 let me' () =
   ___bisect_mark___blob 2;
   print_endline "foo";
   ___bisect_mark___blob 1;
   "let me () = Printf.printf \"ME: %s\\n\" [%blob \"blob.ml\"]\n\nlet me' () = print_endline \"foo\"; [%blob \"blob.ml\"]\n"
+  

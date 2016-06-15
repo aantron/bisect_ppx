@@ -1,14 +1,18 @@
 let ___bisect_mark___attributes =
-  let marks = Array.make 22 0 in
-  Bisect.Runtime.init_with_array "attributes.ml" marks;
+  let points =
+    "\132\149\166\190\000\000\000d\000\000\000\023\000\000\000Y\000\000\000Y\b\000\000X\000\160KU\160TQ\160YR\160jS\160uT\160\127N\160\000PO\160\000[P\160\000{L\160\001\000\134M\160\001\000\152I\160\001\000\164J\160\001\000\188K\160\001\000\202E\160\001\000\213F\160\001\000\235G\160\001\000\246H\160\001\001\014B\160\001\001\028C\160\001\0014D\160\001\001BA\160\001\001J@"
+     in
+  let marks = Array.make 22 0  in
+  Bisect.Runtime.init_with_array "attributes.ml" marks points;
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
 let () =
   ___bisect_mark___attributes 21;
-  ((let x = ___bisect_mark___attributes 17; 1 in
+  ((let x = ___bisect_mark___attributes 17; 1  in
     ___bisect_mark___attributes 18; x)[@testing ]) |>
     ((___bisect_mark___attributes 19; ignore));
   ___bisect_mark___attributes 20;
@@ -20,7 +24,8 @@ let () =
   ___bisect_mark___attributes 13;
   (((match 0 with
      | 0 -> (___bisect_mark___attributes 9; ())
-     | _ -> (___bisect_mark___attributes 10; ())))[@testing ]);
+     | _ -> (___bisect_mark___attributes 10; ())))
+  [@testing ]);
   ___bisect_mark___attributes 11;
   ((function
     | 0 -> (___bisect_mark___attributes 5; 0)
@@ -28,8 +33,10 @@ let () =
     ((___bisect_mark___attributes 7; ignore));
   ___bisect_mark___attributes 8;
   (((try (string_of_int 0) |> (___bisect_mark___attributes 2; ignore)
-     with | _ -> (___bisect_mark___attributes 3; ())))[@testing ]);
+     with | _ -> (___bisect_mark___attributes 3; ())))
+  [@testing ]);
   ___bisect_mark___attributes 4;
   ((if true
     then (___bisect_mark___attributes 1; ())
-    else (___bisect_mark___attributes 0; ()))[@testing ])
+    else (___bisect_mark___attributes 0; ()))
+  [@testing ]) 

@@ -1,14 +1,20 @@
 let ___bisect_mark___expr_lazyop =
-  let marks = Array.make 4 0 in
-  Bisect.Runtime.init_with_array "expr_lazyop.ml" marks;
+  let points =
+    "\132\149\166\190\000\000\000\r\000\000\000\005\000\000\000\017\000\000\000\017\192\160LA\160W@\160lC\160wB"
+     in
+  let marks = Array.make 4 0  in
+  Bisect.Runtime.init_with_array "expr_lazyop.ml" marks points;
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
 let f x y =
   (___bisect_mark___expr_lazyop 1; x > 0) &&
     (___bisect_mark___expr_lazyop 0; y > 0)
+  
 let g x y =
   (___bisect_mark___expr_lazyop 3; x > 0) ||
     (___bisect_mark___expr_lazyop 2; y > 0)
+  

@@ -27,15 +27,15 @@ class type converter =
     method point : int -> int -> string
   end
 
-let output_file verbose in_file conv resolver visited =
+let output_file verbose in_file conv resolver visited points =
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
   let resolved_in_file = resolver in_file in
   match resolved_in_file with
   | None ->
     verbose "... file not found";
     None
-  | Some resolved_in_file ->
-    let cmp_content = Common.read_points resolved_in_file in
+  | Some _ ->
+    let cmp_content = Hashtbl.find points in_file |> Common.read_points' in
     verbose (Printf.sprintf "... file has the following points: %s"
       (String.concat ","
         (List.map (fun pd ->
@@ -64,10 +64,10 @@ let output_file verbose in_file conv resolver visited =
     Buffer.add_string buffer (conv#file_footer in_file);
     Some (Buffer.contents buffer, stats)
 
-let output verbose file conv resolver data =
+let output verbose file conv resolver data points =
   let files, stats = Hashtbl.fold
       (fun file visited (files, summary) ->
-        match output_file verbose file conv resolver visited with
+        match output_file verbose file conv resolver visited points with
         | None -> files, summary
         | Some (text, stats) ->
           ((file, text) :: files, (ReportStat.add summary stats)))

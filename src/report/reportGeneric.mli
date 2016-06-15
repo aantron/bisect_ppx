@@ -48,8 +48,10 @@ class type converter =
 
 val output :
   (string -> unit) -> string -> converter -> (string -> string option) ->
-  (string, int array) Hashtbl.t ->
+  (string, int array) Hashtbl.t -> (string, string) Hashtbl.t ->
     unit
-(** [output verbose file conv resolver data] writes the element for [data]
-    to file [file] using [conv] for data conversion, [verbose] for verbose
-    output. [resolver] associates the actual path to a given filename. *)
+(** [output verbose file conv resolver data points] writes the element for
+    [data] to file [file] using [conv] for data conversion, [verbose] for
+    verbose output. [resolver] associates the actual path to a given
+    filename. [points] gives the marshalled locations of the points in the
+    file. *)

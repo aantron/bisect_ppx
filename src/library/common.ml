@@ -51,22 +51,13 @@ exception Unsupported_version of string
 
 exception Modified_file of string
 
-let cmp_file_of_ml_file filename =
-  (if Filename.check_suffix filename ".ml" then
-    Filename.chop_suffix filename ".ml"
-  else
-    filename)
-  ^ ".cmp"
-
 let magic_number_rtd = "BISECT-RTD"
 
-let magic_number_pts = "BISECT-PTS"
-
 let supported_versions = [
-  1, 0
+  2, 0
 ]
 
-let format_version = (1, 0)
+let format_version = (2, 0)
 
 let write_channel channel magic write_digest x =
   output_string channel magic;
@@ -100,38 +91,45 @@ let check_channel channel filename magic check_digest =
 let write_runtime_data channel content =
   write_channel channel magic_number_rtd None (Array.of_list content)
 
-let write_points channel content file =
-  let arr = Array.of_list content in
-  Array.sort compare arr;
-  write_channel channel magic_number_pts (Some file) arr
+let write_points points =
+  let points_array = Array.of_list points in
+  Array.sort compare points_array;
+  Marshal.to_string points_array []
 
-let read_runtime_data filename =
+let read_runtime_data' filename =
   try_in_channel
     true
     filename
     (fun channel ->
       let version = check_channel channel filename magic_number_rtd None in
       match version with
-      | 1, 0 ->
-          let file_content : (string * (int array)) array =
+      | 2, 0 ->
+          let file_content : (string * (int array * string)) array =
             input_value channel in
           Array.to_list file_content
       | _ -> assert false)
 
+let read_points' s =
+  let points_array : point_definition array = Marshal.from_string s 0 in
+  Array.sort compare points_array;
+  Array.to_list points_array
+
+(* Simulate the old behavior for current ocveralls. This is quite fragile,
+   because it depends on two things:
+   - read_points is only called after all .out files are read with
+     read_runtime_data.
+   - There are no duplicate source file names anywhere in the project. This is
+     necessary because read_runtime_data finds unprefixed source file names,
+     while read_points receives file names with the -I option already
+     applied. *)
+let points : (string, point_definition list) Hashtbl.t = Hashtbl.create 17
+
+let read_runtime_data filename =
+  let data = read_runtime_data' filename in
+  data |> List.map (fun (source_file, (counts, file_points)) ->
+    let basename = Filename.basename source_file in
+    Hashtbl.replace points basename (read_points' file_points);
+    source_file, counts)
+
 let read_points filename =
-  let filename' = cmp_file_of_ml_file filename in
-  try_in_channel
-    true
-    filename'
-    (fun channel ->
-      let version = check_channel channel filename' magic_number_pts (Some filename) in
-      match version with
-      | 1, 0 ->
-          let arr : point_definition array = input_value channel in
-          Array.sort compare arr;
-          for i = 1 to (pred (Array.length arr)) do
-            if arr.(i).offset = arr.(pred i).offset then
-              raise (Invalid_file filename);
-          done;
-          Array.to_list arr
-      | _ -> assert false)
+  Hashtbl.find points (Filename.basename filename)

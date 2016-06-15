@@ -1,21 +1,25 @@
 let ___bisect_mark___source =
-  let marks = Array.make 8 0 in
-  (Bisect.Runtime.init_with_array "source.ml" marks; marks.(1) <- 1);
+  let points =
+    "\132\149\166\190\000\000\000,\000\000\000\t\000\000\000!\000\000\000!\b\000\000 \000\160\000uC\160\001\000\134B\160\001\000\158@\160\001\000\194A\160\001\001\181D\160\001\001\197E\160\001\001\229F\160\001\002\007G"
+     in
+  let marks = Array.make 8 0  in
+  (Bisect.Runtime.init_with_array "source.ml" marks points; marks.(1) <- 1);
   (function
    | idx ->
-       let curr = marks.(idx) in
+       let curr = marks.(idx)  in
        marks.(idx) <-
-       if curr < Pervasives.max_int then Pervasives.succ curr else curr)
-let f1 x y = if x = y then x + y else x - y
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
+let f1 x y = if x = y then x + y else x - y 
 let g s =
   ___bisect_mark___source 3;
   if true
   then
     (___bisect_mark___source 2;
      for i = 1 to 5 do (___bisect_mark___source 0; print_endline s) done)
-  else (___bisect_mark___source 1; assert false)
-let f2 b x = if b then x * x else x
-let s1 = ___bisect_mark___source 4; "\\\\"
-let s2 = ___bisect_mark___source 5; '"'
-let s3 = ___bisect_mark___source 6; '"'
-let s4 = ___bisect_mark___source 7; "a\"a"
+  else (___bisect_mark___source 1; assert false) 
+let f2 b x = if b then x * x else x 
+let s1 = ___bisect_mark___source 4; "\\\\" 
+let s2 = ___bisect_mark___source 5; '"' 
+let s3 = ___bisect_mark___source 6; '"' 
+let s4 = ___bisect_mark___source 7; "a\"a" 

@@ -297,7 +297,7 @@ let faster file =
   let init =
     apply_nolabs
       (lid ((!InstrumentArgs.runtime_name) ^ ".Runtime.init_with_array"))
-      [strconst file; ilid "marks"]
+      [strconst file; ilid "marks"; ilid "points"]
   in
   let make = apply_nolabs (lid "Array.make") [intconst nb; intconst 0] in
   let marks =
@@ -332,6 +332,13 @@ let faster file =
   let e =
     Exp.(let_ Nonrecursive vb (sequence marks func))
   in
+  let points_string =
+    InstrumentState.get_points_for_file file
+    |> Common.write_points
+    |> strconst
+  in
+  let vb = [Vb.mk (pattern_var "points") points_string] in
+  let e = Exp.(let_ Nonrecursive vb e) in
   Str.value Nonrecursive [ Vb.mk (pattern_var (custom_mark_function file)) e]
 
 (* The actual "instrumenter" object, marking expressions. *)
