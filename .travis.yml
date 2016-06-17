@@ -1,9 +1,18 @@
 sudo: required
-language: c
+
+language: generic
+
+matrix:
+  include:
+    - os: linux
+      env: OCAML_VERSION=4.02
+    - os: linux
+      env: OCAML_VERSION=4.03 COVERALLS=yes
+    - os: linux
+      env: OCAML_VERSION=4.03 BYTECODE_ONLY=yes
+    - os: osx
+      env: OCAML_VERSION=4.02
+    - os: osx
+      env: OCAML_VERSION=4.03
+
 script: bash -e ./src/travis_ci_test.sh
-os:
-  - linux
-  - osx
-env: 
-  - OCAML_VERSION=4.02 OPAM_VERSION=1.2.0 COVERALLS=yes
-  - OCAML_VERSION=4.02 OPAM_VERSION=1.2.0 BYTECODE_ONLY=yes

@@ -1,24 +1,39 @@
 #!/usr/bin/env bash
 
-export opam_pin_add=""
-travis_install_on_linux () {
-    # Install OCaml and OPAM PPAs
-    case "$OCAML_VERSION,$OPAM_VERSION" in
-        4.02,1.1.0) ppa=avsm/ocaml42+opam11 ;;
-        4.02,1.2.0) ppa=avsm/ocaml42+opam12; export opam_pin_add="add" ;;
-      *) echo Unknown $OCAML_VERSION,$OPAM_VERSION; exit 1 ;;
-    esac
+set -e
+set -x
 
-    echo "yes" | sudo add-apt-repository ppa:$ppa
+travis_install_on_linux () {
+    # Install OCaml and OPAM PPA
+    sudo add-apt-repository -y ppa:avsm/ocaml42+opam12
     sudo apt-get update -qq
 
-    sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam time git
+    case "$OCAML_VERSION" in
+        4.02)
+            sudo apt-get install -qq ocaml-nox camlp4-extra opam time git
+            opam init -y ;;
+        4.03)
+            sudo apt-get install -qq opam time git
+            opam init -y --compiler=4.03.0 ;;
+        *)
+            echo Unknown $OCAML_VERSION
+            exit 1 ;;
+    esac
 }
 
 travis_install_on_osx () {
     brew update > /dev/null
     brew install opam
-    export opam_pin_add="add"
+
+    case "$OCAML_VERSION" in
+        4.02)
+            opam init -y --compiler=4.02.3 ;;
+        4.03)
+            opam init -y ;;
+        *)
+            echo Unknown $OCAML_VERSION
+            exit 1 ;;
+    esac
 }
 
 case $TRAVIS_OS_NAME in
@@ -27,28 +42,18 @@ case $TRAVIS_OS_NAME in
   *) echo "Unknown $TRAVIS_OS_NAME"; exit 1
 esac
 
-export OPAMYES=1
-
-# Set up OPAM
-opam init $opam_init_options
+# Prepare environment
 eval `opam config env`
 
-# Configure and view settings
-echo "ocaml -version"
-ocaml -version
-echo "opam --version"
+# Check packages
+ocaml -version | grep $OCAML_VERSION
 opam --version
-echo "git --version"
 git --version
-
-# Bypass opam bug #1747
-git config --global user.email "you@example.com"
-git config --global user.name "Your Name"
 
 echo
 echo "Install dependencies"
 echo
-opam install ocamlfind ocamlbuild ppx_tools
+opam install -y ocamlfind ocamlbuild ppx_tools
 
 GENERAL_PATH=$PATH
 RESTRICTED_PATH=$PATH
@@ -75,7 +80,7 @@ echo
 make build
 
 export PATH=$GENERAL_PATH
-opam install ounit ppx_blob ppx_deriving # Used in test suite.
+opam install -y ounit ppx_blob ppx_deriving # Used in test suite.
 export PATH=$RESTRICTED_PATH
 
 echo
@@ -111,18 +116,15 @@ echo "Testing package usage and Ocamlbuild plugin"
 echo
 make -C tests usage
 
-if [ "$TRAVIS_OS_NAME" = linux ]
+if [ "$COVERALLS" = yes ]
 then
-  if [ "$COVERALLS" = yes ]
-  then
-    echo
-    echo "Submitting coverage report"
-    echo
-    export PATH=$GENERAL_PATH
-    opam install -y ocveralls
-    make dev tests
-    make -C tests coverage
-    ocveralls --prefix _build.instrumented tests/_coverage/meta*.out --send
-    export PATH=$RESTRICTED_PATH
-  fi
+  echo
+  echo "Submitting coverage report"
+  echo
+  export PATH=$GENERAL_PATH
+  opam install -y ocveralls
+  make dev tests
+  make -C tests coverage
+  ocveralls --prefix _build.instrumented tests/_coverage/meta*.out --send
+  export PATH=$RESTRICTED_PATH
 fi
