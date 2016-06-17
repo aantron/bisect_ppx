@@ -92,12 +92,31 @@ val report : ?f:string -> ?r:string -> string -> unit
     If [~f] is supplied, [report] uses the pattern to find [*.out] files. The
     default value is [bisect*.out]. *)
 
-val diff : string -> unit
-(** Runs the command [diff] between the given file and a file [_scratch/output].
-    The file is given relative to [tests/], e.g. ["report/reference.html"]. If
-    there is a difference, fails the current test case, including the difference
-    in the error message. The actual output is also written to the [_preserve]
-    subdirectory. *)
+val diff : ?preserve_as:string -> string -> unit
+(** [diff f] runs the command [diff] between the file [f] and [_scratch/output].
+    [f] is given relative to [tests/], e.g. ["report/reference.html"]. If there
+    is a difference, [diff] fails the current test case, and includes the
+    difference in the error message.
+
+    [_scratch/output] is then copied to the [_preserve] subdirectory, under a
+    matching filename - e.g. ["_preserve/report/reference.html"]. This preserved
+    output can be used to replace [f] if, in fact, the output is correct:
+
+    run
+
+      cp _preserve/some_test_suite/foo.ml.reference some_test_suite/
+
+    or
+
+      cp -r _preserve/* .
+
+    in the [tests/] directory.
+
+    Sometimes, [f] is the name of an intermediate generated file, rather than an
+    original reference file under source control. In this case, [~preserve_as]
+    can be used to override the name under which [_scratch/output] is preserved.
+    If the argument is provided, output is copied to
+    ["_preserve/" ^ preserve_as]. *)
 
 val normalize_source : string -> string -> unit
 (** [normalize_source source normalized] uses [compiler-libs] to parse the file

@@ -202,25 +202,30 @@ let _preserve file destination =
   run ("mkdir -p " ^ (Filename.dirname destination));
   run ("cp " ^ file ^ " " ^ destination)
 
-(* Runs a diff between [reference] and [_scratch/output], but reports the file
-   name of [reference] as [reference_original], because [reference] might be
-   generated from [reference_original]. *)
-let _diff reference_original reference =
+let diff ?preserve_as reference =
+  let preserve_as =
+    match preserve_as with
+    | None -> reference
+    | Some preserve_as -> preserve_as
+  in
+
   let reference_actual = Filename.concat Filename.parent_dir_name reference in
-  let command = "diff -a " ^ reference_actual ^ " output" in
+  let command =
+    Printf.sprintf
+      "diff -au --label %s --label %s %s output"
+      preserve_as "'actual output'" reference_actual
+  in
 
   let status = _run_int (command ^ " > /dev/null") in
   match status with
   | 0 -> ()
-  | v when v <> 1 -> _command_failed command ~status:v
-  | _ ->
-    _preserve "output" reference_original;
+  | 1 ->
+    _preserve "output" preserve_as;
     _run_int (command ^ " > delta") |> ignore;
     let delta = _read_file "delta" in
-    Printf.sprintf "Difference against '%s':\n\n%s" reference_original delta
+    Printf.sprintf "Difference against '%s':\n\n%s" preserve_as delta
     |> assert_failure
-
-let diff reference = _diff reference reference
+  | _ -> _command_failed command ~status
 
 let normalize_source source normalized =
   let source = _read_file source in
@@ -242,7 +247,7 @@ let normalize_source source normalized =
 let diff_ast reference =
   let reference_actual = Filename.concat Filename.parent_dir_name reference in
   normalize_source reference_actual "_dsource";
-  _diff reference "_scratch/_dsource"
+  diff ~preserve_as:reference "_scratch/_dsource"
 
 let compile_compare cflags directory =
   let tests =
