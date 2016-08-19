@@ -201,6 +201,12 @@ let translate_pattern =
       translate mark p'
       |> List.map (fun (marks, p'') -> marks, Pat.lazy_ ~loc ~attrs p'')
 
+#if OCAML_VERSION >= (4, 4, 0)
+    | Ppat_open (c, p') ->
+      translate mark p'
+      |> List.map (fun (marks, p'') -> marks, Pat.open_ ~loc ~attrs c p'')
+#endif
+
     (* This should be unreachable in well-formed code, but, if it is reached,
        do not generate any cases. The cases would be used in a secondary match
        expression that works on the same value as the match expression (or

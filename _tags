@@ -30,6 +30,7 @@ true: -traverse, warn(A-4-48), warn_error(A-3)
 <src/report/report.{byte,native}>: use_str
 <src/ocamlbuild/*>: package(ocamlbuild)
 <src/ocamlbuild/*>: bin_annot
+<src/syntax/instrumentPpx.ml>: cppo_V_OCAML
 
 # Self-instrumentation for testing and showing off
 <src/*/*/**>: instrument

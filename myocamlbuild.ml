@@ -111,10 +111,12 @@ struct
 end
 
 let () =
-  dispatch begin function
-    | After_rules ->
-      Self_instrumentation.maybe_meta_build ();
-      Self_instrumentation.maybe_instrumented_build ()
+  dispatch begin (fun hook ->
+      Ocamlbuild_cppo.dispatcher hook;
+      match hook with
+      | After_rules ->
+        Self_instrumentation.maybe_meta_build ();
+        Self_instrumentation.maybe_instrumented_build ()
 
-    | _ -> ()
+      | _ -> ())
   end

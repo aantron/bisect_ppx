@@ -39,6 +39,12 @@ val have_package : string -> bool
 (** Checks that the given findlib package is installed using
     [ocamlfind query]. *)
 
+val ocamlc_version : unit -> int * int * int option
+(** Return the [ocamlc] version. *)
+
+val ocamlc_404_or_more : unit -> bool
+(** [ocamlc] version is 4.04.0 ir greater. *)
+
 val if_package : string -> unit
 (** If the given package is not installed (see [have_package]), skips the
     current test case. *)

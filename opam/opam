@@ -19,6 +19,7 @@ depends: [
   "ocamlfind" {build}
   "ppx_tools" {build & >= "4.02.3"}
   "ocamlbuild" {build}
+  "cppo" {build}
   "ounit" {test}
 ]
 conflicts: [

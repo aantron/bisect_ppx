@@ -58,7 +58,7 @@ git --version
 echo
 echo "Install dependencies"
 echo
-opam install -y ocamlfind ocamlbuild ppx_tools
+opam install -y ocamlfind ocamlbuild ppx_tools cppo
 
 GENERAL_PATH=$PATH
 RESTRICTED_PATH=$PATH

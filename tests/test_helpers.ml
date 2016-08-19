@@ -169,6 +169,14 @@ let have_binary binary =
 let have_package package =
   _run_bool ("ocamlfind query " ^ package ^ "> /dev/null 2> /dev/null")
 
+let ocamlc_version () =
+  Scanf.sscanf Sys.ocaml_version "%u.%u%[.]%[0-9]"
+    (fun major minor _periods patchlevel ->
+        major, minor, try Some (int_of_string patchlevel) with _ -> None)
+
+let ocamlc_404_or_more () =
+  ocamlc_version () >= (4,4,None)
+
 let if_package package =
   skip_if (not @@ have_package package) (package ^ " not installed")
 
