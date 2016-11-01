@@ -8,13 +8,16 @@ travis_install_on_linux () {
     sudo add-apt-repository -y ppa:avsm/ocaml42+opam12
     sudo apt-get update -qq
 
+    sudo apt-get install -qq opam time git
+
     case "$OCAML_VERSION" in
         4.02)
-            sudo apt-get install -qq ocaml-nox camlp4-extra opam time git
+            sudo apt-get install -qq ocaml-nox camlp4-extra
             opam init -y ;;
         4.03)
-            sudo apt-get install -qq opam time git
             opam init -y --compiler=4.03.0 ;;
+        4.04)
+            opam init -y --compiler=4.04.0+beta2 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;
@@ -30,6 +33,8 @@ travis_install_on_osx () {
             opam init -y --compiler=4.02.3 ;;
         4.03)
             opam init -y ;;
+        4.04)
+            opam init -y --compiler=4.04.0+beta2 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;

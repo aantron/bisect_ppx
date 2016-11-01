@@ -10,9 +10,18 @@ matrix:
       env: OCAML_VERSION=4.03 COVERALLS=yes
     - os: linux
       env: OCAML_VERSION=4.03 BYTECODE_ONLY=yes
+    - os: linux
+      env: OCAML_VERSION=4.04
     - os: osx
       env: OCAML_VERSION=4.02
     - os: osx
       env: OCAML_VERSION=4.03
+    - os: osx
+      env: OCAML_VERSION=4.04
+
+  allow_failures:
+    - env: OCAML_VERSION=4.04
+
+  fast_finish: true
 
 script: bash -e ./src/travis_ci_test.sh
