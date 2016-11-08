@@ -7,20 +7,17 @@ matrix:
     - os: linux
       env: OCAML_VERSION=4.02
     - os: linux
-      env: OCAML_VERSION=4.03 COVERALLS=yes
+      env: OCAML_VERSION=4.03
     - os: linux
-      env: OCAML_VERSION=4.03 BYTECODE_ONLY=yes
+      env: OCAML_VERSION=4.04 COVERALLS=yes
     - os: linux
-      env: OCAML_VERSION=4.04
+      env: OCAML_VERSION=4.04 BYTECODE_ONLY=yes
     - os: osx
       env: OCAML_VERSION=4.02
     - os: osx
       env: OCAML_VERSION=4.03
     - os: osx
       env: OCAML_VERSION=4.04
-
-  allow_failures:
-    - env: OCAML_VERSION=4.04
 
   fast_finish: true
 
