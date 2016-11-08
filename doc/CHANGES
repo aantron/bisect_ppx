@@ -1,3 +1,23 @@
+Version 1.2.0 (2016-11-08):
+---------------------------
+  Additions
+
+  - Compatibility with OCaml 4.04 (#113).
+  - Install .mli files (#98, prompted Christian Lindig).
+
+  Removals
+
+  This release removes several features which appear to get little or no use.
+
+  - Rename package bisect_ppx.plugin to bisect_ppx.ocamlbuild; bisect_ppx.plugin
+    is still available as a deprecated name (#93).
+  - Remove -combine-expr option from the reporter (#105, #106).
+  - Remove EMMA, XML, and "bisect" output formats (#105, #106).
+  - Remove obsolete -no-navbar and -no-folding options from HTML output (#106).
+  - Remove point kinds (#101).
+  - Eliminate .cmp files; this makes the -I option unnecessary for output
+    formats besides HTML (#102, #108).
+
 Version 1.1.0 (2016-04-02):
 ---------------------------
   - Port to 4.03.
