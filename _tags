@@ -23,14 +23,15 @@ true: -traverse, warn(A-4-48), warn_error(A-3)
 # Options
 <src/*/*.{byte,native}>: use_unix
 <src/library/*>: runtime
-"src/syntax/instrumentPpx.ml": package(ppx_tools)
-"src/syntax/instrumentPpx.mli": package(ppx_tools)
-"src/syntax/bisect_ppx.ml": package(ppx_tools)
-<src/syntax/bisect_ppx.{byte,native}>: use_str, package(ppx_tools)
+"src/syntax/instrumentPpx.ml": package(ppx_tools_versioned.metaquot_404)
+"src/syntax/instrumentPpx.mli": package(ppx_tools_versioned.metaquot_404)
+"src/syntax/bisect_ppx.ml": package(ppx_tools_versioned.metaquot_404)
+<src/syntax/bisect_ppx.{byte,native}>: use_str, package(ppx_tools_versioned.metaquot_404)
+"src/syntax/ppx_bisect.ml": package(ppx_tools_versioned.metaquot_404)
+<src/syntax/ppx_bisect.{byte,native}>: use_str, package(ppx_tools_versioned.metaquot_404)
 <src/report/report.{byte,native}>: use_str
 <src/ocamlbuild/*>: package(ocamlbuild)
 <src/ocamlbuild/*>: bin_annot
-<src/syntax/instrumentPpx.ml>: cppo_V_OCAML
 
 # Self-instrumentation for testing and showing off
 <src/*/*/**>: instrument

@@ -16,11 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-let () =
-  Ast_mapper.run_main (fun argv ->
-    let anon s = raise (invalid_arg ("nothing anonymous: " ^ s)) in
-    let usage = Printf.sprintf "Usage: bisect_ppx <options>" in
-    let arga = Array.of_list ("" :: argv) in
-    Arg.parse_argv arga InstrumentArgs.switches anon usage;
-    let instrumenter = new InstrumentPpx.instrumenter in
-    Ast_mapper_class.to_mapper instrumenter)
+include Ppx_bisect
+
+let () = Migrate_parsetree.Driver.run_main ()

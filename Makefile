@@ -81,7 +81,7 @@ export OCAMLFIND_IGNORE_DUPS_IN
 
 
 # Ocamlbuild flags. Assume that ocamlbuild, ocamlfind, ocamlc are found in path.
-OCAMLBUILD_FLAGS := -use-ocamlfind -no-links -byte-plugin -plugin-tag 'package(cppo_ocamlbuild)'
+OCAMLBUILD_FLAGS := -use-ocamlfind -no-links -byte-plugin
 
 META_BISECT_DIR := -build-dir _build.meta
 INSTRUMENTED_DIR := -build-dir _build.instrumented

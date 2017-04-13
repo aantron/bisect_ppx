@@ -22,7 +22,7 @@ depends: [
   "ocamlfind" {build}
   "ppx_tools" {build & >= "4.02.3"}
   "ocamlbuild" {build}
-  "cppo" {build}
+  "ocaml-migrate-parsetree"
   "ounit" {test}
 ]
 conflicts: [
