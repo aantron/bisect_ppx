@@ -58,7 +58,7 @@ git --version
 echo
 echo "Install dependencies"
 echo
-opam install -y ocamlfind ocamlbuild ocaml-migrate-parsetree
+opam install -y ocamlfind ocamlbuild ocaml-migrate-parsetree ppx_tools_versioned
 
 GENERAL_PATH=$PATH
 RESTRICTED_PATH=$PATH
