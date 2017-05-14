@@ -231,10 +231,27 @@ let wrap_case case =
     | Some guard -> Some (wrap_expr guard)
   in
 
+  let intentionally_dead_clause =
+    match case.pc_rhs.pexp_desc with
+#if OCAML_VERSION >= (4, 3, 0)
+    | Pexp_unreachable -> true
+    (* refutation clauses (p -> .) must not get instrumented, as
+       instrumentation would generate code of the form
+
+         (p -> <instrumentation>; .)
+
+       that makes the type-checker fail with an error as it does not
+       recognize the refutation clause anymore.
+    *)
+#endif
+    | _ -> false in
+
   let pattern = case.pc_lhs in
   let loc = pattern.ppat_loc in
 
-  if !InstrumentArgs.simple_cases then
+  if intentionally_dead_clause then
+    case
+  else if !InstrumentArgs.simple_cases then
     Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc case.pc_rhs)
   else
     (* If this is an exception case, work with the pattern inside the exception

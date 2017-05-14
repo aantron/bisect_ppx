@@ -1,0 +1,15 @@
+let ___bisect_mark___refutation_clause_403 =
+  let points =
+    "\132\149\166\190\000\000\000\007\000\000\000\003\000\000\000\t\000\000\000\t\160\160KA\160X@"
+     in
+  let marks = Array.make 2 0  in
+  Bisect.Runtime.init_with_array "refutation_clause_403.ml" marks points;
+  (function
+   | idx ->
+       let curr = marks.(idx)  in
+       marks.(idx) <-
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
+let test =
+  ___bisect_mark___refutation_clause_403 1;
+  (function | () -> (___bisect_mark___refutation_clause_403 0; ()) | () -> .) 
