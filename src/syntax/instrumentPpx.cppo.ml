@@ -330,14 +330,20 @@ let faster file =
   in
   let make = apply_nolabs (lid "Array.make") [intconst nb; intconst 0] in
   let marks =
-    List.fold_left
-      (fun acc (idx, nb) ->
-        let mark =
-          apply_nolabs (lid "Array.set") [ ilid "marks"; intconst idx; intconst nb]
-        in
-        Exp.sequence acc mark)
-      init
-      (InstrumentState.get_marked_points_assoc ()) in
+    let marked_points =
+      let compare (idx1, _) (idx2, _) = Pervasives.compare idx1 idx2 in
+      List.sort compare (InstrumentState.get_marked_points_assoc ()) in
+    let assign (idx, nb) acc =
+      let assignment =
+        apply_nolabs (lid "Array.set")
+          [ilid "marks"; intconst idx; intconst nb] in
+      match acc with
+      | None -> Some assignment
+      | Some trail -> Some (Exp.sequence assignment trail) in
+    match List.fold_right assign marked_points None with
+    | None -> init
+    | Some assignments -> Exp.sequence init assignments
+  in
   let func =
     let body =
       let if_then_else =
