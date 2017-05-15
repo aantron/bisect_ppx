@@ -127,3 +127,12 @@ let f x =
 let f x =
   match x with
   | `Foo x | `Bar x -> x
+
+let last = function
+  | [] -> None
+  | _::_ as li ->
+    match List.rev li with
+    | last::_ -> Some last
+    | _ -> assert false
+      (* 'assert false' is an idiom to mark non-trivial unreachability here,
+         we automatically ignore the clause *)

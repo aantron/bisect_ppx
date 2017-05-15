@@ -233,6 +233,12 @@ let wrap_case case =
 
   let intentionally_dead_clause =
     match case.pc_rhs.pexp_desc with
+    | Pexp_assert
+        { pexp_desc =
+            Pexp_construct ({ txt = Longident.Lident "false"; _ }, None); _ } ->
+      true
+    (* Clauses of the form `| p -> assert false` are a common idiom
+       to denote cases that are known to be unreachable. *)
 #if OCAML_VERSION >= (4, 3, 0)
     | Pexp_unreachable -> true
     (* refutation clauses (p -> .) must not get instrumented, as
