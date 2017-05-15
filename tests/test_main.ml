@@ -34,7 +34,7 @@ let tests = "bisect_ppx" >::: [
   Test_top_level.tests;
   Test_legacy_arguments.tests;
   Test_missing_files.tests
-] @ (if ocamlc_404_or_more () then [ Test_ppat_open.tests ] else [])
+]
 
 let () =
   let dependencies =
