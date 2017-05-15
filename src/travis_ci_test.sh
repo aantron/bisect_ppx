@@ -32,7 +32,7 @@ travis_install_on_osx () {
         4.02)
             opam init -y --compiler=4.02.3 ;;
         4.03)
-            opam init -y ;;
+            opam init -y --compiler=4.03.0 ;;
         4.04)
             opam init -y --compiler=4.04.0 ;;
         *)
