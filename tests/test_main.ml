@@ -28,6 +28,7 @@ let tests = "bisect_ppx" >::: [
   Test_comments.tests;
   Test_exclude.tests;
   Test_exclude_file.tests;
+  Test_exclude_comments.tests;
   Test_ppx_integration.tests;
   Test_thread_safety.tests;
   Test_ounit_integration.tests;

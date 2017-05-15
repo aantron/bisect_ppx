@@ -1,0 +1,77 @@
+let ___bisect_mark___excluded_clauses =
+  let points =
+    "\132\149\166\190\000\000\000[\000\000\000\019\000\000\000I\000\000\000I\b\000\000H\000\160SD\160`@\160\001\000\165B\160\001\000\181A\160\001\000\230C\160\001\001,J\160\001\0019E\160\001\001\140F\160\001\001\149G\160\001\001\158H\160\001\001\199I\160\001\001\246O\160\001\002\003K\160\001\002\144M\160\001\002\160L\160\001\002\213N\160\001\003\024Q\160\001\003%P"
+     in
+  let marks = Array.make 18 0  in
+  (Bisect.Runtime.init_with_array "excluded_clauses.ml" marks points;
+   marks.(1) <- 1;
+   marks.(2) <- 1;
+   marks.(3) <- 1;
+   marks.(6) <- 1;
+   marks.(7) <- 1;
+   marks.(8) <- 1;
+   marks.(12) <- 1;
+   marks.(13) <- 1;
+   marks.(14) <- 1);
+  (function
+   | idx ->
+       let curr = marks.(idx)  in
+       marks.(idx) <-
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
+let test_oneline =
+  ___bisect_mark___excluded_clauses 4;
+  (function
+   | None  -> (___bisect_mark___excluded_clauses 0; "included")
+   | Some (true ) when Random.bool () -> "ignored"
+   | Some (true ) -> "ignored"
+   | Some (false ) when ___bisect_mark___excluded_clauses 1; Random.bool ()
+       -> (___bisect_mark___excluded_clauses 2; "visited")
+   | Some (false ) -> (___bisect_mark___excluded_clauses 3; "visited"))
+  
+let test_oneline_multipat =
+  ___bisect_mark___excluded_clauses 10;
+  (function
+   | None  -> (___bisect_mark___excluded_clauses 5; "included")
+   | Some 1|Some 2|Some 3 as ___bisect_matched_value___ ->
+       ((((match ___bisect_matched_value___ with
+           | Some 1 -> ()
+           | Some 2 -> ()
+           | Some 3 -> ()
+           | _ -> ()))
+        [@ocaml.warning "-4-8-9-11-26-27-28"]);
+        "ignored")
+   | Some 4|Some 5|Some 6 as ___bisect_matched_value___ ->
+       ((((match ___bisect_matched_value___ with
+           | Some 4 -> (___bisect_mark___excluded_clauses 6; ())
+           | Some 5 -> (___bisect_mark___excluded_clauses 7; ())
+           | Some 6 -> (___bisect_mark___excluded_clauses 8; ())
+           | _ -> ()))
+        [@ocaml.warning "-4-8-9-11-26-27-28"]);
+        "visited")
+   | Some _ -> (___bisect_mark___excluded_clauses 9; "included"))
+  
+let test_oneline_split =
+  ___bisect_mark___excluded_clauses 15;
+  (function
+   | None  -> (___bisect_mark___excluded_clauses 11; "included")
+   | Some (true ) when Random.bool () -> "ignored"
+   | Some (true ) -> "ignored"
+   | Some (false ) when ___bisect_mark___excluded_clauses 12; Random.bool ()
+       -> (___bisect_mark___excluded_clauses 13; "visited")
+   | Some (false ) -> (___bisect_mark___excluded_clauses 14; "visited"))
+  
+let test_multiline =
+  ___bisect_mark___excluded_clauses 17;
+  (function
+   | None  -> (___bisect_mark___excluded_clauses 16; "included")
+   | Some 1|Some 2|Some 3 as ___bisect_matched_value___ ->
+       ((((match ___bisect_matched_value___ with
+           | Some 1 -> ()
+           | Some 2 -> ()
+           | Some 3 -> ()
+           | _ -> ()))
+        [@ocaml.warning "-4-8-9-11-26-27-28"]);
+        "ignored")
+   | Some _ -> "ignored")
+  
