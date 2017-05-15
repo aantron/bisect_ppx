@@ -42,8 +42,11 @@ val have_package : string -> bool
 val ocamlc_version : unit -> int * int * int option
 (** Return the [ocamlc] version. *)
 
+val ocamlc_403_or_more : unit -> bool
+(** [ocamlc] version is 4.03.0 ir greater. *)
+
 val ocamlc_404_or_more : unit -> bool
-(** [ocamlc] version is 4.04.0 ir greater. *)
+(** [ocamlc] version is 4.04.0 or greater. *)
 
 val if_package : string -> unit
 (** If the given package is not installed (see [have_package]), skips the
