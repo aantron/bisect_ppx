@@ -174,6 +174,9 @@ let ocamlc_version () =
     (fun major minor _periods patchlevel ->
         major, minor, try Some (int_of_string patchlevel) with _ -> None)
 
+let ocamlc_403_or_more () =
+  ocamlc_version () >= (4,3,None)
+
 let ocamlc_404_or_more () =
   ocamlc_version () >= (4,4,None)
 
@@ -271,8 +274,11 @@ let compile_compare cflags directory =
       let source = Filename.concat directory f in
       let title = Filename.chop_suffix f ".ml" in
       let reference = Filename.concat directory (f ^ ".reference") in
-
       test title (fun () ->
+        if Filename.check_suffix title "_403" then
+          skip_if (not (ocamlc_403_or_more ())) "requires OCaml 4.03 or more";
+        if Filename.check_suffix title "_404" then
+          skip_if (not (ocamlc_404_or_more ())) "requires OCaml 4.04 or more";
         compile ((cflags ()) ^ " -w -A -dsource") source ~r:"2> output";
         diff_ast reference)
     end

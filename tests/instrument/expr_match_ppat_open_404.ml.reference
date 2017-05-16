@@ -1,0 +1,82 @@
+let ___bisect_mark___expr_match_ppat_open_404 =
+  let points =
+    "\132\149\166\190\000\000\000y\000\000\000\025\000\000\000a\000\000\000a\b\000\000`\000\160\000WW\160\000_U\160\000jV\160\000}R\160\001\000\131S\160\001\000\155T\160\001\000\163P\160\001\000\176Q\160\001\000\192K\160\001\000\196L\160\001\000\202M\160\001\000\224N\160\001\000\246O\160\001\000\254I\160\001\001\rJ\160\001\001\"E\160\001\001(F\160\001\001@G\160\001\001VH\160\001\001^C\160\001\001tD\160\001\001\139@\160\001\001\143A\160\001\001\167B"
+     in
+  let marks = Array.make 24 0  in
+  Bisect.Runtime.init_with_array "expr_match_ppat_open_404.ml" marks points;
+  (function
+   | idx ->
+       let curr = marks.(idx)  in
+       marks.(idx) <-
+         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  
+module M = struct type t =
+                    | Foo 
+                    | Bar 
+                  type r = {
+                    i: int ;
+                    t: t } end
+let f () =
+  ___bisect_mark___expr_match_ppat_open_404 23;
+  (let s = ___bisect_mark___expr_match_ppat_open_404 21; M.Bar  in
+   ___bisect_mark___expr_match_ppat_open_404 22;
+   (match s with
+    | M.((Foo |Bar ))  as ___bisect_matched_value___ ->
+        ((((match ___bisect_matched_value___ with
+            | M.(Foo )  -> (___bisect_mark___expr_match_ppat_open_404 18; ())
+            | M.(Bar )  -> (___bisect_mark___expr_match_ppat_open_404 19; ())
+            | _ -> ()))
+         [@ocaml.warning "-4-8-9-11-26-27-28"]);
+         assert true));
+   ___bisect_mark___expr_match_ppat_open_404 20;
+   (let l =
+      ___bisect_mark___expr_match_ppat_open_404 16; (let open M in [Foo])  in
+    ___bisect_mark___expr_match_ppat_open_404 17;
+    (match l with
+     | M.((Foo |Bar )::[])  as ___bisect_matched_value___ ->
+         ((((match ___bisect_matched_value___ with
+             | M.((Foo )::[])  ->
+                 (___bisect_mark___expr_match_ppat_open_404 12;
+                  ___bisect_mark___expr_match_ppat_open_404 11;
+                  ())
+             | M.((Bar )::[])  ->
+                 (___bisect_mark___expr_match_ppat_open_404 13;
+                  ___bisect_mark___expr_match_ppat_open_404 11;
+                  ())
+             | _ -> ()))
+          [@ocaml.warning "-4-8-9-11-26-27-28"]);
+          assert true)
+     | _ -> (___bisect_mark___expr_match_ppat_open_404 14; assert false));
+    ___bisect_mark___expr_match_ppat_open_404 15;
+    (let a =
+       ___bisect_mark___expr_match_ppat_open_404 9; (let open M in [|Bar|])
+        in
+     ___bisect_mark___expr_match_ppat_open_404 10;
+     (match a with
+      | M.[|(Foo |Bar )|]  as ___bisect_matched_value___ ->
+          ((((match ___bisect_matched_value___ with
+              | M.[|Foo |]  ->
+                  (___bisect_mark___expr_match_ppat_open_404 5; ())
+              | M.[|Bar |]  ->
+                  (___bisect_mark___expr_match_ppat_open_404 6; ())
+              | _ -> ()))
+           [@ocaml.warning "-4-8-9-11-26-27-28"]);
+           assert true)
+      | _ -> (___bisect_mark___expr_match_ppat_open_404 7; assert false));
+     ___bisect_mark___expr_match_ppat_open_404 8;
+     (let r =
+        ___bisect_mark___expr_match_ppat_open_404 3;
+        (let open M in { i = 3; t = Foo })  in
+      ___bisect_mark___expr_match_ppat_open_404 4;
+      (match r with
+       | M.{ i = (3|4);_}  as ___bisect_matched_value___ ->
+           ((((match ___bisect_matched_value___ with
+               | M.{ i = 3;_}  ->
+                   (___bisect_mark___expr_match_ppat_open_404 0; ())
+               | M.{ i = 4;_}  ->
+                   (___bisect_mark___expr_match_ppat_open_404 1; ())
+               | _ -> ()))
+            [@ocaml.warning "-4-8-9-11-26-27-28"]);
+            assert true)
+       | _ -> (___bisect_mark___expr_match_ppat_open_404 2; assert false))))))
+  
