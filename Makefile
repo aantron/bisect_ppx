@@ -162,7 +162,7 @@ INTERFACE_FILES = \
 	$(shell find $1/src -name '*.cmt*')
 
 install: FORCE
-	[ $(DEV_INSTALL) = "" ] || mkdir -p $(DEV_INSTALL_DIR)
+	[ "$(DEV_INSTALL)" = "" ] || mkdir -p $(DEV_INSTALL_DIR)
 	@! ocamlfind query $(INSTALL_NAME) > /dev/null 2> /dev/null || \
 		ocamlfind remove $(INSTALL_FLAGS) $(INSTALL_NAME)
 	@cp $(REWRITER_NATIVE) $(REWRITER) 2> /dev/null || \
