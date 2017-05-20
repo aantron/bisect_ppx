@@ -169,7 +169,8 @@ install: FORCE
 		cp $(REWRITER_BYTE) $(REWRITER)
 	cp $(REPORTER_NATIVE) $(REPORTER) 2> /dev/null || \
 		cp $(REPORTER_BYTE) $(REPORTER)
-	@ocamlfind install $(INSTALL_FLAGS) $(INSTALL_NAME) src/META -optional \
+	@ocamlfind install $(INSTALL_FLAGS) $(INSTALL_NAME) src/META \
+		src/ppx_bisect.META -optional \
 		$(REWRITER) $(REPORTER) \
 		$(call LIBRARY_FILES,$(INSTALL_SOURCE_DIR)/src/$(RUNTIME)) \
 		$(call LIBRARY_FILES,\
