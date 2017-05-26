@@ -35,7 +35,7 @@ let main () =
       let points = Hashtbl.create 17 in
 
       !ReportArgs.files |> List.iter (fun out_file ->
-        Common.read_runtime_data' out_file
+        Bisect.Common.read_runtime_data' out_file
         |> List.iter (fun (source_file, (file_counts, file_points)) ->
           let file_counts =
             try (Hashtbl.find total_counts source_file) +| file_counts
@@ -91,13 +91,13 @@ let () =
   | Unix.Unix_error (e, _, _) ->
       Printf.eprintf " *** system error: %s\n" (Unix.error_message e);
       exit 1
-  | Common.Invalid_file s ->
+  | Bisect.Common.Invalid_file s ->
       Printf.eprintf " *** invalid file: '%s'\n" s;
       exit 1
-  | Common.Unsupported_version s ->
+  | Bisect.Common.Unsupported_version s ->
       Printf.eprintf " *** unsupported file version: '%s'\n" s;
       exit 1
-  | Common.Modified_file s ->
+  | Bisect.Common.Modified_file s ->
       Printf.eprintf " *** source file modified since instrumentation: '%s'\n" s;
       exit 1
   | e ->

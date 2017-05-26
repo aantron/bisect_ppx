@@ -24,6 +24,8 @@ open Asttypes
 open Ast_mapper
 open Ast_helper
 
+module Common = Bisect.Common
+
 let intconst = Ast_convenience.int
 
 let lid ?(loc = Location.none) s =
