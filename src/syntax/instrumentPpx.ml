@@ -240,7 +240,6 @@ let wrap_case case =
       true
     (* Clauses of the form `| p -> assert false` are a common idiom
        to denote cases that are known to be unreachable. *)
-#if OCAML_VERSION >= (4, 3, 0)
     | Pexp_unreachable -> true
     (* refutation clauses (p -> .) must not get instrumented, as
        instrumentation would generate code of the form
@@ -250,7 +249,6 @@ let wrap_case case =
        that makes the type-checker fail with an error as it does not
        recognize the refutation clause anymore.
     *)
-#endif
     | _ -> false in
 
   let pattern = case.pc_lhs in
