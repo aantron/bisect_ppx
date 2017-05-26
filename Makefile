@@ -62,10 +62,12 @@ PLUGIN_TARGETS := \
 	$(foreach extension,$(LIB_EXTENSIONS),\
 		src/ocamlbuild/bisect_ppx_plugin.$(extension))
 
+PPX_BISECT_TARGETS = $(wildcard $(INSTALL_SOURCE_DIR)/src/syntax/ppx_bisect.cm*)
+
 TARGETS := \
 	$(foreach binary,syntax/bisect_ppx report/report,\
 		src/$(binary).$(BIN_EXTESION)) \
-	$(foreach extension,$(LIB_EXTENSIONS),src/bisect.$(extension)) \
+	$(foreach extension,$(LIB_EXTENSIONS),src/bisect.$(extension) src/ppx_bisect.$(extension)) \
 	$(PLUGIN_TARGETS)
 
 META_TARGETS := \
@@ -161,20 +163,25 @@ INTERFACE_FILES = \
 	$(shell find src/library -name '*.mli') \
 	$(shell find $1/src -name '*.cmt*')
 
+FINDLIB_INSTALL = ocamlfind install $(INSTALL_FLAGS)
+FINDLIB_REMOVE = ocamlfind remove $(INSTALL_FLAGS)
+
 install: FORCE
 	[ "$(DEV_INSTALL)" = "" ] || mkdir -p $(DEV_INSTALL_DIR)
 	@! ocamlfind query $(INSTALL_NAME) > /dev/null 2> /dev/null || \
-		ocamlfind remove $(INSTALL_FLAGS) $(INSTALL_NAME)
+		$(FINDLIB_REMOVE) $(INSTALL_NAME) && \
+	  $(FINDLIB_REMOVE) $(INSTALL_FLAGS) ppx_bisect
 	@cp $(REWRITER_NATIVE) $(REWRITER) 2> /dev/null || \
 		cp $(REWRITER_BYTE) $(REWRITER)
 	cp $(REPORTER_NATIVE) $(REPORTER) 2> /dev/null || \
 		cp $(REPORTER_BYTE) $(REPORTER)
-	@ocamlfind install $(INSTALL_FLAGS) $(INSTALL_NAME) src/META \
-		src/ppx_bisect.META -optional \
+	@$(FINDLIB_INSTALL) $(INSTALL_NAME) src/META \
+		-optional \
 		$(REWRITER) $(REPORTER) \
 		$(call LIBRARY_FILES,$(INSTALL_SOURCE_DIR)/src/$(RUNTIME)) \
 		$(call LIBRARY_FILES,\
 			$(INSTALL_SOURCE_DIR)/src/ocamlbuild/bisect_ppx_plugin) \
-		$(call INTERFACE_FILES,$(INSTALL_SOURCE_DIR))
+		$(call INTERFACE_FILES,$(INSTALL_SOURCE_DIR)) && \
+	  $(FINDLIB_INSTALL) ppx_bisect src/META.ppx_bisect $(PPX_BISECT_TARGETS)
 
 FORCE:
