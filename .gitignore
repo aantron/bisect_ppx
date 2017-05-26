@@ -17,3 +17,6 @@ bisect.odocl
 
 # scratch directory for notes, etc.
 scratch/
+
+*.install
+*.merlin
