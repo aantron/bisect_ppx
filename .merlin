@@ -1,4 +1,0 @@
-PKG ppx_tools_versioned.metaquot_404
-
-S src/**
-B _build/**
