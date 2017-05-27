@@ -1,4 +1,0 @@
-<*>: include
-"usage": -traverse, -include
-<**/test*>: package(oUnit)
-"test_helpers.ml" or <**/*.native> or <**/*.byte>: package(compiler-libs.common)
