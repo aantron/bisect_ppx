@@ -1,5 +1,4 @@
-name: "bisect_ppx"
-version: "1.2.0"
+version: "dev"
 opam-version: "1.2"
 maintainer: [
   "Anton Bachin <antonbachin@yahoo.com>"
@@ -14,15 +13,19 @@ license: "GPL3"
 homepage: "https://github.com/aantron/bisect_ppx"
 bug-reports: "https://github.com/aantron/bisect_ppx/issues"
 dev-repo: "https://github.com/aantron/bisect_ppx.git"
-build: [make "build"]
-build-test: [make "dev" "tests"]
-install: [make "install"]
-remove: ["ocamlfind" "remove" "bisect_ppx"]
+
+build: [
+  ["jbuilder" "build" "-p" name "-j" jobs]
+]
+
+build-test: [
+  ["jbuilder" "runtest" "-p" name]
+]
+
+
 depends: [
-  "ocamlfind" {build}
-  "ppx_tools_versioned" {build}
-  "ocamlbuild" {build}
-  "ocaml-migrate-parsetree"
+  "jbuilder" {build}
+  "base-unix"
   "ounit" {test}
 ]
 conflicts: [
