@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(library
+ ((name bisect_ppx_ocamlbuild)
+  (public_name bisect_ppx-ocamlbuild)
+  (wrapped false)
+  (libraries (ocamlbuild))))
