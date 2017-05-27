@@ -6,5 +6,5 @@
 
 (alias
  ((name runtest)
-  (deps (test_main.exe))
+  (deps (test_main.exe (files_recursively_in fixtures)))
   (action (run ${<}))))
