@@ -261,6 +261,7 @@ let diff_ast reference =
   diff ~preserve_as:reference "_scratch/_dsource"
 
 let compile_compare cflags directory =
+  let directory = Filename.concat "fixtures" directory in
   let tests =
     Sys.readdir directory
     |> Array.to_list
