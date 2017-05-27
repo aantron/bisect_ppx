@@ -2,4 +2,4 @@
 
 (library
  ((name bisect)
-  (public_name bisect-runtime)))
+  (public_name bisect_ppx)))

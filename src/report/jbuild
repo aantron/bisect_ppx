@@ -3,5 +3,5 @@
 (executables
  ((names (report))
   (public_names (bisect-ppx-report))
-  (package bisect-runtime)
-  (libraries (bisect-runtime unix))))
+  (package bisect_ppx)
+  (libraries (bisect_ppx unix))))
