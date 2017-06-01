@@ -74,13 +74,23 @@ let file_channel () =
   let channel_opt = ic_opt_loop (next_name ()) in
   channel_opt
 
+let dump_counters_exn channel =
+  let content = Hashtbl.fold (fun k v acc -> (k, v) :: acc) table [] in
+  Common.write_runtime_data channel content
+
+let reset_counters () =
+  Hashtbl.iter (fun _ (marks, _) ->
+      match Array.length marks with
+      | 0 -> ()
+      | n -> Array.(fill marks 0 (n - 1) 0)
+    ) table
+
 let dump () =
   match file_channel () with
   | None -> ()
   | Some channel ->
-      let content = Hashtbl.fold (fun k v acc -> (k, v) :: acc) table [] in
       (try
-        Common.write_runtime_data channel content;
+        dump_counters_exn channel
       with _ ->
         verbose Unable_to_write_file);
       close_out_noerr channel
