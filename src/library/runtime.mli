@@ -56,3 +56,11 @@ val init_with_array : string -> int array -> string -> unit
     [marks] to store visitation counts. [points] is a serialized
     [Common.point_definition list] giving the locations of all points in the
     file. *)
+
+val dump_counters_exn : out_channel -> unit
+(** [dump_counters_exn channel] dumps the runtime coverage counters
+ * to the specified [channel].
+ * An exception is raised if writing is not successful *)
+
+val reset_counters : unit -> unit
+(** [reset_counters ()] will reset the runtime coverage counters. *)
