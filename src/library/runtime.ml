@@ -57,8 +57,14 @@ let init_with_array fn arr points =
   if not (Hashtbl.mem table fn) then
     Hashtbl.add table fn (arr, points)
 
+
+
 let file_channel () =
-  let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
+  let this    = match Array.length Sys.argv with
+                | 0 -> Filename.basename Sys.executable_name 
+                | _ -> Filename.basename Sys.argv.(0) in
+  let default = Printf.sprintf "bisect-%s" this in
+  let base_name = full_path (env_to_fname "BISECT_FILE" default) in
   let suffix = ref 0 in
   let next_name () =
     incr suffix;
