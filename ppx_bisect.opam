@@ -13,7 +13,6 @@ license: "GPL3"
 homepage: "https://github.com/aantron/bisect_ppx"
 bug-reports: "https://github.com/aantron/bisect_ppx/issues"
 dev-repo: "https://github.com/aantron/bisect_ppx.git"
-
 build: [
   ["jbuilder" "build" "-p" name "-j" jobs]
 ]
@@ -21,7 +20,6 @@ build: [
 build-test: [
   ["jbuilder" "runtest" "-p" name]
 ]
-
 depends: [
   "jbuilder" {build}
   "bisect_ppx"
