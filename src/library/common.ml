@@ -45,7 +45,8 @@ let try_out_channel bin x f =
 
 (* I/O functions *)
 
-exception Invalid_file of string
+(* filename + reason *)
+exception Invalid_file of string * string
 
 exception Unsupported_version of string
 
@@ -79,7 +80,7 @@ let check_channel channel filename magic check_digest =
       else
         file_version
     else
-      raise (Invalid_file filename) in
+      raise (Invalid_file (filename, "bad magic number")) in
   (match check_digest with
   | Some file ->
       let file_digest : string = input_value channel in
@@ -105,7 +106,9 @@ let read_runtime_data' filename =
       match version with
       | 2, 0 ->
           let file_content : (string * (int array * string)) array =
-            input_value channel in
+            (try input_value channel
+             with | e -> raise (Invalid_file (filename, "exception reading data: " ^ Printexc.to_string e))
+            ) in
           Array.to_list file_content
       | _ -> assert false)
 
