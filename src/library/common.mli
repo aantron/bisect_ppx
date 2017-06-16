@@ -53,9 +53,10 @@ val try_out_channel : bool -> string -> (out_channel -> 'a) -> 'a
 
 (** {6 I/O functions} *)
 
-exception Invalid_file of string
-(** Exception to be raised when a read file does not conform to the Bisect
-    format. The parameter is the name of the incriminated file. *)
+exception Invalid_file of string * string
+(** Exception to be raised when a read file does not conform to the
+    Bisect format. The parameter is the name of the incriminated file
+    and the reason of the error. *)
 
 exception Unsupported_version of string
 (** Exception to be raised when a read file has a format whose version is

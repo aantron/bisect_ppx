@@ -91,8 +91,8 @@ let () =
   | Unix.Unix_error (e, _, _) ->
       Printf.eprintf " *** system error: %s\n" (Unix.error_message e);
       exit 1
-  | Common.Invalid_file s ->
-      Printf.eprintf " *** invalid file: '%s'\n" s;
+  | Common.Invalid_file (f, reason) ->
+      Printf.eprintf " *** invalid file: '%s' error: \"%s\"\n" f reason;
       exit 1
   | Common.Unsupported_version s ->
       Printf.eprintf " *** unsupported file version: '%s'\n" s;
