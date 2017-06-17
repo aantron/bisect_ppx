@@ -4,15 +4,15 @@
 (ocamlyacc (excludeParser))
 
 (library
- ((name ppx_bisect)
-  (public_name ppx_bisect)
+ ((name bisect_ppx)
+  (public_name bisect_ppx)
   (kind ppx_rewriter)
-  (ppx_runtime_libraries (bisect_ppx))
+  (ppx_runtime_libraries (bisect_ppx.runtime))
   (preprocess (pps (ppx_tools_versioned.metaquot_404)))
   (libraries
    (ocaml-migrate-parsetree
     ppx_tools_versioned
     ppx_tools_versioned.metaquot_404
     bigarray
-    bisect_ppx
+    bisect_ppx.runtime
     str))))

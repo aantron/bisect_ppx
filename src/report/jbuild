@@ -4,4 +4,4 @@
  ((names (report))
   (public_names (bisect-ppx-report))
   (package bisect_ppx)
-  (libraries (bisect_ppx unix))))
+  (libraries (bisect_ppx.runtime unix))))

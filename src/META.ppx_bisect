@@ -1,8 +1,0 @@
-version="1.2.0"
-description="Code coverage for OCaml"
-requires="bisect_ppx.runtime ocaml-migrate-parsetree ppx_tools_versioned.metaquot_404"
-
-archive(byte,ppx_driver) = "ppx_bisect.cma"
-archive(native,ppx_driver) = "ppx_bisect.cmx"
-plugin(byte,ppx_driver) = "ppx_bisect.cma"
-plugin(native,ppx_driver) = "ppx_bisect.cmxs"
