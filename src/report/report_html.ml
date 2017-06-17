@@ -696,8 +696,7 @@ let output_html
 let output verbose dir tab_size title resolver data points =
   let files = Hashtbl.fold
       (fun in_file visited acc ->
-        let l = List.length acc in
-        let basename = Printf.sprintf "file%04d" l in
+        let basename = Filename.basename in_file in
         let out_file = (Filename.concat dir basename) ^ ".html" in
         let maybe_stats =
           output_html verbose tab_size title in_file out_file resolver
