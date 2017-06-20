@@ -2,5 +2,7 @@
 
 (library
  ((name bisect_ppx_ocamlbuild)
+  (public_name bisect_ppx.ocamlbuild)
+  (optional)
   (wrapped false)
   (libraries (ocamlbuild))))

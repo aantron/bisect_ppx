@@ -28,6 +28,9 @@ depends: [
   "base-unix"
   "ounit" {test}
 ]
+depopts: [
+  "ocamlbuild"
+]
 conflicts: [
   "ocveralls" {<= "0.3.2"}
 ]
