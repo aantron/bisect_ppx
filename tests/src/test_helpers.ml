@@ -194,7 +194,8 @@ let compile ?(r = "") arguments source =
   end;
 
   Printf.sprintf
-    "OCAMLPATH=../../../install/:$OCAMLPATH ocamlfind %s -linkpkg %s %s %s"
+    "%s ocamlfind %s -linkpkg %s %s %s"
+    "OCAMLPATH=../../../install/default/lib:$OCAMLPATH"
     !_compiler arguments source_copy r
   |> run
 

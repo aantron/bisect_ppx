@@ -60,17 +60,12 @@ echo "Install dependencies"
 echo
 opam install -y ocamlfind ocamlbuild ocaml-migrate-parsetree ppx_tools_versioned
 
-GENERAL_PATH=$PATH
-RESTRICTED_PATH=$PATH
-
 echo
 echo "Compiling"
 echo
 make build
 
-export PATH=$GENERAL_PATH
 opam install -y ounit ppx_blob ppx_deriving # Used in test suite.
-export PATH=$RESTRICTED_PATH
 
 echo
 echo "Testing"
@@ -102,7 +97,7 @@ which bisect-ppx-report
 # echo
 # echo "Testing package usage and Ocamlbuild plugin"
 # echo
-m# ake -C tests usage
+# make -C tests usage
 
 # Currently unused; awaiting restoration of self-instrumentation.
 if [ "$COVERALLS" = yes ]
@@ -110,10 +105,8 @@ then
   echo
   echo "Submitting coverage report"
   echo
-  export PATH=$GENERAL_PATH
   opam install -y ocveralls
   make dev tests
   make -C tests coverage
   ocveralls --prefix _build.instrumented tests/_coverage/meta*.out --send
-  export PATH=$RESTRICTED_PATH
 fi
