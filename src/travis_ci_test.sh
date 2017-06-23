@@ -81,7 +81,7 @@ make test STRICT_DEPENDENCIES=yes
 echo
 echo "Checking OPAM file"
 echo
-opam lint opam
+opam lint *.opam
 
 echo
 echo "Testing installation"
