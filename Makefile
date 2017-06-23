@@ -1,12 +1,11 @@
-all:
+.PHONY : build
+build :
 	jbuilder build
 
-tests:
+.PHONY : test
+test :
 	jbuilder runtest
 
-check: tests
-
-clean:
+.PHONY : clean
+clean :
 	jbuilder clean
-
-.PHONY: all tests doc clean check
