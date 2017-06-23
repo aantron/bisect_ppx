@@ -120,10 +120,10 @@ let compiler () = !_compiler
 let with_bisect_args arguments =
   let ppxopt =
     if String.trim arguments = "" then ""
-    else "-ppxopt 'bisect_ppx_instrumented," ^ arguments ^ "'"
+    else "-ppxopt 'bisect_ppx," ^ arguments ^ "'"
   in
 
-  "-package bisect_ppx_meta.runtime -package bisect_ppx_instrumented " ^ ppxopt
+  "-package bisect_ppx " ^ ppxopt
 
 let with_bisect () = with_bisect_args ""
 
@@ -194,13 +194,13 @@ let compile ?(r = "") arguments source =
   end;
 
   Printf.sprintf
-    "OCAMLPATH=../../_findlib:$OCAMLPATH ocamlfind %s -linkpkg %s %s %s"
+    "OCAMLPATH=../../../install/:$OCAMLPATH ocamlfind %s -linkpkg %s %s %s"
     !_compiler arguments source_copy r
   |> run
 
 let report ?(f = "bisect*.out") ?(r = "") arguments =
   Printf.sprintf
-    "../../_build.instrumented/bisect-ppx-report %s %s %s" arguments f r
+    "../../../install/default/bin/bisect-ppx-report %s %s %s" arguments f r
   |> run
 
 let _preserve file destination =

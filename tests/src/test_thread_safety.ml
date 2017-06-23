@@ -34,14 +34,15 @@ let test ?(bisect = "") name expect_correctness =
       (with_bisect_args (bisect ^ " -inexhaustive-matching"))
     in
 
-    compile cflags "thread-safety/source.ml";
+    compile cflags "fixtures/thread-safety/source.ml";
     run command;
     report "-dump -" ~r:" > output";
 
     if expect_correctness then
-      diff "thread-safety/reference"
+      diff "fixtures/thread-safety/reference"
     else
-      run "! diff ../thread-safety/reference output > /dev/null 2> /dev/null"
+      let redirections = "> /dev/null 2> /dev/null" in
+      run ("! diff ../fixtures/thread-safety/reference output" ^ redirections)
   end
 
 let tests = "thread-safety" >::: [

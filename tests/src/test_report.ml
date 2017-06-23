@@ -21,7 +21,9 @@ open Test_helpers
 
 let test name f =
   test name begin fun () ->
-    compile (with_bisect_args "-inexhaustive-matching") "report/source.ml";
+    compile
+      (with_bisect_args "-inexhaustive-matching")
+      "fixtures/report/source.ml";
     run "./a.out -inf 0 -sup 3 > /dev/null";
     run "./a.out -inf 7 -sup 11 > /dev/null";
     f ()
@@ -30,18 +32,18 @@ let test name f =
 let tests = "report" >::: [
   test "csv" (fun () ->
     report "-csv output";
-    diff "report/reference.csv");
+    diff "fixtures/report/reference.csv");
 
   test "dump" (fun () ->
     report "-dump output";
-    diff "report/reference.dump");
+    diff "fixtures/report/reference.dump");
 
   test "html" (fun () ->
     report "-html html_dir";
     run "grep -v 'id=\"footer\"' html_dir/file0000.html > output";
-    diff "report/reference.html");
+    diff "fixtures/report/reference.html");
 
   test "text" (fun () ->
     report "-text output";
-    diff "report/reference.text")
+    diff "fixtures/report/reference.text")
 ]

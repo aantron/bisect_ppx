@@ -3,7 +3,7 @@ build :
 	jbuilder build
 
 .PHONY : test
-test :
+test : build
 	jbuilder runtest
 
 .PHONY : clean

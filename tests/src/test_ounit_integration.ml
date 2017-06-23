@@ -21,8 +21,8 @@ open Test_helpers
 let tests =
   test "ounit-integration" begin fun () ->
     compile ((with_bisect_args "-inexhaustive-matching") ^ " -package oUnit")
-      "ounit-integration/test.ml";
+      "fixtures/ounit-integration/test.ml";
     run "./a.out > /dev/null";
     report "-csv output";
-    diff "ounit-integration/reference.csv"
+    diff "fixtures/ounit-integration/reference.csv"
   end

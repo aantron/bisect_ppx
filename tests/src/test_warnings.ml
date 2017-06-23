@@ -23,20 +23,21 @@ open Test_helpers
    around that, these tests sort the output lines. *)
 let sorted_diff () =
   run "sort < output.raw > output";
-  run "sort < ../warnings/source.ml.reference > reference";
+  run "sort < ../fixtures/warnings/source.ml.reference > reference";
   diff ~preserve_as:"warnings/source.ml.reference" "_scratch/reference"
 
 let tests = "warnings" >::: [
   test "default" begin fun () ->
     compile
-      ((with_bisect ()) ^ " -w +A") "warnings/source.ml" ~r:"2> output.raw";
+      ((with_bisect ()) ^ " -w +A")
+      "fixtures/warnings/source.ml" ~r:"2> output.raw";
     sorted_diff ()
   end;
 
   test "inexhaustive-matching" begin fun () ->
     compile
       ((with_bisect_args "-inexhaustive-matching") ^ " -w +A")
-      "warnings/source.ml"
+      "fixtures/warnings/source.ml"
       ~r:"2> output.raw";
     sorted_diff ()
   end

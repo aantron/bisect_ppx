@@ -39,7 +39,7 @@ let tests = "ppx-integration" >::: [
     compile ("-package ppx_blob " ^ (with_bisect ()) ^ " -dsource")
       "ppx-integration/blob.ml" ~r:"2> buggy_output";
     _ppx_tools_workaround "buggy_output" "output";
-    diff_ast "ppx-integration/blob_then_bisect.reference"
+    diff_ast "fixtures/ppx-integration/blob_then_bisect.reference"
   end;
 
   test "bisect_then_deriving" begin fun () ->
@@ -71,8 +71,10 @@ let tests = "ppx-integration" >::: [
   end;
 
   test "attributes" begin fun () ->
-    compile ((with_bisect ()) ^ " -dsource") "ppx-integration/attributes.ml"
+    compile
+      ((with_bisect ()) ^ " -dsource")
+      "fixtures/ppx-integration/attributes.ml"
       ~r:"2> output";
-    diff_ast "ppx-integration/attributes.reference"
+    diff_ast "fixtures/ppx-integration/attributes.reference"
   end;
 ]

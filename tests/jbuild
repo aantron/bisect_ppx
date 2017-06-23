@@ -1,10 +1,10 @@
 (jbuild_version 1)
 
-(executables
- ((names (test_main))
+(executable
+ ((name test_main)
   (libraries (bisect_test))))
 
 (alias
  ((name runtest)
   (deps (test_main.exe (files_recursively_in fixtures)))
-  (action (run ${<}))))
+  (action (run ${<} -runner sequential))))
