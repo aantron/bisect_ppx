@@ -63,22 +63,6 @@ opam install -y ocamlfind ocamlbuild ocaml-migrate-parsetree ppx_tools_versioned
 GENERAL_PATH=$PATH
 RESTRICTED_PATH=$PATH
 
-if [ "$BYTECODE_ONLY" = yes ]
-then
-  echo
-  echo "Shadowing ocamlopt"
-  echo
-  mkdir ocamlopt-shadow
-  echo "#! /bin/bash" > ocamlopt-shadow/ocamlopt.opt
-  echo "exit 2" >> ocamlopt-shadow/ocamlopt.opt
-  chmod +x ocamlopt-shadow/ocamlopt.opt
-  cp ocamlopt-shadow/ocamlopt.opt ocamlopt-shadow/ocamlopt
-  RESTRICTED_PATH=`pwd`/ocamlopt-shadow:$PATH
-  export PATH=$RESTRICTED_PATH
-  which ocamlopt.opt
-  which ocamlopt
-fi
-
 echo
 echo "Compiling"
 echo
@@ -92,13 +76,13 @@ echo
 echo "Testing"
 echo
 make dev
-make tests STRICT_DEPENDENCIES=yes
+make test STRICT_DEPENDENCIES=yes
 make -C tests performance
 
-echo
-echo "Testing documentation generation"
-echo
-make doc
+# echo
+# echo "Testing documentation generation"
+# echo
+# make doc
 
 echo
 echo "Checking OPAM file"
@@ -116,11 +100,12 @@ opam install -y bisect_ppx
 ocamlfind query bisect_ppx bisect_ppx.runtime bisect_ppx.fast
 which bisect-ppx-report
 
-echo
-echo "Testing package usage and Ocamlbuild plugin"
-echo
-make -C tests usage
+# echo
+# echo "Testing package usage and Ocamlbuild plugin"
+# echo
+m# ake -C tests usage
 
+# Currently unused; awaiting restoration of self-instrumentation.
 if [ "$COVERALLS" = yes ]
 then
   echo
