@@ -120,7 +120,7 @@ let compiler () = !_compiler
 let with_bisect_args arguments =
   let ppxopt =
     if String.trim arguments = "" then ""
-    else "-ppxopt 'bisect_ppx.deprecated-ppx-method," ^ arguments ^ "'"
+    else "-ppxopt 'bisect_ppx," ^ arguments ^ "'"
   in
 
   "-package bisect_ppx " ^ ppxopt
