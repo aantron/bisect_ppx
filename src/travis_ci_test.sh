@@ -75,9 +75,8 @@ export PATH=$RESTRICTED_PATH
 echo
 echo "Testing"
 echo
-make dev
 make test STRICT_DEPENDENCIES=yes
-make -C tests performance
+# make -C tests performance
 
 # echo
 # echo "Testing documentation generation"
