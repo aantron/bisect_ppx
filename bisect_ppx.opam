@@ -24,9 +24,11 @@ build-test: [
 
 
 depends: [
-  "jbuilder" {build}
   "base-unix"
+  "jbuilder" {build}
+  "ocaml-migrate-parsetree"
   "ounit" {test}
+  "ppx_tools_versioned" {build}
 ]
 depopts: [
   "ocamlbuild"
