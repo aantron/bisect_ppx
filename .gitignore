@@ -16,3 +16,6 @@ scratch/
 
 *.install
 *.merlin
+
+# emacs temporary files
+*~

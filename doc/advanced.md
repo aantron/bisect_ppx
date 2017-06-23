@@ -16,6 +16,8 @@ passed using Ocamlbuild, using the tag `ppxopt`.
 - [Environment variables](#EnvironmentVariables)
   - [Naming the output files](#OutFiles)
   - [Logging](#Logging)
+- [File formats](#FileFormats)
+  - [Output files](#OutputFileFormat)
 - [Installing without OPAM](#WithoutOPAM)
 - [Differences from Bisect](#Bisect)
 
@@ -238,6 +240,33 @@ to another filename, or to `ERR` in order to log to `STDERR`.
 
 <br>
 
+<a id="FileFormats"></a>
+## File Formats
+
+<a id="OutputFileFormat"></a>
+#### Output files
+
+After running your test binary, the binary will generate one or more files with
+the extension `.out`, in addition to testing the code. Bisect's
+`bisect-ppx-report` command can be used to generate a code coverage report from
+these files. This section describes the format of these `.out` files.
+
+Each `.out` file is a magic identifier(see
+[common module code][common-code] for more information) followed by a
+`Marshal`ed `(string * int array) array`, an array of pairs of:
+
+- source filename, and
+- array of point visitation counts.
+
+In addition, each file contains a version number which is a `Marshal`ed pair
+`(1,0)`.
+
+If you want to read these files, depending on your environment, the current best
+way might be to link with package `bisect_ppx.runtime` and call
+`Bisect.Common.read_runtime_data`.
+
+<br>
+
 <a id="WithoutOPAM"></a>
 ## Installing without OPAM
 
@@ -277,3 +306,4 @@ The remaining major differences are:
 [Bisect_ppx_plugin]: https://github.com/aantron/bisect_ppx/blob/master/src/ocamlbuild/bisect_ppx_plugin.mli
 [plugin-code]:       https://github.com/aantron/bisect_ppx/blob/master/src/ocamlbuild/bisect_ppx_plugin.ml
 [unlicense]:         http://unlicense.org/
+[common-code]:       https://github.com/aantron/bisect_ppx/blob/1.1.0/src/library/common.ml
