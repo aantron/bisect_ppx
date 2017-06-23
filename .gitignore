@@ -11,10 +11,6 @@ tests/_coverage
 tests/_report
 tests/_preserve
 
-# generated module lists
-*.mlpack
-bisect.odocl
-
 # scratch directory for notes, etc.
 scratch/
 
