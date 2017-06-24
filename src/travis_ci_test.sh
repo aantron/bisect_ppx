@@ -73,11 +73,6 @@ echo
 make test STRICT_DEPENDENCIES=yes
 make performance
 
-# echo
-# echo "Testing documentation generation"
-# echo
-# make doc
-
 echo
 echo "Testing package usage and Ocamlbuild plugin"
 echo
