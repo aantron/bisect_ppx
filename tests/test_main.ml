@@ -39,8 +39,7 @@ let tests = "bisect_ppx" >::: [
 
 let () =
   let dependencies =
-    [have_binary,  "xmllint";
-     have_package, "ppx_deriving";
+    [have_package, "ppx_deriving";
      have_package, "ppx_blob"]
   in
 
