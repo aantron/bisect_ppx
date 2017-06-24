@@ -16,21 +16,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-OCAMLBUILD := \
-	ocamlbuild -use-ocamlfind -no-links -byte-plugin \
-	-plugin-tag 'package(bisect_ppx.ocamlbuild)'
-
-test: FORCE
-	make clean
-	$(OCAMLBUILD) source.byte --
-	! test -f bisect0001.out
-	BISECT_COVERAGE=YES $(OCAMLBUILD) source.byte --
+.PHONY : test
+test : clean
+	@# Building without the PPX is not easy as in other build systems; a test
+	@# for that should be added once Jbuilder supports this.
+	jbuilder build source.exe
+	_build/default/source.exe
 	test -f bisect0001.out
-	bisect-ppx-report -I _build/ -html _coverage/ bisect*.out
-	test -f _coverage/index.html
+	@# There will be a difference if the ppxopt isn't passed correctly.
+	bisect-ppx-report -text - -summary-only bisect*.out | diff - expected
 
-clean: FORCE
-	$(OCAMLBUILD) -clean
-	rm -rf bisect*.out _coverage
-
-FORCE:
+.PHONY : clean
+clean :
+	jbuilder clean
+	rm -f bisect*.out

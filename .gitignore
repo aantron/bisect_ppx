@@ -19,3 +19,10 @@ scratch/
 
 # emacs temporary files
 *~
+
+# Pollution from the usage tests.
+bisect*.out
+a.out
+*.cmi
+*.cmx
+*.o

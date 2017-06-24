@@ -9,7 +9,9 @@ test : build
 .PHONY : clean
 clean :
 	jbuilder clean
-	make -C tests/usage/ clean
+	make -C tests/usage/ocamlbuild/ clean
+	make -C tests/usage/ocamlfind/ clean
+	make -C tests/usage/jbuilder/ clean
 
 INSTALLED_ENVIRONMENT := \
     OCAMLPATH=`pwd`/_build/install/default/lib \
@@ -17,7 +19,9 @@ INSTALLED_ENVIRONMENT := \
 
 .PHONY : usage
 usage : build
-	$(INSTALLED_ENVIRONMENT) make -C tests/usage/
+	$(INSTALLED_ENVIRONMENT) make -C tests/usage/ocamlbuild/
+	$(INSTALLED_ENVIRONMENT) make -C tests/usage/ocamlfind/
+	$(INSTALLED_ENVIRONMENT) make -C tests/usage/jbuilder/
 
 .PHONY : performance
 performance : build
