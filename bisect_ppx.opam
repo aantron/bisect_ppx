@@ -36,4 +36,6 @@ depopts: [
 conflicts: [
   "ocveralls" {<= "0.3.2"}
 ]
+# Note that Bisect_ppx effectively requires 4.02.3, because Jbuilder requires
+# it. 4.02.0 is the natural constraint of Bisect_ppx.
 available: ocaml-version >= "4.02.0"
