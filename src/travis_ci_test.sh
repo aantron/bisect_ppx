@@ -79,6 +79,11 @@ make test STRICT_DEPENDENCIES=yes
 # make doc
 
 echo
+echo "Testing package usage and Ocamlbuild plugin"
+echo
+make usage
+
+echo
 echo "Checking OPAM file"
 echo
 opam lint *.opam
@@ -93,11 +98,6 @@ opam remove -y bisect_ppx
 opam install -y bisect_ppx
 ocamlfind query bisect_ppx bisect_ppx.runtime bisect_ppx.fast
 which bisect-ppx-report
-
-# echo
-# echo "Testing package usage and Ocamlbuild plugin"
-# echo
-# make -C tests usage
 
 # Currently unused; awaiting restoration of self-instrumentation.
 if [ "$COVERALLS" = yes ]
