@@ -1,0 +1,19 @@
+(jbuild_version 1)
+
+(ocamllex (excludeLexer commentsLexer))
+(ocamlyacc (excludeParser))
+
+(library
+ ((name bisect_ppx)
+  (public_name bisect_ppx)
+  (kind ppx_rewriter)
+  (synopsis "Code coverage for OCaml")
+  (ppx_runtime_libraries (bisect_ppx.runtime))
+  (preprocess (pps (ppx_tools_versioned.metaquot_404)))
+  (libraries
+   (ocaml-migrate-parsetree
+    ppx_tools_versioned
+    ppx_tools_versioned.metaquot_404
+    bigarray
+    bisect_ppx.runtime
+    str))))

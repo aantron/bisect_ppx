@@ -89,7 +89,7 @@ let options = Arg.align [
    Arg.Set verbose,
    " Set verbose mode") ;
   ("-version",
-   Arg.Unit (fun () -> print_endline Version.value; exit 0),
+   Arg.Unit (fun () -> print_endline Bisect.Version.value; exit 0),
    " Print version and exit")
 ]
 

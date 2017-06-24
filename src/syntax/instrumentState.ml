@@ -23,7 +23,8 @@ let marked_points = ref []
 let files = ref []
 
 (* Map from file name to list of point definitions. *)
-let points : (string, (Common.point_definition list)) Hashtbl.t = Hashtbl.create 17
+let points : (string, (Bisect.Common.point_definition list)) Hashtbl.t =
+  Hashtbl.create 17
 
 let get_points_for_file file =
   try

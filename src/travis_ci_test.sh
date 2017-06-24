@@ -58,52 +58,30 @@ git --version
 echo
 echo "Install dependencies"
 echo
-opam install -y ocamlfind ocamlbuild ppx_tools cppo
-
-GENERAL_PATH=$PATH
-RESTRICTED_PATH=$PATH
-
-if [ "$BYTECODE_ONLY" = yes ]
-then
-  echo
-  echo "Shadowing ocamlopt"
-  echo
-  mkdir ocamlopt-shadow
-  echo "#! /bin/bash" > ocamlopt-shadow/ocamlopt.opt
-  echo "exit 2" >> ocamlopt-shadow/ocamlopt.opt
-  chmod +x ocamlopt-shadow/ocamlopt.opt
-  cp ocamlopt-shadow/ocamlopt.opt ocamlopt-shadow/ocamlopt
-  RESTRICTED_PATH=`pwd`/ocamlopt-shadow:$PATH
-  export PATH=$RESTRICTED_PATH
-  which ocamlopt.opt
-  which ocamlopt
-fi
+opam install -y ocamlfind ocamlbuild ocaml-migrate-parsetree ppx_tools_versioned
 
 echo
 echo "Compiling"
 echo
 make build
 
-export PATH=$GENERAL_PATH
 opam install -y ounit ppx_blob ppx_deriving # Used in test suite.
-export PATH=$RESTRICTED_PATH
 
 echo
 echo "Testing"
 echo
-make dev
-make tests STRICT_DEPENDENCIES=yes
-make -C tests performance
+make test STRICT_DEPENDENCIES=yes
+make performance
 
 echo
-echo "Testing documentation generation"
+echo "Testing package usage and Ocamlbuild plugin"
 echo
-make doc
+make usage
 
 echo
 echo "Checking OPAM file"
 echo
-opam lint opam
+opam lint *.opam
 
 echo
 echo "Testing installation"
@@ -116,20 +94,14 @@ opam install -y bisect_ppx
 ocamlfind query bisect_ppx bisect_ppx.runtime bisect_ppx.fast
 which bisect-ppx-report
 
-echo
-echo "Testing package usage and Ocamlbuild plugin"
-echo
-make -C tests usage
-
+# Currently unused; awaiting restoration of self-instrumentation.
 if [ "$COVERALLS" = yes ]
 then
   echo
   echo "Submitting coverage report"
   echo
-  export PATH=$GENERAL_PATH
   opam install -y ocveralls
   make dev tests
   make -C tests coverage
   ocveralls --prefix _build.instrumented tests/_coverage/meta*.out --send
-  export PATH=$RESTRICTED_PATH
 fi

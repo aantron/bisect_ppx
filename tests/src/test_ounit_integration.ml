@@ -1,6 +1,6 @@
 (*
- * This file is part of Bisect.
- * Copyright (C) 2008-2012 Xavier Clerc.
+ * This file is part of Bisect_ppx.
+ * Copyright (C) 2016 Anton Bachin.
  *
  * Bisect is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-open Ppx_tools_404
+open Test_helpers
 
-class instrumenter : Ast_mapper_class.mapper
-(**  This class implements an instrumenter to be used through the {i -ppx}
-    command-line switch. *)
+let tests =
+  test "ounit-integration" begin fun () ->
+    compile ((with_bisect_args "-inexhaustive-matching") ^ " -package oUnit")
+      "fixtures/ounit-integration/test.ml";
+    run "./a.out > /dev/null";
+    report "-csv output";
+    diff "fixtures/ounit-integration/reference.csv"
+  end

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
+module Common = Bisect.Common
+
 class type converter =
   object
     method header : string

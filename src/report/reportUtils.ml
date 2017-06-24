@@ -103,7 +103,7 @@ let output_strings lines mapping ch =
     lines
 
 let output_bytes data filename =
-  Common.try_out_channel
+  Bisect.Common.try_out_channel
     true
     filename
     (fun channel -> Array.iter (output_byte channel) data)

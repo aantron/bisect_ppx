@@ -1,0 +1,6 @@
+(jbuild_version 1)
+
+(library
+ ((name bisect_test)
+  (wrapped false)
+  (libraries (compiler-libs.common oUnit bisect_ppx.runtime))))

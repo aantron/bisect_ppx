@@ -1,0 +1,41 @@
+name: "bisect_ppx"
+version: "dev"
+opam-version: "1.2"
+maintainer: [
+  "Anton Bachin <antonbachin@yahoo.com>"
+  "Leonid Rozenberg <leonidr@gmail.com>"
+]
+authors: [
+  "Xavier Clerc <bisect@x9c.fr>"
+  "Leonid Rozenberg <leonidr@gmail.com>"
+  "Anton Bachin <antonbachin@yahoo.com>"
+]
+license: "GPL3"
+homepage: "https://github.com/aantron/bisect_ppx"
+bug-reports: "https://github.com/aantron/bisect_ppx/issues"
+dev-repo: "https://github.com/aantron/bisect_ppx.git"
+
+build: [
+  ["jbuilder" "build" "-p" name "-j" jobs]
+]
+build-test: [
+  ["jbuilder" "runtest" "-p" name]
+]
+
+
+depends: [
+  "base-unix"
+  "jbuilder" {build & >= "1.0+beta10"}
+  "ocaml-migrate-parsetree"
+  "ounit" {test}
+  "ppx_tools_versioned" {build}
+]
+depopts: [
+  "ocamlbuild"
+]
+conflicts: [
+  "ocveralls" {<= "0.3.2"}
+]
+# Note that Bisect_ppx effectively requires 4.02.3, because Jbuilder requires
+# it. 4.02.0 is the natural constraint of Bisect_ppx.
+available: ocaml-version >= "4.02.0"

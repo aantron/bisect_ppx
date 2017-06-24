@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
+module Common = Bisect.Common
+
 open ReportUtils
 
 let css = [
@@ -442,7 +444,7 @@ let html_footer =
   Printf.sprintf "Generated on %s by <a href=\"%s\">Bisect_ppx</a> %s"
     time
     url
-    Version.value
+    Bisect.Version.value
 
 let split_filename name =
   let dirname =
