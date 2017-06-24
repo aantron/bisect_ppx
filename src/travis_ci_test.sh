@@ -71,7 +71,7 @@ echo
 echo "Testing"
 echo
 make test STRICT_DEPENDENCIES=yes
-# make -C tests performance
+make performance
 
 # echo
 # echo "Testing documentation generation"

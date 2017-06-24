@@ -18,3 +18,9 @@ INSTALLED_ENVIRONMENT := \
 .PHONY : usage
 usage : build
 	$(INSTALLED_ENVIRONMENT) make -C tests/usage/
+
+.PHONY : performance
+performance : build
+	jbuilder build tests/performance/test_performance.exe
+	cd _build/default/tests/ && \
+	    performance/test_performance.exe -runner sequential
