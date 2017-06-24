@@ -23,7 +23,7 @@ val test : string -> (unit -> unit) -> OUnit2.test
     that uses [ocamlopt]. Each time [f] is run, some global state is updated so
     that {!compile} calls the appropriate compiler, and {!with_bisect} and
     similar functions expand to the right flags for that compiler. [f] is run
-    with the process switched to a temporary directory [tests/_scratch].
+    with the process switched to a temporary directory [test/_scratch].
 
     The OUnit path of both generated tests includes [name]. *)
 
@@ -64,7 +64,7 @@ val run : string -> unit
 val compile : ?r:string -> string -> string -> unit
 (** [compile flags ml_file] uses [ocamlfind] to compile [file] with the current
     compiler and the given compiler [flags]. [file] is given relative to the
-    [tests/] directory, for example ["report/source.ml"]. The result of
+    [test/] directory, for example ["report/source.ml"]. The result of
     compilation is a number of output files in the current directory
     [_scratch/], depending on the [flags]. [flags] may include options for
     [ocamlfind], such as [-package].
@@ -103,7 +103,7 @@ val report : ?f:string -> ?r:string -> string -> unit
 
 val diff : ?preserve_as:string -> string -> unit
 (** [diff f] runs the command [diff] between the file [f] and [_scratch/output].
-    [f] is given relative to [tests/], e.g. ["report/reference.html"]. If there
+    [f] is given relative to [test/], e.g. ["report/reference.html"]. If there
     is a difference, [diff] fails the current test case, and includes the
     difference in the error message.
 
@@ -119,7 +119,7 @@ val diff : ?preserve_as:string -> string -> unit
 
       cp -r _preserve/* .
 
-    in the [tests/] directory.
+    in the [test/] directory.
 
     Sometimes, [f] is the name of an intermediate generated file, rather than an
     original reference file under source control. In this case, [~preserve_as]

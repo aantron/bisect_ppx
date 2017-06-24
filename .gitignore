@@ -6,10 +6,10 @@ ocamldoc/
 gh-pages/
 
 # test working and coverage directories
-tests/_scratch
-tests/_coverage
-tests/_report
-tests/_preserve
+test/_scratch
+test/_coverage
+test/_report
+test/_preserve
 
 # scratch directory for notes, etc.
 scratch/

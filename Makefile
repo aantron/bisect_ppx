@@ -9,9 +9,9 @@ test : build
 .PHONY : clean
 clean :
 	jbuilder clean
-	make -C tests/usage/ocamlbuild/ clean
-	make -C tests/usage/ocamlfind/ clean
-	make -C tests/usage/jbuilder/ clean
+	make -C test/usage/ocamlbuild/ clean
+	make -C test/usage/ocamlfind/ clean
+	make -C test/usage/jbuilder/ clean
 
 INSTALLED_ENVIRONMENT := \
     OCAMLPATH=`pwd`/_build/install/default/lib \
@@ -19,14 +19,14 @@ INSTALLED_ENVIRONMENT := \
 
 .PHONY : usage
 usage : build
-	$(INSTALLED_ENVIRONMENT) make -C tests/usage/ocamlbuild/
-	$(INSTALLED_ENVIRONMENT) make -C tests/usage/ocamlfind/
-	$(INSTALLED_ENVIRONMENT) make -C tests/usage/jbuilder/
+	$(INSTALLED_ENVIRONMENT) make -C test/usage/ocamlbuild/
+	$(INSTALLED_ENVIRONMENT) make -C test/usage/ocamlfind/
+	$(INSTALLED_ENVIRONMENT) make -C test/usage/jbuilder/
 
 .PHONY : performance
 performance : build
-	jbuilder build tests/performance/test_performance.exe
-	cd _build/default/tests/ && \
+	jbuilder build test/performance/test_performance.exe
+	cd _build/default/test/ && \
 	    performance/test_performance.exe -runner sequential
 
 # Currently unused; awaiting restoration of self-instrumentation.
