@@ -1,3 +1,4 @@
+name: "bisect_ppx"
 version: "dev"
 opam-version: "1.2"
 maintainer: [
@@ -17,7 +18,6 @@ dev-repo: "https://github.com/aantron/bisect_ppx.git"
 build: [
   ["jbuilder" "build" "-p" name "-j" jobs]
 ]
-
 build-test: [
   ["jbuilder" "runtest" "-p" name]
 ]

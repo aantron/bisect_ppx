@@ -34,8 +34,6 @@ let test ?(uninstrumented = false) ?(with_threads = false) ?(bisect = "") name =
       else cflags ^ " -package threads.posix"
     in
 
-    Unix.getcwd () |> prerr_endline;
-
     compile cflags "performance/source.ml";
     Printf.printf "\n %s (%s)\n%!" name (compiler ());
     run command

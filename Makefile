@@ -37,10 +37,10 @@ gh-pages:
 	mkdir -p $(GH_PAGES)
 	omd README.md | _build/doc/postprocess.byte > $(GH_PAGES)/index.html
 	cd $(GH_PAGES) && \
-	    git init && \
-	    git remote add github git@github.com:aantron/bisect_ppx.git && \
-	    mkdir -p coverage && \
-	    cp -r ../tests/_report/* coverage/ && \
-	    git add -A && \
-	    git commit -m 'Bisect_ppx demonstration' && \
-	    git push -uf github master:gh-pages
+		git init && \
+		git remote add github git@github.com:aantron/bisect_ppx.git && \
+		mkdir -p coverage && \
+		cp -r ../tests/_report/* coverage/ && \
+		git add -A && \
+		git commit -m 'Bisect_ppx demonstration' && \
+		git push -uf github master:gh-pages

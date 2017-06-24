@@ -10,6 +10,7 @@ matrix:
       env: OCAML_VERSION=4.03
     - os: linux
       env: OCAML_VERSION=4.04
+    # Awaiting restoration of self-instrumentation.
     # - os: linux
     #   env: OCAML_VERSION=4.04 COVERALLS=yes
     - os: osx
