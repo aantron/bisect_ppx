@@ -25,12 +25,13 @@ build-test: [
 depends: [
   "base-unix"
   "jbuilder" {build & >= "1.0+beta10"}
+  # This will be removed when bisect_ppx-ocamlbuild is fully factored
+  # out. It is not a build dependency because Ocamlbuild must be present
+  # each time the plugin is used, even after it is built and installed.
+  "ocamlbuild"
   "ocaml-migrate-parsetree"
   "ounit" {test}
   "ppx_tools_versioned" {build}
-]
-depopts: [
-  "ocamlbuild"
 ]
 conflicts: [
   "ocveralls" {<= "0.3.2"}
