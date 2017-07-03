@@ -9,7 +9,7 @@ test : build
 .PHONY : clean
 clean :
 	jbuilder clean
-	make -C test/usage/ocamlbuild/ clean
+	make -C test/usage/ocamlbuild-deprecated/ clean
 	make -C test/usage/ocamlfind/ clean
 	make -C test/usage/jbuilder/ clean
 
@@ -19,7 +19,7 @@ INSTALLED_ENVIRONMENT := \
 
 .PHONY : usage
 usage : build
-	$(INSTALLED_ENVIRONMENT) make -C test/usage/ocamlbuild/
+	$(INSTALLED_ENVIRONMENT) make -C test/usage/ocamlbuild-deprecated/
 	$(INSTALLED_ENVIRONMENT) make -C test/usage/ocamlfind/
 	$(INSTALLED_ENVIRONMENT) make -C test/usage/jbuilder/
 
