@@ -33,6 +33,14 @@ conflicts: [
 # it. 4.02.0 is the natural constraint of Bisect_ppx.
 available: ocaml-version >= "4.02.0"
 
+messages: [
+  "For the Ocamlbuild plugin, please install package bisect_ppx-ocamlbuild"
+  {ocamlbuild:installed & !bisect_ppx-ocamlbuild:installed}
+]
+post-messages: [
+  "The future Bisect_ppx 2.0.0 will make breaking changes in October 2017"
+]
+
 build: [
   ["jbuilder" "build" "-p" name "-j" jobs]
 ]

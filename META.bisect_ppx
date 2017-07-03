@@ -37,7 +37,8 @@ package "omp" (
 package "ocamlbuild" (
   directory = "ocamlbuild"
   version = "dev"
-  description = "Bisect_ppx Ocamlbuild plugin"
+  description =
+    "Bisect_ppx Ocamlbuild plugin (deprecated; use bisect_ppx-ocamlbuild)"
   requires = "ocamlbuild unix"
   archive(byte) = "bisect_ppx_ocamlbuild.cma"
   archive(native) = "bisect_ppx_ocamlbuild.cmxa"
