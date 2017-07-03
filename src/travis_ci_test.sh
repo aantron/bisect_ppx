@@ -81,16 +81,20 @@ make usage
 echo
 echo "Checking OPAM file"
 echo
-opam lint *.opam
+ls *.opam | xargs -L1 opam lint
 
 echo
 echo "Testing installation"
 echo
 make clean
-opam pin add -yn .
-opam install -yt bisect_ppx
+opam pin add -yn bisect_ppx .
+opam install -y bisect_ppx
 ocamlfind query bisect_ppx bisect_ppx.runtime bisect_ppx.fast
+ocamlfind query bisect_ppx.ocamlbuild
 which bisect-ppx-report
+opam pin add -yn bisect_ppx-ocamlbuild .
+opam install -y bisect_ppx-ocamlbuild
+ocamlfind query bisect_ppx-ocamlbuild
 
 # Currently unused; awaiting restoration of self-instrumentation.
 if [ "$COVERALLS" = yes ]
