@@ -16,15 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
 
-open Ast_404
-open Ppx_tools_404
 
-open Parsetree
-open Asttypes
-open Ast_mapper
-open Ast_helper
 
+(* From ocaml-migrate-parsetree. *)
+module Ast = Ast_404
+
+module Location = Ast.Location
+module Longident = Ast.Longident
+module Asttypes = Ast.Asttypes
+module Parsetree = Ast.Parsetree
+module Ast_helper = Ast.Ast_helper
+module Ast_mapper = Ast.Ast_mapper
+
+module Pat = Ast_helper.Pat
+module Exp = Ast_helper.Exp
+module Str = Ast_helper.Str
+module Vb = Ast_helper.Vb
+module Cf = Ast_helper.Cf
+
+(* From ppx_tools_versioned. *)
+module Ast_convenience = Ast_convenience_404
+module Ast_mapper_class = Ast_mapper_class_404
+
+(* From Bisect_ppx. *)
 module Common = Bisect.Common
+
+
 
 let intconst = Ast_convenience.int
 
@@ -40,7 +57,7 @@ let unitconst () = constr "()"
 let strconst = Ast_convenience.str
 
 let string_of_ident ident =
-  String.concat "." (Longident.flatten ident.txt)
+  String.concat "." (Longident.flatten ident.Asttypes.txt)
 
 let apply_nolabs ?loc lid el =
   Exp.apply ?loc
@@ -96,7 +113,7 @@ let marker must_be_unique file ofs marked =
 let wrap_expr ?(must_be_unique = true) ?loc e =
   let loc =
     match loc with
-    | None -> e.pexp_loc
+    | None -> e.Parsetree.pexp_loc
     | Some loc -> loc
   in
   if loc.Location.loc_ghost then
@@ -150,8 +167,8 @@ let translate_pattern =
   in
 
   let rec translate mark p =
-    let loc = p.ppat_loc in
-    let attrs = p.ppat_attributes in
+    let loc = p.Parsetree.ppat_loc in
+    let attrs = p.Parsetree.ppat_attributes in
 
     match p.ppat_desc with
     | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
@@ -229,7 +246,7 @@ let translate_pattern =
    increments the appropriate point counts. *)
 let wrap_case case =
   let maybe_guard =
-    match case.pc_guard with
+    match case.Parsetree.pc_guard with
     | None -> None
     | Some guard -> Some (wrap_expr guard)
   in
@@ -313,8 +330,8 @@ let wrap_case case =
         (Exp.sequence ~loc marks_expr case.pc_rhs)
 
 let wrap_class_field_kind = function
-  | Cfk_virtual _ as cf -> cf
-  | Cfk_concrete (o,e)  -> Cf.concrete o (wrap_expr e)
+  | Parsetree.Cfk_virtual _ as cf -> cf
+  | Parsetree.Cfk_concrete (o,e)  -> Cf.concrete o (wrap_expr e)
 
 let pattern_var id =
   Pat.var (Location.mkloc id Location.none)
@@ -392,7 +409,7 @@ class instrumenter = object (self)
             (fun (l, e) ->
               (l, (wrap_expr e)))
             l in
-        Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
+        Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
     | _ ->
         ce
 
@@ -425,12 +442,12 @@ class instrumenter = object (self)
       | Pexp_let (rec_flag, l, e) ->
           let l =
             List.map (fun vb ->
-            {vb with pvb_expr = wrap_expr vb.pvb_expr}) l in
+            Parsetree.{vb with pvb_expr = wrap_expr vb.pvb_expr}) l in
           Exp.let_ ~loc ~attrs rec_flag l (wrap_expr e)
       | Pexp_poly (e, ct) ->
           Exp.poly ~loc ~attrs (wrap_expr e) ct
       | Pexp_fun (al, eo, p, e) ->
-          let eo = map_opt wrap_expr eo in
+          let eo = Ast_mapper.map_opt wrap_expr eo in
           Exp.fun_ ~loc ~attrs al eo p (wrap_expr e)
       | Pexp_apply (e1, [l2, e2; l3, e3]) ->
           (match e1.pexp_desc with
@@ -470,7 +487,7 @@ class instrumenter = object (self)
     | Pstr_value (rec_flag, l) ->
         let l =
           List.map (fun vb ->     (* Only instrument things not excluded. *)
-            { vb with pvb_expr =
+            Parsetree.{ vb with pvb_expr =
                 match vb.pvb_pat.ppat_desc with
                   (* Match the 'f' in 'let f x = ... ' *)
                 | Ppat_var ident when Exclusions.contains_value
