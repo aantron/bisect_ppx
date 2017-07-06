@@ -43,26 +43,31 @@ module Common = Bisect.Common
 
 
 
-let intconst = Ast_convenience.int
+module More_ast_helpers :
+sig
+  val lid : ?loc:Location.t -> string -> Longident.t Location.loc
+  val string_of_ident : Longident.t Location.loc -> string
 
-let lid ?(loc = Location.none) s =
-  Location.mkloc (Longident.parse s) loc
+  val apply_nolabs :
+    ?loc:Location.t ->
+    Longident.t Location.loc -> Parsetree.expression list ->
+      Parsetree.expression
+end =
+struct
+  let lid ?(loc = Location.none) s =
+    Location.mkloc (Longident.parse s) loc
 
-let constr id =
-  let t = Location.mkloc (Longident.parse id) Location.none in
-  Exp.construct t None
+  let string_of_ident ident =
+    String.concat "." (Longident.flatten ident.Asttypes.txt)
 
-let unitconst () = constr "()"
+  let apply_nolabs ?loc lid el =
+    Exp.apply ?loc
+      (Exp.ident ?loc lid)
+      (List.map (fun e -> (Ast_convenience.Label.nolabel, e)) el)
+end
+open More_ast_helpers
 
-let strconst = Ast_convenience.str
 
-let string_of_ident ident =
-  String.concat "." (Longident.flatten ident.Asttypes.txt)
-
-let apply_nolabs ?loc lid el =
-  Exp.apply ?loc
-    (Exp.ident ?loc lid)
-    (List.map (fun e -> (Ast_convenience.Label.nolabel, e)) el)
 
 let custom_mark_function file =
   Printf.sprintf "___bisect_mark___%s"
@@ -103,7 +108,9 @@ let marker must_be_unique file ofs marked =
   else
     let loc = Location.none in
     let wrapped =
-      apply_nolabs ~loc (lid (custom_mark_function file)) [intconst idx] in
+      apply_nolabs
+        ~loc (lid (custom_mark_function file)) [Ast_convenience.int idx]
+    in
     Some wrapped
 
 (* Wraps an expression with a marker, returning the passed expression
@@ -313,7 +320,7 @@ let wrap_case case =
       let marks_expr =
         cases
         |> List.map (fun (marks, pattern) ->
-          Exp.case pattern (increments (unitconst ()) marks))
+          Exp.case pattern (increments (Ast_convenience.unit ()) marks))
         |> Exp.match_ ~loc (Exp.ident (lid ~loc case_variable))
       in
 
@@ -323,7 +330,7 @@ let wrap_case case =
       let marks_expr =
         Exp.attr marks_expr
           (Location.mkloc "ocaml.warning" loc,
-            PStr [Str.eval (strconst "-4-8-9-11-26-27-28")])
+            PStr [Str.eval (Ast_convenience.str "-4-8-9-11-26-27-28")])
       in
 
       Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
@@ -333,9 +340,6 @@ let wrap_class_field_kind = function
   | Parsetree.Cfk_virtual _ as cf -> cf
   | Parsetree.Cfk_concrete (o,e)  -> Cf.concrete o (wrap_expr e)
 
-let pattern_var id =
-  Pat.var (Location.mkloc id Location.none)
-
 (* This method is stateful and depends on `InstrumentState.set_points_for_file`
    having been run on all the points in the rest of the AST. *)
 let faster file =
@@ -344,9 +348,12 @@ let faster file =
   let init =
     apply_nolabs
       (lid ((!InstrumentArgs.runtime_name) ^ ".Runtime.init_with_array"))
-      [strconst file; ilid "marks"; ilid "points"]
+      [Ast_convenience.str file; ilid "marks"; ilid "points"]
   in
-  let make = apply_nolabs (lid "Array.make") [intconst nb; intconst 0] in
+  let make =
+    apply_nolabs
+      (lid "Array.make") [Ast_convenience.int nb; Ast_convenience.int 0]
+  in
   let marks =
     let marked_points =
       let compare (idx1, _) (idx2, _) = Pervasives.compare idx1 idx2 in
@@ -354,7 +361,7 @@ let faster file =
     let assign (idx, nb) acc =
       let assignment =
         apply_nolabs (lid "Array.set")
-          [ilid "marks"; intconst idx; intconst nb] in
+          [ilid "marks"; Ast_convenience.int idx; Ast_convenience.int nb] in
       match acc with
       | None -> Some assignment
       | Some trail -> Some (Exp.sequence assignment trail) in
@@ -371,7 +378,7 @@ let faster file =
             (Some (ilid "curr"))
       in
       let vb =
-        Vb.mk (pattern_var "curr")
+        Vb.mk (Ast_convenience.pvar "curr")
               (apply_nolabs (lid "Array.get") [ilid "marks"; ilid "idx"])
       in
       Exp.let_ Nonrecursive [vb]
@@ -379,20 +386,21 @@ let faster file =
               (lid "Array.set")
               [ilid "marks"; ilid "idx"; if_then_else])
     in
-    Exp.(function_ [ case (pattern_var "idx") body ])
+    Exp.(function_ [ case (Ast_convenience.pvar "idx") body ])
   in
-  let vb = [(Vb.mk (pattern_var "marks") make)] in
+  let vb = [(Vb.mk (Ast_convenience.pvar "marks") make)] in
   let e =
     Exp.(let_ Nonrecursive vb (sequence marks func))
   in
   let points_string =
     InstrumentState.get_points_for_file file
     |> Common.write_points
-    |> strconst
+    |> Ast_convenience.str
   in
-  let vb = [Vb.mk (pattern_var "points") points_string] in
+  let vb = [Vb.mk (Ast_convenience.pvar "points") points_string] in
   let e = Exp.(let_ Nonrecursive vb e) in
-  Str.value Nonrecursive [ Vb.mk (pattern_var (custom_mark_function file)) e]
+  Str.value
+    Nonrecursive [ Vb.mk (Ast_convenience.pvar (custom_mark_function file)) e]
 
 (* The actual "instrumenter" object, marking expressions. *)
 class instrumenter = object (self)
