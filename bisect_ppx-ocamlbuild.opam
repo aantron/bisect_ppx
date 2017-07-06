@@ -1,4 +1,3 @@
-name: "bisect_ppx-ocamlbuild"
 version: "dev"
 opam-version: "1.2"
 maintainer: [
