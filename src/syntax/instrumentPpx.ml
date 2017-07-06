@@ -75,11 +75,11 @@ sig
 (** This stateful module maintains the information about files and points
     that have been used by an instrumenter. *)
 
-val get_points_for_file : string -> Bisect.Common.point_definition list
+val get_points_for_file : string -> Common.point_definition list
 (** Returns the list of point definitions for the passed file, an empty
     list if the file has no associated point. *)
 
-val set_points_for_file : string -> Bisect.Common.point_definition list -> unit
+val set_points_for_file : string -> Common.point_definition list -> unit
 (** Sets the list of point definitions for the passed file, replacing any
     previous definitions. *)
 
@@ -107,7 +107,7 @@ let marked_points = ref []
 let files = ref []
 
 (* Map from file name to list of point definitions. *)
-let points : (string, (Bisect.Common.point_definition list)) Hashtbl.t =
+let points : (string, (Common.point_definition list)) Hashtbl.t =
   Hashtbl.create 17
 
 let get_points_for_file file =
