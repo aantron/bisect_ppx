@@ -86,9 +86,6 @@ val set_points_for_file : string -> Bisect.Common.point_definition list -> unit
 val add_marked_point : int -> unit
 (** Adds the passed identifier to the list of marked points. *)
 
-val get_marked_points : unit -> int list
-(** Returns the list of marked points. *)
-
 val get_marked_points_assoc : unit -> (int * int) list
 (** Returns the list of marked points, as an association list from
     identifiers to number of occurrences. *)
@@ -124,9 +121,6 @@ let set_points_for_file file pts =
 
 let add_marked_point idx =
   marked_points := idx :: !marked_points
-
-let get_marked_points () =
-  !marked_points
 
 let get_marked_points_assoc () =
   let tbl : (int, int) Hashtbl.t = Hashtbl.create 17 in
