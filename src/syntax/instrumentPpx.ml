@@ -69,6 +69,87 @@ open More_ast_helpers
 
 
 
+module InstrumentState :
+sig
+
+(** This stateful module maintains the information about files and points
+    that have been used by an instrumenter. *)
+
+val get_points_for_file : string -> Bisect.Common.point_definition list
+(** Returns the list of point definitions for the passed file, an empty
+    list if the file has no associated point. *)
+
+val set_points_for_file : string -> Bisect.Common.point_definition list -> unit
+(** Sets the list of point definitions for the passed file, replacing any
+    previous definitions. *)
+
+val add_marked_point : int -> unit
+(** Adds the passed identifier to the list of marked points. *)
+
+val get_marked_points : unit -> int list
+(** Returns the list of marked points. *)
+
+val get_marked_points_assoc : unit -> (int * int) list
+(** Returns the list of marked points, as an association list from
+    identifiers to number of occurrences. *)
+
+val add_file : string -> unit
+(** Adds the passed file to the list of instrumented files. *)
+
+val is_file : string -> bool
+(** Tests whether the passed file has been added through a call to
+    [add_file]. *)
+
+end =
+struct
+
+(** List of marked points (identifiers are stored). *)
+let marked_points = ref []
+
+(* List of files with a call to [Bisect.Runtime.init_with_array]. *)
+let files = ref []
+
+(* Map from file name to list of point definitions. *)
+let points : (string, (Bisect.Common.point_definition list)) Hashtbl.t =
+  Hashtbl.create 17
+
+let get_points_for_file file =
+  try
+    Hashtbl.find points file
+  with Not_found ->
+    []
+
+let set_points_for_file file pts =
+  Hashtbl.replace points file pts
+
+let add_marked_point idx =
+  marked_points := idx :: !marked_points
+
+let get_marked_points () =
+  !marked_points
+
+let get_marked_points_assoc () =
+  let tbl : (int, int) Hashtbl.t = Hashtbl.create 17 in
+  List.iter
+    (fun pt ->
+      let curr = try Hashtbl.find tbl pt with Not_found -> 0 in
+      Hashtbl.replace tbl pt (succ curr))
+    !marked_points;
+  Hashtbl.fold
+    (fun k v acc -> (k, v) :: acc)
+    tbl
+    []
+
+let add_file file =
+  files := file :: !files
+
+let is_file file =
+  List.mem file !files
+
+end
+
+
+
 let custom_mark_function file =
   Printf.sprintf "___bisect_mark___%s"
     (* Turn's out that the variable name syntax isn't checked again,
