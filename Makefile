@@ -20,10 +20,10 @@ INSTALLED_ENVIRONMENT := \
 
 .PHONY : usage
 usage : build
-	$(INSTALLED_ENVIRONMENT) make -C test/usage/ocamlbuild/
-	$(INSTALLED_ENVIRONMENT) make -C test/usage/ocamlbuild-deprecated/
-	$(INSTALLED_ENVIRONMENT) make -C test/usage/ocamlfind/
-	$(INSTALLED_ENVIRONMENT) make -C test/usage/jbuilder/
+	$(INSTALLED_ENVIRONMENT) make -wC test/usage/ocamlbuild/
+	$(INSTALLED_ENVIRONMENT) make -wC test/usage/ocamlbuild-deprecated/
+	$(INSTALLED_ENVIRONMENT) make -wC test/usage/ocamlfind/
+	$(INSTALLED_ENVIRONMENT) make -wC test/usage/jbuilder/
 
 .PHONY : performance
 performance : build
