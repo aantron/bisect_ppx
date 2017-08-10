@@ -17,5 +17,7 @@
  *)
 
 include Ppx_bisect
+(* Ppx_bisect is a side-effecting module. In particular, it registers the
+   bisect_ppx PPX with the driver. *)
 
 let () = Migrate_parsetree.Driver.run_main ()
