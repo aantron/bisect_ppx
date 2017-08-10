@@ -17,9 +17,7 @@
 #
 
 .PHONY : test
-test : clean
-	@# Building without the PPX is not easy as in other build systems; a test
-	@# for that should be added once Jbuilder supports this.
+test :
 	jbuilder build source.exe
 	_build/default/source.exe
 	test -f bisect0001.out
