@@ -17,6 +17,8 @@
  *)
 
 
+let conditional = ref false
+
 let runtime_name = ref "Bisect"
 
 let simple_cases = ref false
@@ -35,6 +37,10 @@ let switches = [
   ("-mode",
    (Arg.Symbol (["safe"; "fast"; "faster"], ignore)),
    "  Ignored") ;
+
+  ("-conditional",
+   Arg.Set conditional,
+   "  Do not instrument unless environment variable BISECT_ENABLE is YES");
 
   ("-runtime",
    Arg.Set_string runtime_name,

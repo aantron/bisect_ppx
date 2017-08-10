@@ -13,6 +13,7 @@ clean :
 	make -C test/usage/ocamlbuild-deprecated/ clean
 	make -C test/usage/ocamlfind/ clean
 	make -C test/usage/jbuilder-unconditional/ clean
+	make -C test/usage/jbuilder-conditional/ clean
 
 INSTALLED_ENVIRONMENT := \
     OCAMLPATH=`pwd`/_build/install/default/lib \
@@ -24,6 +25,7 @@ usage : build
 	$(INSTALLED_ENVIRONMENT) make -wC test/usage/ocamlbuild-deprecated/
 	$(INSTALLED_ENVIRONMENT) make -wC test/usage/ocamlfind/
 	$(INSTALLED_ENVIRONMENT) make -wC test/usage/jbuilder-unconditional/
+	$(INSTALLED_ENVIRONMENT) make -wC test/usage/jbuilder-conditional/
 
 .PHONY : performance
 performance : build

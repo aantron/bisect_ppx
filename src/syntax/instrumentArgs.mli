@@ -19,6 +19,11 @@
 (** This module defines the values related to command-line analysis. *)
 
 
+val conditional : bool ref
+(** If set, Bisect_ppx does not instrument code, unless environment variable
+    [BISECT_ENABLE] is set to [YES]. The environment variable's value is not
+    case-sensitive. *)
+
 val runtime_name : string ref
 (** Runtime module name. Defaults to [Bisect], but should be set to
     [Meta_bisect] when applying Bisect_ppx to itself. *)
