@@ -4,7 +4,7 @@ build :
 
 .PHONY : test
 test : build
-	jbuilder runtest
+	jbuilder runtest --no-buffer -j 1
 
 .PHONY : clean
 clean :
