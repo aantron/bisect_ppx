@@ -23,7 +23,7 @@ depends: [
   "ocamlbuild"
   "ocaml-migrate-parsetree"
   "ounit" {test}
-  "ppx_tools_versioned" {build}
+  "ppx_tools_versioned"
 ]
 conflicts: [
   "ocveralls" {<= "0.3.2"}
