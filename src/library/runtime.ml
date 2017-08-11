@@ -35,6 +35,7 @@ let full_path fname =
 let env_to_fname env default = try Sys.getenv env with Not_found -> default
 
 let verbose =
+  lazy begin
   let fname = env_to_fname "BISECT_SILENT" "bisect.log" in
   match String.uppercase fname with
   | "YES" | "ON" -> fun _ -> ()
@@ -50,12 +51,13 @@ let verbose =
       in
       fun msg ->
         Printf.fprintf (Lazy.force oc_l) "%s\n" (string_of_message msg)
+  end
 
-let table : (string, int array * string) Hashtbl.t = Hashtbl.create 17
+let verbose message =
+  (Lazy.force verbose) message
 
-let init_with_array fn arr points =
-  if not (Hashtbl.mem table fn) then
-    Hashtbl.add table fn (arr, points)
+let table : (string, int array * string) Hashtbl.t Lazy.t =
+  lazy (Hashtbl.create 17)
 
 let file_channel () =
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
@@ -75,7 +77,8 @@ let file_channel () =
   channel_opt
 
 let dump_counters_exn channel =
-  let content = Hashtbl.fold (fun k v acc -> (k, v) :: acc) table [] in
+  let content =
+    Hashtbl.fold (fun k v acc -> (k, v) :: acc) (Lazy.force table) [] in
   Common.write_runtime_data channel content
 
 let reset_counters () =
@@ -83,7 +86,7 @@ let reset_counters () =
       match Array.length marks with
       | 0 -> ()
       | n -> Array.(fill marks 0 (n - 1) 0)
-    ) table
+    ) (Lazy.force table)
 
 let dump () =
   match file_channel () with
@@ -95,5 +98,11 @@ let dump () =
         verbose Unable_to_write_file);
       close_out_noerr channel
 
-let () =
-  at_exit dump
+let register_dump : unit Lazy.t =
+  lazy (at_exit dump)
+
+let init_with_array fn arr points =
+  let () = Lazy.force register_dump in
+  let table = Lazy.force table in
+  if not (Hashtbl.mem table fn) then
+    Hashtbl.add table fn (arr, points)
