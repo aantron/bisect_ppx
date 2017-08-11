@@ -59,8 +59,9 @@ val init_with_array : string -> int array -> string -> unit
 
 val dump_counters_exn : out_channel -> unit
 (** [dump_counters_exn channel] dumps the runtime coverage counters
- * to the specified [channel].
- * An exception is raised if writing is not successful *)
+    to the specified [channel].
+
+    An exception is raised if writing is not successful *)
 
 val reset_counters : unit -> unit
 (** [reset_counters ()] will reset the runtime coverage counters. *)
