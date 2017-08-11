@@ -9,11 +9,10 @@ test : build
 .PHONY : clean
 clean :
 	jbuilder clean
-	make -C test/usage/ocamlbuild/ clean
-	make -C test/usage/ocamlbuild-deprecated/ clean
-	make -C test/usage/ocamlfind/ clean
-	make -C test/usage/jbuilder-unconditional/ clean
-	make -C test/usage/jbuilder-conditional/ clean
+	for TEST in `ls -d test/usage/*` ; \
+	do \
+		make -wC $$TEST clean ; \
+	done
 
 INSTALLED_ENVIRONMENT := \
     OCAMLPATH=`pwd`/_build/install/default/lib \
@@ -21,11 +20,10 @@ INSTALLED_ENVIRONMENT := \
 
 .PHONY : usage
 usage : build
-	$(INSTALLED_ENVIRONMENT) make -wC test/usage/ocamlbuild/
-	$(INSTALLED_ENVIRONMENT) make -wC test/usage/ocamlbuild-deprecated/
-	$(INSTALLED_ENVIRONMENT) make -wC test/usage/ocamlfind/
-	$(INSTALLED_ENVIRONMENT) make -wC test/usage/jbuilder-unconditional/
-	$(INSTALLED_ENVIRONMENT) make -wC test/usage/jbuilder-conditional/
+	for TEST in `ls -d test/usage/*` ; \
+	do \
+		$(INSTALLED_ENVIRONMENT) make -wC $$TEST ; \
+	done
 
 .PHONY : performance
 performance : build
