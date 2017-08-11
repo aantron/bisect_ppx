@@ -75,13 +75,15 @@ See also the [advanced usage][advanced].
 
 A small sample of projects using Bisect_ppx:
 
-- [Oml][oml]: [report][oml-coveralls]
-- [ctypes][ctypes]: [report][ctypes-coveralls]
-- [ocaml-irc-client][ocaml-irc-client]: [report][irc-coveralls]
-- [Markup.ml][markupml]: [report][markupml-coveralls]
+- [Lwt][lwt]
+- [Oml][oml] ([report][oml-coveralls])
+- [ctypes][ctypes] ([report][ctypes-coveralls])
+- [ocaml-irc-client][ocaml-irc-client] ([report][irc-coveralls])
+- [Markup.ml][markupml] ([report][markupml-coveralls])
 - [Ketrew][ketrew]
 - [Sosa][sosa]
 
+[lwt]:                https://github.com/ocsigen/lwt
 [oml]:                https://github.com/hammerlab/oml
 [oml-coveralls]:      https://coveralls.io/github/hammerlab/oml?branch=HEAD
 [ctypes]:             https://github.com/ocamllabs/ocaml-ctypes
