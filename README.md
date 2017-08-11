@@ -38,7 +38,8 @@ to run that script, then refresh your browser.
    You can also install [without OPAM][without-opam].
 
 2. When compiling for testing, include Bisect_ppx. Instructions are also
-   available [for Ocamlbuild][ocamlbuild] and [for OASIS][oasis].
+   available for [Ocamlbuild][ocamlbuild], [OASIS][oasis] and
+   [Jbuilder][jbuilder].
 
         ocamlfind c -package bisect_ppx -c my_code.ml
         ocamlfind c -c my_tests.ml
@@ -64,6 +65,7 @@ See also the [advanced usage][advanced].
 [without-opam]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#WithoutOPAM
 [ocamlbuild]:   https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
 [oasis]:        https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#OASIS
+[jbuilder]:     https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Jbuilder
 [ocveralls]:    https://github.com/sagotch/ocveralls
 [advanced]:     https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md
 
