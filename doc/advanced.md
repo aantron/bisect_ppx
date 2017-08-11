@@ -10,6 +10,7 @@ passed using Ocamlbuild, using the tag `ppxopt`.
   - [With Ocamlfind](#Ocamlfind)
   - [With Ocamlbuild](#Ocamlbuild)
   - [With OASIS](#OASIS)
+  - [With Jbuilder](#Jbuilder)
 - [Excluding code from coverage](#Excluding)
   - [Individual lines and line ranges](#ExcludingLines)
   - [Files and top-level values](#ExcludingValues)
@@ -143,6 +144,48 @@ dependency, you can work the [contents][plugin-code] of `Bisect_ppx_plugin`
 directly into `myocamlbuild.ml`. Use them to replace the call to
 `Bisect_ppx_plugin.dispatch`. In that case, you don't want to put the package
 fields in the first step into your `_oasis` file.
+
+<a id="Jbuilder"></a>
+#### With Jbuilder
+
+Jbuilder currently doesn't support Bisect_ppx very well. There isn't a good way
+to turn Bisect_ppx on and off conditionally during development, nor to
+permanently disable it for release. However, Bisect_ppx provides a pretty decent
+workaround:
+
+1. List Bisect_ppx in your `jbuild` files, and pass the `-conditional` flag to
+   it:
+
+        (jbuild_version 1)
+
+        (library
+         ((name my_lib)
+          (preprocess (pps (bisect_ppx -conditional)))))
+
+2. `-conditional` is what turns on the workaround. It makes Bisect_ppx *not*
+   instrument your code by default. You can conditionally enable instrumentation
+   using the `BISECT_ENABLE` environment variable. Just set it to `YES` in your
+   `Makefile`, or whatever you use to trigger Jbuilder:
+
+        .PHONY : coverage
+        coverage :
+            BISECT_ENABLE=YES jbuilder runtest
+            bisect-ppx-report -html _coverage/ bisect*.out
+
+   Your other rules are not affected.
+
+3. For release, we recommend manually removing `bisect_ppx -conditional` from
+   your `jbuild` files. If you don't want to do that, you can add a dependency
+   on package `bisect_ppx` to your `opam` files:
+
+        depends: [
+          "bisect_ppx" {build & >= "1.3.0"}
+        ]
+
+See [Jbuilder issue #57][jbuilder-bisect] for discussion of Jbuilder/Bisect_ppx
+compatibility.
+
+[jbuilder-bisect]: https://github.com/janestreet/jbuilder/issues/57
 
 
 
