@@ -36,21 +36,21 @@ let env_to_fname env default = try Sys.getenv env with Not_found -> default
 
 let verbose =
   lazy begin
-  let fname = env_to_fname "BISECT_SILENT" "bisect.log" in
-  match String.uppercase fname with
-  | "YES" | "ON" -> fun _ -> ()
-  | "ERR"        -> fun msg -> prerr_endline (string_of_message msg)
-  | _uc_fname    ->
-      let oc_l = lazy (
-        (* A weird race condition is caused if we use this invocation instead
-          let oc = open_out_gen [Open_append] 0o244 (full_path fname) in
-          Note that verbose is called only during [at_exit]. *)
-        let oc = open_out_bin (full_path fname) in
-        at_exit (fun () -> close_out_noerr oc);
-        oc)
-      in
-      fun msg ->
-        Printf.fprintf (Lazy.force oc_l) "%s\n" (string_of_message msg)
+    let fname = env_to_fname "BISECT_SILENT" "bisect.log" in
+    match String.uppercase fname with
+    | "YES" | "ON" -> fun _ -> ()
+    | "ERR"        -> fun msg -> prerr_endline (string_of_message msg)
+    | _uc_fname    ->
+        let oc_l = lazy (
+          (* A weird race condition is caused if we use this invocation instead
+            let oc = open_out_gen [Open_append] 0o244 (full_path fname) in
+            Note that verbose is called only during [at_exit]. *)
+          let oc = open_out_bin (full_path fname) in
+          at_exit (fun () -> close_out_noerr oc);
+          oc)
+        in
+        fun msg ->
+          Printf.fprintf (Lazy.force oc_l) "%s\n" (string_of_message msg)
   end
 
 let verbose message =
@@ -68,7 +68,8 @@ let file_channel () =
   in
   let rec ic_opt_loop actual_name =
     try
-      Some (open_out_gen [Open_wronly; Open_binary; Open_creat; Open_excl] 0o644 actual_name)
+      Some (open_out_gen
+        [Open_wronly; Open_binary; Open_creat; Open_excl] 0o644 actual_name)
     with Sys_error _ -> ic_opt_loop (next_name ())
        | _ -> verbose Unable_to_create_file;
               None
