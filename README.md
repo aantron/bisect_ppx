@@ -122,13 +122,22 @@ If you use Camlp4, you will want to use the original Bisect.
 
 ## License
 
-Bisect_ppx is distributed under the terms of the
-[GPL license, version 3][license]. Note, however, that Bisect_ppx does not
-"contaminate" your project with the terms of the GPL, because it is a
-development tool used only during testing. You would not want to link Bisect_ppx
-into your release files anyway, for performance reasons.
+Bisect_ppx is available under the Mozilla Public License 2.0 (MPL). To
+summarize, you can incorporate Bisect_ppx into proprietary projects. If you make
+modifications to Bisect_ppx, you have to open-source them. The rest of your
+project remains proprietary.
 
-[license]: https://github.com/aantron/bisect_ppx/blob/master/doc/COPYING
+Essentially, this is like the BSD or MIT licenses, except that if you customize
+Bisect_ppx, you have to contribute the changes back, or keep them in a visible
+fork. A public GitHub fork meets the requirement.
+
+Besides proprietary licenses, MPL is compatible with BSD/MIT/Apache- and
+(L)GPL-licensed projects. See the [MPL 2.0 FAQ][mpl-faq].
+
+The Ocamlbuild plugin is dedicated to the public domain.
+
+[license]: https://github.com/aantron/bisect_ppx/blob/master/LICENSE
+[mpl-faq]: https://www.mozilla.org/en-US/MPL/2.0/FAQ/
 
 
 
