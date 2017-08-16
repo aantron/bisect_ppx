@@ -6,15 +6,14 @@
 - Pick a version number according to [semantic versioning][semver].
 - Update the `CHANGES` file.
 - `grep` for the previous version number. Replace occurences with the new
-  version number. This should include `META`, `opam`, `version.ml`, and
-  `README.md`,
-- Tag (`tag -a`) the release. Include the changelog in the tag message, so it
-  can be viewed with `git tag -n99`.
+  version number. This should include at least `version.ml` and `README.md`.
+- Create a release branch. Change the version number in `META` and the `*.opam`
+  files in that branch.
+- Tag (`tag -a`) the release in the release branch. Include the changelog in
+  the tag message, so it can be viewed with `git tag -n99`.
 - Push the tag.
-- Submit the release to OPAM.
-- After release is accepted in OPAM, make a GitHub release for it as well. List
-  the changes there. The reason this is done after OPAM is that the OPAM release
-  may have to be amended before it is accepted.
-- Update GitHub Pages.
+- Create a nicely-formatted GitHub release.
+- Submit the release to OPAM from the release branch.
+- Update GitHub Pages (this is on hold until self-instrumentation is restored).
 
 [semver]: http://semver.org/
