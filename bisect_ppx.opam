@@ -21,7 +21,7 @@ depends: [
   # out. It is not a build dependency because Ocamlbuild must be present
   # each time the plugin is used, even after it is built and installed.
   "ocamlbuild"
-  "ocaml-migrate-parsetree"
+  "ocaml-migrate-parsetree" {>= "1.0.3"}
   "ounit" {test}
   "ppx_tools_versioned"
 ]

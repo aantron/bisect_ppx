@@ -28,5 +28,5 @@ let () =
       | `Enabled ->
         Ast_mapper_class.to_mapper (new InstrumentPpx.instrumenter)
       | `Disabled ->
-        Ast_404.Ast_mapper.default_mapper
+        Ast_404.shallow_identity
     end
