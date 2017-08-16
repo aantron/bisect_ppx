@@ -1,3 +1,40 @@
+Version 1.3.0 (2017-08-16):
+---------------------------
+  Planned to break in the future 2.0.0
+
+  - The Ocamlbuild plugin will be factored out into its own OPAM package
+    bisect_ppx-ocamlbuild, and the ocamlfind package will be changed to also
+    have that name, instead of the current bisect_ppx.ocamlbuild. The new OPAM
+    package is available now, since Bisect_ppx 1.3.0 (#146).
+  - Delete ocamlfind package bisect_ppx.fast. It is a little-used alias for
+    package bisect_ppx (#144).
+  - Delete ocamlfind package bisect_ppx.plugin. It is a little-used alias for
+    bisect_ppx.ocamlbuild (#144).
+
+  Additions
+
+  - Port to Jbuilder (#117, Rudi Grinberg).
+  - Port to ocaml-migrate-parsetree (#117, Rudi Grinberg).
+  - Add "-conditional" workaround for Jbuilder (#153).
+  - API for dumping coverage statistics before program exit, e.g. for
+    long-running daemons (#129, Edwin Török).
+  - Match cases consisting of only assert false are no longer instrumented
+    (#118, Gabriel Scherer).
+  - Change license to MPL 2.0, from GPL 3.0 (#133).
+
+  Bugs fixed
+
+  - Don't instrument refutation cases ("| p -> .") (#118, Gabriel Scherer).
+  - Some builds failing with "unary operator expected" (#123, Brad Langel).
+  - Better error messages for malformed bisect*.out files (#137,
+    Emilio Jesús Gallego Arias).
+
+  Miscellaneous
+
+  - Document bisect*.out file format (#138, Brad Langel).
+  - Testing, build, debuggability improvements, including by Gabriel Scherer,
+    Emilio Jesús Gallego Arias.
+
 Version 1.2.0 (2016-11-08):
 ---------------------------
   Additions
