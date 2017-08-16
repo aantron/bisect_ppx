@@ -9,7 +9,7 @@ authors: [
   "Leonid Rozenberg <leonidr@gmail.com>"
   "Anton Bachin <antonbachin@yahoo.com>"
 ]
-license: "GPL3"
+license: "MPL2"
 homepage: "https://github.com/aantron/bisect_ppx"
 bug-reports: "https://github.com/aantron/bisect_ppx/issues"
 dev-repo: "https://github.com/aantron/bisect_ppx.git"
@@ -37,7 +37,8 @@ messages: [
   {ocamlbuild:installed & !bisect_ppx-ocamlbuild:installed}
 ]
 post-messages: [
-  "The future Bisect_ppx 2.0.0 will make breaking changes in October 2017"
+  "The future Bisect_ppx 2.0.0 will make breaking changes in late 2017. See
+  https://github.com/aantron/bisect_ppx/releases/tag/1.3.0"
 ]
 
 build: [
