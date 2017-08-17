@@ -1,0 +1,25 @@
+{
+  "name": "test",
+  "sources": [{
+    "dir": "src",
+    "subdirs": [{
+      "dir": "bla"
+    }]
+  }, {
+    "dir": "tests"
+  }],
+  "bs-dependencies": ["DepA", "DepB", "DepC"],
+  "entries": [{
+    "kind": "js",
+    "main": "Main"
+  }, {
+    "kind": "bytecode",
+    "main": "Main"
+  }, {
+    "kind": "bytecode",
+    "main": "Test"
+  }, {
+    "kind": "native",
+    "main": "Main"
+  }]
+}

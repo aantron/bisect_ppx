@@ -1,0 +1,11 @@
+{
+  "name": "bsb-native-bisect_ppx",
+  "sources": "src",
+  "ocamlfind-dependencies": ["bisect_ppx"],
+  "entries": [
+    {
+      "kind": "bytecode",
+      "main": "Source"
+    }
+  ]
+}

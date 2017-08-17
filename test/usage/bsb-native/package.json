@@ -1,0 +1,19 @@
+{
+  "name": "bsb-native",
+  "version": "0.1.0",
+  "description": "bsb-native bisect_ppx usage example",
+  "main": "index.js",
+  "scripts": {
+    "clean": "bsb -backend bytecode -clean-world && bsb -backend native -clean-world",
+    "build": "bsb -backend bytecode",
+    "tests": "./lib/bs/bytecode/src/source.byte",
+    "devTest": "npm run cleanB && npm run build && npm run tests",
+    "coverage": "bisect-ppx-report -I build/ -html coverage/ bisect*.out",
+    "cleanCov": "rm -rf bisect*.out && rm -rf coverage"
+  },
+  "devDependencies": {
+    "bs-platform": "github:bsansouci/bsb-native"
+  },
+  "author": "",
+  "license": "ISC"
+}
