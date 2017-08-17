@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "bsb -backend bytecode -clean-world && bsb -backend native -clean-world",
     "build": "bsb -backend bytecode",
-    "tests": "./lib/bs/bytecode/src/source.byte",
+    "test": "./lib/bs/bytecode/source.byte",
     "devTest": "npm run cleanB && npm run build && npm run tests",
     "coverage": "bisect-ppx-report -I build/ -html coverage/ bisect*.out",
     "cleanCov": "rm -rf bisect*.out && rm -rf coverage"
