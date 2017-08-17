@@ -9,7 +9,8 @@
     "test": "./lib/bs/bytecode/source.byte",
     "devTest": "npm run cleanB && npm run build && npm run tests",
     "coverage": "bisect-ppx-report -I build/ -html coverage/ bisect*.out",
-    "cleanCov": "rm -rf bisect*.out && rm -rf coverage"
+    "cleanCov": "rm -rf bisect*.out && rm -rf coverage",
+    "coverageReport": "open -a \"Google Chrome\" ./coverage/index.html"
   },
   "devDependencies": {
     "bs-platform": "github:bsansouci/bsb-native"

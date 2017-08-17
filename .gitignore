@@ -26,3 +26,9 @@ a.out
 *.cmi
 *.cmx
 *.o
+
+# npm and bucklescript artifacts
+lib
+node_modules
+_build
+coverage
