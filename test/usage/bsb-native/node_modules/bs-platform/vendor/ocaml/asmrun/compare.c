@@ -1,1 +1,0 @@
-../byterun/compare.c
