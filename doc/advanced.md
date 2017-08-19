@@ -2,7 +2,8 @@
 
 Several sections below give options that can be passed to the Bisect_ppx
 preprocessor using the Ocamlfind option `-ppxopt`. The same options can be
-passed using Ocamlbuild, using the tag `ppxopt`.
+passed using Ocamlbuild, using the tag `ppxopt`, and to Jbuilder, by simply
+listing them after `bisect_ppx` in the `pps` list.
 
 #### Table of contents
 
@@ -168,11 +169,25 @@ workaround:
    `Makefile`, or whatever you use to trigger Jbuilder:
 
         .PHONY : coverage
-        coverage :
+        coverage : clean
             BISECT_ENABLE=YES jbuilder runtest
-            bisect-ppx-report -html _coverage/ bisect*.out
+            bisect-ppx-report -html _coverage/ `find . -name 'bisect*.out'`
+
+        .PHONY : clean
+        clean :
+            rm -f `find . -name 'bisect*.out'`
+            jbuilder clean
 
    Your other rules are not affected.
+
+   Note that `coverage` triggers `clean` first. This (1) gets rid of stale old
+   `bisect*.out` files, and (2) forces to Jbuilder to rerun the tests. Normally,
+   Jbuilder doesn't rerun tests if the code they are testing hasn't changed.
+
+   The `find . -name 'bisect*.out'` is needed because Jbuilder changes directory
+   while running the tests, and the `.out` files end up written there. The
+   directory usually ends up being something like `_build/default/tests/`, but
+   if you have multiple test targets, there will be multiple directories.
 
 3. For release, we recommend manually removing `bisect_ppx -conditional` from
    your `jbuild` files. If you don't want to do that, you can add a dependency
@@ -181,6 +196,8 @@ workaround:
         depends: [
           "bisect_ppx" {build & >= "1.3.0"}
         ]
+
+   We hope to eliminate this chore in the future.
 
 See [Jbuilder issue #57][jbuilder-bisect] for discussion of Jbuilder/Bisect_ppx
 compatibility.
