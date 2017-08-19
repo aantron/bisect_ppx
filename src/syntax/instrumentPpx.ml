@@ -76,21 +76,11 @@ val get_marked_points_assoc : unit -> (int * int) list
 (** Returns the list of marked points, as an association list from
     identifiers to number of occurrences. *)
 
-val add_file : string -> unit
-(** Adds the passed file to the list of instrumented files. *)
-
-val is_file : string -> bool
-(** Tests whether the passed file has been added through a call to
-    [add_file]. *)
-
 end =
 struct
 
 (** List of marked points (identifiers are stored). *)
 let marked_points = ref []
-
-(* List of files with a call to [Bisect.Runtime.init_with_array]. *)
-let files = ref []
 
 (* Map from file name to list of point definitions. *)
 let points : (string, (Common.point_definition list)) Hashtbl.t =
@@ -119,12 +109,6 @@ let get_marked_points_assoc () =
     (fun k v acc -> (k, v) :: acc)
     tbl
     []
-
-let add_file file =
-  files := file :: !files
-
-let is_file file =
-  List.mem file !files
 
 end
 
@@ -403,7 +387,7 @@ let wrap_class_field_kind = function
 
 (* This method is stateful and depends on `InstrumentState.set_points_for_file`
    having been run on all the points in the rest of the AST. *)
-let faster file =
+let generate_runtime_initialization_code file =
   let nb = List.length (InstrumentState.get_points_for_file file) in
   let ilid s = Exp.ident (lid s) in
   let init =
@@ -596,31 +580,51 @@ class instrumenter = object (self)
     attribute_guard <- false;
     r
 
-  (* Initializes storage and applies requested marks. *)
-  method! structure ast =
-    if extension_guard || attribute_guard then
-      super#structure ast
-    else
-      let file = !Location.input_name in
-      if file = "//toplevel//" ||
-         file = "(stdin)" ||
-         List.mem (Filename.basename file) [".ocamlinit"; "topfind"] then
-        ast
-      else
-        if not (InstrumentState.is_file file) then
-          if Exclusions.contains_file file then ast
-          else begin
-            (* We have to add this here, before we process the rest of the
-               structure, because that may also have structures contained
-               there-in, but we'll add the header after processing all of those
-               declarations so that we know how many instrumentations there
-               are. *)
-            InstrumentState.add_file file;
-            let rest = super#structure ast in
-            let head = faster file in
-            head :: rest
-          end
-        else
-          super#structure ast
+  (* This is set to [true] once the [structure] method is called for the first
+     time. It's used to determine whether Bisect_ppx is looking at the top-level
+     structure (module) in the file, or a nested structure (module). *)
+  val mutable saw_top_level_structure = false
 
+  method! structure ast =
+    if saw_top_level_structure then
+      super#structure ast
+      (* This is *not* the first structure we see, so it is nested within the
+         file, either inside [struct]..[end] or in an attribute or extension
+         point. Traverse it recursively as normal. *)
+
+    else begin
+      (* This is the first structure we see, so Bisect_ppx is beginning to
+         (potentially) instrument the current file. We need to check whether
+         this file is excluded from instrumentation before proceeding. *)
+         saw_top_level_structure <- true;
+
+      (* Bisect_ppx is hardcoded to ignore files with certain names. If we have
+         one of these, return the AST uninstrumented. In particular, do not
+         recurse into it. *)
+      let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
+      let always_ignore_basenames = [".ocamlinit"; "topfind"] in
+      let always_ignore path =
+        List.mem path always_ignore_paths ||
+        List.mem (Filename.basename path) always_ignore_basenames
+      in
+
+      if always_ignore !Location.input_name then
+        ast
+
+      else
+        (* The file might also be excluded by the user. *)
+        if Exclusions.contains_file !Location.input_name then
+          ast
+
+        else begin
+          (* This file should be instrumented. Traverse the AST recursively,
+             then prepend some generated code for initializing the Bisect_ppx
+             runtime and telling it about the instrumentation points in this
+             file. *)
+          let instrumented_ast = super#structure ast in
+          let runtime_initialization =
+            generate_runtime_initialization_code !Location.input_name in
+          runtime_initialization::instrumented_ast
+        end
+    end
 end
