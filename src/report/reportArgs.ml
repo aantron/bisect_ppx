@@ -82,12 +82,19 @@ let options = Arg.align [
 ]
 
 let usage =
-  "Usage:\n\n  bisect-ppx-report <options> <.out files>\n\n" ^
-  "Where a file is required, '-' may be used to specify STDOUT\n\n" ^
-  "Examples:\n\n" ^
-  "  bisect-ppx-report -I build/ -I src/ -html coverage/ bisect*.out\n" ^
-  "  bisect-ppx-report -I _build/ -summary-only -text - bisect*.out\n\n" ^
-  "Options are:"
+{|Usage:
+
+  bisect-ppx-report <options> <.out files>
+
+Where a file is required, '-' may be used to specify STDOUT.
+
+Examples:
+
+  bisect-ppx-report -I build/ -I src/ -html coverage/ bisect*.out
+  bisect-ppx-report -I _build/ -summary-only -text - bisect*.out
+
+Options are:
+|}
 
 let parse () = Arg.parse options add_file usage
 
