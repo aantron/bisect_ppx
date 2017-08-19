@@ -55,31 +55,7 @@ open More_ast_helpers
 
 
 
-module InstrumentState :
-sig
-
-(** This stateful module maintains the information about files and points
-    that have been used by an instrumenter. *)
-
-val get_points_for_file : unit -> Common.point_definition list
-(** Returns the list of point definitions for the passed file, an empty
-    list if the file has no associated point. *)
-
-val set_points_for_file : Common.point_definition list -> unit
-(** Sets the list of point definitions for the passed file, replacing any
-    previous definitions. *)
-
-end =
-struct
-
-(* Map from file name to list of point definitions. *)
 let points : Common.point_definition list ref = ref []
-
-let get_points_for_file () = !points
-
-let set_points_for_file pts = points := pts
-
-end
 
 
 
@@ -91,19 +67,17 @@ let case_variable = "___bisect_matched_value___"
    creates it.. The point is paired with a flag indicating whether it existed
    before this function was called. *)
 let get_point ofs =
-  let lst = InstrumentState.get_points_for_file () in
-
   let maybe_existing =
-    try Some (List.find (fun p -> p.Common.offset = ofs) lst)
+    try Some (List.find (fun p -> p.Common.offset = ofs) !points)
     with Not_found -> None
   in
 
   match maybe_existing with
   | Some pt -> pt, true
   | None ->
-    let idx = List.length lst in
+    let idx = List.length !points in
     let pt = { Common.offset = ofs; identifier = idx } in
-    InstrumentState.set_points_for_file (pt :: lst);
+    points := (pt::!points);
     pt, false
 
 (* Creates the marking expression for given file, and offset. Populates the
@@ -350,7 +324,7 @@ let wrap_class_field_kind = function
 (* This method is stateful and depends on `InstrumentState.set_points_for_file`
    having been run on all the points in the rest of the AST. *)
 let generate_runtime_initialization_code file =
-  let nb = List.length (InstrumentState.get_points_for_file ()) in
+  let nb = List.length !points in
   let ilid s = Exp.ident (lid s) in
   let init =
     apply_nolabs
@@ -385,7 +359,7 @@ let generate_runtime_initialization_code file =
     Exp.(let_ Nonrecursive vb (sequence init func))
   in
   let points_string =
-    InstrumentState.get_points_for_file ()
+    !points
     |> Common.write_points
     |> Ast_convenience.str
   in
