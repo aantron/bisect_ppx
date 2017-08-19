@@ -69,18 +69,8 @@ val set_points_for_file : Common.point_definition list -> unit
 (** Sets the list of point definitions for the passed file, replacing any
     previous definitions. *)
 
-val add_marked_point : int -> unit
-(** Adds the passed identifier to the list of marked points. *)
-
-val get_marked_points_assoc : unit -> (int * int) list
-(** Returns the list of marked points, as an association list from
-    identifiers to number of occurrences. *)
-
 end =
 struct
-
-(** List of marked points (identifiers are stored). *)
-let marked_points = ref []
 
 (* Map from file name to list of point definitions. *)
 let points : Common.point_definition list ref = ref []
@@ -88,21 +78,6 @@ let points : Common.point_definition list ref = ref []
 let get_points_for_file () = !points
 
 let set_points_for_file pts = points := pts
-
-let add_marked_point idx =
-  marked_points := idx :: !marked_points
-
-let get_marked_points_assoc () =
-  let tbl : (int, int) Hashtbl.t = Hashtbl.create 17 in
-  List.iter
-    (fun pt ->
-      let curr = try Hashtbl.find tbl pt with Not_found -> 0 in
-      Hashtbl.replace tbl pt (succ curr))
-    !marked_points;
-  Hashtbl.fold
-    (fun k v acc -> (k, v) :: acc)
-    tbl
-    []
 
 end
 
@@ -115,7 +90,7 @@ let case_variable = "___bisect_matched_value___"
 (* Evaluates to a point at the given location. If the point does not yet exist,
    creates it.. The point is paired with a flag indicating whether it existed
    before this function was called. *)
-let get_point ofs marked =
+let get_point ofs =
   let lst = InstrumentState.get_points_for_file () in
 
   let maybe_existing =
@@ -127,16 +102,15 @@ let get_point ofs marked =
   | Some pt -> pt, true
   | None ->
     let idx = List.length lst in
-    if marked then InstrumentState.add_marked_point idx;
     let pt = { Common.offset = ofs; identifier = idx } in
     InstrumentState.set_points_for_file (pt :: lst);
     pt, false
 
 (* Creates the marking expression for given file, and offset. Populates the
    'points' global variable. *)
-let marker must_be_unique ofs marked =
+let marker must_be_unique ofs =
   let { Common.identifier = idx; _ }, existing =
-    get_point ofs marked in
+    get_point ofs in
   if must_be_unique && existing then
     None
   else
@@ -170,12 +144,12 @@ let wrap_expr ?(must_be_unique = true) ?loc e =
         (fun (lo, hi) ->
           line >= lo && line <= hi)
         c.CommentsPpx.ignored_intervals
+      || List.mem line c.CommentsPpx.marked_lines
     in
     if ignored then
       e
     else
-      let marked = List.mem line c.CommentsPpx.marked_lines in
-      match marker must_be_unique ofs marked with
+      match marker must_be_unique ofs with
       | Some w -> Exp.sequence ~loc w e
       | None   -> e
 
@@ -387,21 +361,6 @@ let generate_runtime_initialization_code file =
     apply_nolabs
       (lid "Array.make") [Ast_convenience.int nb; Ast_convenience.int 0]
   in
-  let marks =
-    let marked_points =
-      let compare (idx1, _) (idx2, _) = Pervasives.compare idx1 idx2 in
-      List.sort compare (InstrumentState.get_marked_points_assoc ()) in
-    let assign (idx, nb) acc =
-      let assignment =
-        apply_nolabs (lid "Array.set")
-          [ilid "marks"; Ast_convenience.int idx; Ast_convenience.int nb] in
-      match acc with
-      | None -> Some assignment
-      | Some trail -> Some (Exp.sequence assignment trail) in
-    match List.fold_right assign marked_points None with
-    | None -> init
-    | Some assignments -> Exp.sequence init assignments
-  in
   let func =
     let body =
       let if_then_else =
@@ -423,7 +382,7 @@ let generate_runtime_initialization_code file =
   in
   let vb = [(Vb.mk (Ast_convenience.pvar "marks") make)] in
   let e =
-    Exp.(let_ Nonrecursive vb (sequence marks func))
+    Exp.(let_ Nonrecursive vb (sequence init func))
   in
   let points_string =
     InstrumentState.get_points_for_file ()
