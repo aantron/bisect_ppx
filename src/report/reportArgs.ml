@@ -38,15 +38,22 @@ let add_file f =
   files := f :: !files
 
 let options = Arg.align [
-  ("-I",
-   Arg.String add_search_path,
-   "<dir>  Look for .cmp and/or .ml files in the given directory") ;
   ("-html",
    Arg.String (fun s -> add_output (Html_output s)),
-   "<dir>  Output html to the given directory") ;
+   "<dir>  Output HTML report to <dir> (HTML only)");
+
+  ("-I",
+   Arg.String add_search_path,
+   "<dir>  Look for .ml files in <dir> (HTML only)");
+
+   ("-ignore-missing-files",
+   Arg.Set ignore_missing_files,
+   " Do not fail if an .ml file can't be found (HTML only)");
+
   ("-title",
    Arg.Set_string title,
-   "<string>  Set the title for generated output (HTML only)") ;
+   "<string>  Set title for report pages (HTML only)");
+
   ("-tab-size",
    Arg.Int
      (fun x ->
@@ -54,31 +61,35 @@ let options = Arg.align [
          (print_endline " *** error: tab size should be positive"; exit 1)
        else
          tab_size := x),
-   "<int>  Set tabulation size in output (HTML only)") ;
+   "<int>  Set tab width in report (HTML only)");
+
   ("-text",
    Arg.String (fun s -> add_output (Text_output s)),
-   "<file>  Output plain text to the given file") ;
-    ("-summary-only",
+   "<file>  Output plain text report to <file>");
+
+  ("-summary-only",
    Arg.Set summary_only,
-   " Output only a summary (text only)") ;
+   " Output only a whole-project summary (text only)");
+
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
-   "<file>  Output CSV to the given file") ;
+   "<file>  Output CSV report to <file>");
+
   ("-separator",
    Arg.Set_string separator,
-   "<string>  Set the separator for generated output (CSV only)") ;
+   "<string>  Set column separator (CSV only)");
+
   ("-dump",
    Arg.String (fun s -> add_output (Dump_output s)),
-   "<file>  Output bare dump to the given file") ;
-  ("-ignore-missing-files",
-   Arg.Set ignore_missing_files,
-   " Do not fail if an .ml file can't be found") ;
+   "<file>  Output bare dump to <file>");
+
   ("-verbose",
    Arg.Set verbose,
-   " Set verbose mode") ;
+   " Set verbose mode");
+
   ("-version",
    Arg.Unit (fun () -> print_endline Bisect.Version.value; exit 0),
-   " Print version and exit")
+   " Print version and exit");
 ]
 
 let usage =
@@ -90,8 +101,12 @@ Where a file is required, '-' may be used to specify STDOUT.
 
 Examples:
 
-  bisect-ppx-report -I build/ -I src/ -html coverage/ bisect*.out
-  bisect-ppx-report -I _build/ -summary-only -text - bisect*.out
+  bisect-ppx-report -html coverage/ -I _build bisect*.out
+  bisect-ppx-report -text - -summary-only bisect*.out
+
+Jbuilder:
+
+  bisect-ppx-report -html coverage/ -I _build/default _build/default/bisect*.out
 
 Options are:
 |}
