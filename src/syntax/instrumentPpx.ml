@@ -73,33 +73,28 @@ let get_point ofs =
   in
 
   match maybe_existing with
-  | Some pt -> pt, true
+  | Some pt -> pt
   | None ->
     let idx = List.length !points in
     let pt = { Common.offset = ofs; identifier = idx } in
     points := (pt::!points);
-    pt, false
+    pt
 
 (* Creates the marking expression for given file, and offset. Populates the
    'points' global variable. *)
-let marker must_be_unique ofs =
-  let { Common.identifier = idx; _ }, existing =
+let marker ofs =
+  let { Common.identifier = idx; _ } =
     get_point ofs in
-  if must_be_unique && existing then
-    None
-  else
-    let loc = Location.none in
-    let wrapped =
-      apply_nolabs
-        ~loc (lid custom_mark_function) [Ast_convenience.int idx]
-    in
-    Some wrapped
+
+  let loc = Location.none in
+  apply_nolabs
+    ~loc (lid custom_mark_function) [Ast_convenience.int idx]
 
 (* Wraps an expression with a marker, returning the passed expression
    unmodified if the expression is already marked, has a ghost location,
    construct instrumentation is disabled, or a special comments indicates to
    ignore line. *)
-let wrap_expr ?(must_be_unique = true) ?loc e =
+let wrap_expr ?loc e =
   let loc =
     match loc with
     | None -> e.Parsetree.pexp_loc
@@ -123,9 +118,7 @@ let wrap_expr ?(must_be_unique = true) ?loc e =
     if ignored then
       e
     else
-      match marker must_be_unique ofs with
-      | Some w -> Exp.sequence ~loc w e
-      | None   -> e
+      Exp.sequence ~loc (marker ofs) e
 
 (* Given a pattern and a location, transforms the pattern into pattern list by
    eliminating all or-patterns and promoting them into separate cases. Each
@@ -281,7 +274,7 @@ let wrap_case case =
         l.Location.loc_start.Lexing.pos_cnum -
         l'.Location.loc_start.Lexing.pos_cnum)
       |> List.fold_left (fun e l ->
-        wrap_expr ~must_be_unique:false ~loc:l e) e
+        wrap_expr ~loc:l e) e
     in
 
     match translate_pattern loc pure_pattern with

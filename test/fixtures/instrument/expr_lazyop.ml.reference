@@ -10,5 +10,9 @@ let ___bisect_mark___ =
        marks.(idx) <-
          (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
   
-let f x y = (___bisect_mark___ 1; x > 0) && (___bisect_mark___ 0; y > 0) 
-let g x y = (___bisect_mark___ 3; x > 0) || (___bisect_mark___ 2; y > 0) 
+let f x y =
+  ___bisect_mark___ 1;
+  (___bisect_mark___ 1; x > 0) && ((___bisect_mark___ 0; y > 0)) 
+let g x y =
+  ___bisect_mark___ 3;
+  (___bisect_mark___ 3; x > 0) || ((___bisect_mark___ 2; y > 0)) 

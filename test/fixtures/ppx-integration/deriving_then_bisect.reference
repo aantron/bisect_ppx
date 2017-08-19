@@ -13,16 +13,19 @@ let ___bisect_mark___ =
 let () = ___bisect_mark___ 0; () 
 type a =
   | Foo [@@deriving show]
-let rec (pp_a : Format.formatter -> a -> Ppx_deriving_runtime.unit) =
-  ((let open! Ppx_deriving_runtime in
-      fun fmt  ->
-        function
-        | Foo  ->
-            (___bisect_mark___ 1; Format.pp_print_string fmt "Deriving.Foo"))
+let rec pp_a : Format.formatter -> a -> Ppx_deriving_runtime.unit =
+  ___bisect_mark___ 1;
+  (((let open! Ppx_deriving_runtime in
+       fun fmt  ->
+         ___bisect_mark___ 1;
+         (function
+          | Foo  ->
+              (___bisect_mark___ 1; Format.pp_print_string fmt "Deriving.Foo"))))
   [@ocaml.warning "-A"])
 
 and show_a : a -> Ppx_deriving_runtime.string =
-  fun x  -> Format.asprintf "%a" pp_a x
+  ___bisect_mark___ 1;
+  (fun x  -> ___bisect_mark___ 1; Format.asprintf "%a" pp_a x)
 
 let () =
   ___bisect_mark___ 3; (show_a Foo) |> ((___bisect_mark___ 2; print_endline)) 
