@@ -52,7 +52,7 @@ to run that script, then refresh your browser.
 
 4. Generate the coverage report.
 
-        bisect-ppx-report -I build/ -html coverage/ bisect*.out`
+        bisect-ppx-report -I _build/ -html coverage/ bisect*.out`
 
 5. Open `coverage/index.html`!
 
