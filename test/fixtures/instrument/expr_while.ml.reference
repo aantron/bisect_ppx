@@ -1,4 +1,4 @@
-let ___bisect_mark___expr_while =
+let ___bisect_mark___ =
   let points =
     "\132\149\166\190\000\000\000/\000\000\000\011\000\000\000)\000\000\000)\b\000\000(\000\160KE\160eD\160wB\160\000PA\160\000i@\160\001\000\135C\160\001\000\169I\160\001\000\195H\160\001\000\213F\160\001\000\243G"
      in
@@ -11,23 +11,23 @@ let ___bisect_mark___expr_while =
          (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
   
 let () =
-  ___bisect_mark___expr_while 5;
+  ___bisect_mark___ 5;
   print_endline "before";
-  ___bisect_mark___expr_while 4;
+  ___bisect_mark___ 4;
   while true do
-    (___bisect_mark___expr_while 2;
+    (___bisect_mark___ 2;
      print_endline "abc";
-     ___bisect_mark___expr_while 1;
+     ___bisect_mark___ 1;
      print_endline "def";
-     ___bisect_mark___expr_while 0;
+     ___bisect_mark___ 0;
      print_endline "ghi")
     done;
-  ___bisect_mark___expr_while 3;
+  ___bisect_mark___ 3;
   print_endline "after" 
 let () =
-  ___bisect_mark___expr_while 9;
+  ___bisect_mark___ 9;
   print_endline "before";
-  ___bisect_mark___expr_while 8;
-  while true do (___bisect_mark___expr_while 6; print_endline "abc") done;
-  ___bisect_mark___expr_while 7;
+  ___bisect_mark___ 8;
+  while true do (___bisect_mark___ 6; print_endline "abc") done;
+  ___bisect_mark___ 7;
   print_endline "after" 

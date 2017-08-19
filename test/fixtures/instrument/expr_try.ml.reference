@@ -1,4 +1,4 @@
-let ___bisect_mark___expr_try =
+let ___bisect_mark___ =
   let points =
     "\132\149\166\190\000\000\0000\000\000\000\011\000\000\000)\000\000\000)\b\000\000(\000\160KE\160eD\160\000GA\160\000bB\160\000|@\160\001\000\148C\160\001\000\182I\160\001\000\208H\160\001\000\244F\160\001\001\017G"
      in
@@ -11,23 +11,23 @@ let ___bisect_mark___expr_try =
          (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
   
 let () =
-  ___bisect_mark___expr_try 5;
+  ___bisect_mark___ 5;
   print_endline "before";
-  ___bisect_mark___expr_try 4;
-  (try print_endline "abc"; ___bisect_mark___expr_try 1; print_endline "def"
+  ___bisect_mark___ 4;
+  (try print_endline "abc"; ___bisect_mark___ 1; print_endline "def"
    with
    | _ ->
-       (___bisect_mark___expr_try 2;
+       (___bisect_mark___ 2;
         print_endline "ABC";
-        ___bisect_mark___expr_try 0;
+        ___bisect_mark___ 0;
         print_endline "DEF"));
-  ___bisect_mark___expr_try 3;
+  ___bisect_mark___ 3;
   print_endline "after" 
 let () =
-  ___bisect_mark___expr_try 9;
+  ___bisect_mark___ 9;
   print_endline "before";
-  ___bisect_mark___expr_try 8;
+  ___bisect_mark___ 8;
   (try print_endline "abc"
-   with | _ -> (___bisect_mark___expr_try 6; print_endline "ABC"));
-  ___bisect_mark___expr_try 7;
+   with | _ -> (___bisect_mark___ 6; print_endline "ABC"));
+  ___bisect_mark___ 7;
   print_endline "after" 

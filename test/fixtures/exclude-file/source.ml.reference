@@ -1,4 +1,4 @@
-let ___bisect_mark___source =
+let ___bisect_mark___ =
   let points =
     "\132\149\166\190\000\000\000\t\000\000\000\003\000\000\000\t\000\000\000\t\160\160\000EA\160\000[@"
      in
@@ -12,8 +12,8 @@ let ___bisect_mark___source =
   
 let f1 x y = if x = y then x + y else x - y 
 let g s =
-  ___bisect_mark___source 1;
-  for i = 1 to 5 do (___bisect_mark___source 0; print_endline s) done 
+  ___bisect_mark___ 1;
+  for i = 1 to 5 do (___bisect_mark___ 0; print_endline s) done 
 let f2 b x = if b then x * x else x 
 let f3 : 'a . 'a -> string = fun (type a) ->
   (fun _  -> "Hello" : a -> string) 

@@ -114,12 +114,7 @@ end
 
 
 
-let custom_mark_function file =
-  Printf.sprintf "___bisect_mark___%s"
-    (* Turn's out that the variable name syntax isn't checked again,
-       so directory separtors '\' seem to be fine,
-       and this extension chop might not be necessary. *)
-    (Filename.chop_extension file)
+let custom_mark_function = "___bisect_mark___"
 
 let case_variable = "___bisect_matched_value___"
 
@@ -154,7 +149,7 @@ let marker must_be_unique file ofs marked =
     let loc = Location.none in
     let wrapped =
       apply_nolabs
-        ~loc (lid (custom_mark_function file)) [Ast_convenience.int idx]
+        ~loc (lid custom_mark_function) [Ast_convenience.int idx]
     in
     Some wrapped
 
@@ -445,7 +440,7 @@ let generate_runtime_initialization_code file =
   let vb = [Vb.mk (Ast_convenience.pvar "points") points_string] in
   let e = Exp.(let_ Nonrecursive vb e) in
   Str.value
-    Nonrecursive [ Vb.mk (Ast_convenience.pvar (custom_mark_function file)) e]
+    Nonrecursive [ Vb.mk (Ast_convenience.pvar custom_mark_function) e]
 
 (* The actual "instrumenter" object, marking expressions. *)
 class instrumenter = object (self)

@@ -1,4 +1,4 @@
-let ___bisect_mark___expr_polyrec =
+let ___bisect_mark___ =
   let points =
     "\132\149\166\190\000\000\000$\000\000\000\t\000\000\000!\000\000\000!\b\000\000 \000\160_B\160lA\160u@\160\000FG\160\000gE\160\000vD\160\001\000\129C\160\001\000\139F"
      in
@@ -11,22 +11,12 @@ let ___bisect_mark___expr_polyrec =
          (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
   
 let rec f : 'a . 'a -> unit =
-  ___bisect_mark___expr_polyrec 2;
-  (fun _  ->
-     ___bisect_mark___expr_polyrec 1;
-     f 0;
-     ___bisect_mark___expr_polyrec 0;
-     f "")
-  
+  ___bisect_mark___ 2;
+  (fun _  -> ___bisect_mark___ 1; f 0; ___bisect_mark___ 0; f "") 
 let () =
-  ___bisect_mark___expr_polyrec 7;
+  ___bisect_mark___ 7;
   (let rec f : 'a . 'a -> unit =
-     ___bisect_mark___expr_polyrec 5;
-     (fun _  ->
-        ___bisect_mark___expr_polyrec 4;
-        f 0;
-        ___bisect_mark___expr_polyrec 3;
-        f "")
-      in
-   ___bisect_mark___expr_polyrec 6; f 0)
+     ___bisect_mark___ 5;
+     (fun _  -> ___bisect_mark___ 4; f 0; ___bisect_mark___ 3; f "")  in
+   ___bisect_mark___ 6; f 0)
   

@@ -1,4 +1,4 @@
-let ___bisect_mark___expr_doubleslashedquotes =
+let ___bisect_mark___ =
   let points =
     "\132\149\166\190\000\000\000\011\000\000\000\004\000\000\000\r\000\000\000\r\176\160oB\160|@\160\000SA"
      in
@@ -14,8 +14,8 @@ type t =
   | Anthony 
   | Caesar 
 let message =
-  ___bisect_mark___expr_doubleslashedquotes 2;
+  ___bisect_mark___ 2;
   (function
-   | Anthony  -> (___bisect_mark___expr_doubleslashedquotes 0; "foo\\")
-   | Caesar  -> (___bisect_mark___expr_doubleslashedquotes 1; "\\bar"))
+   | Anthony  -> (___bisect_mark___ 0; "foo\\")
+   | Caesar  -> (___bisect_mark___ 1; "\\bar"))
   

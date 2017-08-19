@@ -1,4 +1,4 @@
-let ___bisect_mark___source =
+let ___bisect_mark___ =
   let points =
     "\132\149\166\190\000\000\000,\000\000\000\t\000\000\000!\000\000\000!\b\000\000 \000\160\000uC\160\001\000\134B\160\001\000\158@\160\001\000\194A\160\001\001\181D\160\001\001\197E\160\001\001\229F\160\001\002\007G"
      in
@@ -12,14 +12,14 @@ let ___bisect_mark___source =
   
 let f1 x y = if x = y then x + y else x - y 
 let g s =
-  ___bisect_mark___source 3;
+  ___bisect_mark___ 3;
   if true
   then
-    (___bisect_mark___source 2;
-     for i = 1 to 5 do (___bisect_mark___source 0; print_endline s) done)
-  else (___bisect_mark___source 1; assert false) 
+    (___bisect_mark___ 2;
+     for i = 1 to 5 do (___bisect_mark___ 0; print_endline s) done)
+  else (___bisect_mark___ 1; assert false) 
 let f2 b x = if b then x * x else x 
-let s1 = ___bisect_mark___source 4; "\\\\" 
-let s2 = ___bisect_mark___source 5; '"' 
-let s3 = ___bisect_mark___source 6; '"' 
-let s4 = ___bisect_mark___source 7; "a\"a" 
+let s1 = ___bisect_mark___ 4; "\\\\" 
+let s2 = ___bisect_mark___ 5; '"' 
+let s3 = ___bisect_mark___ 6; '"' 
+let s4 = ___bisect_mark___ 7; "a\"a" 

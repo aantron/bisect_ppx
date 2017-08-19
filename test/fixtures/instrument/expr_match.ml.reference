@@ -1,8 +1,8 @@
-let ___bisect_mark___expr_match =
+let ___bisect_mark___ =
   let points =
-"\132\149\166\190\000\000\0023\000\000\000j\000\000\001\165\000\000\001\165\b\000\001\164\000\160LC\160]@\160zA\160\000WB\160\000yG\160\001\000\134D\160\001\000\163E\160\001\000\192F\160\001\000\230N\160\001\000\247K\160\001\001\016H\160\001\001%L\160\001\001>I\160\001\001SM\160\001\001lJ\160\001\001\134U\160\001\001\147R\160\001\001\172O\160\001\001\193S\160\001\001\218P\160\001\001\239T\160\001\002\bQ\160\001\002@Z\160\001\002QX\160\001\002lV\160\001\002\129Y\160\001\002\156W\160\001\002\182_\160\001\002\195]\160\001\002\222[\160\001\002\243^\160\001\003\014\\\160\001\003,d\160\001\003:`\160\001\003Ka\160\001\003bb\160\001\003rc\160\001\003\144i\160\001\003\161g\160\001\003\192h\160\001\003\222e\160\001\004\002f\160\001\004-l\160\001\004>j\160\001\004Dk\160\001\004lo\160\001\004}m\160\001\004\136n\160\001\004\181t\160\001\004\199p\160\001\004\205s\160\001\004\212q\160\001\004\218r\160\001\005\003w\160\001\005\020u\160\001\0058v\160\001\005^z\160\001\005ox\160\001\005\141y\160\001\005\202|\160\001\005\219{\160\001\006\027~\160\001\006,}\160\001\006_\000A\160\001\006p\127\160\001\006v\000@\160\001\006\145\000F\160\001\006\162\000B\160\001\006\163\000C\160\001\006\169\000D\160\001\006\204\000E\160\001\006\243\000J\160\001\007\004\000G\160\001\007(\000H\160\001\007.\000I\160\001\007p\000O\160\001\007\135\000K\160\001\007\141\000N\160\001\007\152\000L\160\001\007\158\000M\160\001\007\200\000W\160\001\007\217\000P\160\001\007\249\000Q\160\001\007\252\000R\160\001\b\002\000U\160\001\b\t\000S\160\001\b\015\000T\160\001\b4\000V\160\001\bW\000Z\160\001\bn\000X\160\001\bt\000Y\160\001\b\177\000^\160\001\b\209\000[\160\001\b\215\000\\\160\001\b\247\000]\160\001\t\029\000a\160\001\t.\000_\160\001\t;\000`\160\001\tX\000d\160\001\ti\000b\160\001\tr\000c\160\001\t\138\000h\160\001\t\151\000f\160\001\t\166\000g\160\001\t\213\000e"
+    "\132\149\166\190\000\000\0023\000\000\000j\000\000\001\165\000\000\001\165\b\000\001\164\000\160LC\160]@\160zA\160\000WB\160\000yG\160\001\000\134D\160\001\000\163E\160\001\000\192F\160\001\000\230N\160\001\000\247K\160\001\001\016H\160\001\001%L\160\001\001>I\160\001\001SM\160\001\001lJ\160\001\001\134U\160\001\001\147R\160\001\001\172O\160\001\001\193S\160\001\001\218P\160\001\001\239T\160\001\002\bQ\160\001\002@Z\160\001\002QX\160\001\002lV\160\001\002\129Y\160\001\002\156W\160\001\002\182_\160\001\002\195]\160\001\002\222[\160\001\002\243^\160\001\003\014\\\160\001\003,d\160\001\003:`\160\001\003Ka\160\001\003bb\160\001\003rc\160\001\003\144i\160\001\003\161g\160\001\003\192h\160\001\003\222e\160\001\004\002f\160\001\004-l\160\001\004>j\160\001\004Dk\160\001\004lo\160\001\004}m\160\001\004\136n\160\001\004\181t\160\001\004\199p\160\001\004\205s\160\001\004\212q\160\001\004\218r\160\001\005\003w\160\001\005\020u\160\001\0058v\160\001\005^z\160\001\005ox\160\001\005\141y\160\001\005\202|\160\001\005\219{\160\001\006\027~\160\001\006,}\160\001\006_\000A\160\001\006p\127\160\001\006v\000@\160\001\006\145\000F\160\001\006\162\000B\160\001\006\163\000C\160\001\006\169\000D\160\001\006\204\000E\160\001\006\243\000J\160\001\007\004\000G\160\001\007(\000H\160\001\007.\000I\160\001\007p\000O\160\001\007\135\000K\160\001\007\141\000N\160\001\007\152\000L\160\001\007\158\000M\160\001\007\200\000W\160\001\007\217\000P\160\001\007\249\000Q\160\001\007\252\000R\160\001\b\002\000U\160\001\b\t\000S\160\001\b\015\000T\160\001\b4\000V\160\001\bW\000Z\160\001\bn\000X\160\001\bt\000Y\160\001\b\177\000^\160\001\b\209\000[\160\001\b\215\000\\\160\001\b\247\000]\160\001\t\029\000a\160\001\t.\000_\160\001\t;\000`\160\001\tX\000d\160\001\ti\000b\160\001\tr\000c\160\001\t\138\000h\160\001\t\151\000f\160\001\t\166\000g\160\001\t\213\000e"
      in
-  let marks = Array.make 105 0 in
+  let marks = Array.make 105 0  in
   Bisect.Runtime.init_with_array "expr_match.ml" marks points;
   (function
    | idx ->
@@ -11,214 +11,195 @@ let ___bisect_mark___expr_match =
          (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
   
 let f x =
-  ___bisect_mark___expr_match 3;
+  ___bisect_mark___ 3;
   (match x with
-   | 0 -> (___bisect_mark___expr_match 0; print_endline "abc")
-   | 1 -> (___bisect_mark___expr_match 1; print_endline "def")
-   | _ -> (___bisect_mark___expr_match 2; print_endline "ghi"))
+   | 0 -> (___bisect_mark___ 0; print_endline "abc")
+   | 1 -> (___bisect_mark___ 1; print_endline "def")
+   | _ -> (___bisect_mark___ 2; print_endline "ghi"))
   
 let f =
-  ___bisect_mark___expr_match 7;
+  ___bisect_mark___ 7;
   (function
-   | 0 -> (___bisect_mark___expr_match 4; print_endline "abc")
-   | 1 -> (___bisect_mark___expr_match 5; print_endline "def")
-   | _ -> (___bisect_mark___expr_match 6; print_endline "ghi"))
+   | 0 -> (___bisect_mark___ 4; print_endline "abc")
+   | 1 -> (___bisect_mark___ 5; print_endline "def")
+   | _ -> (___bisect_mark___ 6; print_endline "ghi"))
   
 let f x =
-  ___bisect_mark___expr_match 14;
+  ___bisect_mark___ 14;
   (match x with
    | 0 ->
-       (___bisect_mark___expr_match 11;
+       (___bisect_mark___ 11;
         print_string "abc";
-        ___bisect_mark___expr_match 8;
+        ___bisect_mark___ 8;
         print_newline ())
    | 1 ->
-       (___bisect_mark___expr_match 12;
+       (___bisect_mark___ 12;
         print_string "def";
-        ___bisect_mark___expr_match 9;
+        ___bisect_mark___ 9;
         print_newline ())
    | _ ->
-       (___bisect_mark___expr_match 13;
+       (___bisect_mark___ 13;
         print_string "ghi";
-        ___bisect_mark___expr_match 10;
+        ___bisect_mark___ 10;
         print_newline ()))
   
 let f =
-  ___bisect_mark___expr_match 21;
+  ___bisect_mark___ 21;
   (function
    | 0 ->
-       (___bisect_mark___expr_match 18;
+       (___bisect_mark___ 18;
         print_string "abc";
-        ___bisect_mark___expr_match 15;
+        ___bisect_mark___ 15;
         print_newline ())
    | 1 ->
-       (___bisect_mark___expr_match 19;
+       (___bisect_mark___ 19;
         print_string "def";
-        ___bisect_mark___expr_match 16;
+        ___bisect_mark___ 16;
         print_newline ())
    | _ ->
-       (___bisect_mark___expr_match 20;
+       (___bisect_mark___ 20;
         print_string "ghi";
-        ___bisect_mark___expr_match 17;
+        ___bisect_mark___ 17;
         print_newline ()))
   
 type t =
   | Foo 
   | Bar 
 let f x =
-  ___bisect_mark___expr_match 26;
+  ___bisect_mark___ 26;
   (match x with
    | Foo  ->
-       (___bisect_mark___expr_match 24;
+       (___bisect_mark___ 24;
         print_string "foo";
-        ___bisect_mark___expr_match 22;
+        ___bisect_mark___ 22;
         print_newline ())
    | Bar  ->
-       (___bisect_mark___expr_match 25;
+       (___bisect_mark___ 25;
         print_string "bar";
-        ___bisect_mark___expr_match 23;
+        ___bisect_mark___ 23;
         print_newline ()))
   
 let f =
-  ___bisect_mark___expr_match 31;
+  ___bisect_mark___ 31;
   (function
    | Foo  ->
-       (___bisect_mark___expr_match 29;
+       (___bisect_mark___ 29;
         print_string "foo";
-        ___bisect_mark___expr_match 27;
+        ___bisect_mark___ 27;
         print_newline ())
    | Bar  ->
-       (___bisect_mark___expr_match 30;
+       (___bisect_mark___ 30;
         print_string "bar";
-        ___bisect_mark___expr_match 28;
+        ___bisect_mark___ 28;
         print_newline ()))
   
 let f x =
-  ___bisect_mark___expr_match 36;
+  ___bisect_mark___ 36;
   ((function
-    | Foo  -> (___bisect_mark___expr_match 32; "foo")
-    | Bar  -> (___bisect_mark___expr_match 33; "bar")) x) |>
-    ((___bisect_mark___expr_match 34; print_string));
-  ___bisect_mark___expr_match 35;
+    | Foo  -> (___bisect_mark___ 32; "foo")
+    | Bar  -> (___bisect_mark___ 33; "bar")) x) |>
+    ((___bisect_mark___ 34; print_string));
+  ___bisect_mark___ 35;
   print_newline () 
 let f x =
-  ___bisect_mark___expr_match 41;
+  ___bisect_mark___ 41;
   (match x with
-   | Foo  -> (___bisect_mark___expr_match 39; print_endline "foo")
+   | Foo  -> (___bisect_mark___ 39; print_endline "foo")
    | Bar  ->
-       (___bisect_mark___expr_match 40;
+       (___bisect_mark___ 40;
         (match x with
-         | Foo  -> (___bisect_mark___expr_match 37; print_endline "foobar")
-         | Bar  -> (___bisect_mark___expr_match 38; print_endline "barbar"))))
+         | Foo  -> (___bisect_mark___ 37; print_endline "foobar")
+         | Bar  -> (___bisect_mark___ 38; print_endline "barbar"))))
   
 let f x =
-  ___bisect_mark___expr_match 44;
+  ___bisect_mark___ 44;
   (match x with
    | Foo |Bar  as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | Foo  -> (___bisect_mark___expr_match 42; ())
-           | Bar  -> (___bisect_mark___expr_match 43; ())
+           | Foo  -> (___bisect_mark___ 42; ())
+           | Bar  -> (___bisect_mark___ 43; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
   
 let f x =
-  ___bisect_mark___expr_match 47;
+  ___bisect_mark___ 47;
   (match x with
    | (Foo ,_)|(Bar ,_) as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | (Foo ,_) -> (___bisect_mark___expr_match 45; ())
-           | (Bar ,_) -> (___bisect_mark___expr_match 46; ())
+           | (Foo ,_) -> (___bisect_mark___ 45; ())
+           | (Bar ,_) -> (___bisect_mark___ 46; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
   
 let f x =
-  ___bisect_mark___expr_match 52;
+  ___bisect_mark___ 52;
   (match x with
    | ((Foo |Bar ),(Foo |Bar )) as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | (Foo ,Foo ) ->
-               (___bisect_mark___expr_match 49;
-                ___bisect_mark___expr_match 48;
-                ())
-           | (Foo ,Bar ) ->
-               (___bisect_mark___expr_match 50;
-                ___bisect_mark___expr_match 48;
-                ())
-           | (Bar ,Foo ) ->
-               (___bisect_mark___expr_match 49;
-                ___bisect_mark___expr_match 51;
-                ())
-           | (Bar ,Bar ) ->
-               (___bisect_mark___expr_match 50;
-                ___bisect_mark___expr_match 51;
-                ())
+           | (Foo ,Foo ) -> (___bisect_mark___ 49; ___bisect_mark___ 48; ())
+           | (Foo ,Bar ) -> (___bisect_mark___ 50; ___bisect_mark___ 48; ())
+           | (Bar ,Foo ) -> (___bisect_mark___ 49; ___bisect_mark___ 51; ())
+           | (Bar ,Bar ) -> (___bisect_mark___ 50; ___bisect_mark___ 51; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
   
 let f x =
-  ___bisect_mark___expr_match 55;
+  ___bisect_mark___ 55;
   (match x with
-   | 'a'..'z' -> (___bisect_mark___expr_match 53; print_endline "foo")
-   | _ -> (___bisect_mark___expr_match 54; print_endline "bar"))
+   | 'a'..'z' -> (___bisect_mark___ 53; print_endline "foo")
+   | _ -> (___bisect_mark___ 54; print_endline "bar"))
   
 let f x =
-  ___bisect_mark___expr_match 58;
+  ___bisect_mark___ 58;
   (match x with
-   | `A -> (___bisect_mark___expr_match 56; print_endline "foo")
-   | `B -> (___bisect_mark___expr_match 57; print_endline "bar"))
+   | `A -> (___bisect_mark___ 56; print_endline "foo")
+   | `B -> (___bisect_mark___ 57; print_endline "bar"))
   
 type u = [ `A  | `B ]
 let f x =
-  ___bisect_mark___expr_match 60;
-  (match x with | #u -> (___bisect_mark___expr_match 59; print_endline "foo"))
-  
+  ___bisect_mark___ 60;
+  (match x with | #u -> (___bisect_mark___ 59; print_endline "foo")) 
 module type S  = sig  end
 let f x =
-  ___bisect_mark___expr_match 62;
+  ___bisect_mark___ 62;
   (match x with
    | ((module X)  : (module S)) ->
-       (___bisect_mark___expr_match 61; print_endline "foo"))
+       (___bisect_mark___ 61; print_endline "foo"))
   
 let f x =
-  ___bisect_mark___expr_match 65;
+  ___bisect_mark___ 65;
   (match x with
    | Foo |Bar  as y as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | Foo  as y -> (___bisect_mark___expr_match 63; ())
-           | Bar  as y -> (___bisect_mark___expr_match 64; ())
+           | Foo  as y -> (___bisect_mark___ 63; ())
+           | Bar  as y -> (___bisect_mark___ 64; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         y))
   
 let f x =
-  ___bisect_mark___expr_match 70;
+  ___bisect_mark___ 70;
   (match x with
    | (Foo |Bar )::_ as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | (Foo )::_ ->
-               (___bisect_mark___expr_match 67;
-                ___bisect_mark___expr_match 66;
-                ())
-           | (Bar )::_ ->
-               (___bisect_mark___expr_match 68;
-                ___bisect_mark___expr_match 66;
-                ())
+           | (Foo )::_ -> (___bisect_mark___ 67; ___bisect_mark___ 66; ())
+           | (Bar )::_ -> (___bisect_mark___ 68; ___bisect_mark___ 66; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo")
-   | [] -> (___bisect_mark___expr_match 69; print_endline "bar"))
+   | [] -> (___bisect_mark___ 69; print_endline "bar"))
   
 let f x =
-  ___bisect_mark___expr_match 74;
+  ___bisect_mark___ 74;
   (match x with
-   | `A _ -> (___bisect_mark___expr_match 71; print_endline "foo")
+   | `A _ -> (___bisect_mark___ 71; print_endline "foo")
    | `B (Foo |Bar ) as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | `B (Foo ) -> (___bisect_mark___expr_match 72; ())
-           | `B (Bar ) -> (___bisect_mark___expr_match 73; ())
+           | `B (Foo ) -> (___bisect_mark___ 72; ())
+           | `B (Bar ) -> (___bisect_mark___ 73; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "bar"))
@@ -227,114 +208,106 @@ type v = {
   a: t ;
   b: t }
 let f x =
-  ___bisect_mark___expr_match 79;
+  ___bisect_mark___ 79;
   (match x with
    | { a = (Foo |Bar ); b = (Foo |Bar ) } as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
            | { a = Foo ; b = Foo  } ->
-               (___bisect_mark___expr_match 76;
-                ___bisect_mark___expr_match 75;
-                ())
+               (___bisect_mark___ 76; ___bisect_mark___ 75; ())
            | { a = Foo ; b = Bar  } ->
-               (___bisect_mark___expr_match 77;
-                ___bisect_mark___expr_match 75;
-                ())
+               (___bisect_mark___ 77; ___bisect_mark___ 75; ())
            | { a = Bar ; b = Foo  } ->
-               (___bisect_mark___expr_match 76;
-                ___bisect_mark___expr_match 78;
-                ())
+               (___bisect_mark___ 76; ___bisect_mark___ 78; ())
            | { a = Bar ; b = Bar  } ->
-               (___bisect_mark___expr_match 77;
-                ___bisect_mark___expr_match 78;
-                ())
+               (___bisect_mark___ 77; ___bisect_mark___ 78; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
   
 let f x =
-  ___bisect_mark___expr_match 87;
+  ___bisect_mark___ 87;
   (match x with
-   | [||] -> (___bisect_mark___expr_match 80; print_endline "foo")
+   | [||] -> (___bisect_mark___ 80; print_endline "foo")
    | [|(Foo |Bar );(Foo |Bar );_|] as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
            | [|Foo ;Foo ;_|] ->
-               (___bisect_mark___expr_match 83;
-                ___bisect_mark___expr_match 82;
-                ___bisect_mark___expr_match 81;
+               (___bisect_mark___ 83;
+                ___bisect_mark___ 82;
+                ___bisect_mark___ 81;
                 ())
            | [|Foo ;Bar ;_|] ->
-               (___bisect_mark___expr_match 84;
-                ___bisect_mark___expr_match 82;
-                ___bisect_mark___expr_match 81;
+               (___bisect_mark___ 84;
+                ___bisect_mark___ 82;
+                ___bisect_mark___ 81;
                 ())
            | [|Bar ;Foo ;_|] ->
-               (___bisect_mark___expr_match 83;
-                ___bisect_mark___expr_match 85;
-                ___bisect_mark___expr_match 81;
+               (___bisect_mark___ 83;
+                ___bisect_mark___ 85;
+                ___bisect_mark___ 81;
                 ())
            | [|Bar ;Bar ;_|] ->
-               (___bisect_mark___expr_match 84;
-                ___bisect_mark___expr_match 85;
-                ___bisect_mark___expr_match 81;
+               (___bisect_mark___ 84;
+                ___bisect_mark___ 85;
+                ___bisect_mark___ 81;
                 ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "bar")
-   | _ -> (___bisect_mark___expr_match 86; print_newline ()))
+   | _ -> (___bisect_mark___ 86; print_newline ()))
   
 let f x =
-  ___bisect_mark___expr_match 90;
+  ___bisect_mark___ 90;
   (match x with
    | (lazy (Foo |Bar )) as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | (lazy Foo ) -> (___bisect_mark___expr_match 88; ())
-           | (lazy Bar ) -> (___bisect_mark___expr_match 89; ())
+           | (lazy Foo ) -> (___bisect_mark___ 88; ())
+           | (lazy Bar ) -> (___bisect_mark___ 89; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo"))
   
 exception Exn of t 
 let f x =
-  ___bisect_mark___expr_match 94;
+  ___bisect_mark___ 94;
   (match x with
    | exception (Exn (Foo |Bar ) as ___bisect_matched_value___) ->
        ((((match ___bisect_matched_value___ with
-           | Exn (Foo ) -> (___bisect_mark___expr_match 91; ())
-           | Exn (Bar ) -> (___bisect_mark___expr_match 92; ())
+           | Exn (Foo ) -> (___bisect_mark___ 91; ())
+           | Exn (Bar ) -> (___bisect_mark___ 92; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         print_endline "foo")
-   | _ -> (___bisect_mark___expr_match 93; print_endline "bar"))
+   | _ -> (___bisect_mark___ 93; print_endline "bar"))
   
 let f x =
-  ___bisect_mark___expr_match 97;
+  ___bisect_mark___ 97;
   (match x with
    | Foo  as x|Bar  as x as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | Foo  as x -> (___bisect_mark___expr_match 95; ())
-           | Bar  as x -> (___bisect_mark___expr_match 96; ())
+           | Foo  as x -> (___bisect_mark___ 95; ())
+           | Bar  as x -> (___bisect_mark___ 96; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         x))
   
 let f x =
-  ___bisect_mark___expr_match 100;
+  ___bisect_mark___ 100;
   (match x with
    | `Foo x|`Bar x as ___bisect_matched_value___ ->
        ((((match ___bisect_matched_value___ with
-           | `Foo x -> (___bisect_mark___expr_match 98; ())
-           | `Bar x -> (___bisect_mark___expr_match 99; ())
+           | `Foo x -> (___bisect_mark___ 98; ())
+           | `Bar x -> (___bisect_mark___ 99; ())
            | _ -> ()))
         [@ocaml.warning "-4-8-9-11-26-27-28"]);
         x))
-
+  
 let last =
-  ___bisect_mark___expr_match 104;
+  ___bisect_mark___ 104;
   (function
-   | [] -> (___bisect_mark___expr_match 102; None)
+   | [] -> (___bisect_mark___ 102; None)
    | _::_ as li ->
-       (___bisect_mark___expr_match 103;
+       (___bisect_mark___ 103;
         (match List.rev li with
-         | last::_ -> (___bisect_mark___expr_match 101; Some last)
+         | last::_ -> (___bisect_mark___ 101; Some last)
          | _ -> assert false)))
   

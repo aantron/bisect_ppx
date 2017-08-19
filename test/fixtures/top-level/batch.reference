@@ -1,4 +1,4 @@
-let ___bisect_mark___source =
+let ___bisect_mark___ =
   let points =
     "\132\149\166\190\000\000\000\004\000\000\000\002\000\000\000\005\000\000\000\005\144\160I@"
      in
@@ -10,4 +10,4 @@ let ___bisect_mark___source =
        marks.(idx) <-
          (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
   
-let () = ___bisect_mark___source 0; print_endline "foo" 
+let () = ___bisect_mark___ 0; print_endline "foo" 
