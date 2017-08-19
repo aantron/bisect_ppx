@@ -61,11 +61,11 @@ sig
 (** This stateful module maintains the information about files and points
     that have been used by an instrumenter. *)
 
-val get_points_for_file : string -> Common.point_definition list
+val get_points_for_file : unit -> Common.point_definition list
 (** Returns the list of point definitions for the passed file, an empty
     list if the file has no associated point. *)
 
-val set_points_for_file : string -> Common.point_definition list -> unit
+val set_points_for_file : Common.point_definition list -> unit
 (** Sets the list of point definitions for the passed file, replacing any
     previous definitions. *)
 
@@ -83,17 +83,11 @@ struct
 let marked_points = ref []
 
 (* Map from file name to list of point definitions. *)
-let points : (string, (Common.point_definition list)) Hashtbl.t =
-  Hashtbl.create 17
+let points : Common.point_definition list ref = ref []
 
-let get_points_for_file file =
-  try
-    Hashtbl.find points file
-  with Not_found ->
-    []
+let get_points_for_file () = !points
 
-let set_points_for_file file pts =
-  Hashtbl.replace points file pts
+let set_points_for_file pts = points := pts
 
 let add_marked_point idx =
   marked_points := idx :: !marked_points
@@ -121,8 +115,8 @@ let case_variable = "___bisect_matched_value___"
 (* Evaluates to a point at the given location. If the point does not yet exist,
    creates it.. The point is paired with a flag indicating whether it existed
    before this function was called. *)
-let get_point file ofs marked =
-  let lst = InstrumentState.get_points_for_file file in
+let get_point ofs marked =
+  let lst = InstrumentState.get_points_for_file () in
 
   let maybe_existing =
     try Some (List.find (fun p -> p.Common.offset = ofs) lst)
@@ -135,14 +129,14 @@ let get_point file ofs marked =
     let idx = List.length lst in
     if marked then InstrumentState.add_marked_point idx;
     let pt = { Common.offset = ofs; identifier = idx } in
-    InstrumentState.set_points_for_file file (pt :: lst);
+    InstrumentState.set_points_for_file (pt :: lst);
     pt, false
 
 (* Creates the marking expression for given file, and offset. Populates the
    'points' global variable. *)
-let marker must_be_unique file ofs marked =
+let marker must_be_unique ofs marked =
   let { Common.identifier = idx; _ }, existing =
-    get_point file ofs marked in
+    get_point ofs marked in
   if must_be_unique && existing then
     None
   else
@@ -181,8 +175,7 @@ let wrap_expr ?(must_be_unique = true) ?loc e =
       e
     else
       let marked = List.mem line c.CommentsPpx.marked_lines in
-      let marker_file = !Location.input_name in
-      match marker must_be_unique marker_file ofs marked with
+      match marker must_be_unique ofs marked with
       | Some w -> Exp.sequence ~loc w e
       | None   -> e
 
@@ -383,7 +376,7 @@ let wrap_class_field_kind = function
 (* This method is stateful and depends on `InstrumentState.set_points_for_file`
    having been run on all the points in the rest of the AST. *)
 let generate_runtime_initialization_code file =
-  let nb = List.length (InstrumentState.get_points_for_file file) in
+  let nb = List.length (InstrumentState.get_points_for_file ()) in
   let ilid s = Exp.ident (lid s) in
   let init =
     apply_nolabs
@@ -433,7 +426,7 @@ let generate_runtime_initialization_code file =
     Exp.(let_ Nonrecursive vb (sequence marks func))
   in
   let points_string =
-    InstrumentState.get_points_for_file file
+    InstrumentState.get_points_for_file ()
     |> Common.write_points
     |> Ast_convenience.str
   in
