@@ -25,7 +25,7 @@ let env_to_fname env default = try Sys.getenv env with Not_found -> default
 let verbose =
   lazy begin
     let fname = env_to_fname "BISECT_SILENT" "bisect.log" in
-    match String.uppercase fname with
+    match (String.uppercase [@ocaml.warning "-3"]) fname with
     | "YES" | "ON" -> fun _ -> ()
     | "ERR"        -> fun msg -> prerr_endline (string_of_message msg)
     | _uc_fname    ->

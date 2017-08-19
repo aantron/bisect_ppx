@@ -1,10 +1,10 @@
 .PHONY : build
 build :
-	jbuilder build
+	jbuilder build --dev
 
 .PHONY : test
 test : build
-	jbuilder runtest --no-buffer -j 1
+	jbuilder runtest --dev --no-buffer -j 1
 
 .PHONY : clean
 clean :
@@ -27,7 +27,7 @@ usage : build
 
 .PHONY : performance
 performance : build
-	jbuilder build test/performance/test_performance.exe
+	jbuilder build --dev test/performance/test_performance.exe
 	cd _build/default/test/ && \
 	    performance/test_performance.exe -runner sequential
 
