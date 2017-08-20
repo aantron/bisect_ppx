@@ -2,4 +2,4 @@
 
 (executable
  ((name source)
-  (preprocess (pps (bisect_ppx -simple-cases)))))
+  (preprocess (pps (bisect_ppx)))))

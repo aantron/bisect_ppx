@@ -6,8 +6,6 @@
 
 let conditional = ref false
 
-let simple_cases = ref false
-
 let inexhaustive_matching = ref false
 
 let switches = [
@@ -26,10 +24,6 @@ let switches = [
   ("-conditional",
    Arg.Set conditional,
    "  Do not instrument unless environment variable BISECT_ENABLE is YES");
-
-  ("-simple-cases",
-   Arg.Set simple_cases,
-   "  Do not generate separate points for clauses of or-patterns") ;
 
   ("-inexhaustive-matching",
    Arg.Set inexhaustive_matching,

@@ -229,8 +229,6 @@ let wrap_case case =
 
   if intentionally_dead_clause then
     case
-  else if !InstrumentArgs.simple_cases then
-    Exp.case pattern ?guard:maybe_guard (instrument_expr ~loc case.pc_rhs)
   else
     (* If this is an exception case, work with the pattern inside the exception
        instead. *)

@@ -12,10 +12,6 @@ val conditional : bool ref
     [BISECT_ENABLE] is set to [YES]. The environment variable's value is not
     case-sensitive. *)
 
-val simple_cases : bool ref
-(** Whether to avoid generating separate points on clauses of or-patterns. Set
-    to [false] by default. *)
-
 val inexhaustive_matching : bool ref
 (** Whether to generate inexhaustive match expressions when adding points to
     cases. Defaults to [false] for safer behavior in user code, but can be set
