@@ -29,22 +29,6 @@ module Common = Bisect.Common
 
 
 
-module More_ast_helpers :
-sig
-  val lid : ?loc:Location.t -> string -> Longident.t Location.loc
-  val string_of_ident : Longident.t Location.loc -> string
-end =
-struct
-  let lid ?(loc = Location.none) s =
-    Location.mkloc (Longident.parse s) loc
-
-  let string_of_ident ident =
-    String.concat "." (Longident.flatten ident.Asttypes.txt)
-end
-open More_ast_helpers
-
-
-
 let points : Common.point_definition list ref = ref []
 
 
@@ -206,22 +190,20 @@ let wrap_case case =
   in
 
   let intentionally_dead_clause =
-    match case.pc_rhs.pexp_desc with
-    | Pexp_assert
-        { pexp_desc =
-            Pexp_construct ({ txt = Longident.Lident "false"; _ }, None); _ } ->
-      true
+    match case.pc_rhs with
+    | [%expr assert false] -> true
     (* Clauses of the form `| p -> assert false` are a common idiom
        to denote cases that are known to be unreachable. *)
-    | Pexp_unreachable -> true
+
+    | {pexp_desc = Pexp_unreachable; _} -> true
     (* refutation clauses (p -> .) must not get instrumented, as
        instrumentation would generate code of the form
 
          (p -> <instrumentation>; .)
 
        that makes the type-checker fail with an error as it does not
-       recognize the refutation clause anymore.
-    *)
+       recognize the refutation clause anymore. *)
+
     | _ -> false in
 
   let pattern = case.pc_lhs in
@@ -266,7 +248,7 @@ let wrap_case case =
         cases
         |> List.map (fun (marks, pattern) ->
           Exp.case pattern (increments (Ast_convenience.unit ()) marks))
-        |> Exp.match_ ~loc (Exp.ident (lid ~loc case_variable))
+        |> Exp.match_ ~loc (Exp.ident (Ast_convenience.lid ~loc case_variable))
       in
 
       (* Suppress warnings because the generated match expression will almost
@@ -306,6 +288,9 @@ let generate_runtime_initialization_code file =
           else
             curr]
 
+let string_of_ident ident =
+  String.concat "." (Longident.flatten ident.Asttypes.txt)
+
 (* The actual "instrumenter" object, marking expressions. *)
 class instrumenter = object (self)
 
@@ -316,14 +301,15 @@ class instrumenter = object (self)
     let ce = super#class_expr ce in
     match ce.pcl_desc with
     | Pcl_apply (ce, l) ->
-        let l =
-          List.map
-            (fun (l, e) ->
-              (l, (instrument_expr e)))
-            l in
-        Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
+      let l =
+        List.map
+          (fun (l, e) ->
+            (l, (instrument_expr e)))
+          l
+      in
+      Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
     | _ ->
-        ce
+      ce
 
   method! class_field cf =
     let loc = cf.pcf_loc in
@@ -331,14 +317,13 @@ class instrumenter = object (self)
     let cf = super#class_field cf in
     match cf.pcf_desc with
     | Pcf_val (id, mut, cf) ->
-        Cf.val_ ~loc ~attrs id mut (wrap_class_field_kind cf)
+      Cf.val_ ~loc ~attrs id mut (wrap_class_field_kind cf)
     | Pcf_method (id, mut, cf) ->
-        Cf.method_ ~loc ~attrs id mut
-          (wrap_class_field_kind cf)
+      Cf.method_ ~loc ~attrs id mut (wrap_class_field_kind cf)
     | Pcf_initializer e ->
-        Cf.initializer_ ~loc ~attrs (instrument_expr e)
+      Cf.initializer_ ~loc ~attrs (instrument_expr e)
     | _ ->
-        cf
+      cf
 
   val mutable extension_guard = false
   val mutable attribute_guard = false
@@ -350,80 +335,104 @@ class instrumenter = object (self)
       let loc = e.pexp_loc in
       let attrs = e.pexp_attributes in
       let e' = super#expr e in
+
       match e'.pexp_desc with
       | Pexp_let (rec_flag, l, e) ->
-          let l =
-            List.map (fun vb ->
-            Parsetree.{vb with pvb_expr = instrument_expr vb.pvb_expr}) l in
-          Exp.let_ ~loc ~attrs rec_flag l (instrument_expr e)
+        let l =
+          List.map (fun vb ->
+            Parsetree.{vb with pvb_expr = instrument_expr vb.pvb_expr}) l
+        in
+        Exp.let_ ~loc ~attrs rec_flag l (instrument_expr e)
+
       | Pexp_poly (e, ct) ->
-          Exp.poly ~loc ~attrs (instrument_expr e) ct
+        Exp.poly ~loc ~attrs (instrument_expr e) ct
+
       | Pexp_fun (al, eo, p, e) ->
-          let eo = Ast_mapper.map_opt instrument_expr eo in
-          Exp.fun_ ~loc ~attrs al eo p (instrument_expr e)
+        let eo = Ast_mapper.map_opt instrument_expr eo in
+        Exp.fun_ ~loc ~attrs al eo p (instrument_expr e)
+
       | Pexp_apply (e1, [l2, e2; l3, e3]) ->
-          (match e1.pexp_desc with
-          | Pexp_ident ident
-            when
-              List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
-                Exp.apply ~loc ~attrs e1
-                  [l2, (instrument_expr e2);
-                  l3, (instrument_expr e3)]
-          | Pexp_ident ident when string_of_ident ident = "|>" ->
-            Exp.apply ~loc ~attrs e1
-              [l2, e2; l3, (instrument_expr e3)]
-          | _ -> e')
+        begin match e1.pexp_desc with
+        | Pexp_ident ident
+            when List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
+          Exp.apply ~loc ~attrs e1
+            [l2, (instrument_expr e2);
+             l3, (instrument_expr e3)]
+
+        | Pexp_ident ident
+            when string_of_ident ident = "|>" ->
+          Exp.apply ~loc ~attrs e1 [l2, e2; l3, (instrument_expr e3)]
+
+        | _ ->
+          e'
+        end
+
       | Pexp_match (e, l) ->
-          List.map wrap_case l
-          |> Exp.match_ ~loc ~attrs e
+        List.map wrap_case l
+        |> Exp.match_ ~loc ~attrs e
+
       | Pexp_function l ->
-          List.map wrap_case l
-          |> Exp.function_ ~loc ~attrs
+        List.map wrap_case l
+        |> Exp.function_ ~loc ~attrs
+
       | Pexp_try (e, l) ->
-          List.map wrap_case l
-          |> Exp.try_ ~loc ~attrs e
+        List.map wrap_case l
+        |> Exp.try_ ~loc ~attrs e
+
       | Pexp_ifthenelse (e1, e2, e3) ->
-          Exp.ifthenelse ~loc ~attrs e1 (instrument_expr e2)
-            (match e3 with Some x -> Some (instrument_expr x) | None -> None)
+        Exp.ifthenelse ~loc ~attrs e1 (instrument_expr e2)
+          (match e3 with Some x -> Some (instrument_expr x) | None -> None)
+
       | Pexp_sequence (e1, e2) ->
-          Exp.sequence ~loc ~attrs e1 (instrument_expr e2)
+        Exp.sequence ~loc ~attrs e1 (instrument_expr e2)
+
       | Pexp_while (e1, e2) ->
-          Exp.while_ ~loc ~attrs e1 (instrument_expr e2)
+        Exp.while_ ~loc ~attrs e1 (instrument_expr e2)
       | Pexp_for (id, e1, e2, dir, e3) ->
-          Exp.for_ ~loc ~attrs id e1 e2 dir (instrument_expr e3)
-      | _ -> e'
+        Exp.for_ ~loc ~attrs id e1 e2 dir (instrument_expr e3)
+
+      | _ ->
+        e'
 
   method! structure_item si =
     let loc = si.pstr_loc in
     match si.pstr_desc with
     | Pstr_value (rec_flag, l) ->
-        let l =
-          List.map (fun vb ->     (* Only instrument things not excluded. *)
-            Parsetree.{ vb with pvb_expr =
-                match vb.pvb_pat.ppat_desc with
-                  (* Match the 'f' in 'let f x = ... ' *)
-                | Ppat_var ident when Exclusions.contains_value
-                      (ident.loc.Location.loc_start.Lexing.pos_fname)
-                    ident.txt -> vb.pvb_expr
-                  (* Match the 'f' in 'let f : type a. a -> string = ...' *)
-                | Ppat_constraint (p,_) ->
-                    begin
-                      match p.ppat_desc with
-                      | Ppat_var ident when Exclusions.contains_value
-                          (ident.loc.Location.loc_start.Lexing.pos_fname)
-                            ident.txt -> vb.pvb_expr
-                      | _ ->
-                        instrument_expr (self#expr vb.pvb_expr)
-                    end
-                | _ ->
-                    instrument_expr (self#expr vb.pvb_expr)})
-          l
-        in
-          Str.value ~loc rec_flag l
+      let l =
+        List.map begin fun vb ->     (* Only instrument things not excluded. *)
+          Parsetree.{ vb with pvb_expr =
+            match vb.pvb_pat.ppat_desc with
+            (* Match the 'f' in 'let f x = ... ' *)
+            | Ppat_var ident
+                when Exclusions.contains_value
+                  (ident.loc.Location.loc_start.Lexing.pos_fname)
+                  ident.txt ->
+              vb.pvb_expr
+
+            (* Match the 'f' in 'let f : type a. a -> string = ...' *)
+            | Ppat_constraint (p,_) ->
+              begin match p.ppat_desc with
+              | Ppat_var ident
+                  when Exclusions.contains_value
+                    (ident.loc.Location.loc_start.Lexing.pos_fname)
+                    ident.txt ->
+                vb.pvb_expr
+
+              | _ ->
+                instrument_expr (self#expr vb.pvb_expr)
+              end
+
+            | _ ->
+              instrument_expr (self#expr vb.pvb_expr)}
+          end l
+      in
+      Str.value ~loc rec_flag l
+
     | Pstr_eval (e, a) when not (attribute_guard || extension_guard) ->
-        Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
+      Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
+
     | _ ->
-        super#structure_item si
+      super#structure_item si
 
   (* Guard these because they can carry payloads that we
      do not want to instrument. *)
