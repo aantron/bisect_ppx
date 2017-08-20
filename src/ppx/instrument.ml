@@ -316,206 +316,208 @@ class instrumenter =
   let wrap_class_field_kind = Generated_code.wrap_class_field_kind points in
 
   object (self)
+    inherit Ast_mapper_class.mapper as super
 
-  inherit Ast_mapper_class.mapper as super
-
-  method! class_expr ce =
-    let loc = ce.pcl_loc in
-    let ce = super#class_expr ce in
-    match ce.pcl_desc with
-    | Pcl_apply (ce, l) ->
-      let l =
-        List.map
-          (fun (l, e) ->
-            (l, (instrument_expr e)))
-          l
-      in
-      Ast.Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
-    | _ ->
-      ce
-
-  method! class_field cf =
-    let loc = cf.pcf_loc in
-    let attrs = cf.pcf_attributes in
-    let cf = super#class_field cf in
-    match cf.pcf_desc with
-    | Pcf_val (id, mut, cf) ->
-      Cf.val_ ~loc ~attrs id mut (wrap_class_field_kind cf)
-    | Pcf_method (id, mut, cf) ->
-      Cf.method_ ~loc ~attrs id mut (wrap_class_field_kind cf)
-    | Pcf_initializer e ->
-      Cf.initializer_ ~loc ~attrs (instrument_expr e)
-    | _ ->
-      cf
-
-  val mutable extension_guard = false
-  val mutable attribute_guard = false
-
-  method! expr e =
-    if attribute_guard || extension_guard then
-      super#expr e
-    else
-      let loc = e.pexp_loc in
-      let attrs = e.pexp_attributes in
-      let e' = super#expr e in
-
-      match e'.pexp_desc with
-      | Pexp_let (rec_flag, l, e) ->
+    method! class_expr ce =
+      let loc = ce.pcl_loc in
+      let ce = super#class_expr ce in
+      match ce.pcl_desc with
+      | Pcl_apply (ce, l) ->
         let l =
-          List.map (fun vb ->
-            Parsetree.{vb with pvb_expr = instrument_expr vb.pvb_expr}) l
+          List.map
+            (fun (l, e) ->
+              (l, (instrument_expr e)))
+            l
         in
-        Exp.let_ ~loc ~attrs rec_flag l (instrument_expr e)
+        Ast.Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
+      | _ ->
+        ce
 
-      | Pexp_poly (e, ct) ->
-        Exp.poly ~loc ~attrs (instrument_expr e) ct
+    method! class_field cf =
+      let loc = cf.pcf_loc in
+      let attrs = cf.pcf_attributes in
+      let cf = super#class_field cf in
+      match cf.pcf_desc with
+      | Pcf_val (id, mut, cf) ->
+        Cf.val_ ~loc ~attrs id mut (wrap_class_field_kind cf)
+      | Pcf_method (id, mut, cf) ->
+        Cf.method_ ~loc ~attrs id mut (wrap_class_field_kind cf)
+      | Pcf_initializer e ->
+        Cf.initializer_ ~loc ~attrs (instrument_expr e)
+      | _ ->
+        cf
 
-      | Pexp_fun (al, eo, p, e) ->
-        let eo = Ast.Ast_mapper.map_opt instrument_expr eo in
-        Exp.fun_ ~loc ~attrs al eo p (instrument_expr e)
+    val mutable extension_guard = false
+    val mutable attribute_guard = false
 
-      | Pexp_apply (e1, [l2, e2; l3, e3]) ->
-        begin match e1.pexp_desc with
-        | Pexp_ident ident
-            when List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
-          Exp.apply ~loc ~attrs e1
-            [l2, (instrument_expr e2);
-             l3, (instrument_expr e3)]
+    method! expr e =
+      if attribute_guard || extension_guard then
+        super#expr e
+      else
+        let loc = e.pexp_loc in
+        let attrs = e.pexp_attributes in
+        let e' = super#expr e in
 
-        | Pexp_ident ident
-            when string_of_ident ident = "|>" ->
-          Exp.apply ~loc ~attrs e1 [l2, e2; l3, (instrument_expr e3)]
+        match e'.pexp_desc with
+        | Pexp_let (rec_flag, l, e) ->
+          let l =
+            List.map (fun vb ->
+              Parsetree.{vb with pvb_expr = instrument_expr vb.pvb_expr}) l
+          in
+          Exp.let_ ~loc ~attrs rec_flag l (instrument_expr e)
+
+        | Pexp_poly (e, ct) ->
+          Exp.poly ~loc ~attrs (instrument_expr e) ct
+
+        | Pexp_fun (al, eo, p, e) ->
+          let eo = Ast.Ast_mapper.map_opt instrument_expr eo in
+          Exp.fun_ ~loc ~attrs al eo p (instrument_expr e)
+
+        | Pexp_apply (e1, [l2, e2; l3, e3]) ->
+          begin match e1.pexp_desc with
+          | Pexp_ident ident
+              when List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
+            Exp.apply ~loc ~attrs e1
+              [l2, (instrument_expr e2);
+              l3, (instrument_expr e3)]
+
+          | Pexp_ident ident
+              when string_of_ident ident = "|>" ->
+            Exp.apply ~loc ~attrs e1 [l2, e2; l3, (instrument_expr e3)]
+
+          | _ ->
+            e'
+          end
+
+        | Pexp_match (e, l) ->
+          List.map wrap_case l
+          |> Exp.match_ ~loc ~attrs e
+
+        | Pexp_function l ->
+          List.map wrap_case l
+          |> Exp.function_ ~loc ~attrs
+
+        | Pexp_try (e, l) ->
+          List.map wrap_case l
+          |> Exp.try_ ~loc ~attrs e
+
+        | Pexp_ifthenelse (e1, e2, e3) ->
+          Exp.ifthenelse ~loc ~attrs e1 (instrument_expr e2)
+            (match e3 with Some x -> Some (instrument_expr x) | None -> None)
+
+        | Pexp_sequence (e1, e2) ->
+          Exp.sequence ~loc ~attrs e1 (instrument_expr e2)
+
+        | Pexp_while (e1, e2) ->
+          Exp.while_ ~loc ~attrs e1 (instrument_expr e2)
+        | Pexp_for (id, e1, e2, dir, e3) ->
+          Exp.for_ ~loc ~attrs id e1 e2 dir (instrument_expr e3)
 
         | _ ->
           e'
-        end
 
-      | Pexp_match (e, l) ->
-        List.map wrap_case l
-        |> Exp.match_ ~loc ~attrs e
-
-      | Pexp_function l ->
-        List.map wrap_case l
-        |> Exp.function_ ~loc ~attrs
-
-      | Pexp_try (e, l) ->
-        List.map wrap_case l
-        |> Exp.try_ ~loc ~attrs e
-
-      | Pexp_ifthenelse (e1, e2, e3) ->
-        Exp.ifthenelse ~loc ~attrs e1 (instrument_expr e2)
-          (match e3 with Some x -> Some (instrument_expr x) | None -> None)
-
-      | Pexp_sequence (e1, e2) ->
-        Exp.sequence ~loc ~attrs e1 (instrument_expr e2)
-
-      | Pexp_while (e1, e2) ->
-        Exp.while_ ~loc ~attrs e1 (instrument_expr e2)
-      | Pexp_for (id, e1, e2, dir, e3) ->
-        Exp.for_ ~loc ~attrs id e1 e2 dir (instrument_expr e3)
-
-      | _ ->
-        e'
-
-  method! structure_item si =
-    let loc = si.pstr_loc in
-    match si.pstr_desc with
-    | Pstr_value (rec_flag, l) ->
-      let l =
-        List.map begin fun vb ->     (* Only instrument things not excluded. *)
-          Parsetree.{ vb with pvb_expr =
-            match vb.pvb_pat.ppat_desc with
-            (* Match the 'f' in 'let f x = ... ' *)
-            | Ppat_var ident
-                when Exclusions.contains_value
-                  (ident.loc.Location.loc_start.Lexing.pos_fname)
-                  ident.txt ->
-              vb.pvb_expr
-
-            (* Match the 'f' in 'let f : type a. a -> string = ...' *)
-            | Ppat_constraint (p,_) ->
-              begin match p.ppat_desc with
+    method! structure_item si =
+      let loc = si.pstr_loc in
+      match si.pstr_desc with
+      | Pstr_value (rec_flag, l) ->
+        let l =
+          List.map begin fun vb ->    (* Only instrument things not excluded. *)
+            Parsetree.{ vb with pvb_expr =
+              match vb.pvb_pat.ppat_desc with
+              (* Match the 'f' in 'let f x = ... ' *)
               | Ppat_var ident
                   when Exclusions.contains_value
                     (ident.loc.Location.loc_start.Lexing.pos_fname)
                     ident.txt ->
                 vb.pvb_expr
 
+              (* Match the 'f' in 'let f : type a. a -> string = ...' *)
+              | Ppat_constraint (p,_) ->
+                begin match p.ppat_desc with
+                | Ppat_var ident
+                    when Exclusions.contains_value
+                      (ident.loc.Location.loc_start.Lexing.pos_fname)
+                      ident.txt ->
+                  vb.pvb_expr
+
+                | _ ->
+                  instrument_expr (self#expr vb.pvb_expr)
+                end
+
               | _ ->
-                instrument_expr (self#expr vb.pvb_expr)
-              end
+                instrument_expr (self#expr vb.pvb_expr)}
+            end l
+        in
+        Str.value ~loc rec_flag l
 
-            | _ ->
-              instrument_expr (self#expr vb.pvb_expr)}
-          end l
-      in
-      Str.value ~loc rec_flag l
+      | Pstr_eval (e, a) when not (attribute_guard || extension_guard) ->
+        Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
 
-    | Pstr_eval (e, a) when not (attribute_guard || extension_guard) ->
-      Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
+      | _ ->
+        super#structure_item si
 
-    | _ ->
-      super#structure_item si
+    (* Guard these because they can carry payloads that we
+       do not want to instrument. *)
+    method! extension e =
+      extension_guard <- true;
+      let r = super#extension e in
+      extension_guard <- false;
+      r
 
-  (* Guard these because they can carry payloads that we
-     do not want to instrument. *)
-  method! extension e =
-    extension_guard <- true;
-    let r = super#extension e in
-    extension_guard <- false;
-    r
+    method! attribute a =
+      attribute_guard <- true;
+      let r = super#attribute a in
+      attribute_guard <- false;
+      r
 
-  method! attribute a =
-    attribute_guard <- true;
-    let r = super#attribute a in
-    attribute_guard <- false;
-    r
+    (* This is set to [true] once the [structure] method is called for the first
+       time. It's used to determine whether Bisect_ppx is looking at the
+       top-level structure (module) in the file, or a nested structure
+       (module). *)
+    val mutable saw_top_level_structure = false
 
-  (* This is set to [true] once the [structure] method is called for the first
-     time. It's used to determine whether Bisect_ppx is looking at the top-level
-     structure (module) in the file, or a nested structure (module). *)
-  val mutable saw_top_level_structure = false
+    method! structure ast =
+      if saw_top_level_structure then
+        super#structure ast
+        (* This is *not* the first structure we see, so it is nested within the
+           file, either inside [struct]..[end] or in an attribute or extension
+           point. Traverse it recursively as normal. *)
 
-  method! structure ast =
-    if saw_top_level_structure then
-      super#structure ast
-      (* This is *not* the first structure we see, so it is nested within the
-         file, either inside [struct]..[end] or in an attribute or extension
-         point. Traverse it recursively as normal. *)
+      else begin
+        (* This is the first structure we see, so Bisect_ppx is beginning to
+           (potentially) instrument the current file. We need to check whether
+           this file is excluded from instrumentation before proceeding. *)
+          saw_top_level_structure <- true;
 
-    else begin
-      (* This is the first structure we see, so Bisect_ppx is beginning to
-         (potentially) instrument the current file. We need to check whether
-         this file is excluded from instrumentation before proceeding. *)
-         saw_top_level_structure <- true;
+        (* Bisect_ppx is hardcoded to ignore files with certain names. If we
+           have one of these, return the AST uninstrumented. In particular, do
+           not recurse into it. *)
+        let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
+        let always_ignore_basenames = [".ocamlinit"; "topfind"] in
+        let always_ignore path =
+          List.mem path always_ignore_paths ||
+          List.mem (Filename.basename path) always_ignore_basenames
+        in
 
-      (* Bisect_ppx is hardcoded to ignore files with certain names. If we have
-         one of these, return the AST uninstrumented. In particular, do not
-         recurse into it. *)
-      let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
-      let always_ignore_basenames = [".ocamlinit"; "topfind"] in
-      let always_ignore path =
-        List.mem path always_ignore_paths ||
-        List.mem (Filename.basename path) always_ignore_basenames
-      in
-
-      if always_ignore !Location.input_name then
-        ast
-
-      else
-        (* The file might also be excluded by the user. *)
-        if Exclusions.contains_file !Location.input_name then
+        if always_ignore !Location.input_name then
           ast
 
-        else begin
-          (* This file should be instrumented. Traverse the AST recursively,
-             then prepend some generated code for initializing the Bisect_ppx
-             runtime and telling it about the instrumentation points in this
-             file. *)
-          let instrumented_ast = super#structure ast in
-          let runtime_initialization =
-            Generated_code.runtime_initialization points !Location.input_name in
-          runtime_initialization::instrumented_ast
-        end
-    end
+        else
+          (* The file might also be excluded by the user. *)
+          if Exclusions.contains_file !Location.input_name then
+            ast
+
+          else begin
+            (* This file should be instrumented. Traverse the AST recursively,
+               then prepend some generated code for initializing the Bisect_ppx
+               runtime and telling it about the instrumentation points in this
+               file. *)
+            let instrumented_ast = super#structure ast in
+            let runtime_initialization =
+              Generated_code.runtime_initialization
+                points !Location.input_name
+            in
+            runtime_initialization::instrumented_ast
+          end
+      end
 end
