@@ -12,10 +12,6 @@ val conditional : bool ref
     [BISECT_ENABLE] is set to [YES]. The environment variable's value is not
     case-sensitive. *)
 
-val runtime_name : string ref
-(** Runtime module name. Defaults to [Bisect], but should be set to
-    [Meta_bisect] when applying Bisect_ppx to itself. *)
-
 val simple_cases : bool ref
 (** Whether to avoid generating separate points on clauses of or-patterns. Set
     to [false] by default. *)

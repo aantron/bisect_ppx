@@ -6,8 +6,6 @@
 
 let conditional = ref false
 
-let runtime_name = ref "Bisect"
-
 let simple_cases = ref false
 
 let inexhaustive_matching = ref false
@@ -28,10 +26,6 @@ let switches = [
   ("-conditional",
    Arg.Set conditional,
    "  Do not instrument unless environment variable BISECT_ENABLE is YES");
-
-  ("-runtime",
-   Arg.Set_string runtime_name,
-   "<module name>  Set runtime module name; used for testing") ;
 
   ("-simple-cases",
    Arg.Set simple_cases,
