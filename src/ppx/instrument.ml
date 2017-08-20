@@ -23,26 +23,32 @@ module Ast_mapper_class = Ast_mapper_class_404
 
 module Generated_code :
 sig
+  type points
+
+  val init : unit -> points
+
   val instrument_expr :
-    ?loc:Location.t -> Parsetree.expression -> Parsetree.expression
+    points -> ?loc:Location.t -> Parsetree.expression -> Parsetree.expression
 
   val wrap_case :
-    Parsetree.case -> Parsetree.case
+    points -> Parsetree.case -> Parsetree.case
 
   val wrap_class_field_kind :
-    Parsetree.class_field_kind -> Parsetree.class_field_kind
+    points -> Parsetree.class_field_kind -> Parsetree.class_field_kind
 
-  val generate_runtime_initialization_code :
-    string -> Parsetree.structure_item
+  val runtime_initialization :
+    points -> string -> Parsetree.structure_item
 end =
 struct
-  let points : Bisect.Common.point_definition list ref = ref []
+  type points = Bisect.Common.point_definition list ref
+
+  let init () = ref []
 
   (* Wraps an expression with a marker, returning the passed expression
      unmodified if the expression is already marked, has a ghost location,
      construct instrumentation is disabled, or a special comments indicates to
      ignore line. *)
-  let instrument_expr ?loc e =
+  let instrument_expr points ?loc e =
     let loc =
       match loc with
       | Some loc -> loc
@@ -188,11 +194,11 @@ struct
      and marking expression. If there are multiple top-level patterns, wrap_case
      inserts a match expression that determines, at runtime, which one is
      matched, and increments the appropriate point counts. *)
-  let wrap_case case =
+  let wrap_case points case =
     let maybe_guard =
       match Parsetree.(case.pc_guard) with
       | None -> None
-      | Some guard -> Some (instrument_expr guard)
+      | Some guard -> Some (instrument_expr points guard)
     in
 
     let intentionally_dead_clause =
@@ -233,12 +239,13 @@ struct
           l.Location.loc_start.Lexing.pos_cnum -
           l'.Location.loc_start.Lexing.pos_cnum)
         |> List.fold_left (fun e l ->
-          instrument_expr ~loc:l e) e
+          instrument_expr points ~loc:l e) e
       in
 
       match translate_pattern loc pure_pattern with
       | [] ->
-        Exp.case pattern ?guard:maybe_guard (instrument_expr ~loc case.pc_rhs)
+        Exp.case pattern
+          ?guard:maybe_guard (instrument_expr points ~loc case.pc_rhs)
       | [marks, _] ->
         Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
       | cases ->
@@ -269,11 +276,13 @@ struct
         Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
           (Exp.sequence ~loc marks_expr case.pc_rhs)
 
-  let wrap_class_field_kind = function
-    | Parsetree.Cfk_virtual _ as cf -> cf
-    | Parsetree.Cfk_concrete (o,e)  -> Cf.concrete o (instrument_expr e)
+  let wrap_class_field_kind points = function
+    | Parsetree.Cfk_virtual _ as cf ->
+      cf
+    | Parsetree.Cfk_concrete (o,e) ->
+      Cf.concrete o (instrument_expr points e)
 
-  let generate_runtime_initialization_code file =
+  let runtime_initialization points file =
     let point_count = Ast_convenience.int (List.length !points) in
     let points_data =
         Ast_convenience.str (Bisect.Common.write_points !points) in
@@ -293,7 +302,6 @@ struct
             else
               curr]
 end
-open Generated_code
 
 
 
@@ -301,7 +309,13 @@ let string_of_ident ident =
   String.concat "." Ast.(Longident.flatten ident.Asttypes.txt)
 
 (* The actual "instrumenter" object, marking expressions. *)
-class instrumenter = object (self)
+class instrumenter =
+  let points = Generated_code.init () in
+  let instrument_expr = Generated_code.instrument_expr points in
+  let wrap_case = Generated_code.wrap_case points in
+  let wrap_class_field_kind = Generated_code.wrap_class_field_kind points in
+
+  object (self)
 
   inherit Ast_mapper_class.mapper as super
 
@@ -500,7 +514,7 @@ class instrumenter = object (self)
              file. *)
           let instrumented_ast = super#structure ast in
           let runtime_initialization =
-            generate_runtime_initialization_code !Location.input_name in
+            Generated_code.runtime_initialization points !Location.input_name in
           runtime_initialization::instrumented_ast
         end
     end
