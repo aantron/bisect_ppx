@@ -27,6 +27,23 @@ let points : Bisect.Common.point_definition list ref = ref []
 
 let case_variable = "___bisect_matched_value___"
 
+
+
+module Generated_code :
+sig
+  val instrument_expr :
+    ?loc:Location.t -> Parsetree.expression -> Parsetree.expression
+
+  val wrap_case :
+    Parsetree.case -> Parsetree.case
+
+  val wrap_class_field_kind :
+    Parsetree.class_field_kind -> Parsetree.class_field_kind
+
+  val generate_runtime_initialization_code :
+    string -> Parsetree.structure_item
+end =
+struct
 (* Wraps an expression with a marker, returning the passed expression
    unmodified if the expression is already marked, has a ghost location,
    construct instrumentation is disabled, or a special comments indicates to
@@ -276,6 +293,10 @@ let generate_runtime_initialization_code file =
             Pervasives.succ curr
           else
             curr]
+end
+open Generated_code
+
+
 
 let string_of_ident ident =
   String.concat "." Ast.(Longident.flatten ident.Asttypes.txt)
