@@ -44,255 +44,258 @@ sig
     string -> Parsetree.structure_item
 end =
 struct
-(* Wraps an expression with a marker, returning the passed expression
-   unmodified if the expression is already marked, has a ghost location,
-   construct instrumentation is disabled, or a special comments indicates to
-   ignore line. *)
-let instrument_expr ?loc e =
-  let loc =
-    match loc with
-    | Some loc -> loc
-    | None -> Parsetree.(e.pexp_loc)
-  in
-
-  let ignored =
-    (* Different files because of the line directive *)
-    let file = loc.Location.loc_start.Lexing.pos_fname in
-    let line = loc.Location.loc_start.Lexing.pos_lnum in
-    let c = Comments.get file in
-    Location.(loc.loc_ghost)
-    || List.exists
-      (fun (lo, hi) ->
-        line >= lo && line <= hi)
-      Comments.(c.ignored_intervals)
-    || List.mem line Comments.(c.marked_lines)
-  in
-
-  if ignored then
-    e
-
-  else
-    let ofs = loc.Location.loc_start.Lexing.pos_cnum in
-    let idx =
-      try
-        (List.find (fun p -> Bisect.Common.(p.offset) = ofs) !points).identifier
-      with Not_found ->
-        let idx = List.length !points in
-        let pt = Bisect.Common.{offset = ofs; identifier = idx} in
-        points := pt::!points;
-        pt.identifier
-    in
-    let idx = Ast_convenience.int idx in
-    [%expr ___bisect_mark___ [%e idx]; [%e e]]
-      [@metaloc loc]
-
-(* Given a pattern and a location, transforms the pattern into pattern list by
-   eliminating all or-patterns and promoting them into separate cases. Each
-   resulting case is paired with a list of locations to mark if that case is
-   reached.
-
-   The location argument to this function is used for assembling these location
-   lists. It is set to the location of the nearest enclosing or-pattern clause.
-   When there is no such clause, it is set to the location of the entire
-   enclosing pattern. *)
-let translate_pattern =
-  (* n-ary Cartesion product of case patterns. Used for assembling case lists
-     for "and-patterns" such as tuples and arrays. *)
-  let product = function
-    | [] -> []
-    | cases::more ->
-      let multiply product cases =
-        product |> List.map (fun (marks_1, ps) ->
-          cases |> List.map (fun (marks_2, p) ->
-            marks_1 @ marks_2, ps @ [p]))
-        |> List.flatten
-      in
-
-      let initial = cases |> List.map (fun (marks, p) -> marks, [p]) in
-
-      List.fold_left multiply initial more
-  in
-
-  let rec translate mark p =
-    let loc = Parsetree.(p.ppat_loc) in
-    let attrs = Parsetree.(p.ppat_attributes) in
-
-    match p.ppat_desc with
-    | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
-    | Ppat_construct (_, None) | Ppat_variant (_, None) | Ppat_type _
-    | Ppat_unpack _ | Ppat_extension _ ->
-      [[mark], p]
-
-    | Ppat_alias (p', x) ->
-      translate mark p'
-      |> List.map (fun (marks, p'') -> marks, Pat.alias ~loc ~attrs p'' x)
-
-    | Ppat_tuple ps ->
-      ps
-      |> List.map (translate mark)
-      |> product
-      |> List.map (fun (marks, ps') -> marks, Pat.tuple ~loc ~attrs ps')
-
-    | Ppat_construct (c, Some p') ->
-      translate mark p'
-      |> List.map (fun (marks, p'') ->
-        marks, Pat.construct ~loc ~attrs c (Some p''))
-
-    | Ppat_variant (c, Some p') ->
-      translate mark p'
-      |> List.map (fun (marks, p'') ->
-        marks, Pat.variant ~loc ~attrs c (Some p''))
-
-    | Ppat_record (entries, closed) ->
-      let labels, ps = List.split entries in
-      ps
-      |> List.map (translate mark)
-      |> product
-      |> List.map (fun (marks, ps') ->
-        marks, Pat.record ~loc ~attrs (List.combine labels ps') closed)
-
-    | Ppat_array ps ->
-      ps
-      |> List.map (translate mark)
-      |> product
-      |> List.map (fun (marks, ps') -> marks, Pat.array ~loc ~attrs ps')
-
-    | Ppat_or (p_1, p_2) ->
-      let ps_1 = translate p_1.ppat_loc p_1 in
-      let ps_2 = translate p_2.ppat_loc p_2 in
-      ps_1 @ ps_2
-
-    | Ppat_constraint (p', t) ->
-      translate mark p'
-      |> List.map (fun (marks, p'') -> marks, Pat.constraint_ ~loc ~attrs p'' t)
-
-    | Ppat_lazy p' ->
-      translate mark p'
-      |> List.map (fun (marks, p'') -> marks, Pat.lazy_ ~loc ~attrs p'')
-
-    | Ppat_open (c, p') ->
-      translate mark p'
-      |> List.map (fun (marks, p'') -> marks, Pat.open_ ~loc ~attrs c p'')
-
-    (* This should be unreachable in well-formed code, but, if it is reached,
-       do not generate any cases. The cases would be used in a secondary match
-       expression that works on the same value as the match expression (or
-       function expression) that is being instrumented. Inside that expression,
-       it makes no sense to match a second time for effects such as
-       exceptions. *)
-    | Ppat_exception _ -> []
-  in
-
-  translate
-
-(* Wraps a match or function case. A transformed pattern list is first created,
-   where all or-patterns are promoted to top-level patterns. If there is only
-   one resulting top-level pattern, wrap_case inserts a single point and marking
-   expression. If there are multiple top-level patterns, wrap_case inserts a
-   match expression that determines, at runtime, which one is matched, and
-   increments the appropriate point counts. *)
-let wrap_case case =
-  let maybe_guard =
-    match Parsetree.(case.pc_guard) with
-    | None -> None
-    | Some guard -> Some (instrument_expr guard)
-  in
-
-  let intentionally_dead_clause =
-    match case.pc_rhs with
-    | [%expr assert false] -> true
-    (* Clauses of the form `| p -> assert false` are a common idiom
-       to denote cases that are known to be unreachable. *)
-
-    | {pexp_desc = Pexp_unreachable; _} -> true
-    (* refutation clauses (p -> .) must not get instrumented, as
-       instrumentation would generate code of the form
-
-         (p -> <instrumentation>; .)
-
-       that makes the type-checker fail with an error as it does not
-       recognize the refutation clause anymore. *)
-
-    | _ -> false in
-
-  let pattern = case.pc_lhs in
-  let loc = pattern.ppat_loc in
-
-  if intentionally_dead_clause then
-    case
-  else
-    (* If this is an exception case, work with the pattern inside the exception
-       instead. *)
-    let pure_pattern, reassemble =
-      match pattern.ppat_desc with
-      | Ppat_exception p ->
-        p, (fun p' -> {pattern with ppat_desc = Ppat_exception p'})
-      | _ -> pattern, (fun p -> p)
+  (* Wraps an expression with a marker, returning the passed expression
+     unmodified if the expression is already marked, has a ghost location,
+     construct instrumentation is disabled, or a special comments indicates to
+     ignore line. *)
+  let instrument_expr ?loc e =
+    let loc =
+      match loc with
+      | Some loc -> loc
+      | None -> Parsetree.(e.pexp_loc)
     in
 
-    let increments e marks =
-      marks
-      |> List.sort_uniq (fun l l' ->
-        l.Location.loc_start.Lexing.pos_cnum -
-        l'.Location.loc_start.Lexing.pos_cnum)
-      |> List.fold_left (fun e l ->
-        instrument_expr ~loc:l e) e
+    let ignored =
+      (* Different files because of the line directive *)
+      let file = loc.Location.loc_start.Lexing.pos_fname in
+      let line = loc.Location.loc_start.Lexing.pos_lnum in
+      let c = Comments.get file in
+      Location.(loc.loc_ghost)
+      || List.exists
+        (fun (lo, hi) ->
+          line >= lo && line <= hi)
+        Comments.(c.ignored_intervals)
+      || List.mem line Comments.(c.marked_lines)
     in
 
-    match translate_pattern loc pure_pattern with
-    | [] ->
-      Exp.case pattern ?guard:maybe_guard (instrument_expr ~loc case.pc_rhs)
-    | [marks, _] ->
-      Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
-    | cases ->
-      let cases = cases @ [[], Pat.any ~loc ()] in
+    if ignored then
+      e
 
-      let wrapped_pattern =
-        Pat.alias ~loc pure_pattern (Location.mkloc case_variable loc) in
+    else
+      let ofs = loc.Location.loc_start.Lexing.pos_cnum in
+      let idx =
+        try
+          let pt =
+            List.find (fun p -> Bisect.Common.(p.offset) = ofs) !points in
+          pt.identifier
+        with Not_found ->
+          let idx = List.length !points in
+          let pt = Bisect.Common.{offset = ofs; identifier = idx} in
+          points := pt::!points;
+          pt.identifier
+      in
+      let idx = Ast_convenience.int idx in
+      [%expr ___bisect_mark___ [%e idx]; [%e e]]
+        [@metaloc loc]
 
-      let marks_expr =
-        cases
-        |> List.map (fun (marks, pattern) ->
-          Exp.case pattern (increments (Ast_convenience.unit ()) marks))
-        |> Exp.match_ ~loc (Exp.ident (Ast_convenience.lid ~loc case_variable))
+  (* Given a pattern and a location, transforms the pattern into pattern list by
+      eliminating all or-patterns and promoting them into separate cases. Each
+      resulting case is paired with a list of locations to mark if that case is
+      reached.
+
+      The location argument to this function is used for assembling these
+      location lists. It is set to the location of the nearest enclosing
+      or-pattern clause. When there is no such clause, it is set to the location
+      of the entire enclosing pattern. *)
+  let translate_pattern =
+    (* n-ary Cartesion product of case patterns. Used for assembling case lists
+       for "and-patterns" such as tuples and arrays. *)
+    let product = function
+      | [] -> []
+      | cases::more ->
+        let multiply product cases =
+          product |> List.map (fun (marks_1, ps) ->
+            cases |> List.map (fun (marks_2, p) ->
+              marks_1 @ marks_2, ps @ [p]))
+          |> List.flatten
+        in
+
+        let initial = cases |> List.map (fun (marks, p) -> marks, [p]) in
+
+        List.fold_left multiply initial more
+    in
+
+    let rec translate mark p =
+      let loc = Parsetree.(p.ppat_loc) in
+      let attrs = Parsetree.(p.ppat_attributes) in
+
+      match p.ppat_desc with
+      | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
+      | Ppat_construct (_, None) | Ppat_variant (_, None) | Ppat_type _
+      | Ppat_unpack _ | Ppat_extension _ ->
+        [[mark], p]
+
+      | Ppat_alias (p', x) ->
+        translate mark p'
+        |> List.map (fun (marks, p'') -> marks, Pat.alias ~loc ~attrs p'' x)
+
+      | Ppat_tuple ps ->
+        ps
+        |> List.map (translate mark)
+        |> product
+        |> List.map (fun (marks, ps') -> marks, Pat.tuple ~loc ~attrs ps')
+
+      | Ppat_construct (c, Some p') ->
+        translate mark p'
+        |> List.map (fun (marks, p'') ->
+          marks, Pat.construct ~loc ~attrs c (Some p''))
+
+      | Ppat_variant (c, Some p') ->
+        translate mark p'
+        |> List.map (fun (marks, p'') ->
+          marks, Pat.variant ~loc ~attrs c (Some p''))
+
+      | Ppat_record (entries, closed) ->
+        let labels, ps = List.split entries in
+        ps
+        |> List.map (translate mark)
+        |> product
+        |> List.map (fun (marks, ps') ->
+          marks, Pat.record ~loc ~attrs (List.combine labels ps') closed)
+
+      | Ppat_array ps ->
+        ps
+        |> List.map (translate mark)
+        |> product
+        |> List.map (fun (marks, ps') -> marks, Pat.array ~loc ~attrs ps')
+
+      | Ppat_or (p_1, p_2) ->
+        let ps_1 = translate p_1.ppat_loc p_1 in
+        let ps_2 = translate p_2.ppat_loc p_2 in
+        ps_1 @ ps_2
+
+      | Ppat_constraint (p', t) ->
+        translate mark p'
+        |> List.map (fun (marks, p'') ->
+          marks, Pat.constraint_ ~loc ~attrs p'' t)
+
+      | Ppat_lazy p' ->
+        translate mark p'
+        |> List.map (fun (marks, p'') -> marks, Pat.lazy_ ~loc ~attrs p'')
+
+      | Ppat_open (c, p') ->
+        translate mark p'
+        |> List.map (fun (marks, p'') -> marks, Pat.open_ ~loc ~attrs c p'')
+
+      (* This should be unreachable in well-formed code, but, if it is reached,
+         do not generate any cases. The cases would be used in a secondary match
+         expression that works on the same value as the match expression (or
+         function expression) that is being instrumented. Inside that
+         expression, it makes no sense to match a second time for effects such
+         as exceptions. *)
+      | Ppat_exception _ -> []
+    in
+
+    translate
+
+  (* Wraps a match or function case. A transformed pattern list is first
+     created, where all or-patterns are promoted to top-level patterns. If there
+     is only one resulting top-level pattern, wrap_case inserts a single point
+     and marking expression. If there are multiple top-level patterns, wrap_case
+     inserts a match expression that determines, at runtime, which one is
+     matched, and increments the appropriate point counts. *)
+  let wrap_case case =
+    let maybe_guard =
+      match Parsetree.(case.pc_guard) with
+      | None -> None
+      | Some guard -> Some (instrument_expr guard)
+    in
+
+    let intentionally_dead_clause =
+      match case.pc_rhs with
+      | [%expr assert false] -> true
+      (* Clauses of the form `| p -> assert false` are a common idiom
+         to denote cases that are known to be unreachable. *)
+
+      | {pexp_desc = Pexp_unreachable; _} -> true
+      (* refutation clauses (p -> .) must not get instrumented, as
+         instrumentation would generate code of the form
+
+           (p -> <instrumentation>; .)
+
+         that makes the type-checker fail with an error as it does not recognize
+         the refutation clause anymore. *)
+
+      | _ -> false in
+
+    let pattern = case.pc_lhs in
+    let loc = pattern.ppat_loc in
+
+    if intentionally_dead_clause then
+      case
+    else
+      (* If this is an exception case, work with the pattern inside the
+         exception instead. *)
+      let pure_pattern, reassemble =
+        match pattern.ppat_desc with
+        | Ppat_exception p ->
+          p, (fun p' -> {pattern with ppat_desc = Ppat_exception p'})
+        | _ -> pattern, (fun p -> p)
       in
 
-      (* Suppress warnings because the generated match expression will almost
-         never be exhaustive. It may also have redundant cases or unused
-         variables. *)
-      let marks_expr =
-        Exp.attr marks_expr
-          (Location.mkloc "ocaml.warning" loc,
-            PStr [Str.eval (Ast_convenience.str "-4-8-9-11-26-27-28")])
+      let increments e marks =
+        marks
+        |> List.sort_uniq (fun l l' ->
+          l.Location.loc_start.Lexing.pos_cnum -
+          l'.Location.loc_start.Lexing.pos_cnum)
+        |> List.fold_left (fun e l ->
+          instrument_expr ~loc:l e) e
       in
 
-      Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
-        (Exp.sequence ~loc marks_expr case.pc_rhs)
+      match translate_pattern loc pure_pattern with
+      | [] ->
+        Exp.case pattern ?guard:maybe_guard (instrument_expr ~loc case.pc_rhs)
+      | [marks, _] ->
+        Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
+      | cases ->
+        let cases = cases @ [[], Pat.any ~loc ()] in
 
-let wrap_class_field_kind = function
-  | Parsetree.Cfk_virtual _ as cf -> cf
-  | Parsetree.Cfk_concrete (o,e)  -> Cf.concrete o (instrument_expr e)
+        let wrapped_pattern =
+          Pat.alias ~loc pure_pattern (Location.mkloc case_variable loc) in
 
-(* This method is stateful and depends on `InstrumentState.set_points_for_file`
-   having been run on all the points in the rest of the AST. *)
-let generate_runtime_initialization_code file =
-  let point_count = Ast_convenience.int (List.length !points) in
-  let points_data = Ast_convenience.str (Bisect.Common.write_points !points) in
-  let file = Ast_convenience.str file in
+        let marks_expr =
+          cases
+          |> List.map (fun (marks, pattern) ->
+            Exp.case pattern (increments (Ast_convenience.unit ()) marks))
+          |> Exp.match_
+            ~loc (Exp.ident (Ast_convenience.lid ~loc case_variable))
+        in
 
-  [%stri
-    let ___bisect_mark___ =
-      let points = [%e points_data] in
-      let marks = Array.make [%e point_count] 0 in
-      Bisect.Runtime.init_with_array [%e file] marks points;
+        (* Suppress warnings because the generated match expression will almost
+           never be exhaustive. It may also have redundant cases or unused
+           variables. *)
+        let marks_expr =
+          Exp.attr marks_expr
+            (Location.mkloc "ocaml.warning" loc,
+              PStr [Str.eval (Ast_convenience.str "-4-8-9-11-26-27-28")])
+        in
 
-      function idx ->
-        let curr = marks.(idx) in
-        marks.(idx) <-
-          if curr < Pervasives.max_int then
-            Pervasives.succ curr
-          else
-            curr]
+        Exp.case (reassemble wrapped_pattern) ?guard:maybe_guard
+          (Exp.sequence ~loc marks_expr case.pc_rhs)
+
+  let wrap_class_field_kind = function
+    | Parsetree.Cfk_virtual _ as cf -> cf
+    | Parsetree.Cfk_concrete (o,e)  -> Cf.concrete o (instrument_expr e)
+
+  let generate_runtime_initialization_code file =
+    let point_count = Ast_convenience.int (List.length !points) in
+    let points_data =
+        Ast_convenience.str (Bisect.Common.write_points !points) in
+    let file = Ast_convenience.str file in
+
+    [%stri
+      let ___bisect_mark___ =
+        let points = [%e points_data] in
+        let marks = Array.make [%e point_count] 0 in
+        Bisect.Runtime.init_with_array [%e file] marks points;
+
+        function idx ->
+          let curr = marks.(idx) in
+          marks.(idx) <-
+            if curr < Pervasives.max_int then
+              Pervasives.succ curr
+            else
+              curr]
 end
 open Generated_code
 
