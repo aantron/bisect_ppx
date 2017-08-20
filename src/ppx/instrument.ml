@@ -21,14 +21,6 @@ module Ast_mapper_class = Ast_mapper_class_404
 
 
 
-let points : Bisect.Common.point_definition list ref = ref []
-
-
-
-let case_variable = "___bisect_matched_value___"
-
-
-
 module Generated_code :
 sig
   val instrument_expr :
@@ -44,6 +36,8 @@ sig
     string -> Parsetree.structure_item
 end =
 struct
+  let points : Bisect.Common.point_definition list ref = ref []
+
   (* Wraps an expression with a marker, returning the passed expression
      unmodified if the expression is already marked, has a ghost location,
      construct instrumentation is disabled, or a special comments indicates to
@@ -249,6 +243,8 @@ struct
         Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
       | cases ->
         let cases = cases @ [[], Pat.any ~loc ()] in
+
+        let case_variable = "___bisect_matched_value___" in
 
         let wrapped_pattern =
           Pat.alias ~loc pure_pattern (Location.mkloc case_variable loc) in
