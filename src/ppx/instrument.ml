@@ -89,14 +89,14 @@ struct
         [@metaloc loc]
 
   (* Given a pattern and a location, transforms the pattern into pattern list by
-      eliminating all or-patterns and promoting them into separate cases. Each
-      resulting case is paired with a list of locations to mark if that case is
-      reached.
+     eliminating all or-patterns and promoting them into separate cases. Each
+     resulting case is paired with a list of locations to mark if that case is
+     reached.
 
-      The location argument to this function is used for assembling these
-      location lists. It is set to the location of the nearest enclosing
-      or-pattern clause. When there is no such clause, it is set to the location
-      of the entire enclosing pattern. *)
+     The location argument to this function is used for assembling these
+     location lists. It is set to the location of the nearest enclosing
+     or-pattern clause. When there is no such clause, it is set to the location
+     of the entire enclosing pattern. *)
   let translate_pattern =
     (* n-ary Cartesion product of case patterns. Used for assembling case lists
        for "and-patterns" such as tuples and arrays. *)
