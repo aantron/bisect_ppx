@@ -33,11 +33,6 @@ module More_ast_helpers :
 sig
   val lid : ?loc:Location.t -> string -> Longident.t Location.loc
   val string_of_ident : Longident.t Location.loc -> string
-
-  val apply_nolabs :
-    ?loc:Location.t ->
-    Longident.t Location.loc -> Parsetree.expression list ->
-      Parsetree.expression
 end =
 struct
   let lid ?(loc = Location.none) s =
@@ -45,11 +40,6 @@ struct
 
   let string_of_ident ident =
     String.concat "." (Longident.flatten ident.Asttypes.txt)
-
-  let apply_nolabs ?loc lid el =
-    Exp.apply ?loc
-      (Exp.ident ?loc lid)
-      (List.map (fun e -> (Ast_convenience.Label.nolabel, e)) el)
 end
 open More_ast_helpers
 
@@ -58,8 +48,6 @@ open More_ast_helpers
 let points : Common.point_definition list ref = ref []
 
 
-
-let custom_mark_function = "___bisect_mark___"
 
 let case_variable = "___bisect_matched_value___"
 
@@ -101,11 +89,9 @@ let instrument_expr ?loc e =
         points := pt::!points;
         pt.identifier
     in
-    let marker =
-      apply_nolabs
-        ~loc:Location.none (lid custom_mark_function) [Ast_convenience.int idx]
-    in
-    Exp.sequence ~loc marker e
+    let idx = Ast_convenience.int idx in
+    [%expr ___bisect_mark___ [%e idx]; [%e e]]
+      [@metaloc loc]
 
 (* Given a pattern and a location, transforms the pattern into pattern list by
    eliminating all or-patterns and promoting them into separate cases. Each
@@ -304,49 +290,23 @@ let wrap_class_field_kind = function
 (* This method is stateful and depends on `InstrumentState.set_points_for_file`
    having been run on all the points in the rest of the AST. *)
 let generate_runtime_initialization_code file =
-  let nb = List.length !points in
-  let ilid s = Exp.ident (lid s) in
-  let init =
-    apply_nolabs
-      (lid ((!InstrumentArgs.runtime_name) ^ ".Runtime.init_with_array"))
-      [Ast_convenience.str file; ilid "marks"; ilid "points"]
-  in
-  let make =
-    apply_nolabs
-      (lid "Array.make") [Ast_convenience.int nb; Ast_convenience.int 0]
-  in
-  let func =
-    let body =
-      let if_then_else =
-        Exp.ifthenelse
-            (apply_nolabs (lid "<") [ilid "curr"; ilid "Pervasives.max_int"])
-            (apply_nolabs (lid "Pervasives.succ") [ilid "curr"])
-            (Some (ilid "curr"))
-      in
-      let vb =
-        Vb.mk (Ast_convenience.pvar "curr")
-              (apply_nolabs (lid "Array.get") [ilid "marks"; ilid "idx"])
-      in
-      Exp.let_ Nonrecursive [vb]
-          (apply_nolabs
-              (lid "Array.set")
-              [ilid "marks"; ilid "idx"; if_then_else])
-    in
-    Exp.(function_ [ case (Ast_convenience.pvar "idx") body ])
-  in
-  let vb = [(Vb.mk (Ast_convenience.pvar "marks") make)] in
-  let e =
-    Exp.(let_ Nonrecursive vb (sequence init func))
-  in
-  let points_string =
-    !points
-    |> Common.write_points
-    |> Ast_convenience.str
-  in
-  let vb = [Vb.mk (Ast_convenience.pvar "points") points_string] in
-  let e = Exp.(let_ Nonrecursive vb e) in
-  Str.value
-    Nonrecursive [ Vb.mk (Ast_convenience.pvar custom_mark_function) e]
+  let point_count = Ast_convenience.int (List.length !points) in
+  let points_data = Ast_convenience.str (Common.write_points !points) in
+  let file = Ast_convenience.str file in
+
+  [%stri
+    let ___bisect_mark___ =
+      let points = [%e points_data] in
+      let marks = Array.make [%e point_count] 0 in
+      Bisect.Runtime.init_with_array [%e file] marks points;
+
+      function idx ->
+        let curr = marks.(idx) in
+        marks.(idx) <-
+          if curr < Pervasives.max_int then
+            Pervasives.succ curr
+          else
+            curr]
 
 (* The actual "instrumenter" object, marking expressions. *)
 class instrumenter = object (self)
