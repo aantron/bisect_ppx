@@ -8,28 +8,20 @@
 module Ast = Ast_404
 
 module Location = Ast.Location
-module Longident = Ast.Longident
-module Asttypes = Ast.Asttypes
 module Parsetree = Ast.Parsetree
-module Ast_helper = Ast.Ast_helper
-module Ast_mapper = Ast.Ast_mapper
 
-module Pat = Ast_helper.Pat
-module Exp = Ast_helper.Exp
-module Str = Ast_helper.Str
-module Vb = Ast_helper.Vb
-module Cf = Ast_helper.Cf
+module Pat = Ast.Ast_helper.Pat
+module Exp = Ast.Ast_helper.Exp
+module Str = Ast.Ast_helper.Str
+module Cf = Ast.Ast_helper.Cf
 
 (* From ppx_tools_versioned. *)
 module Ast_convenience = Ast_convenience_404
 module Ast_mapper_class = Ast_mapper_class_404
 
-(* From Bisect_ppx. *)
-module Common = Bisect.Common
 
 
-
-let points : Common.point_definition list ref = ref []
+let points : Bisect.Common.point_definition list ref = ref []
 
 
 
@@ -66,10 +58,10 @@ let instrument_expr ?loc e =
     let ofs = loc.Location.loc_start.Lexing.pos_cnum in
     let idx =
       try
-        (List.find (fun p -> p.Common.offset = ofs) !points).identifier
+        (List.find (fun p -> Bisect.Common.(p.offset) = ofs) !points).identifier
       with Not_found ->
         let idx = List.length !points in
-        let pt = {Common.offset = ofs; identifier = idx} in
+        let pt = Bisect.Common.{offset = ofs; identifier = idx} in
         points := pt::!points;
         pt.identifier
     in
@@ -105,8 +97,8 @@ let translate_pattern =
   in
 
   let rec translate mark p =
-    let loc = p.Parsetree.ppat_loc in
-    let attrs = p.Parsetree.ppat_attributes in
+    let loc = Parsetree.(p.ppat_loc) in
+    let attrs = Parsetree.(p.ppat_attributes) in
 
     match p.ppat_desc with
     | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
@@ -184,7 +176,7 @@ let translate_pattern =
    increments the appropriate point counts. *)
 let wrap_case case =
   let maybe_guard =
-    match case.Parsetree.pc_guard with
+    match Parsetree.(case.pc_guard) with
     | None -> None
     | Some guard -> Some (instrument_expr guard)
   in
@@ -268,7 +260,7 @@ let wrap_class_field_kind = function
    having been run on all the points in the rest of the AST. *)
 let generate_runtime_initialization_code file =
   let point_count = Ast_convenience.int (List.length !points) in
-  let points_data = Ast_convenience.str (Common.write_points !points) in
+  let points_data = Ast_convenience.str (Bisect.Common.write_points !points) in
   let file = Ast_convenience.str file in
 
   [%stri
@@ -286,7 +278,7 @@ let generate_runtime_initialization_code file =
             curr]
 
 let string_of_ident ident =
-  String.concat "." (Longident.flatten ident.Asttypes.txt)
+  String.concat "." Ast.(Longident.flatten ident.Asttypes.txt)
 
 (* The actual "instrumenter" object, marking expressions. *)
 class instrumenter = object (self)
@@ -304,7 +296,7 @@ class instrumenter = object (self)
             (l, (instrument_expr e)))
           l
       in
-      Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
+      Ast.Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
     | _ ->
       ce
 
@@ -345,7 +337,7 @@ class instrumenter = object (self)
         Exp.poly ~loc ~attrs (instrument_expr e) ct
 
       | Pexp_fun (al, eo, p, e) ->
-        let eo = Ast_mapper.map_opt instrument_expr eo in
+        let eo = Ast.Ast_mapper.map_opt instrument_expr eo in
         Exp.fun_ ~loc ~attrs al eo p (instrument_expr e)
 
       | Pexp_apply (e1, [l2, e2; l3, e3]) ->
