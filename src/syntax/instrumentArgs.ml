@@ -6,8 +6,6 @@
 
 let conditional = ref false
 
-let inexhaustive_matching = ref false
-
 let switches = [
   ("-exclude",
    Arg.String Exclusions.add,
@@ -24,8 +22,4 @@ let switches = [
   ("-conditional",
    Arg.Set conditional,
    "  Do not instrument unless environment variable BISECT_ENABLE is YES");
-
-  ("-inexhaustive-matching",
-   Arg.Set inexhaustive_matching,
-   "  Generate inexhaustive match expressions in cases; used for testing")
 ]

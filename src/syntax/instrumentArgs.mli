@@ -12,12 +12,5 @@ val conditional : bool ref
     [BISECT_ENABLE] is set to [YES]. The environment variable's value is not
     case-sensitive. *)
 
-val inexhaustive_matching : bool ref
-(** Whether to generate inexhaustive match expressions when adding points to
-    cases. Defaults to [false] for safer behavior in user code, but can be set
-    to [true] to help catch Bisect_ppx bugs in Bisect_ppx testing. If the match
-    expressions are generated correctly, they should never fail, whether the
-    cases are exhaustive or not. *)
-
 val switches : (Arg.key * Arg.spec * Arg.doc) list
 (** Command-line switches. *)

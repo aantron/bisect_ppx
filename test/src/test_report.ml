@@ -9,9 +9,7 @@ open Test_helpers
 
 let test name f =
   test name begin fun () ->
-    compile
-      (with_bisect_args "-inexhaustive-matching")
-      "fixtures/report/source.ml";
+    compile (with_bisect ()) "fixtures/report/source.ml";
     run "./a.out -inf 0 -sup 3 > /dev/null";
     run "./a.out -inf 7 -sup 11 > /dev/null";
     f ()

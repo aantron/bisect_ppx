@@ -6,16 +6,13 @@ let () =
 type t = A | B | C
 type u = {a : int; b : int; c : int}
 
-(* Triggers (suppressed) warning 4 without -inexhaustive-matching: fragile
-   pattern matching (due to wildcard). *)
-(* Triggers (suppressed) warning 11 without -inexhaustive-matching: unused match
-   case (wildcard). *)
+(* Triggers (suppressed) warning 4: fragile pattern matching (due to
+   wildcard). *)
+(* Triggers (suppressed) warning 11: unused match case (wildcard). *)
 let f x =
   match x with
   | A | B | C -> 42
 
-(* Triggers (suppressed) warning 8 with -inexhaustive-matching: inexhaustive
-   matching. *)
 let g x =
   match x with
   | A | B -> 42

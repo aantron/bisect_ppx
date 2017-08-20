@@ -14,7 +14,7 @@ let test ?(uninstrumented = false) ?(with_threads = false) ?(bisect = "") name =
   test name begin fun () ->
     let cflags =
       if uninstrumented then ""
-      else with_bisect_args (bisect ^ " -inexhaustive-matching")
+      else with_bisect_args bisect
     in
 
     let cflags =

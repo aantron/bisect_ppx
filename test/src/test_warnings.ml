@@ -21,12 +21,4 @@ let tests = "warnings" >::: [
       "fixtures/warnings/source.ml" ~r:"2> output.raw";
     sorted_diff ()
   end;
-
-  test "inexhaustive-matching" begin fun () ->
-    compile
-      ((with_bisect_args "-inexhaustive-matching") ^ " -w +A")
-      "fixtures/warnings/source.ml"
-      ~r:"2> output.raw";
-    sorted_diff ()
-  end
 ]

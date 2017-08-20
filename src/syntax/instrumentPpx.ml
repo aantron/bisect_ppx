@@ -236,10 +236,7 @@ let wrap_case case =
     | [marks, _] ->
       Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
     | cases ->
-      let cases =
-        if !InstrumentArgs.inexhaustive_matching then cases
-        else cases @ [[], Pat.any ~loc ()]
-      in
+      let cases = cases @ [[], Pat.any ~loc ()] in
 
       let wrapped_pattern =
         Pat.alias ~loc pure_pattern (Location.mkloc case_variable loc) in
