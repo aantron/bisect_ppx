@@ -63,62 +63,49 @@ let custom_mark_function = "___bisect_mark___"
 
 let case_variable = "___bisect_matched_value___"
 
-(* Evaluates to a point at the given location. If the point does not yet exist,
-   creates it.. The point is paired with a flag indicating whether it existed
-   before this function was called. *)
-let get_point ofs =
-  let maybe_existing =
-    try Some (List.find (fun p -> p.Common.offset = ofs) !points)
-    with Not_found -> None
-  in
-
-  match maybe_existing with
-  | Some pt -> pt
-  | None ->
-    let idx = List.length !points in
-    let pt = { Common.offset = ofs; identifier = idx } in
-    points := (pt::!points);
-    pt
-
-(* Creates the marking expression for given file, and offset. Populates the
-   'points' global variable. *)
-let marker ofs =
-  let { Common.identifier = idx; _ } =
-    get_point ofs in
-
-  let loc = Location.none in
-  apply_nolabs
-    ~loc (lid custom_mark_function) [Ast_convenience.int idx]
-
 (* Wraps an expression with a marker, returning the passed expression
    unmodified if the expression is already marked, has a ghost location,
    construct instrumentation is disabled, or a special comments indicates to
    ignore line. *)
-let wrap_expr ?loc e =
+let instrument_expr ?loc e =
   let loc =
     match loc with
-    | None -> e.Parsetree.pexp_loc
     | Some loc -> loc
+    | None -> Parsetree.(e.pexp_loc)
   in
-  if loc.Location.loc_ghost then
-    e
-  else
-    let ofs = loc.Location.loc_start.Lexing.pos_cnum in
+
+  let ignored =
     (* Different files because of the line directive *)
     let file = loc.Location.loc_start.Lexing.pos_fname in
     let line = loc.Location.loc_start.Lexing.pos_lnum in
     let c = CommentsPpx.get file in
-    let ignored =
-      List.exists
-        (fun (lo, hi) ->
-          line >= lo && line <= hi)
-        c.CommentsPpx.ignored_intervals
-      || List.mem line c.CommentsPpx.marked_lines
+    Location.(loc.loc_ghost)
+    || List.exists
+      (fun (lo, hi) ->
+        line >= lo && line <= hi)
+      c.CommentsPpx.ignored_intervals
+    || List.mem line c.CommentsPpx.marked_lines
+  in
+
+  if ignored then
+    e
+
+  else
+    let ofs = loc.Location.loc_start.Lexing.pos_cnum in
+    let idx =
+      try
+        (List.find (fun p -> p.Common.offset = ofs) !points).identifier
+      with Not_found ->
+        let idx = List.length !points in
+        let pt = {Common.offset = ofs; identifier = idx} in
+        points := pt::!points;
+        pt.identifier
     in
-    if ignored then
-      e
-    else
-      Exp.sequence ~loc (marker ofs) e
+    let marker =
+      apply_nolabs
+        ~loc:Location.none (lid custom_mark_function) [Ast_convenience.int idx]
+    in
+    Exp.sequence ~loc marker e
 
 (* Given a pattern and a location, transforms the pattern into pattern list by
    eliminating all or-patterns and promoting them into separate cases. Each
@@ -229,7 +216,7 @@ let wrap_case case =
   let maybe_guard =
     match case.Parsetree.pc_guard with
     | None -> None
-    | Some guard -> Some (wrap_expr guard)
+    | Some guard -> Some (instrument_expr guard)
   in
 
   let intentionally_dead_clause =
@@ -257,7 +244,7 @@ let wrap_case case =
   if intentionally_dead_clause then
     case
   else if !InstrumentArgs.simple_cases then
-    Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc case.pc_rhs)
+    Exp.case pattern ?guard:maybe_guard (instrument_expr ~loc case.pc_rhs)
   else
     (* If this is an exception case, work with the pattern inside the exception
        instead. *)
@@ -274,12 +261,12 @@ let wrap_case case =
         l.Location.loc_start.Lexing.pos_cnum -
         l'.Location.loc_start.Lexing.pos_cnum)
       |> List.fold_left (fun e l ->
-        wrap_expr ~loc:l e) e
+        instrument_expr ~loc:l e) e
     in
 
     match translate_pattern loc pure_pattern with
     | [] ->
-      Exp.case pattern ?guard:maybe_guard (wrap_expr ~loc case.pc_rhs)
+      Exp.case pattern ?guard:maybe_guard (instrument_expr ~loc case.pc_rhs)
     | [marks, _] ->
       Exp.case pattern ?guard:maybe_guard (increments case.pc_rhs marks)
     | cases ->
@@ -312,7 +299,7 @@ let wrap_case case =
 
 let wrap_class_field_kind = function
   | Parsetree.Cfk_virtual _ as cf -> cf
-  | Parsetree.Cfk_concrete (o,e)  -> Cf.concrete o (wrap_expr e)
+  | Parsetree.Cfk_concrete (o,e)  -> Cf.concrete o (instrument_expr e)
 
 (* This method is stateful and depends on `InstrumentState.set_points_for_file`
    having been run on all the points in the rest of the AST. *)
@@ -374,7 +361,7 @@ class instrumenter = object (self)
         let l =
           List.map
             (fun (l, e) ->
-              (l, (wrap_expr e)))
+              (l, (instrument_expr e)))
             l in
         Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce l
     | _ ->
@@ -391,7 +378,7 @@ class instrumenter = object (self)
         Cf.method_ ~loc ~attrs id mut
           (wrap_class_field_kind cf)
     | Pcf_initializer e ->
-        Cf.initializer_ ~loc ~attrs (wrap_expr e)
+        Cf.initializer_ ~loc ~attrs (instrument_expr e)
     | _ ->
         cf
 
@@ -409,24 +396,24 @@ class instrumenter = object (self)
       | Pexp_let (rec_flag, l, e) ->
           let l =
             List.map (fun vb ->
-            Parsetree.{vb with pvb_expr = wrap_expr vb.pvb_expr}) l in
-          Exp.let_ ~loc ~attrs rec_flag l (wrap_expr e)
+            Parsetree.{vb with pvb_expr = instrument_expr vb.pvb_expr}) l in
+          Exp.let_ ~loc ~attrs rec_flag l (instrument_expr e)
       | Pexp_poly (e, ct) ->
-          Exp.poly ~loc ~attrs (wrap_expr e) ct
+          Exp.poly ~loc ~attrs (instrument_expr e) ct
       | Pexp_fun (al, eo, p, e) ->
-          let eo = Ast_mapper.map_opt wrap_expr eo in
-          Exp.fun_ ~loc ~attrs al eo p (wrap_expr e)
+          let eo = Ast_mapper.map_opt instrument_expr eo in
+          Exp.fun_ ~loc ~attrs al eo p (instrument_expr e)
       | Pexp_apply (e1, [l2, e2; l3, e3]) ->
           (match e1.pexp_desc with
           | Pexp_ident ident
             when
               List.mem (string_of_ident ident) [ "&&"; "&"; "||"; "or" ] ->
                 Exp.apply ~loc ~attrs e1
-                  [l2, (wrap_expr e2);
-                  l3, (wrap_expr e3)]
+                  [l2, (instrument_expr e2);
+                  l3, (instrument_expr e3)]
           | Pexp_ident ident when string_of_ident ident = "|>" ->
             Exp.apply ~loc ~attrs e1
-              [l2, e2; l3, (wrap_expr e3)]
+              [l2, e2; l3, (instrument_expr e3)]
           | _ -> e')
       | Pexp_match (e, l) ->
           List.map wrap_case l
@@ -438,14 +425,14 @@ class instrumenter = object (self)
           List.map wrap_case l
           |> Exp.try_ ~loc ~attrs e
       | Pexp_ifthenelse (e1, e2, e3) ->
-          Exp.ifthenelse ~loc ~attrs e1 (wrap_expr e2)
-            (match e3 with Some x -> Some (wrap_expr x) | None -> None)
+          Exp.ifthenelse ~loc ~attrs e1 (instrument_expr e2)
+            (match e3 with Some x -> Some (instrument_expr x) | None -> None)
       | Pexp_sequence (e1, e2) ->
-          Exp.sequence ~loc ~attrs e1 (wrap_expr e2)
+          Exp.sequence ~loc ~attrs e1 (instrument_expr e2)
       | Pexp_while (e1, e2) ->
-          Exp.while_ ~loc ~attrs e1 (wrap_expr e2)
+          Exp.while_ ~loc ~attrs e1 (instrument_expr e2)
       | Pexp_for (id, e1, e2, dir, e3) ->
-          Exp.for_ ~loc ~attrs id e1 e2 dir (wrap_expr e3)
+          Exp.for_ ~loc ~attrs id e1 e2 dir (instrument_expr e3)
       | _ -> e'
 
   method! structure_item si =
@@ -468,15 +455,15 @@ class instrumenter = object (self)
                           (ident.loc.Location.loc_start.Lexing.pos_fname)
                             ident.txt -> vb.pvb_expr
                       | _ ->
-                        wrap_expr (self#expr vb.pvb_expr)
+                        instrument_expr (self#expr vb.pvb_expr)
                     end
                 | _ ->
-                    wrap_expr (self#expr vb.pvb_expr)})
+                    instrument_expr (self#expr vb.pvb_expr)})
           l
         in
           Str.value ~loc rec_flag l
     | Pstr_eval (e, a) when not (attribute_guard || extension_guard) ->
-        Str.eval ~loc ~attrs:a (wrap_expr (self#expr e))
+        Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
     | _ ->
         super#structure_item si
 
