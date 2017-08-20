@@ -4,14 +4,36 @@
 
 
 
+let conditional = ref false
+
+let switches = [
+  ("-exclude",
+  Arg.String Exclusions.add,
+  "<pattern>  Exclude functions matching pattern") ;
+
+  ("-exclude-file",
+  Arg.String Exclusions.add_file,
+  "<filename>  Exclude functions listed in given file") ;
+
+  ("-mode",
+  (Arg.Symbol (["safe"; "fast"; "faster"], ignore)),
+  "  Ignored") ;
+
+  ("-conditional",
+  Arg.Set conditional,
+  "  Do not instrument unless environment variable BISECT_ENABLE is YES");
+]
+
+   
+
 open Migrate_parsetree
 open Ppx_tools_404
 
 let () =
-  Driver.register ~name:"bisect_ppx" ~args:InstrumentArgs.switches
+  Driver.register ~name:"bisect_ppx" ~args:switches
     Versions.ocaml_404 begin fun _config _cookies ->
       let enabled =
-        match !InstrumentArgs.conditional with
+        match !conditional with
         | false ->
           `Enabled
         | true ->
