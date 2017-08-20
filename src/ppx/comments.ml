@@ -21,7 +21,7 @@ let get filename =
     try
       let lexbuf = Lexing.from_channel chan in
       let stack = Stack.create () in
-      let lst = CommentsLexer.normal [] [] stack (filename,[]) lexbuf in
+      let lst = Comments_lexer.normal [] [] stack (filename,[]) lexbuf in
       let as_comments =
         List.map (fun (filename, (ignored_intervals,marked_lines)) ->
           let comments = { ignored_intervals ; marked_lines } in

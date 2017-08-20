@@ -48,7 +48,7 @@ let () =
 
       match enabled with
       | `Enabled ->
-        Ast_mapper_class.to_mapper (new InstrumentPpx.instrumenter)
+        Ast_mapper_class.to_mapper (new Instrument.instrumenter)
       | `Disabled ->
         Ast_404.shallow_identity
     end

@@ -55,17 +55,17 @@ let hexa = hexa_digit hexa_digit
 let ident = letter (letter | decimal_digit | ['_'] | ['-'])*
 
 rule token = parse
-| "]"             { ExcludeParser.CLOSING_BRACKET }
-| "["             { ExcludeParser.OPENING_BRACKET }
-| ";"             { ExcludeParser.SEMICOLON }
-| "file"          { ExcludeParser.FILE }
-| "name"          { ExcludeParser.NAME }
-| "regexp"        { ExcludeParser.REGEXP }
+| "]"             { Exclude_parser.CLOSING_BRACKET }
+| "["             { Exclude_parser.OPENING_BRACKET }
+| ";"             { Exclude_parser.SEMICOLON }
+| "file"          { Exclude_parser.FILE }
+| "name"          { Exclude_parser.NAME }
+| "regexp"        { Exclude_parser.REGEXP }
 | "\""            { string 0 (Buffer.create 64) lexbuf }
 | "(*"            { comment 1 lexbuf }
 | whitespace+     { token lexbuf }
 | eol             { incr_line lexbuf; token lexbuf }
-| eof             { ExcludeParser.EOF }
+| eof             { Exclude_parser.EOF }
 | _ as ch         { fail lexbuf (Invalid_character ch) }
 and string n strbuf = parse
 | "\\b"           { Buffer.add_char strbuf '\008'; string n strbuf lexbuf }
@@ -78,7 +78,7 @@ and string n strbuf = parse
 | "\\" octal as o { add_octal_char strbuf o; string n strbuf lexbuf }
 | "\\x" hexa as h { add_hexa_char strbuf h; string n strbuf lexbuf }
 | "\""            { if n = 0 then
-                      ExcludeParser.STRING (Buffer.contents strbuf)
+                      Exclude_parser.STRING (Buffer.contents strbuf)
                     else
                       comment n lexbuf }
 | _ as c          { Buffer.add_char strbuf c; string n strbuf lexbuf }

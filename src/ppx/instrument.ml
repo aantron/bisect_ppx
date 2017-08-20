@@ -50,13 +50,13 @@ let instrument_expr ?loc e =
     (* Different files because of the line directive *)
     let file = loc.Location.loc_start.Lexing.pos_fname in
     let line = loc.Location.loc_start.Lexing.pos_lnum in
-    let c = CommentsPpx.get file in
+    let c = Comments.get file in
     Location.(loc.loc_ghost)
     || List.exists
       (fun (lo, hi) ->
         line >= lo && line <= hi)
-      c.CommentsPpx.ignored_intervals
-    || List.mem line c.CommentsPpx.marked_lines
+      Comments.(c.ignored_intervals)
+    || List.mem line Comments.(c.marked_lines)
   in
 
   if ignored then

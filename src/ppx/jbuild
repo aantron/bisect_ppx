@@ -1,7 +1,7 @@
 (jbuild_version 1)
 
-(ocamllex (excludeLexer commentsLexer))
-(ocamlyacc (excludeParser))
+(ocamllex (exclude_lexer comments_lexer))
+(ocamlyacc (exclude_parser))
 
 (library
  ((name bisect_ppx)

@@ -21,7 +21,7 @@ let add_file filename =
   let ch = open_in filename in
   let lexbuf = Lexing.from_channel ch in
   try
-    let res = ExcludeParser.file ExcludeLexer.token lexbuf in
+    let res = Exclude_parser.file Exclude_lexer.token lexbuf in
     let res = List.map (fun x -> Exclude_file x) res in
     excluded := res @ !excluded;
     close_in_noerr ch
