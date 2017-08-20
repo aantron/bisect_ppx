@@ -22,7 +22,7 @@ INSTALLED_ENVIRONMENT := \
 usage : build
 	for TEST in `ls -d test/usage/*` ; \
 	do \
-		$(INSTALLED_ENVIRONMENT) make -wC $$TEST ; \
+		$(INSTALLED_ENVIRONMENT) make -wC $$TEST || exit 2 ; \
 	done
 
 .PHONY : performance
