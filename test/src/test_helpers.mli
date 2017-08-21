@@ -99,15 +99,7 @@ val diff : ?preserve_as:string -> string -> unit
     matching filename - e.g. ["_preserve/report/reference.html"]. This preserved
     output can be used to replace [f] if, in fact, the output is correct:
 
-    run
-
-      cp _preserve/some_test_suite/foo.ml.reference some_test_suite/
-
-    or
-
-      cp -r _preserve/* .
-
-    in the [test/] directory.
+      make save-test-output
 
     Sometimes, [f] is the name of an intermediate generated file, rather than an
     original reference file under source control. In this case, [~preserve_as]

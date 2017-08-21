@@ -12,7 +12,7 @@ let tests = "top-level" >::: [
     compile
       ((with_bisect ()) ^ " -dsource")
       "fixtures/top-level/source.ml" ~r:"2> output";
-    diff_ast "fixtures/top-level/batch.reference");
+    diff_ast "fixtures/top-level/batch.reference.ml");
 
   test "stdin" (fun () ->
     skip_if (compiler () = "ocamlopt") "Top-level accepts only bytecode";

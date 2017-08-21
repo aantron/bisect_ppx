@@ -256,14 +256,16 @@ let compile_compare cflags directory =
     |> Array.to_list
     |> List.filter (fun f -> Filename.check_suffix f ".ml")
     |> List.filter (fun f ->
+      let f = Filename.chop_suffix f ".ml" in
+      not (Filename.check_suffix f ".reference"))
+    |> List.filter (fun f ->
       let prefix = "test_" in
       let prefix_length = String.length prefix in
       String.length f < prefix_length || String.sub f 0 prefix_length <> prefix)
-
     |> List.map begin fun f ->
       let source = Filename.concat directory f in
       let title = Filename.chop_suffix f ".ml" in
-      let reference = Filename.concat directory (f ^ ".reference") in
+      let reference = Filename.concat directory (title ^ ".reference.ml") in
       test title (fun () ->
         if Filename.check_suffix title "_403" then
           skip_if (not (ocamlc_403_or_more ())) "requires OCaml 4.03 or more";

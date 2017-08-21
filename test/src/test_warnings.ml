@@ -11,8 +11,8 @@ open Test_helpers
    around that, these tests sort the output lines. *)
 let sorted_diff () =
   run "sort < output.raw > output";
-  run "sort < ../fixtures/warnings/source.ml.reference > reference";
-  diff ~preserve_as:"warnings/source.ml.reference" "_scratch/reference"
+  run "sort < ../fixtures/warnings/source.reference.ml > reference";
+  diff ~preserve_as:"warnings/source.reference.ml" "_scratch/reference"
 
 let tests = "warnings" >::: [
   test "default" begin fun () ->
