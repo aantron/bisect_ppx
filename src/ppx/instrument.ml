@@ -4,6 +4,32 @@
 
 
 
+(* Overview
+
+   This is the core of Bisect_ppx: the instrumenter that runs on ASTs is defined
+   here. The instrumenter is divided into two major pieces:
+
+   1. The class [instrumenter] traverses ASTs. It decides where instrumentation
+      should be inserted.
+   2. The module [Generated_code] provides the helpers that actually insert the
+      instrumentation. In other words, they insert new leaves into the AST at
+      the places chosen by [instrumenter].
+
+   The code is structured to strongly reflect this division. It is recommended
+   to read this file with code folding.
+
+   All state is contained within instances of [instrumenter].
+
+   Instances are actually created in [register.ml], which is the "top-level"
+   side-effecting module of Bisect_ppx, when Bisect_ppx used as a PPX library
+   (i.e. by PPX drivers).
+
+   When Bisect_ppx is used as a standalone executable PPX, the top-level entry
+   point is in [bisect_ppx.ml]. It's basically a PPX driver that registers only
+   this instrumenter with itself, using [register.ml], and then runs it. *)
+
+
+
 (* From ocaml-migrate-parsetree. *)
 module Ast = Ast_404
 
@@ -592,7 +618,7 @@ end
 
 
 
-(* The actual "instrumenter" object, marking expressions. *)
+(* The actual "instrumenter" object, instrumenting expressions. *)
 class instrumenter =
   let points = Generated_code.init () in
   let instrument_expr = Generated_code.instrument_expr points in
@@ -657,7 +683,11 @@ class instrumenter =
           Exp.poly ~loc ~attrs (instrument_expr e) ct
 
         | Pexp_fun (al, eo, p, e) ->
-          let eo = Ast.Ast_mapper.map_opt instrument_expr eo in
+          let eo =
+            match eo with
+            | None -> None
+            | Some eo -> Some (instrument_expr eo)
+          in
           Exp.fun_ ~loc ~attrs al eo p (instrument_expr e)
 
         | Pexp_apply (e1, [l2, e2; l3, e3]) ->
@@ -697,6 +727,7 @@ class instrumenter =
 
         | Pexp_while (e1, e2) ->
           Exp.while_ ~loc ~attrs e1 (instrument_expr e2)
+
         | Pexp_for (id, e1, e2, dir, e3) ->
           Exp.for_ ~loc ~attrs id e1 e2 dir (instrument_expr e3)
 
