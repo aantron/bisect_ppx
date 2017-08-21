@@ -4,10 +4,6 @@
 
 
 
-module Common = Bisect.Common
-
-open Report_utils
-
 let css = [
   "body {";
   "    margin: 0;";
@@ -416,22 +412,22 @@ let script = [
 ]
 
 let output_css filename =
-  Common.try_out_channel
+  Bisect.Common.try_out_channel
     false
     filename
-    (fun channel -> output_strings css css_variables channel)
+    (fun channel -> Report_utils.output_strings css css_variables channel)
 
 let output_script filename =
-  Common.try_out_channel
+  Bisect.Common.try_out_channel
     false
     filename
-    (fun channel -> output_strings script [] channel)
+    (fun channel -> Report_utils.output_strings script [] channel)
 
 let html_footer =
-  let time = current_time () in
+  let time = Report_utils.current_time () in
   Printf.sprintf "Generated on %s by <a href=\"%s\">Bisect_ppx</a> %s"
     time
-    url
+    Report_utils.url
     Bisect.Version.value
 
 let split_filename name =
@@ -458,11 +454,11 @@ let output_html_index verbose title filename l =
       (Report_stat.make ())
       l in
 
-  Common.try_out_channel
+  Bisect.Common.try_out_channel
     false
     filename
     (fun channel ->
-      output_strings
+      Report_utils.output_strings
         [  "<html>" ;
            "  <head>" ;
            "    <title>$(title)</title>" ;
@@ -481,7 +477,7 @@ let output_html_index verbose title filename l =
 
       let per_file (name, html_file, stats) =
         let dirname, basename = split_filename name in
-        output_strings
+        Report_utils.output_strings
           ["      <div>";
            "        <span class=\"meter\">";
            "          <span class=\"covered\" style=\"width: $(p)%\"></span>";
@@ -498,7 +494,7 @@ let output_html_index verbose title filename l =
           channel in
       List.iter per_file l;
 
-      output_strings
+      Report_utils.output_strings
         [ "    </div>" ;
           "    <div id=\"footer\">$(footer)</div>" ;
           "  </body>" ;
@@ -541,22 +537,24 @@ let output_html
     verbose "... file not found";
     None
   | Some resolved_in_file ->
-    let cmp_content = Hashtbl.find points in_file |> Common.read_points' in
+    let cmp_content =
+      Hashtbl.find points in_file |> Bisect.Common.read_points' in
     verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
     let len = Array.length visited in
     let stats = Report_stat.make () in
     let pts = ref (List.map
                      (fun p ->
                        let nb =
-                         if p.Common.identifier < len then
-                           visited.(p.Common.identifier)
+                         if Bisect.Common.(p.identifier) < len then
+                           visited.(Bisect.Common.(p.identifier))
                          else
                            0 in
                        Report_stat.update stats (nb > 0);
-                       (p.Common.offset, nb))
+                       (Bisect.Common.(p.offset), nb))
                      cmp_content) in
     let dirname, basename = split_filename in_file in
-    let in_channel, out_channel = open_both resolved_in_file out_file in
+    let in_channel, out_channel =
+      Report_utils.open_both resolved_in_file out_file in
     (try
       let lines, line_count =
         let rec read number acc =
@@ -564,7 +562,8 @@ let output_html
           try
             let line = input_line in_channel in
             let end_ofs = pos_in in_channel in
-            let before, after = split (fun (o, _) -> o < end_ofs) !pts in
+            let before, after =
+              Report_utils.split (fun (o, _) -> o < end_ofs) !pts in
             pts := after;
             let line' = escape_line tab_size line start_ofs before in
             let visited, unvisited =
@@ -589,7 +588,7 @@ let output_html
       in
 
       (* Head and header. *)
-      output_strings
+      Report_utils.output_strings
         [  "<html>" ;
            "  <head>" ;
            "    <title>$(title)</title>" ;
@@ -617,7 +616,7 @@ let output_html
         if unvisited then begin
           let offset =
             (float_of_int number) /. (float_of_int line_count) *. 100. in
-          output_strings
+          Report_utils.output_strings
             ["      <span $(visited) style=\"top:$(offset)%\"></span>"]
             ["visited", class_of_visited (visited, unvisited);
              "offset", Printf.sprintf "%.02f" offset;
@@ -625,7 +624,7 @@ let output_html
             out_channel
         end);
 
-      output_strings
+      Report_utils.output_strings
         ["    </div>";
          "    <div id=\"report\">";
          "      <div id=\"lines-layer\">";
@@ -635,13 +634,13 @@ let output_html
 
       (* Line highlights. *)
       lines |> List.iter (fun (number, _, visited, unvisited) ->
-        output_strings
+        Report_utils.output_strings
           ["<a id=\"L$(n)\"></a><span $(visited)> </span>"]
           ["n", string_of_int number;
            "visited", class_of_visited (visited, unvisited)]
           out_channel);
 
-      output_strings
+      Report_utils.output_strings
         ["</pre>";
          "      </div>";
          "      <div id=\"text-layer\">";
@@ -657,13 +656,13 @@ let output_html
         let padded =
           (String.make (width - String.length formatted) ' ') ^  formatted in
 
-        output_strings
+        Report_utils.output_strings
           ["<a href=\"#L$(n)\">$(padded)</a>"]
           ["n", formatted;
            "padded", padded]
           out_channel);
 
-      output_strings
+      Report_utils.output_strings
         ["</pre>";
          "        <pre id=\"code\">"]
         []
@@ -674,7 +673,7 @@ let output_html
         output_string out_channel markup;
         output_char out_channel '\n');
 
-      output_strings
+      Report_utils.output_strings
         ["</pre>";
          "      </div>";
          "    </div>";

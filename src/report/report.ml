@@ -4,9 +4,6 @@
 
 
 
-open Report_utils
-
-
 let main () =
   Report_args.parse ();
   if !Report_args.outputs = [] then begin
@@ -26,6 +23,7 @@ let main () =
         Bisect.Common.read_runtime_data' out_file
         |> List.iter (fun (source_file, (file_counts, file_points)) ->
           let file_counts =
+            let open Report_utils.Infix in
             try (Hashtbl.find total_counts source_file) +| file_counts
             with Not_found -> file_counts
           in
@@ -56,7 +54,7 @@ let main () =
     Report_generic.output verbose file conv data points in
   let write_output = function
     | Report_args.Html_output dir ->
-        mkdirs dir;
+        Report_utils.mkdirs dir;
         Report_html.output verbose dir
           !Report_args.tab_size !Report_args.title
           search_in_path data points

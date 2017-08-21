@@ -10,27 +10,30 @@
 val url : string
 (** The Bisect URL, as a string. *)
 
-val (++) : int -> int -> int
-(** Similar to [(+)] except that overflow is handled by returning:
-    - [max_int] if the result should be above [max_int];
-    - [min_int] if the result should be below [min_int]. *)
+module Infix :
+sig
+  val (++) : int -> int -> int
+  (** Similar to [(+)] except that overflow is handled by returning:
+      - [max_int] if the result should be above [max_int];
+      - [min_int] if the result should be below [min_int]. *)
 
-val (--) : int -> int -> int
-(** Similar to [(-)] except that overflow is handled by returning:
-    - [max_int] if the result should be above [max_int];
-    - [min_int] if the result should be below [min_int]. *)
+  val (--) : int -> int -> int
+  (** Similar to [(-)] except that overflow is handled by returning:
+      - [max_int] if the result should be above [max_int];
+      - [min_int] if the result should be below [min_int]. *)
 
-val (+|) : int array -> int array -> int array
-(** Returns the sum of the passed arrays, using [(++)] to sum elements.
-    The length of the returned array is the maximum of the lengths of
-    the passed arrays, missing elements from the smallest array being
-    supposed to be equal to [0]. *)
+  val (+|) : int array -> int array -> int array
+  (** Returns the sum of the passed arrays, using [(++)] to sum elements.
+      The length of the returned array is the maximum of the lengths of
+      the passed arrays, missing elements from the smallest array being
+      supposed to be equal to [0]. *)
 
-val (-|) : int array -> int array -> int array
-(** Returns the difference of the passed arrays, using [(--)] to subtract
-    elements. The length of the returned array is the maximum of the
-    lengths of the passed arrays, missing elements from the smallest
-    array being supposed to be equal to [0]. *)
+  val (-|) : int array -> int array -> int array
+  (** Returns the difference of the passed arrays, using [(--)] to subtract
+      elements. The length of the returned array is the maximum of the
+      lengths of the passed arrays, missing elements from the smallest
+      array being supposed to be equal to [0]. *)
+end
 
 val mkdirs : ?perm:Unix.file_perm -> string -> unit
 (** Creates the directory whose path is passed, and all necessary parent

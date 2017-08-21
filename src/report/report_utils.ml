@@ -6,39 +6,42 @@
 
 let url = "https://github.com/aantron/bisect_ppx"
 
-let (++) x y =
-  if ((x > 0) && (y > 0) && (x > max_int - y)) then
-    max_int
-  else if ((x < 0) && (y < 0) && (x < min_int - y)) then
-    min_int
-  else
-    x + y
-
-let (--) x y =
-  if y > min_int then
-    (++) x (-y)
-  else
-    let res = (++) x max_int in
-    if res < max_int then
-      succ res
+module Infix =
+struct
+  let (++) x y =
+    if ((x > 0) && (y > 0) && (x > max_int - y)) then
+      max_int
+    else if ((x < 0) && (y < 0) && (x < min_int - y)) then
+      min_int
     else
-      res
+      x + y
 
-let rec zip op x y =
-  let lx = Array.length x in
-  let ly = Array.length y in
-  if lx >= ly then begin
-    let z = Array.copy x in
-    for i = 0 to (pred ly) do
-      z.(i) <- op x.(i) y.(i)
-    done;
-    z
-  end else
-    zip op y x
+  let (--) x y =
+    if y > min_int then
+      (++) x (-y)
+    else
+      let res = (++) x max_int in
+      if res < max_int then
+        succ res
+      else
+        res
 
-let (+|) x y = zip (++) x y
+  let rec zip op x y =
+    let lx = Array.length x in
+    let ly = Array.length y in
+    if lx >= ly then begin
+      let z = Array.copy x in
+      for i = 0 to (pred ly) do
+        z.(i) <- op x.(i) y.(i)
+      done;
+      z
+    end else
+      zip op y x
 
-let (-|) x y = zip (--) x y
+  let (+|) x y = zip (++) x y
+
+  let (-|) x y = zip (--) x y
+end
 
 let mkdirs ?(perm=0o755) dir =
   let rec mk dir =
