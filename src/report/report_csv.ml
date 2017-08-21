@@ -14,5 +14,5 @@ let make sep =
     method file_summary s = self#sum s
     method point _ _ = ""
     method private sum s =
-      Printf.sprintf "%d%s%d\n" s.ReportStat.visited sep s.ReportStat.total
+      Printf.sprintf "%d%s%d\n" s.Report_stat.visited sep s.Report_stat.total
   end

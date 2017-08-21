@@ -10,10 +10,10 @@ class type converter =
   object
     method header : string
     method footer : string
-    method summary : ReportStat.counts -> string
+    method summary : Report_stat.counts -> string
     method file_header : string -> string
     method file_footer : string -> string
-    method file_summary : ReportStat.counts -> string
+    method file_summary : Report_stat.counts -> string
     method point : int -> int -> string
   end
 
@@ -26,7 +26,7 @@ let output_file verbose in_file conv visited points =
         Printf.sprintf "[%d %d]\n" pd.Common.offset pd.Common.identifier)
         cmp_content)));
   let len = Array.length visited in
-  let stats = ReportStat.make () in
+  let stats = Report_stat.make () in
   let points =
     List.map
       (fun p ->
@@ -35,7 +35,7 @@ let output_file verbose in_file conv visited points =
             visited.(p.Common.identifier)
           else
             0 in
-        ReportStat.update stats (nb > 0);
+        Report_stat.update stats (nb > 0);
         (p.Common.offset, nb))
       cmp_content in
   let buffer = Buffer.create 64 in
@@ -54,9 +54,9 @@ let output verbose file conv data points =
         match output_file verbose file conv visited points with
         | None -> files, summary
         | Some (text, stats) ->
-          ((file, text) :: files, (ReportStat.add summary stats)))
+          ((file, text) :: files, (Report_stat.add summary stats)))
       data
-      ([], (ReportStat.make ())) in
+      ([], (Report_stat.make ())) in
   let sorted_files =
     List.sort
       (fun (f1, _) (f2, _) -> compare f1 f2)

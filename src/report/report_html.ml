@@ -6,7 +6,7 @@
 
 module Common = Bisect.Common
 
-open ReportUtils
+open Report_utils
 
 let css = [
   "body {";
@@ -445,7 +445,7 @@ let split_filename name =
   dirname, basename
 
 let percentage stats =
-  let a, b = ReportStat.(stats.visited, stats.total) in
+  let a, b = Report_stat.(stats.visited, stats.total) in
   let a, b = float_of_int a, float_of_int b in
   if b = 0. then 100. else (100. *. a) /. b
 
@@ -454,8 +454,8 @@ let output_html_index verbose title filename l =
 
   let stats =
     List.fold_left
-      (fun acc (_, _, s) -> ReportStat.add acc s)
-      (ReportStat.make ())
+      (fun acc (_, _, s) -> Report_stat.add acc s)
+      (Report_stat.make ())
       l in
 
   Common.try_out_channel
@@ -544,7 +544,7 @@ let output_html
     let cmp_content = Hashtbl.find points in_file |> Common.read_points' in
     verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
     let len = Array.length visited in
-    let stats = ReportStat.make () in
+    let stats = Report_stat.make () in
     let pts = ref (List.map
                      (fun p ->
                        let nb =
@@ -552,7 +552,7 @@ let output_html
                            visited.(p.Common.identifier)
                          else
                            0 in
-                       ReportStat.update stats (nb > 0);
+                       Report_stat.update stats (nb > 0);
                        (p.Common.offset, nb))
                      cmp_content) in
     let dirname, basename = split_filename in_file in

@@ -4,7 +4,7 @@
 
 
 
-open ReportUtils
+open Report_utils
 
 type counts = { mutable visited : int; mutable total : int }
 

@@ -4,8 +4,8 @@
 
 
 
-(** This module defines the output to CSV. *)
+(** This module defines the output to dump. *)
 
 
-val make : string -> ReportGeneric.converter
-(** Returns a converter for CSV output, the passed string being the separator. *)
+val make : unit -> Report_generic.converter
+(** Returns a converter for dump output. *)

@@ -4,17 +4,17 @@
 
 
 
-open ReportUtils
+open Report_utils
 
 
 let main () =
-  ReportArgs.parse ();
-  if !ReportArgs.outputs = [] then begin
-    ReportArgs.print_usage ();
+  Report_args.parse ();
+  if !Report_args.outputs = [] then begin
+    Report_args.print_usage ();
     exit 0
   end;
   let data, points =
-    match !ReportArgs.files with
+    match !Report_args.files with
     | [] ->
         prerr_endline " *** warning: no .out files provided";
         exit 0
@@ -22,7 +22,7 @@ let main () =
       let total_counts = Hashtbl.create 17 in
       let points = Hashtbl.create 17 in
 
-      !ReportArgs.files |> List.iter (fun out_file ->
+      !Report_args.files |> List.iter (fun out_file ->
         Bisect.Common.read_runtime_data' out_file
         |> List.iter (fun (source_file, (file_counts, file_points)) ->
           let file_counts =
@@ -34,10 +34,10 @@ let main () =
 
       total_counts, points
   in
-  let verbose = if !ReportArgs.verbose then print_endline else ignore in
+  let verbose = if !Report_args.verbose then print_endline else ignore in
   let search_file l f =
     let fail () =
-      if !ReportArgs.ignore_missing_files then None
+      if !Report_args.ignore_missing_files then None
       else
         raise (Sys_error (f ^ ": No such file or directory")) in
     let rec search = function
@@ -51,22 +51,22 @@ let main () =
       Some f
     else
       fail () in
-  let search_in_path = search_file !ReportArgs.search_path in
+  let search_in_path = search_file !Report_args.search_path in
   let generic_output file conv =
-    ReportGeneric.output verbose file conv data points in
+    Report_generic.output verbose file conv data points in
   let write_output = function
-    | ReportArgs.Html_output dir ->
+    | Report_args.Html_output dir ->
         mkdirs dir;
-        ReportHTML.output verbose dir
-          !ReportArgs.tab_size !ReportArgs.title
+        Report_html.output verbose dir
+          !Report_args.tab_size !Report_args.title
           search_in_path data points
-    | ReportArgs.Csv_output file ->
-        generic_output file (ReportCSV.make !ReportArgs.separator)
-    | ReportArgs.Text_output file ->
-        generic_output file (ReportText.make !ReportArgs.summary_only)
-    | ReportArgs.Dump_output file ->
-        generic_output file (ReportDump.make ()) in
-  List.iter write_output (List.rev !ReportArgs.outputs)
+    | Report_args.Csv_output file ->
+        generic_output file (Report_csv.make !Report_args.separator)
+    | Report_args.Text_output file ->
+        generic_output file (Report_text.make !Report_args.summary_only)
+    | Report_args.Dump_output file ->
+        generic_output file (Report_dump.make ()) in
+  List.iter write_output (List.rev !Report_args.outputs)
 
 let () =
   try
