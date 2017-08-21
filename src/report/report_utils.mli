@@ -76,3 +76,29 @@ val output_bytes : int array -> string -> unit
 val current_time : unit -> string
 (** Returns the current time as a string, using the following format:
     ["2001-01-01 01:01:01"]. *)
+
+(** Types and functions related to visitation counts.
+    All operations gracefully handle overflows by ensuring that:
+    - a value above [max_int] is encoded by [max_int];
+    - a value below [min_int] is encoded by [min_int]. *)
+
+type counts = {
+    mutable visited : int; (** Number of points actually visited. *)
+    mutable total : int (** Total number of points. *)
+  }
+(** The type of visitation count statistics. These are used for each file, and
+    for the whole project. *)
+
+val make : unit -> counts
+(** Evaluates to [{visited = 0; total = 0}]. *)
+
+val update : counts -> bool -> unit
+(** [update counts v] updates [counts]. [counts.total] is always incremented,
+    while [counts.visited] is incremented iff [v] equals [true]. *)
+
+val add : counts -> counts -> counts
+(** [add x y] returns the sum of counts [x] and [y]. *)
+
+val sum : counts list -> counts
+(** [sum l] is a fold over [l] elements with function [add],
+    using the value returned by [make] as the initial value. *)

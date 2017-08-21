@@ -16,7 +16,7 @@ class type converter =
     method footer : string
     (** Should return the overall footer for output. *)
 
-    method summary : Report_stat.counts -> string
+    method summary : Report_utils.counts -> string
     (** Should return the overall summary for passed statistics. *)
 
     method file_header : string -> string
@@ -25,7 +25,7 @@ class type converter =
     method file_footer : string -> string
     (** Should return the footer for passed file. *)
 
-    method file_summary : Report_stat.counts -> string
+    method file_summary : Report_utils.counts -> string
     (** Should return the file summary for passed statistics. *)
 
     method point : int -> int -> string

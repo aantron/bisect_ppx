@@ -8,10 +8,10 @@ class type converter =
   object
     method header : string
     method footer : string
-    method summary : Report_stat.counts -> string
+    method summary : Report_utils.counts -> string
     method file_header : string -> string
     method file_footer : string -> string
-    method file_summary : Report_stat.counts -> string
+    method file_summary : Report_utils.counts -> string
     method point : int -> int -> string
   end
 
@@ -25,7 +25,7 @@ let output_file verbose in_file conv visited points =
           Bisect.Common.(pd.offset) Bisect.Common.(pd.identifier))
         cmp_content)));
   let len = Array.length visited in
-  let stats = Report_stat.make () in
+  let stats = Report_utils.make () in
   let points =
     List.map
       (fun p ->
@@ -34,7 +34,7 @@ let output_file verbose in_file conv visited points =
             visited.(Bisect.Common.(p.identifier))
           else
             0 in
-        Report_stat.update stats (nb > 0);
+        Report_utils.update stats (nb > 0);
         Bisect.Common.(p.offset, nb))
       cmp_content in
   let buffer = Buffer.create 64 in
@@ -53,9 +53,9 @@ let output verbose file conv data points =
         match output_file verbose file conv visited points with
         | None -> files, summary
         | Some (text, stats) ->
-          ((file, text) :: files, (Report_stat.add summary stats)))
+          ((file, text) :: files, (Report_utils.add summary stats)))
       data
-      ([], (Report_stat.make ())) in
+      ([], (Report_utils.make ())) in
   let sorted_files =
     List.sort
       (fun (f1, _) (f2, _) -> compare f1 f2)

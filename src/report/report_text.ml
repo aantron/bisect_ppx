@@ -20,5 +20,5 @@ let make summary_only =
           Printf.sprintf "%d/%d (%.2f%%)" x y p
         else
           "none" in
-      Report_stat.(numbers s.visited s.total) ^ "\n"
+      Report_utils.(numbers s.visited s.total) ^ "\n"
   end

@@ -108,3 +108,19 @@ let current_time () =
     now.Unix.tm_hour
     now.Unix.tm_min
     now.Unix.tm_sec
+
+type counts = { mutable visited : int; mutable total : int }
+
+let make () = { visited = 0; total = 0 }
+
+let update counts v =
+  let open Infix in
+  counts.total <- counts.total ++ 1;
+  if v then counts.visited <- counts.visited ++ 1
+
+let add counts_1 counts_2 =
+  let open Infix in
+  {visited = counts_1.visited ++ counts_2.visited;
+   total = counts_1.total ++ counts_2.total}
+
+let sum = List.fold_left add (make ())
