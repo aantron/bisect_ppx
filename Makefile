@@ -31,6 +31,13 @@ performance : build
 	cd _build/default/test/ && \
 	    performance/test_performance.exe -runner sequential
 
+PRESERVE := _build/default/test/_preserve
+
+.PHONY : save-test-output
+save-test-output :
+	(cd $(PRESERVE) ; find . -name '*.ml.reference') \
+	  | xargs -I FILE cp $(PRESERVE)/FILE test/FILE
+
 # Currently unused; awaiting restoration of self-instrumentation.
 GH_PAGES := gh-pages
 
