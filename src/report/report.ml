@@ -4,14 +4,127 @@
 
 
 
+type output_kind =
+  | Html_output of string
+  | Csv_output of string
+  | Text_output of string
+  | Dump_output of string
+
+let report_outputs = ref []
+
+let add_output o =
+  report_outputs := o :: !report_outputs
+
+let verbose = ref false
+
+let tab_size = ref 8
+
+let report_title = ref "Coverage report"
+
+let csv_separator = ref ";"
+
+let search_path = ref [""]
+
+let add_search_path sp =
+  search_path := sp :: !search_path
+
+let raw_coverage_files = ref []
+
+let summary_only = ref false
+
+let ignore_missing_files = ref false
+
+let add_file f =
+  raw_coverage_files := f :: !raw_coverage_files
+
+let options = Arg.align [
+  ("-html",
+   Arg.String (fun s -> add_output (Html_output s)),
+   "<dir>  Output HTML report to <dir> (HTML only)");
+
+  ("-I",
+   Arg.String add_search_path,
+   "<dir>  Look for .ml files in <dir> (HTML only)");
+
+   ("-ignore-missing-files",
+   Arg.Set ignore_missing_files,
+   " Do not fail if an .ml file can't be found (HTML only)");
+
+  ("-title",
+   Arg.Set_string report_title,
+   "<string>  Set title for report pages (HTML only)");
+
+  ("-tab-size",
+   Arg.Int
+     (fun x ->
+       if x < 0 then
+         (print_endline " *** error: tab size should be positive"; exit 1)
+       else
+         tab_size := x),
+   "<int>  Set tab width in report (HTML only)");
+
+  ("-text",
+   Arg.String (fun s -> add_output (Text_output s)),
+   "<file>  Output plain text report to <file>");
+
+  ("-summary-only",
+   Arg.Set summary_only,
+   " Output only a whole-project summary (text only)");
+
+  ("-csv",
+   Arg.String (fun s -> add_output (Csv_output s)),
+   "<file>  Output CSV report to <file>");
+
+  ("-separator",
+   Arg.Set_string csv_separator,
+   "<string>  Set column separator (CSV only)");
+
+  ("-dump",
+   Arg.String (fun s -> add_output (Dump_output s)),
+   "<file>  Output bare dump to <file>");
+
+  ("-verbose",
+   Arg.Set verbose,
+   " Set verbose mode");
+
+  ("-version",
+   Arg.Unit (fun () -> print_endline Bisect.Version.value; exit 0),
+   " Print version and exit");
+]
+
+let usage =
+{|Usage:
+
+  bisect-ppx-report <options> <.out files>
+
+Where a file is required, '-' may be used to specify STDOUT.
+
+Examples:
+
+  bisect-ppx-report -html coverage/ -I _build bisect*.out
+  bisect-ppx-report -text - -summary-only bisect*.out
+
+Jbuilder:
+
+  bisect-ppx-report -html coverage/ -I _build/default _build/default/bisect*.out
+
+Options are:
+|}
+
+let parse_args () = Arg.parse options add_file usage
+
+let print_usage () = Arg.usage options usage
+
+
+
 let main () =
-  Report_args.parse ();
-  if !Report_args.outputs = [] then begin
-    Report_args.print_usage ();
+  parse_args ();
+  if !report_outputs = [] then begin
+    print_usage ();
     exit 0
   end;
   let data, points =
-    match !Report_args.files with
+    match !raw_coverage_files with
     | [] ->
         prerr_endline " *** warning: no .out files provided";
         exit 0
@@ -19,7 +132,7 @@ let main () =
       let total_counts = Hashtbl.create 17 in
       let points = Hashtbl.create 17 in
 
-      !Report_args.files |> List.iter (fun out_file ->
+      !raw_coverage_files |> List.iter (fun out_file ->
         Bisect.Common.read_runtime_data' out_file
         |> List.iter (fun (source_file, (file_counts, file_points)) ->
           let file_counts =
@@ -32,10 +145,10 @@ let main () =
 
       total_counts, points
   in
-  let verbose = if !Report_args.verbose then print_endline else ignore in
+  let verbose = if !verbose then print_endline else ignore in
   let search_file l f =
     let fail () =
-      if !Report_args.ignore_missing_files then None
+      if !ignore_missing_files then None
       else
         raise (Sys_error (f ^ ": No such file or directory")) in
     let rec search = function
@@ -49,22 +162,22 @@ let main () =
       Some f
     else
       fail () in
-  let search_in_path = search_file !Report_args.search_path in
+  let search_in_path = search_file !search_path in
   let generic_output file conv =
     Report_generic.output verbose file conv data points in
   let write_output = function
-    | Report_args.Html_output dir ->
+    | Html_output dir ->
         Report_utils.mkdirs dir;
         Report_html.output verbose dir
-          !Report_args.tab_size !Report_args.title
+          !tab_size !report_title
           search_in_path data points
-    | Report_args.Csv_output file ->
-        generic_output file (Report_csv.make !Report_args.separator)
-    | Report_args.Text_output file ->
-        generic_output file (Report_text.make !Report_args.summary_only)
-    | Report_args.Dump_output file ->
+    | Csv_output file ->
+        generic_output file (Report_csv.make !csv_separator)
+    | Text_output file ->
+        generic_output file (Report_text.make !summary_only)
+    | Dump_output file ->
         generic_output file (Report_dump.make ()) in
-  List.iter write_output (List.rev !Report_args.outputs)
+  List.iter write_output (List.rev !report_outputs)
 
 let () =
   try
