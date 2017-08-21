@@ -18,6 +18,10 @@
    The code is structured to strongly reflect this division. It is recommended
    to read this file with code folding.
 
+   Instrumented locations are called {e points}. When the instrumentation code
+   is executed, the point is {e visited}. Points appear as highlighted
+   characters in coverage reports.
+
    All state is contained within instances of [instrumenter].
 
    Instances are actually created in [register.ml], which is the "top-level"
