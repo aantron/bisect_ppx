@@ -16,3 +16,5 @@ val get : string -> t
     (parsed file are cached).
 
     Raises [Sys_error] if an i/o error occurs. *)
+
+val line_is_ignored : int -> t -> bool

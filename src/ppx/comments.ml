@@ -33,3 +33,9 @@ let get filename =
     with e ->
       close_in_noerr chan;
       raise e
+
+let line_is_ignored line_number comments_info =
+  List.exists
+    (fun (low, high) -> line_number >= low && line_number <= high)
+    comments_info.ignored_intervals
+  || List.mem line_number comments_info.marked_lines
