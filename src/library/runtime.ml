@@ -71,10 +71,10 @@ let dump_counters_exn channel =
   Common.write_runtime_data channel content
 
 let reset_counters () =
-  Hashtbl.iter (fun _ (marks, _) ->
-      match Array.length marks with
+  Hashtbl.iter (fun _ (point_state, _) ->
+      match Array.length point_state with
       | 0 -> ()
-      | n -> Array.(fill marks 0 (n - 1) 0)
+      | n -> Array.(fill point_state 0 (n - 1) 0)
     ) (Lazy.force table)
 
 let dump () =
@@ -90,8 +90,8 @@ let dump () =
 let register_dump : unit Lazy.t =
   lazy (at_exit dump)
 
-let init_with_array fn arr points =
+let register_file file point_state point_definitions =
   let () = Lazy.force register_dump in
   let table = Lazy.force table in
-  if not (Hashtbl.mem table fn) then
-    Hashtbl.add table fn (arr, points)
+  if not (Hashtbl.mem table file) then
+    Hashtbl.add table file (point_state, point_definitions)

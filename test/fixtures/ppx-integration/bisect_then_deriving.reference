@@ -1,16 +1,17 @@
-let ___bisect_mark___ =
-  let points =
+let ___bisect_visit___ =
+  let point_definitions =
     "\132\149\166\190\000\000\000\011\000\000\000\004\000\000\000\r\000\000\000\r\176\160I@\160vB\160\000DA"
      in
-  let marks = Array.make 3 0  in
-  Bisect.Runtime.init_with_array "deriving.ml" marks points;
-  (function
-   | idx ->
-       let curr = marks.(idx)  in
-       marks.(idx) <-
-         (if curr < Pervasives.max_int then Pervasives.succ curr else curr))
+  let point_state = Array.make 3 0  in
+  Bisect.Runtime.register_file "deriving.ml" point_state point_definitions;
+  (fun point_index  ->
+     let current_count = point_state.(point_index)  in
+     point_state.(point_index) <-
+       (if current_count < Pervasives.max_int
+        then Pervasives.succ current_count
+        else current_count))
   
-let () = ___bisect_mark___ 0; () 
+let () = ___bisect_visit___ 0; () 
 type a =
   | Foo [@@deriving show]
 let rec (pp_a : Format.formatter -> a -> Ppx_deriving_runtime.unit) =
@@ -23,4 +24,5 @@ and show_a : a -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_a x
 
 let () =
-  ___bisect_mark___ 2; (show_a Foo) |> ((___bisect_mark___ 1; print_endline)) 
+  ___bisect_visit___ 2;
+  (show_a Foo) |> ((___bisect_visit___ 1; print_endline)) 

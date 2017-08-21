@@ -84,7 +84,7 @@ struct
         e
       else
         let point_index = get_index_of_point_at_location ~point_loc in
-        [%expr ___bisect_mark___ [%e point_index]; [%e e]]
+        [%expr ___bisect_visit___ [%e point_index]; [%e e]]
           [@metaloc point_loc]
 
     and choose_location_of_point ~maybe_override_loc e =
@@ -231,13 +231,13 @@ struct
       as you can see, or-patterns under and-like patterns (tuples, arrays,
       records) get multiplied combinatorially.
 
-      The above example also shows that Bisect_ppx needs to mark a whole list of
-      points in each of the generated cases. For that, the function that rotates
-      or-patterns to the top level also keeps track of the original locations of
-      each case of each or-pattern. Each of the resulting top-level patterns is
-      paired with the list of locations of the or-cases it contains, visualised
-      above as ["A1"; "A2"], ["A1"; "B2"], etc. These are termed *location
-      traces*.
+      The above example also shows that Bisect_ppx needs to mark visisted a
+      whole list of points in each of the generated cases. For that, the
+      function that rotates or-patterns to the top level also keeps track of the
+      original locations of each case of each or-pattern. Each of the resulting
+      top-level patterns is paired with the list of locations of the or-cases it
+      contains, visualised above as ["A1"; "A2"], ["A1"; "B2"], etc. These are
+      termed *location traces*.
 
       Finally, there are some corner cases. First is the exception pattern:
 
@@ -606,18 +606,18 @@ struct
     let file = Ast_convenience.str file in
 
     [%stri
-      let ___bisect_mark___ =
-        let points = [%e points_data] in
-        let marks = Array.make [%e point_count] 0 in
-        Bisect.Runtime.init_with_array [%e file] marks points;
+      let ___bisect_visit___ =
+        let point_definitions = [%e points_data] in
+        let point_state = Array.make [%e point_count] 0 in
+        Bisect.Runtime.register_file [%e file] point_state point_definitions;
 
-        function idx ->
-          let curr = marks.(idx) in
-          marks.(idx) <-
-            if curr < Pervasives.max_int then
-              Pervasives.succ curr
+        fun point_index ->
+          let current_count = point_state.(point_index) in
+          point_state.(point_index) <-
+            if current_count < Pervasives.max_int then
+              Pervasives.succ current_count
             else
-              curr]
+              current_count]
 end
 
 
