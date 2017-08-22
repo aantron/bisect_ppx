@@ -30,7 +30,7 @@ matrix:
 
   fast_finish: true
 
-script: bash -e ./src/travis_ci_test.sh
+script: bash -e ./src/util/travis_ci_test.sh
 
 notifications:
   email:
