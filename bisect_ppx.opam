@@ -16,7 +16,7 @@ dev-repo: "https://github.com/aantron/bisect_ppx.git"
 
 depends: [
   "base-unix"
-  "jbuilder" {build & >= "1.0+beta12"}
+  "jbuilder" {build & >= "1.0+beta13"}
   # This will be removed when bisect_ppx-ocamlbuild is fully factored
   # out. It is not a build dependency because Ocamlbuild must be present
   # each time the plugin is used, even after it is built and installed.
