@@ -39,7 +39,7 @@ exception Unsupported_version of string
 
 exception Modified_file of string
 
-let magic_number_rtd = "BISECT-RTD"
+let magic_number_rtd = Bytes.of_string "BISECT-RTD"
 
 let supported_versions = [
   2, 0
@@ -48,7 +48,7 @@ let supported_versions = [
 let format_version = (2, 0)
 
 let write_channel channel magic write_digest x =
-  output_string channel magic;
+  output_bytes channel magic;
   output_value channel format_version;
   (match write_digest with
   | Some file -> output_value channel (Digest.file file)
@@ -56,7 +56,7 @@ let write_channel channel magic write_digest x =
   output_value channel x
 
 let check_channel channel filename magic check_digest =
-  let magic_length = String.length magic in
+  let magic_length = Bytes.length magic in
   let file_magic = Bytes.create magic_length in
   really_input channel file_magic 0 magic_length;
   let file_version =
