@@ -50,9 +50,9 @@ travis_install_on_osx () {
 }
 
 case $TRAVIS_OS_NAME in
-  osx) travis_install_on_osx ;;
-  linux) travis_install_on_linux ;;
-  *) echo "Unknown $TRAVIS_OS_NAME"; exit 1
+    osx) travis_install_on_osx ;;
+    linux) travis_install_on_linux ;;
+    *) echo "Unknown $TRAVIS_OS_NAME"; exit 1
 esac
 
 # Prepare environment
@@ -110,11 +110,11 @@ ocamlfind query bisect_ppx-ocamlbuild
 # Currently unused; awaiting restoration of self-instrumentation.
 if [ "$COVERALLS" = yes ]
 then
-  echo
-  echo "Submitting coverage report"
-  echo
-  opam install -y ocveralls
-  make dev tests
-  make -C tests coverage
-  ocveralls --prefix _build.instrumented tests/_coverage/meta*.out --send
+    echo
+    echo "Submitting coverage report"
+    echo
+    opam install -y ocveralls
+    make dev tests
+    make -C tests coverage
+    ocveralls --prefix _build.instrumented tests/_coverage/meta*.out --send
 fi
