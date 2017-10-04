@@ -20,9 +20,6 @@ matrix:
     - os: osx
       env: OCAML_VERSION=4.05
 
-  allow_failures:
-    - env: OCAML_VERSION=4.06
-
   fast_finish: true
 
 script: bash -e ./src/util/travis_ci_test.sh

@@ -73,10 +73,12 @@ echo "Compiling"
 echo
 make build
 
-opam install -y ounit ppx_blob # Used in test suite.
+opam install -y ounit
 if [ "$OCAML_VERSION" != 4.06 ]
 then
-    opam install -y ppx_deriving # ppx_deriving is not available on 4.06.
+    # These packages are optional for the test suite. Neither is available on
+    # 4.06.
+    opam install -y ppx_blob ppx_deriving
 fi
 
 echo
