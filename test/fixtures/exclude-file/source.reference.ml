@@ -10,11 +10,10 @@ let ___bisect_visit___ =
        (if current_count < Pervasives.max_int
         then Pervasives.succ current_count
         else current_count))
-  
-let f1 x y = if x = y then x + y else x - y 
+
+let f1 x y = if x = y then x + y else x - y
 let g s =
   ___bisect_visit___ 1;
-  for i = 1 to 5 do (___bisect_visit___ 0; print_endline s) done 
-let f2 b x = if b then x * x else x 
-let f3 : 'a . 'a -> string = fun (type a) ->
-  (fun _  -> "Hello" : a -> string) 
+  for i = 1 to 5 do (___bisect_visit___ 0; print_endline s) done
+let f2 b x = if b then x * x else x
+let f3 : type a. a -> string = fun _ -> "Hello"

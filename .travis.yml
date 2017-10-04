@@ -25,7 +25,6 @@ matrix:
       env: OCAML_VERSION=4.04
 
   allow_failures:
-    - env: OCAML_VERSION=4.05
     - env: OCAML_VERSION=4.06
 
   fast_finish: true
