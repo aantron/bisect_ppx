@@ -30,21 +30,8 @@ let () =
      have_package, "ppx_blob"]
   in
 
-  let missing =
-    dependencies |> List.fold_left (fun missing (predicate, name) ->
-      if predicate name then missing
-      else (prerr_endline ("Warning: " ^ name ^ " not installed"); true))
-      false
-  in
-
-  let strict_dependencies =
-    try Sys.getenv "STRICT_DEPENDENCIES" = "yes"
-    with Not_found -> false
-  in
-
-  if missing && strict_dependencies then begin
-    prerr_endline "Stopping due to missing dependencies";
-    exit 2
-  end;
+  dependencies |> List.iter (fun (predicate, name) ->
+    if not @@ predicate name then
+      prerr_endline ("Warning: " ^ name ^ " not installed"));
 
   run_test_tt_main tests
