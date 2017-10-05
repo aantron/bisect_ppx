@@ -84,6 +84,7 @@ fi
 echo
 echo "Testing"
 echo
+make test
 make performance
 
 echo
