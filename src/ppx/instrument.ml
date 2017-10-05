@@ -58,7 +58,8 @@ sig
   val init : unit -> points
 
   val instrument_expr :
-    points -> ?loc:Location.t -> Parsetree.expression -> Parsetree.expression
+    points -> ?override_loc:Location.t -> Parsetree.expression ->
+      Parsetree.expression
 
   val instrument_case :
     points -> Parsetree.case -> Parsetree.case
@@ -77,9 +78,9 @@ struct
   (* Given an AST for an expression [e], replaces it by the sequence expression
      [instrumentation; e], where [instrumentation] is some code that tells
      Bisect_ppx, at runtime, that [e] has been visited. *)
-  let instrument_expr points ?loc e =
+  let instrument_expr points ?override_loc e =
     let rec outline () =
-      let point_loc = choose_location_of_point ~maybe_override_loc:loc e in
+      let point_loc = choose_location_of_point ~override_loc e in
       if expression_should_not_be_instrumented ~point_loc then
         e
       else
@@ -87,8 +88,8 @@ struct
         [%expr ___bisect_visit___ [%e point_index]; [%e e]]
           [@metaloc point_loc]
 
-    and choose_location_of_point ~maybe_override_loc e =
-      match maybe_override_loc with
+    and choose_location_of_point ~override_loc e =
+      match override_loc with
       | Some override_loc -> override_loc
       | _ -> Parsetree.(e.pexp_loc)
 
@@ -373,7 +374,7 @@ struct
         l.Location.loc_start.Lexing.pos_cnum -
         l'.Location.loc_start.Lexing.pos_cnum)
       |> List.fold_left (fun e l ->
-        instrument_expr points ~loc:l e) e
+        instrument_expr points ~override_loc:l e) e
 
     and add_bisect_matched_value_alias loc ~non_exception_pattern =
       [%pat? [%p non_exception_pattern] as ___bisect_matched_value___]
