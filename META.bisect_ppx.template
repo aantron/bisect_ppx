@@ -1,13 +1,13 @@
 # JBUILDER_GEN
 
 package "fast" (
-  version = "dev"
+  version = "1.3.1"
   description = "Old Bisect_ppx package (deprecated)"
   requires = "bisect_ppx"
 )
 
 package "plugin" (
-  version = "dev"
+  version = "1.3.1"
   description = "Old Bisect_ppx Ocamlbuild plugin (deprecated)"
   requires = "bisect_ppx.ocamlbuild"
 )
