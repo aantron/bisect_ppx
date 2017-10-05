@@ -22,7 +22,7 @@ let tests = "bisect_ppx" >::: [
   Test_top_level.tests;
   Test_legacy_arguments.tests;
   Test_missing_files.tests;
-  Test_multiple_module_open.tests;
+  Test_open.tests;
   Test_include.tests;
 ]
 

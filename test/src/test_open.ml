@@ -11,12 +11,8 @@ open Test_helpers
    Index out of bounds. *)
 let tests = "multiple-modules-open" >::: [
   test "open" begin fun () ->
-    compile
-      ((with_bisect ()) ^ " -c")
-      "fixtures/multiple-module-open/a.ml";
-    compile
-      ((with_bisect ()) ^ " a.cm[ox]")
-      "fixtures/multiple-module-open/b.ml";
+    compile ((with_bisect ()) ^ " -c") "fixtures/open/a.ml";
+    compile ((with_bisect ()) ^ " a.cm[ox]") "fixtures/open/b.ml";
     run "./a.out"
   end;
 ]
