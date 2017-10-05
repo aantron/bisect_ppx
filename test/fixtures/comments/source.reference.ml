@@ -1,16 +1,20 @@
-let ___bisect_visit___ =
-  let point_definitions =
-    "\132\149\166\190\000\000\000#\000\000\000\b\000\000\000\029\000\000\000\029\240\160\000uB\160\001\000\134A\160\001\000\158@\160\001\001\181C\160\001\001\197D\160\001\001\229E\160\001\002\007F"
-     in
-  let point_state = Array.make 7 0  in
-  Bisect.Runtime.register_file "source.ml" point_state point_definitions;
-  (fun point_index  ->
-     let current_count = point_state.(point_index)  in
-     point_state.(point_index) <-
-       (if current_count < Pervasives.max_int
-        then Pervasives.succ current_count
-        else current_count))
-  
+module Bisect_visit___source___ml =
+  struct
+    let ___bisect_visit___ =
+      let point_definitions =
+        "\132\149\166\190\000\000\000#\000\000\000\b\000\000\000\029\000\000\000\029\240\160\000uB\160\001\000\134A\160\001\000\158@\160\001\001\181C\160\001\001\197D\160\001\001\229E\160\001\002\007F"
+         in
+      let point_state = Array.make 7 0  in
+      Bisect.Runtime.register_file "source.ml" point_state point_definitions;
+      (fun point_index  ->
+         let current_count = point_state.(point_index)  in
+         point_state.(point_index) <-
+           (if current_count < Pervasives.max_int
+            then Pervasives.succ current_count
+            else current_count))
+      
+  end
+open Bisect_visit___source___ml
 let f1 x y = if x = y then x + y else x - y 
 let g s =
   ___bisect_visit___ 2;

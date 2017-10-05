@@ -1,17 +1,21 @@
-let ___bisect_visit___ =
-  let point_definitions =
-    "\132\149\166\190\000\000\000I\000\000\000\016\000\000\000=\000\000\000=\b\000\000<\000\160K@\160kB\160\000BA\160\000bE\160\000yD\160\001\000\144C\160\001\000\176J\160\001\000\211H\160\001\000\226F\160\001\001\002G\160\001\001&I\160\001\0019N\160\001\001KL\160\001\001]M\160\001\001cK"
-     in
-  let point_state = Array.make 15 0  in
-  Bisect.Runtime.register_file "expr_sequence.ml" point_state
-    point_definitions;
-  (fun point_index  ->
-     let current_count = point_state.(point_index)  in
-     point_state.(point_index) <-
-       (if current_count < Pervasives.max_int
-        then Pervasives.succ current_count
-        else current_count))
-  
+module Bisect_visit___expr_sequence___ml =
+  struct
+    let ___bisect_visit___ =
+      let point_definitions =
+        "\132\149\166\190\000\000\000I\000\000\000\016\000\000\000=\000\000\000=\b\000\000<\000\160K@\160kB\160\000BA\160\000bE\160\000yD\160\001\000\144C\160\001\000\176J\160\001\000\211H\160\001\000\226F\160\001\001\002G\160\001\001&I\160\001\0019N\160\001\001KL\160\001\001]M\160\001\001cK"
+         in
+      let point_state = Array.make 15 0  in
+      Bisect.Runtime.register_file "expr_sequence.ml" point_state
+        point_definitions;
+      (fun point_index  ->
+         let current_count = point_state.(point_index)  in
+         point_state.(point_index) <-
+           (if current_count < Pervasives.max_int
+            then Pervasives.succ current_count
+            else current_count))
+      
+  end
+open Bisect_visit___expr_sequence___ml
 let () = ___bisect_visit___ 0; print_endline "abc" 
 let () =
   ___bisect_visit___ 2;

@@ -1,17 +1,21 @@
-let ___bisect_visit___ =
-  let point_definitions =
-    "\132\149\166\190\000\000\000j\000\000\000\022\000\000\000U\000\000\000U\b\000\000T\000\160\000WT\160\000_R\160\000jS\160\000}O\160\001\000\131P\160\001\000\155Q\160\001\000\163M\160\001\000\176N\160\001\000\192I\160\001\000\196J\160\001\000\202K\160\001\000\246L\160\001\000\254G\160\001\001\rH\160\001\001\"D\160\001\001(E\160\001\001VF\160\001\001^B\160\001\001tC\160\001\001\139@\160\001\001\143A"
-     in
-  let point_state = Array.make 21 0  in
-  Bisect.Runtime.register_file "expr_match_ppat_open_404.ml" point_state
-    point_definitions;
-  (fun point_index  ->
-     let current_count = point_state.(point_index)  in
-     point_state.(point_index) <-
-       (if current_count < Pervasives.max_int
-        then Pervasives.succ current_count
-        else current_count))
-  
+module Bisect_visit___expr_match_ppat_open_404___ml =
+  struct
+    let ___bisect_visit___ =
+      let point_definitions =
+        "\132\149\166\190\000\000\000j\000\000\000\022\000\000\000U\000\000\000U\b\000\000T\000\160\000WT\160\000_R\160\000jS\160\000}O\160\001\000\131P\160\001\000\155Q\160\001\000\163M\160\001\000\176N\160\001\000\192I\160\001\000\196J\160\001\000\202K\160\001\000\246L\160\001\000\254G\160\001\001\rH\160\001\001\"D\160\001\001(E\160\001\001VF\160\001\001^B\160\001\001tC\160\001\001\139@\160\001\001\143A"
+         in
+      let point_state = Array.make 21 0  in
+      Bisect.Runtime.register_file "expr_match_ppat_open_404.ml" point_state
+        point_definitions;
+      (fun point_index  ->
+         let current_count = point_state.(point_index)  in
+         point_state.(point_index) <-
+           (if current_count < Pervasives.max_int
+            then Pervasives.succ current_count
+            else current_count))
+      
+  end
+open Bisect_visit___expr_match_ppat_open_404___ml
 module M = struct type t =
                     | Foo 
                     | Bar 

@@ -1,17 +1,21 @@
-let ___bisect_visit___ =
-  let point_definitions =
-    "\132\149\166\190\000\000\000-\000\000\000\011\000\000\000)\000\000\000)\b\000\000(\000\160H@\160SA\160fB\160}C\160\000vF\160\000\127D\160\001\000\151E\160\001\000\183G\160\001\000\211I\160\001\000\230H"
-     in
-  let point_state = Array.make 10 0  in
-  Bisect.Runtime.register_file "expr_binding.ml" point_state
-    point_definitions;
-  (fun point_index  ->
-     let current_count = point_state.(point_index)  in
-     point_state.(point_index) <-
-       (if current_count < Pervasives.max_int
-        then Pervasives.succ current_count
-        else current_count))
-  
+module Bisect_visit___expr_binding___ml =
+  struct
+    let ___bisect_visit___ =
+      let point_definitions =
+        "\132\149\166\190\000\000\000-\000\000\000\011\000\000\000)\000\000\000)\b\000\000(\000\160H@\160SA\160fB\160}C\160\000vF\160\000\127D\160\001\000\151E\160\001\000\183G\160\001\000\211I\160\001\000\230H"
+         in
+      let point_state = Array.make 10 0  in
+      Bisect.Runtime.register_file "expr_binding.ml" point_state
+        point_definitions;
+      (fun point_index  ->
+         let current_count = point_state.(point_index)  in
+         point_state.(point_index) <-
+           (if current_count < Pervasives.max_int
+            then Pervasives.succ current_count
+            else current_count))
+      
+  end
+open Bisect_visit___expr_binding___ml
 let x = ___bisect_visit___ 0; 3 
 let y = ___bisect_visit___ 1; [1; 2; 3] 
 let z = ___bisect_visit___ 2; [|1;2;3|] 

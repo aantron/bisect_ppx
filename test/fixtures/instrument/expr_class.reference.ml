@@ -1,16 +1,21 @@
-let ___bisect_visit___ =
-  let point_definitions =
-    "\132\149\166\190\000\000\000X\000\000\000\019\000\000\000I\000\000\000I\b\000\000H\000\160c@\160vA\160\000LB\160\000eC\160\000\127D\160\001\000\164E\160\001\000\207F\160\001\000\226G\160\001\000\248I\160\001\001\018H\160\001\001+K\160\001\0018J\160\001\001WM\160\001\001oL\160\001\001\141N\160\001\001\221O\160\001\002\017P\160\001\0026Q"
-     in
-  let point_state = Array.make 18 0  in
-  Bisect.Runtime.register_file "expr_class.ml" point_state point_definitions;
-  (fun point_index  ->
-     let current_count = point_state.(point_index)  in
-     point_state.(point_index) <-
-       (if current_count < Pervasives.max_int
-        then Pervasives.succ current_count
-        else current_count))
-  
+module Bisect_visit___expr_class___ml =
+  struct
+    let ___bisect_visit___ =
+      let point_definitions =
+        "\132\149\166\190\000\000\000X\000\000\000\019\000\000\000I\000\000\000I\b\000\000H\000\160c@\160vA\160\000LB\160\000eC\160\000\127D\160\001\000\164E\160\001\000\207F\160\001\000\226G\160\001\000\248I\160\001\001\018H\160\001\001+K\160\001\0018J\160\001\001WM\160\001\001oL\160\001\001\141N\160\001\001\221O\160\001\002\017P\160\001\0026Q"
+         in
+      let point_state = Array.make 18 0  in
+      Bisect.Runtime.register_file "expr_class.ml" point_state
+        point_definitions;
+      (fun point_index  ->
+         let current_count = point_state.(point_index)  in
+         point_state.(point_index) <-
+           (if current_count < Pervasives.max_int
+            then Pervasives.succ current_count
+            else current_count))
+      
+  end
+open Bisect_visit___expr_class___ml
 class c =
   object
     val mutable x = ___bisect_visit___ 0; 0

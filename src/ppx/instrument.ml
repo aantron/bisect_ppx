@@ -67,7 +67,7 @@ sig
     points -> Parsetree.class_field_kind -> Parsetree.class_field_kind
 
   val runtime_initialization :
-    points -> string -> Parsetree.structure_item
+    points -> string -> Parsetree.structure_item list
 end =
 struct
   type points = Bisect.Common.point_definition list ref
@@ -600,24 +600,129 @@ struct
       Cf.concrete o (instrument_expr points e)
 
   let runtime_initialization points file =
-    let point_count = Ast_convenience.int (List.length !points) in
+    let loc = Location.in_file file in
+
+    let mangled_module_name =
+      let buffer = Buffer.create ((String.length file) * 2) in
+      file |> String.iter (function
+        | 'A'..'Z' | 'a'..'z' | '0'..'9' | '_' as c ->
+          Buffer.add_char buffer c
+        | _ ->
+          Buffer.add_string buffer "___");
+      "Bisect_visit___" ^ (Buffer.contents buffer)
+    in
+
+    let point_count = Ast_convenience.int ~loc (List.length !points) in
     let points_data =
-        Ast_convenience.str (Bisect.Common.write_points !points) in
-    let file = Ast_convenience.str file in
+      Ast_convenience.str ~loc (Bisect.Common.write_points !points) in
+    let file = Ast_convenience.str ~loc file in
 
-    [%stri
-      let ___bisect_visit___ =
-        let point_definitions = [%e points_data] in
-        let point_state = Array.make [%e point_count] 0 in
-        Bisect.Runtime.register_file [%e file] point_state point_definitions;
+    (* ___bisect_visit___ is a function with a reference to a point count array.
+       It is called every time a point is visited.
 
-        fun point_index ->
-          let current_count = point_state.(point_index) in
-          point_state.(point_index) <-
-            if current_count < Pervasives.max_int then
-              Pervasives.succ current_count
-            else
-              current_count]
+       It is scoped in a local module, to ensure that each compilation unit
+       calls its own ___bisect_visit___ function. In particular, if
+       ___bisect_visit___ is unscoped, the following interaction is possible
+       between a.ml and b.ml:
+
+
+       a.ml:
+
+       let ___bisect_visit___ = (* ... *)
+
+       b.ml:
+
+       let ___bisect_visit___ = (* ... *)
+
+       open A
+       (* Further calls to ___bisect_visit___ are to A's instance of it! *)
+
+
+       To prevent this, Bisect_ppx generates:
+
+
+       a.ml:
+
+       module Bisect_visit___ =
+       struct
+         let ___bisect_visit___ = (* ... *)
+       end
+       open Bisect_visit___ (* Scope of open is only a.ml. *)
+
+       b.ml:
+
+       module Bisect_visit___ =
+       struct
+         let ___bisect_visit___ = (* ... *)
+       end
+       open Bisect_visit___
+       (* Since this open is prepended to b.ml, it is guaranteed to precede any
+          open A. At the same time, open A introduces Bisect_visit___ into
+          scope, not ___bisect_visit___. So, after this point, any unqualified
+          reference to ___bisect_visit___ is to b.ml's instance. *)
+
+       open A
+
+
+       Bisect_ppx needs to mangle the generated module names, to make them
+       unique. Otherwise, including A in B triggers a duplicate module
+       Bisect_visit___ error. This is better than mangling ___bisect_visit___
+       itself for two reasons:
+
+       1. A collision of mangled module names (due to include) is a compile-time
+          error. By comparison, a collusion of mangled function names will
+          result in one silently shadowing the other, which *may* produce a
+          runtime error if (1) the shadowing function has a smaller points array
+          than the shadowed function and (2) the shadowing function is actually
+          called with a large enough point index during testing. If shadowing
+          does not produce a runtime error, it can result in inaccurate coverage
+          statistics being silently accumulated.
+       2. ___bisect_visit___, sprinked throughout the code, can be kept
+          unmangled. This keeps the mangling generation code local to this
+          instrumentation function, which generates only the top of each
+          instrumented module. That keeps the instrumenter relatively simple.
+
+
+       For discussion, see
+
+         https://github.com/aantron/bisect_ppx/issues/160 *)
+    let generated_module =
+      let bisect_visit_function =
+        [%stri
+          let ___bisect_visit___ =
+            let point_definitions = [%e points_data] in
+            let point_state = Array.make [%e point_count] 0 in
+            Bisect.Runtime.register_file [%e file] point_state point_definitions;
+
+            fun point_index ->
+              let current_count = point_state.(point_index) in
+              point_state.(point_index) <-
+                if current_count < Pervasives.max_int then
+                  Pervasives.succ current_count
+                else
+                  current_count]
+          [@metaloc loc]
+      in
+
+      let open Ast.Ast_helper in
+
+      Str.module_ ~loc @@
+        Mb.mk ~loc
+          (Location.mkloc mangled_module_name loc)
+          (Mod.structure ~loc [bisect_visit_function])
+    in
+
+    let module_open =
+      let open Ast.Ast_helper in
+
+      (* This requires the assumption that the mangled module name doesn't have
+         any periods. *)
+      Str.open_ ~loc @@
+        Opn.mk ~loc
+          (Ast_convenience.lid ~loc mangled_module_name)
+    in
+
+    [generated_module; module_open]
 end
 
 
@@ -848,7 +953,7 @@ class instrumenter =
               Generated_code.runtime_initialization
                 points !Location.input_name
             in
-            runtime_initialization::instrumented_ast
+            runtime_initialization @ instrumented_ast
           end
       end
 end
