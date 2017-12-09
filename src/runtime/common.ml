@@ -58,7 +58,11 @@ let write_channel channel magic write_digest x =
 let check_channel channel filename magic check_digest =
   let magic_length = Bytes.length magic in
   let file_magic = Bytes.create magic_length in
-  really_input channel file_magic 0 magic_length;
+  begin
+    try really_input channel file_magic 0 magic_length;
+    with End_of_file ->
+      raise (Invalid_file (filename, "unexpected end of file while reading magic number"))
+  end;
   let file_version =
     if file_magic = magic then
       let file_version : (int * int) = input_value channel in
