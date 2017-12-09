@@ -61,7 +61,9 @@ let check_channel channel filename magic check_digest =
   begin
     try really_input channel file_magic 0 magic_length;
     with End_of_file ->
-      raise (Invalid_file (filename, "unexpected end of file while reading magic number"))
+      raise
+        (Invalid_file
+          (filename, "unexpected end of file while reading magic number"))
   end;
   let file_version =
     if file_magic = magic then
@@ -96,11 +98,14 @@ let read_runtime_data' filename =
       let version = check_channel channel filename magic_number_rtd None in
       match version with
       | 2, 0 ->
-          let file_content : (string * (int array * string)) array =
-            (try input_value channel
-             with | e -> raise (Invalid_file (filename, "exception reading data: " ^ Printexc.to_string e))
-            ) in
-          Array.to_list file_content
+        let file_content : (string * (int array * string)) array =
+          try input_value channel
+          with e ->
+            raise
+              (Invalid_file
+                (filename, "exception reading data: " ^ Printexc.to_string e))
+        in
+        Array.to_list file_content
       | _ -> assert false)
 
 let read_points' s =
