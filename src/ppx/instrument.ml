@@ -924,7 +924,7 @@ class instrumenter =
         (* This is the first structure we see, so Bisect_ppx is beginning to
            (potentially) instrument the current file. We need to check whether
            this file is excluded from instrumentation before proceeding. *)
-          saw_top_level_structure <- true;
+        saw_top_level_structure <- true;
 
         (* Bisect_ppx is hardcoded to ignore files with certain names. If we
            have one of these, return the AST uninstrumented. In particular, do
