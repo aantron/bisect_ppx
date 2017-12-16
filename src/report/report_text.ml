@@ -8,7 +8,7 @@ let make summary_only =
   object (self)
     method header = ""
     method footer = ""
-    method summary s = "Summary: " ^ (self#sum s)
+    method summary s = "Coverage summary: " ^ (self#sum s)
     method file_header f = if not summary_only then Printf.sprintf "File '%s': " f else ""
     method file_footer _ = ""
     method file_summary s = if not summary_only then self#sum s else ""
