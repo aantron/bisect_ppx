@@ -35,7 +35,7 @@ PRESERVE := _build/default/test/_preserve
 
 .PHONY : save-test-output
 save-test-output :
-	(cd $(PRESERVE) ; find . -name '*.reference.ml') \
+	(cd $(PRESERVE) ; find . -name '*reference.*') \
 	  | xargs -I FILE cp $(PRESERVE)/FILE test/FILE
 
 # Currently unused; awaiting restoration of self-instrumentation.
