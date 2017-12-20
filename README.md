@@ -56,6 +56,13 @@ to run that script, then refresh your browser.
 
 5. Open `coverage/index.html`!
 
+    In each file of the report,
+
+    - Green lines contain expressions, all of which were visited.
+    - Red lines contain expressions, none of which were visited.
+    - Yellow lines contain expressions, some of which were visited, but others not.
+    - White lines are those that don't contain visitable expressions. They may have type declarations, keywords, or something else that Bisect_ppx did not, or cannot instrument.
+
 You can submit a coverage report to Coveralls.io using [ocveralls][ocveralls].
 Note that Bisect_ppx reports are more precise than Coveralls, which only
 considers whole lines as visited or not.
