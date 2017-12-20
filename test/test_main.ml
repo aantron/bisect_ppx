@@ -24,6 +24,7 @@ let tests = "bisect_ppx" >::: [
   Test_missing_files.tests;
   Test_open.tests;
   Test_include.tests;
+  Test_mli.tests;
 ]
 
 let () =

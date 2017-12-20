@@ -907,24 +907,40 @@ class instrumenter =
       attribute_guard <- false;
       r
 
-    (* This is set to [true] once the [structure] method is called for the first
-       time. It's used to determine whether Bisect_ppx is looking at the
-       top-level structure (module) in the file, or a nested structure
-       (module). *)
-    val mutable saw_top_level_structure = false
+    (* This is set to [true] when the [structure] or [signature] method is
+       called the first time. It is used to determine whether Bisect_ppx is
+       looking at the top-level structure (module) in the file, or a nested
+       structure (module).
+
+       For [.mli] and [.rei] files, the [signature] method will be called first.
+       That method will set this variable to [true], and do nothing else.
+
+       The more interesting case is [.ml] and [.re] files. For those, the
+       [structure] method will be called first. That method will set this
+       variable to [true]. However, if the variable started out [false],
+       [structure] will insert Bisect_ppx initialization code into the
+       structure. *)
+    val mutable saw_top_level_structure_or_signature = false
+
+    method! signature ast =
+      if not saw_top_level_structure_or_signature then
+        saw_top_level_structure_or_signature <- true;
+      super#signature ast
 
     method! structure ast =
-      if saw_top_level_structure then
+      if saw_top_level_structure_or_signature then
         super#structure ast
-        (* This is *not* the first structure we see, so it is nested within the
-           file, either inside [struct]..[end] or in an attribute or extension
-           point. Traverse it recursively as normal. *)
+        (* This is *not* the first structure we see, or we are inside an
+           interface file, so the structure is nested within the file, either
+           inside [struct]..[end] or in an attribute or extension point.
+           Traverse the structure recursively as normal. *)
 
       else begin
-        (* This is the first structure we see, so Bisect_ppx is beginning to
-           (potentially) instrument the current file. We need to check whether
-           this file is excluded from instrumentation before proceeding. *)
-        saw_top_level_structure <- true;
+        (* This is the first structure we see in te file, and we are not in an
+           interface file, so Bisect_ppx is beginning to (potentially)
+           instrument the current file. We need to check whether this file is
+           excluded from instrumentation before proceeding. *)
+        saw_top_level_structure_or_signature <- true;
 
         (* Bisect_ppx is hardcoded to ignore files with certain names. If we
            have one of these, return the AST uninstrumented. In particular, do
