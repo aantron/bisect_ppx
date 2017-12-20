@@ -252,16 +252,24 @@ let diff_ast reference =
 let compile_compare cflags directory =
   let directory = Filename.concat "fixtures" directory in
   let tests =
-    Sys.readdir directory
-    |> Array.to_list
-    |> List.filter (fun f -> Filename.check_suffix f ".ml")
-    |> List.filter (fun f ->
-      let f = Filename.chop_suffix f ".ml" in
-      not (Filename.check_suffix f ".reference"))
-    |> List.filter (fun f ->
-      let prefix = "test_" in
-      let prefix_length = String.length prefix in
-      String.length f < prefix_length || String.sub f 0 prefix_length <> prefix)
+    (* Get a list of all files in the given directory, whose name does not start
+       with "test_", does end in ".ml", but not ".reference.ml". *)
+    let files_in_directory = Sys.readdir directory |> Array.to_list in
+    let ml_file_names =
+      List.filter (fun f -> Filename.check_suffix f ".ml") files_in_directory in
+    let source_file_names =
+      ml_file_names
+      |> List.filter (fun f ->
+        let f = Filename.chop_suffix f ".ml" in
+        not (Filename.check_suffix f ".reference"))
+      |> List.filter (fun f ->
+        let prefix = "test_" in
+        let length = String.length prefix in
+        String.length f < length || String.sub f 0 length <> prefix)
+    in
+
+    (* Create a test for each source file. *)
+    source_file_names
     |> List.map begin fun f ->
       let source = Filename.concat directory f in
       let title = Filename.chop_suffix f ".ml" in
