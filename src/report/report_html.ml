@@ -555,6 +555,24 @@ let output_html
     let dirname, basename = split_filename in_file in
     let in_channel, out_channel =
       Report_utils.open_both resolved_in_file out_file in
+    let rec make_path_to_report_root acc in_file_path_remaining =
+      if in_file_path_remaining = "" ||
+         in_file_path_remaining = Filename.current_dir_name then
+        acc
+      else
+        let path_component = Filename.basename in_file_path_remaining in
+        let parent = Filename.dirname in_file_path_remaining in
+        if path_component = Filename.current_dir_name then
+          make_path_to_report_root acc parent
+        else
+          make_path_to_report_root
+            (Filename.concat acc Filename.parent_dir_name)
+            parent
+    in
+    let path_to_report_root =
+      make_path_to_report_root "" (Filename.dirname in_file) in
+    let style_css = Filename.concat path_to_report_root "style.css" in
+    let coverage_js = Filename.concat path_to_report_root "coverage.js" in
     (try
       let lines, line_count =
         let rec read number acc =
@@ -592,7 +610,7 @@ let output_html
         [  "<html>" ;
            "  <head>" ;
            "    <title>$(title)</title>" ;
-           "    <link rel=\"stylesheet\" href=\"style.css\" />" ;
+           "    <link rel=\"stylesheet\" href=\"$(style_css)\" />" ;
            "    <meta charset=\"utf-8\" />" ;
            "  </head>" ;
            "  <body>" ;
@@ -608,7 +626,8 @@ let output_html
         [ "dir", dirname ;
           "name", basename ;
           "title", title ;
-          "percentage", Printf.sprintf "%.02f" (percentage stats) ]
+          "percentage", Printf.sprintf "%.02f" (percentage stats);
+          "style_css", style_css ]
         out_channel;
 
       (* Navigation bar items. *)
@@ -678,10 +697,11 @@ let output_html
          "      </div>";
          "    </div>";
          "    <div id=\"footer\">$(footer)</div>";
-         "    <script src=\"coverage.js\"></script>";
+         "    <script src=\"$(coverage_js)\"></script>";
          "  </body>";
          "</html>"]
-        ["footer", html_footer]
+        ["footer", html_footer;
+         "coverage_js", coverage_js]
         out_channel
 
     with e ->
@@ -697,15 +717,14 @@ let output verbose dir tab_size title resolver data points =
   let files =
     Hashtbl.fold
       (fun in_file visited acc ->
-        let basename = Filename.basename in_file in
-        let out_file = (Filename.concat dir basename) ^ ".html" in
+        let out_file = (Filename.concat dir in_file) ^ ".html" in
         let maybe_stats =
           output_html verbose tab_size title in_file out_file resolver
             visited points
         in
         match maybe_stats with
         | None -> acc
-        | Some stats -> (in_file, (basename ^ ".html"), stats) :: acc)
+        | Some stats -> (in_file, (in_file ^ ".html"), stats) :: acc)
       data
       [] in
   output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);

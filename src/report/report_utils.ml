@@ -75,9 +75,22 @@ let split_after n l =
 
 let open_both in_file out_file =
   let in_channel = open_in in_file in
+
   try
+    let rec make_out_dir path =
+      if Sys.file_exists path then
+        ()
+      else begin
+        let parent = Filename.dirname path in
+        make_out_dir parent;
+        Unix.mkdir path 0o755
+      end
+    in
+    make_out_dir (Filename.dirname out_file);
+
     let out_channel = open_out out_file in
     (in_channel, out_channel)
+
   with e ->
     close_in_noerr in_channel;
     raise e
