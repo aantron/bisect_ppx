@@ -37,7 +37,7 @@ messages: [
   {ocamlbuild:installed & !bisect_ppx-ocamlbuild:installed}
 ]
 post-messages: [
-  "The future Bisect_ppx 2.0.0 will make breaking changes in late 2017. See
+  "The future Bisect_ppx 2.0.0 will make breaking changes. See
   https://github.com/aantron/bisect_ppx/releases/tag/1.3.0"
 ]
 
