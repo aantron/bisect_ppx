@@ -1,3 +1,17 @@
+Version 1.3.2 (2017-12-21):
+---------------------------
+  Bugs fixed
+
+  - Report names of intermediate files when Bisect_ppx is unable to read them
+    (#163, Emilio Jesús Gallego Arias).
+  - Don't apply instrumentation to attributes in .mli files (#164, reported
+    Etienne Millon).
+
+  Improvements
+
+  - Generate HTML report filenames from source filenames, instead of assigning
+    them numbers (#139, Brad Langel).
+
 Version 1.3.1 (2017-10-05):
 ---------------------------
   Compatibility with OCaml 4.06
