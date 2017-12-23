@@ -1,0 +1,8 @@
+type point =
+  { offset: int
+  ; identifier: int }
+
+type file_report =
+  { points: point list }
+
+type report = (string * file_report) list <json repr="object">

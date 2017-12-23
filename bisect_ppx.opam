@@ -25,6 +25,7 @@ depends: [
   "ocaml-migrate-parsetree" {>= "1.0.3"}
   "ounit" {test}
   "ppx_tools_versioned"
+  "yojson" {build}
 ]
 conflicts: [
   "ocveralls" {<= "0.3.2"}

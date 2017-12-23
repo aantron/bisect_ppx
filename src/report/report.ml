@@ -7,6 +7,7 @@
 type output_kind =
   | Html_output of string
   | Csv_output of string
+  | Json_output of string
   | Text_output of string
   | Dump_output of string
 
@@ -82,6 +83,10 @@ let options = Arg.align [
   ("-dump",
    Arg.String (fun s -> add_output (Dump_output s)),
    "<file>  Output bare dump to <file>");
+
+  ("-json",
+    Arg.String (fun s -> add_output (Json_output s)),
+    "<file>  Output JSON report to <file>");
 
   ("-verbose",
    Arg.Set verbose,
@@ -173,6 +178,8 @@ let main () =
           search_in_path data points
     | Csv_output file ->
         generic_output file (Report_csv.make !csv_separator)
+    | Json_output file -> 
+        Report_json.output verbose file data points
     | Text_output file ->
         generic_output file (Report_text.make !summary_only)
     | Dump_output file ->
