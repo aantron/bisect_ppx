@@ -62,7 +62,7 @@ let output_html_index verbose title filename l =
         [  "<html>" ;
            "  <head>" ;
            "    <title>$(title)</title>" ;
-           "    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" ;
+           "    <link rel=\"stylesheet\" type=\"text/css\" href=\"coverage.css\" />" ;
            "    <meta charset=\"utf-8\" />" ;
            "  </head>" ;
            "  <body>" ;
@@ -171,7 +171,7 @@ let output_html
     in
     let path_to_report_root =
       make_path_to_report_root "" (Filename.dirname in_file) in
-    let style_css = Filename.concat path_to_report_root "style.css" in
+    let style_css = Filename.concat path_to_report_root "coverage.css" in
     let coverage_js = Filename.concat path_to_report_root "coverage.js" in
     (try
       let lines, line_count =
@@ -329,4 +329,4 @@ let output verbose dir tab_size title resolver data points =
       [] in
   output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);
   output_script (Filename.concat dir "coverage.js");
-  output_css (Filename.concat dir "style.css")
+  output_css (Filename.concat dir "coverage.css")
