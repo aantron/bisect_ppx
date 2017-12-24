@@ -22,6 +22,8 @@ INSTALLED_ENVIRONMENT := \
 usage : build
 	for TEST in `ls -d test/usage/*` ; \
 	do \
+		echo ; \
+		echo ; \
 		$(INSTALLED_ENVIRONMENT) make -wC $$TEST || exit 2 ; \
 	done
 
