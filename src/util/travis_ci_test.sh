@@ -85,7 +85,6 @@ echo
 echo "Testing"
 echo
 make test
-make performance
 
 echo
 echo "Testing package usage and Ocamlbuild plugin"

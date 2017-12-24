@@ -25,12 +25,6 @@ usage : build
 		$(INSTALLED_ENVIRONMENT) make -wC $$TEST || exit 2 ; \
 	done
 
-.PHONY : performance
-performance : build
-	jbuilder build --dev test/performance/test_performance.exe
-	cd _build/default/test/ && \
-	    performance/test_performance.exe -runner sequential
-
 PRESERVE := _build/default/test/_preserve
 
 .PHONY : save-test-output
