@@ -20,9 +20,6 @@ val compiler : unit -> string
 
 
 
-val have_binary : string -> bool
-(** Checks that the given binary is installed on the system using [which]. *)
-
 val have_package : string -> bool
 (** Checks that the given findlib package is installed using
     [ocamlfind query]. *)

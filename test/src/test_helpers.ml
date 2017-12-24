@@ -118,9 +118,6 @@ let with_bisect () = with_bisect_args ""
 let test name f =
   name >:: fun context -> _with_directory context f
 
-let have_binary binary =
-  _run_bool ("which " ^ binary ^ " > /dev/null 2> /dev/null")
-
 let have_package package =
   _run_bool ("ocamlfind query " ^ package ^ "> /dev/null 2> /dev/null")
 
