@@ -2,7 +2,7 @@
 
 (executable
  ((name test_main)
-  (libraries (bisect_test))))
+  (libraries (bisect_ppx.runtime compiler-libs.common oUnit))))
 
 (alias
  ((name runtest)

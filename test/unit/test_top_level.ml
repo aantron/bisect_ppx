@@ -16,7 +16,7 @@ let tests = "top-level" >::: [
 
   test "stdin" (fun () ->
     run ("cat ../fixtures/top-level/source.ml | ocaml " ^
-         "-ppx '../../../install/default/lib/bisect_ppx/ppx.exe --as-ppx' " ^
+         "-ppx '../../../../install/default/lib/bisect_ppx/ppx.exe --as-ppx' " ^
          "-stdin > /dev/null");
     run "! ls bisect0001.out 2> /dev/null")
 ]

@@ -25,12 +25,12 @@ usage : build
 		$(INSTALLED_ENVIRONMENT) make -wC $$TEST || exit 2 ; \
 	done
 
-PRESERVE := _build/default/test/_preserve
+PRESERVE := _build/default/test/unit/_preserve
 
 .PHONY : save-test-output
 save-test-output :
-	(cd $(PRESERVE) ; find . -name '*reference.*') \
-	  | xargs -I FILE cp $(PRESERVE)/FILE test/FILE
+	(cd $(PRESERVE) && find . -name '*reference.*') \
+	  | xargs -I FILE cp $(PRESERVE)/FILE test/unit/FILE
 
 # Currently unused; awaiting restoration of self-instrumentation.
 GH_PAGES := gh-pages

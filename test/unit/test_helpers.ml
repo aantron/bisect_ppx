@@ -141,13 +141,13 @@ let compile ?(r = "") arguments source =
 
   Printf.sprintf
     "%s ocamlfind opt -linkpkg %s %s %s"
-    "OCAMLPATH=../../../install/default/lib:$OCAMLPATH"
+    "OCAMLPATH=../../../../install/default/lib:$OCAMLPATH"
     arguments source_copy r
   |> run
 
 let report ?(f = "bisect*.out") ?(r = "") arguments =
   Printf.sprintf
-    "../../../install/default/bin/bisect-ppx-report %s %s %s" arguments f r
+    "../../../../install/default/bin/bisect-ppx-report %s %s %s" arguments f r
   |> run
 
 let _preserve file destination =
