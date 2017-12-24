@@ -15,7 +15,6 @@ let tests = "top-level" >::: [
     diff_ast "fixtures/top-level/batch.reference.ml");
 
   test "stdin" (fun () ->
-    skip_if (compiler () = "ocamlopt") "Top-level accepts only bytecode";
     run ("cat ../fixtures/top-level/source.ml | ocaml " ^
          "-ppx '../../../install/default/lib/bisect_ppx/ppx.exe --as-ppx' " ^
          "-stdin > /dev/null");

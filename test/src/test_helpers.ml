@@ -99,9 +99,9 @@ let _with_directory context f =
   try f (); restore ()
   with exn -> restore (); raise exn
 
-let _compiler = ref "none"
-let _object = ref "none"
-let _library = ref "none"
+let _compiler = ref "ocamlopt"
+let _object = ref "cmx"
+let _library = ref "cmxa"
 
 let compiler () = !_compiler
 
@@ -115,41 +115,8 @@ let with_bisect_args arguments =
 
 let with_bisect () = with_bisect_args ""
 
-type compiler = Ocamlc | Ocamlopt
-
-let _with_compiler compiler f =
-  begin
-    match compiler with
-    | Ocamlc ->
-      _compiler := "ocamlc";
-      _object := "cmo";
-      _library := "cma"
-    | Ocamlopt ->
-      _compiler := "ocamlopt";
-      _object := "cmx";
-      _library := "cmxa"
-  end;
-
-  f ()
-
-let _bytecode_only =
-  try Sys.getenv "BYTECODE_ONLY" <> ""
-  with Not_found -> false
-
 let test name f =
-  let bytecode =
-    "byte" >:: fun context ->
-      _with_directory context (fun () ->
-      _with_compiler Ocamlc f)
-  in
-
-  let native =
-    "native" >:: fun context ->
-      _with_directory context (fun () ->
-      _with_compiler Ocamlopt f)
-  in
-
-  name >::: (if _bytecode_only then [bytecode] else [bytecode; native])
+  name >:: fun context -> _with_directory context f
 
 let have_binary binary =
   _run_bool ("which " ^ binary ^ " > /dev/null 2> /dev/null")
