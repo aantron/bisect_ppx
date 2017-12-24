@@ -15,9 +15,6 @@ val test : string -> (unit -> unit) -> OUnit2.test
 
     The OUnit path of both generated tests includes [name]. *)
 
-val compiler : unit -> string
-(** Evaluates to the name of the current compiler. *)
-
 
 
 val have_package : string -> bool

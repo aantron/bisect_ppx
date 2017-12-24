@@ -99,12 +99,6 @@ let _with_directory context f =
   try f (); restore ()
   with exn -> restore (); raise exn
 
-let _compiler = ref "ocamlopt"
-let _object = ref "cmx"
-let _library = ref "cmxa"
-
-let compiler () = !_compiler
-
 let with_bisect_args arguments =
   let ppxopt =
     if String.trim arguments = "" then ""
@@ -146,9 +140,9 @@ let compile ?(r = "") arguments source =
   end;
 
   Printf.sprintf
-    "%s ocamlfind %s -linkpkg %s %s %s"
+    "%s ocamlfind opt -linkpkg %s %s %s"
     "OCAMLPATH=../../../install/default/lib:$OCAMLPATH"
-    !_compiler arguments source_copy r
+    arguments source_copy r
   |> run
 
 let report ?(f = "bisect*.out") ?(r = "") arguments =
