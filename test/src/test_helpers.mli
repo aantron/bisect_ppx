@@ -17,10 +17,6 @@ val test : string -> (unit -> unit) -> OUnit2.test
 
 
 
-val have_package : string -> bool
-(** Checks that the given findlib package is installed using
-    [ocamlfind query]. *)
-
 val ocamlc_403_or_more : unit -> bool
 (** [ocamlc] version is 4.03.0 or greater. *)
 

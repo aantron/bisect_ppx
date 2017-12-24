@@ -5,7 +5,6 @@
 
 
 open OUnit2
-open Test_helpers
 
 let tests = "bisect_ppx" >::: [
   Test_report.tests;
@@ -28,13 +27,4 @@ let tests = "bisect_ppx" >::: [
 ]
 
 let () =
-  let dependencies =
-    [have_package, "ppx_deriving";
-     have_package, "ppx_blob"]
-  in
-
-  dependencies |> List.iter (fun (predicate, name) ->
-    if not @@ predicate name then
-      prerr_endline ("Warning: " ^ name ^ " not installed"));
-
   run_test_tt_main tests
