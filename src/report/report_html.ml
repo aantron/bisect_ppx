@@ -173,6 +173,7 @@ let output_html
       make_path_to_report_root "" (Filename.dirname in_file) in
     let style_css = Filename.concat path_to_report_root "coverage.css" in
     let coverage_js = Filename.concat path_to_report_root "coverage.js" in
+    let index_html = Filename.concat path_to_report_root "index.html" in
     (try
       let lines, line_count =
         let rec read number acc =
@@ -216,7 +217,7 @@ let output_html
            "  <body>" ;
            "    <div id=\"header\">" ;
            "      <h1>" ;
-           "        <a href=\"index.html\">" ;
+           "        <a href=\"$(index_html)\">" ;
            "          <span class=\"dirname\">$(dir)</span>$(name)" ;
            "        </a>" ;
            "      </h1>" ;
@@ -227,7 +228,8 @@ let output_html
           "name", basename ;
           "title", title ;
           "percentage", Printf.sprintf "%.02f" (percentage stats);
-          "style_css", style_css ]
+          "style_css", style_css;
+          "index_html", index_html ]
         out_channel;
 
       (* Navigation bar items. *)
