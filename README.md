@@ -108,25 +108,6 @@ A small sample of projects using Bisect_ppx:
 
 <br>
 
-## Relation to Bisect
-
-Bisect_ppx is an advanced fork of the excellent [Bisect][bisect] by Xavier
-Clerc. As of the time of this writing, it appears that the original Bisect is
-no longer maintained.
-
-Considerable work has been done on Bisect_ppx, so that it is now a distinct
-project. In terms of the interface, Bisect_ppx is still largely compatible with
-Bisect's ppx mode, but see [here][differences] for a list of differences.
-
-If you use Camlp4, you will want to use the original Bisect.
-
-[bisect]:      http://bisect.x9c.fr/
-[differences]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Differences
-
-
-
-<br>
-
 ## License
 
 Bisect_ppx is available under the Mozilla Public License 2.0 (MPL). To

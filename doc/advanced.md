@@ -21,7 +21,6 @@ listing them after `bisect_ppx` in the `pps` list.
 - [File formats](#FileFormats)
   - [Output files](#OutputFileFormat)
 - [Installing without OPAM](#WithoutOPAM)
-- [Differences from Bisect](#Bisect)
 
 
 
@@ -349,25 +348,6 @@ ocamlfind bisect_ppx/bisect-ppx-report
 
 unless you add the `bisect_ppx` package directory to your `PATH`, or symlink the
 `bisect-ppx-report` binary from a directory in your `PATH`.
-
-
-
-<br>
-
-<a id="Differences"></a>
-## Differences from Bisect
-
-The biggest difference is that Bisect_ppx does not support camlp4. It
-consequently doesn't bring camlp4 in as a dependency.
-
-The remaining major differences are:
-- The reporter is now called `bisect-ppx-report`.
-- The instrumentation is much more thorough.
-- HTML reports should be much easier to read.
-- Modes have been eliminated. The only mode is the old "fastest" mode.
-- The default value of `BISECT_SILENT` is `bisect.log` instead of `ERR`.
-- Many bugs have been fixed.
-- There is no `BisectThread` module.
 
 
 
