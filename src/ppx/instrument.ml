@@ -772,13 +772,7 @@ class instrumenter =
       | _ ->
         cf
 
-    val mutable extension_guard = false
-    val mutable attribute_guard = false
-
     method! expr e =
-      if attribute_guard || extension_guard then
-        super#expr e
-      else
         let loc = e.pexp_loc in
         let attrs = e.pexp_attributes in
         let e' = super#expr e in
@@ -887,25 +881,18 @@ class instrumenter =
         in
         Str.value ~loc rec_flag bindings
 
-      | Pstr_eval (e, a) when not (attribute_guard || extension_guard) ->
+      | Pstr_eval (e, a) ->
         Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
 
       | _ ->
         super#structure_item si
 
-    (* Guard these because they can carry payloads that we
-       do not want to instrument. *)
+    (* Don't instrument payloads of extensions and attributes. *)
     method! extension e =
-      extension_guard <- true;
-      let r = super#extension e in
-      extension_guard <- false;
-      r
+      e
 
     method! attribute a =
-      attribute_guard <- true;
-      let r = super#attribute a in
-      attribute_guard <- false;
-      r
+      a
 
     (* This is set to [true] when the [structure] or [signature] method is
        called the first time. It is used to determine whether Bisect_ppx is
