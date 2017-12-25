@@ -4,7 +4,8 @@ build :
 
 .PHONY : test
 test : build
-	jbuilder runtest --dev --no-buffer -j 1
+	jbuilder build --dev @tester
+	cd _build/default/test/unit && ./test_main.exe -runner sequential
 
 .PHONY : clean
 clean :

@@ -5,6 +5,5 @@
   (libraries (bisect_ppx.runtime compiler-libs.common oUnit))))
 
 (alias
- ((name runtest)
-  (deps (test_main.exe (files_recursively_in fixtures)))
-  (action (run ${<} -runner sequential))))
+ ((name tester)
+  (deps (test_main.exe (files_recursively_in fixtures)))))
