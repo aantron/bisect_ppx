@@ -4,7 +4,7 @@
 
 
 
-open Ppx_tools_404
+open Ppx_tools_405
 
 class instrumenter : Ast_mapper_class.mapper
 (**  This class implements an instrumenter to be used through the {i -ppx}

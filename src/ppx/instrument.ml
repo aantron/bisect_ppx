@@ -35,7 +35,7 @@
 
 
 (* From ocaml-migrate-parsetree. *)
-module Ast = Ast_404
+module Ast = Ast_405
 
 module Location = Ast.Location
 module Parsetree = Ast.Parsetree
@@ -46,8 +46,8 @@ module Str = Ast.Ast_helper.Str
 module Cf = Ast.Ast_helper.Cf
 
 (* From ppx_tools_versioned. *)
-module Ast_convenience = Ast_convenience_404
-module Ast_mapper_class = Ast_mapper_class_404
+module Ast_convenience = Ast_convenience_405
+module Ast_mapper_class = Ast_mapper_class_405
 
 
 

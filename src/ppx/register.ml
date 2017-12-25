@@ -24,14 +24,14 @@ let switches = [
   "  Do not instrument unless environment variable BISECT_ENABLE is YES");
 ]
 
-   
+
 
 open Migrate_parsetree
-open Ppx_tools_404
+open Ppx_tools_405
 
 let () =
   Driver.register ~name:"bisect_ppx" ~args:switches
-    Versions.ocaml_404 begin fun _config _cookies ->
+    Versions.ocaml_405 begin fun _config _cookies ->
       let enabled =
         match !conditional with
         | false ->
@@ -50,5 +50,5 @@ let () =
       | `Enabled ->
         Ast_mapper_class.to_mapper (new Instrument.instrumenter)
       | `Disabled ->
-        Ast_404.shallow_identity
+        Ast_405.shallow_identity
     end
