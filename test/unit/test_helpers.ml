@@ -237,7 +237,7 @@ let compile_compare cflags directory =
           skip_if (not (ocamlc_403_or_more ())) "requires OCaml 4.03 or more";
         if Filename.check_suffix title "_404" then
           skip_if (not (ocamlc_404_or_more ())) "requires OCaml 4.04 or more";
-        compile ((cflags ()) ^ " -w -A -dsource") source ~r:"2> output";
+        compile ((cflags ()) ^ " -c -w -A -dsource") source ~r:"2> output";
         diff_ast reference)
     end
   in
