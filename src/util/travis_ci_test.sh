@@ -21,7 +21,7 @@ travis_install_on_linux () {
         4.05)
             opam init -y --compiler=4.05.0 ;;
         4.06)
-            opam init -y --compiler=4.06.0 ;;
+            opam init -y --compiler=4.06.1 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;
@@ -42,7 +42,7 @@ travis_install_on_osx () {
         4.05)
             opam init -y --compiler=4.05.0 ;;
         4.06)
-            opam init -y --compiler=4.06.0 ;;
+            opam init -y --compiler=4.06.1 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;
