@@ -22,6 +22,8 @@ travis_install_on_linux () {
             opam init -y --compiler=4.05.0 ;;
         4.06)
             opam init -y --compiler=4.06.1 ;;
+        4.07)
+            opam init -y --compiler=4.07.0+beta2 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;
@@ -76,7 +78,7 @@ echo
 make build
 
 opam install -y ounit
-opam install -y ppx_blob ppx_deriving
+# opam install -y ppx_blob ppx_deriving
 
 echo
 echo "Testing"
