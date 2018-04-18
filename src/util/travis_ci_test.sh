@@ -30,6 +30,8 @@ travis_install_on_linux () {
 
 travis_install_on_osx () {
     brew update > /dev/null
+    # See https://github.com/Homebrew/homebrew-core/issues/26358.
+    brew upgrade python > /dev/null
     brew install opam
 
     case "$OCAML_VERSION" in
