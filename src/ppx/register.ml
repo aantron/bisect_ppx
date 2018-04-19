@@ -6,13 +6,31 @@
 
 let conditional = ref false
 
+let enabled () =
+  match !conditional with
+  | false ->
+    `Enabled
+  | true ->
+    match Sys.getenv "BISECT_ENABLE" with
+    | exception Not_found ->
+      `Disabled
+    | s when (String.uppercase [@ocaml.warning "-3"]) s = "YES" ->
+      `Enabled
+    | _ ->
+      `Disabled
+
+let conditional_exclude_file filename =
+  match enabled () with
+  | `Enabled -> Exclusions.add_file filename
+  | `Disabled -> ()
+
 let switches = [
   ("-exclude",
   Arg.String Exclusions.add,
   "<pattern>  Exclude functions matching pattern") ;
 
   ("-exclude-file",
-  Arg.String Exclusions.add_file,
+  Arg.String conditional_exclude_file,
   "<filename>  Exclude functions listed in given file") ;
 
   ("-mode",
@@ -32,21 +50,7 @@ open Ppx_tools_405
 let () =
   Driver.register ~name:"bisect_ppx" ~args:switches
     Versions.ocaml_405 begin fun _config _cookies ->
-      let enabled =
-        match !conditional with
-        | false ->
-          `Enabled
-        | true ->
-          match Sys.getenv "BISECT_ENABLE" with
-          | exception Not_found ->
-            `Disabled
-          | s when (String.uppercase [@ocaml.warning "-3"]) s = "YES" ->
-            `Enabled
-          | _ ->
-            `Disabled
-      in
-
-      match enabled with
+      match enabled () with
       | `Enabled ->
         Ast_mapper_class.to_mapper (new Instrument.instrumenter)
       | `Disabled ->
