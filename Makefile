@@ -32,7 +32,7 @@ PRESERVE := _build/default/test/unit/_preserve
 
 .PHONY : save-test-output
 save-test-output :
-	(cd $(PRESERVE) && find . -name '*reference.*') \
+	(cd $(PRESERVE) && find ./fixtures -name '*reference.*') \
 	  | xargs -I FILE cp $(PRESERVE)/FILE test/unit/FILE
 
 # Currently unused; awaiting restoration of self-instrumentation.
