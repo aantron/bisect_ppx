@@ -13,7 +13,6 @@ bug-reports: "https://github.com/aantron/bisect_ppx/issues"
 dev-repo: "https://github.com/aantron/bisect_ppx.git"
 
 depends: [
-  # Bisect_ppx pulls in Ocamlbuild.
   "bisect_ppx" {>= "1.0.0"}
   "jbuilder" {build & >= "1.0+beta10"}
   "ocamlbuild"

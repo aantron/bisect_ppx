@@ -7,8 +7,6 @@
 - Update the `CHANGES` file.
 - `grep` for the previous version number. Replace occurences with the new
   version number. This should include at least `version.ml` and `README.md`.
-- Create a release branch. Change the version number in `META` and the `*.opam`
-  files in that branch.
 - Tag (`tag -a`) the release in the release branch. Include the changelog in
   the tag message, so it can be viewed with `git tag -n99`.
 - Push the tag.
