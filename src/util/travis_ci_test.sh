@@ -102,7 +102,6 @@ make clean
 opam pin add -yn bisect_ppx .
 opam install -y bisect_ppx
 ocamlfind query bisect_ppx bisect_ppx.runtime bisect_ppx.fast
-ocamlfind query bisect_ppx.ocamlbuild
 which bisect-ppx-report
 opam pin add -yn bisect_ppx-ocamlbuild .
 opam install -y bisect_ppx-ocamlbuild

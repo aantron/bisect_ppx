@@ -1,3 +1,0 @@
-version = "dev"
-description = "Bisect_ppx Ocamlbuild plugin"
-requires = "bisect_ppx.ocamlbuild"

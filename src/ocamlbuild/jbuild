@@ -2,9 +2,8 @@
 
 (library
  ((name bisect_ppx_ocamlbuild)
-  (public_name bisect_ppx.ocamlbuild)
-  (synopsis
-   "Bisect_ppx Ocamlbuild plugin (deprecated; use bisect_ppx-ocamlbuild)")
+  (public_name bisect_ppx-ocamlbuild)
+  (synopsis "Bisect_ppx Ocamlbuild plugin")
   (optional)
   (wrapped false)
   (libraries (ocamlbuild))))

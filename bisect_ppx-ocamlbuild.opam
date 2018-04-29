@@ -16,6 +16,7 @@ depends: [
   # Bisect_ppx pulls in Ocamlbuild.
   "bisect_ppx" {>= "1.0.0"}
   "jbuilder" {build & >= "1.0+beta10"}
+  "ocamlbuild"
 ]
 
 build: [
