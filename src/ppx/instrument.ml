@@ -612,8 +612,10 @@ struct
           Buffer.add_string buffer "___");
       "Bisect_visit___" ^ (Buffer.contents buffer)
     in
+
     let point_count = Ast_convenience.int ~loc (List.length !points) in
-    let points_data = Ast_convenience.str ~loc (Bisect.Common.write_points !points) in
+    let points_data =
+      Ast_convenience.str ~loc (Bisect.Common.write_points !points) in
     let file = Ast_convenience.str ~loc file in
 
     (* ___bisect_visit___ is a function with a reference to a point count array.
@@ -691,7 +693,8 @@ struct
           let ___bisect_visit___ =
             let point_definitions = [%e points_data] in
             let `Staged cb =
-              Bisect.Runtime.register_file [%e file] ~len:[%e point_count] ~data:point_definitions
+              Bisect.Runtime.register_file
+                [%e file] ~point_count:[%e point_count] ~point_definitions
             in
             cb
         ]

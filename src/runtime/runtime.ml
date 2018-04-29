@@ -90,16 +90,16 @@ let dump () =
 let register_dump : unit Lazy.t =
   lazy (at_exit dump)
 
-let register_file file ~len ~data =
+let register_file file ~point_count ~point_definitions =
   let () = Lazy.force register_dump in
-  let point_state = Array.make len 0 in
+  let point_state = Array.make point_count 0 in
   let table = Lazy.force table in
   if not (Hashtbl.mem table file) then
-    Hashtbl.add table file (point_state, data);
+    Hashtbl.add table file (point_state, point_definitions);
   `Staged (fun point_index ->
-     let current_count = point_state.(point_index) in
-     point_state.(point_index) <-
-       if current_count < Pervasives.max_int then
-         Pervasives.succ current_count
-       else
-         current_count)
+    let current_count = point_state.(point_index) in
+    point_state.(point_index) <-
+      if current_count < Pervasives.max_int then
+        Pervasives.succ current_count
+      else
+        current_count)

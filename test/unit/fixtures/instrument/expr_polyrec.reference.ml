@@ -4,8 +4,8 @@ module Bisect_visit___expr_polyrec___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000$\000\000\000\t\000\000\000!\000\000\000!\b\000\000 \000\160_B\160lA\160u@\160\000FG\160\000gE\160\000vD\160\001\000\129C\160\001\000\139F" in
       let `Staged cb =
-        Bisect.Runtime.register_file "expr_polyrec.ml" ~len:8
-          ~data:point_definitions in
+        Bisect.Runtime.register_file "expr_polyrec.ml" ~point_count:8
+          ~point_definitions in
       cb
   end
 open Bisect_visit___expr_polyrec___ml

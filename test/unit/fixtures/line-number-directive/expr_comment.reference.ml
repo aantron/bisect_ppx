@@ -4,8 +4,8 @@ module Bisect_visit___expr_comment___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000\n\000\000\000\004\000\000\000\r\000\000\000\r\176\160H@\160SA\160fB" in
       let `Staged cb =
-        Bisect.Runtime.register_file "expr_comment.ml" ~len:3
-          ~data:point_definitions in
+        Bisect.Runtime.register_file "expr_comment.ml" ~point_count:3
+          ~point_definitions in
       cb
   end
 open Bisect_visit___expr_comment___ml

@@ -4,8 +4,8 @@ module Bisect_visit___expr_sequence___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000I\000\000\000\016\000\000\000=\000\000\000=\b\000\000<\000\160K@\160kB\160\000BA\160\000bE\160\000yD\160\001\000\144C\160\001\000\176J\160\001\000\211H\160\001\000\226F\160\001\001\002G\160\001\001&I\160\001\0019N\160\001\001KL\160\001\001]M\160\001\001cK" in
       let `Staged cb =
-        Bisect.Runtime.register_file "expr_sequence.ml" ~len:15
-          ~data:point_definitions in
+        Bisect.Runtime.register_file "expr_sequence.ml" ~point_count:15
+          ~point_definitions in
       cb
   end
 open Bisect_visit___expr_sequence___ml

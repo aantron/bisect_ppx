@@ -4,8 +4,8 @@ module Bisect_visit___expr_lazyop___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000\r\000\000\000\005\000\000\000\017\000\000\000\017\192\160LA\160W@\160lC\160wB" in
       let `Staged cb =
-        Bisect.Runtime.register_file "expr_lazyop.ml" ~len:4
-          ~data:point_definitions in
+        Bisect.Runtime.register_file "expr_lazyop.ml" ~point_count:4
+          ~point_definitions in
       cb
   end
 open Bisect_visit___expr_lazyop___ml

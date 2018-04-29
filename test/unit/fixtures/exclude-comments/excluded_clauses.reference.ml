@@ -4,8 +4,8 @@ module Bisect_visit___excluded_clauses___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000.\000\000\000\n\000\000\000%\000\000\000%\b\000\000$\000\160SA\160`@\160\001\001,D\160\001\0019B\160\001\001\199C\160\001\001\246F\160\001\002\003E\160\001\003\024H\160\001\003%G" in
       let `Staged cb =
-        Bisect.Runtime.register_file "excluded_clauses.ml" ~len:9
-          ~data:point_definitions in
+        Bisect.Runtime.register_file "excluded_clauses.ml" ~point_count:9
+          ~point_definitions in
       cb
   end
 open Bisect_visit___excluded_clauses___ml

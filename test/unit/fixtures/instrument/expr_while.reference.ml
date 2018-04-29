@@ -4,8 +4,8 @@ module Bisect_visit___expr_while___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000/\000\000\000\011\000\000\000)\000\000\000)\b\000\000(\000\160KE\160eD\160wB\160\000PA\160\000i@\160\001\000\135C\160\001\000\169I\160\001\000\195H\160\001\000\213F\160\001\000\243G" in
       let `Staged cb =
-        Bisect.Runtime.register_file "expr_while.ml" ~len:10
-          ~data:point_definitions in
+        Bisect.Runtime.register_file "expr_while.ml" ~point_count:10
+          ~point_definitions in
       cb
   end
 open Bisect_visit___expr_while___ml
