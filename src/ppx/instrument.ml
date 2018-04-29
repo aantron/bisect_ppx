@@ -692,16 +692,12 @@ struct
         [%stri
           let ___bisect_visit___ =
             let point_definitions = [%e points_data] in
-            let point_state = Array.make [%e point_count] 0 in
-            Bisect.Runtime.register_file [%e file] point_state point_definitions;
-
-            fun point_index ->
-              let current_count = point_state.(point_index) in
-              point_state.(point_index) <-
-                if current_count < Pervasives.max_int then
-                  Pervasives.succ current_count
-                else
-                  current_count]
+            let `Staged cb =
+              Bisect.Runtime.register_file
+                [%e file] ~point_count:[%e point_count] ~point_definitions
+            in
+            cb
+        ]
           [@metaloc loc]
       in
 

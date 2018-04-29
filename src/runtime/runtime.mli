@@ -38,12 +38,14 @@
     should be specified with absolute paths. *)
 
 
-val register_file : string -> int array -> string -> unit
-(** [register_file file point_state point_definitions] indicates that the file
-    [file] is part of the application that has been instrumented, using the
-    passed array [point_state] to store visitation counts. [point_definitions]
-    is a serialized [Common.point_definition list] giving the locations of all
-    points in the file. *)
+val register_file :
+  string -> point_count:int -> point_definitions:string ->
+    [`Staged of (int -> unit)]
+(** [register_file file ~point_count ~point_definitions] indicates that the file
+    [file] is part of the application that has been instrumented.
+    [point_definitions] is a serialized [Common.point_definition list] giving
+    the locations of all points in the file. The returned callback is used to
+    increment visitation counts. *)
 
 val dump_counters_exn : out_channel -> unit
 (** [dump_counters_exn channel] dumps the runtime coverage counters
