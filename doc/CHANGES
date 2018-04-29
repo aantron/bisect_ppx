@@ -1,3 +1,24 @@
+Version 1.3.3 (2018-04-29):
+---------------------------
+  Bugs fixed
+
+  - Don't try to read .exclude file when Bisect_ppx is disabled (#169, Gary
+    Trakhman).
+  - Refactor how instrumented code registers itself with the Bisect_ppx runtime,
+    to make it easier to use Bisect_ppx with libraries other than stdlib (#171,
+    Hugo Heuzard).
+
+  Packaging
+
+  - The deprecated packages bisect_ppx.ocamlbuild and bisect_ppx.plugin, which
+    contained the Bisect_ppx Ocamlbuild plugin, have been deleted. The plugin is
+    now available only through bisect_ppx-ocamlbuild (#143).
+  - The deprecated package alias bisect_ppx.fast has been deleted (#144).
+
+  Miscellaneous
+
+  - Major refactoring of the instrumenter to make it much easier to work on.
+
 Version 1.3.2 (2017-12-21):
 ---------------------------
   Bugs fixed
