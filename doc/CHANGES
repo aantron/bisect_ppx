@@ -1,3 +1,8 @@
+Version 1.3.4 (2018-07-23):
+---------------------------
+
+  - Remove manual call to PPX driver (#173, Rudi Grinberg).
+
 Version 1.3.3 (2018-04-29):
 ---------------------------
   Bugs fixed
