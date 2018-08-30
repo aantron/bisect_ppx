@@ -1,15 +1,15 @@
 .PHONY : build
 build :
-	jbuilder build --dev
+	dune build
 
 .PHONY : test
 test : build
-	jbuilder build --dev @tester
+	dune build @tester
 	cd _build/default/test/unit && ./test_main.exe -runner sequential
 
 .PHONY : clean
 clean :
-	jbuilder clean
+	dune clean
 	for TEST in `ls -d test/usage/*` ; \
 	do \
 		make -wC $$TEST clean ; \

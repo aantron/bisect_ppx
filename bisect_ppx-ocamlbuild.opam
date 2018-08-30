@@ -14,10 +14,10 @@ dev-repo: "https://github.com/aantron/bisect_ppx.git"
 
 depends: [
   "bisect_ppx" {>= "1.0.0"}
-  "jbuilder" {build & >= "1.0+beta10"}
+  "dune" {build}
   "ocamlbuild"
 ]
 
 build: [
-  ["jbuilder" "build" "-p" name "-j" jobs]
+  ["dune" "build" "-p" name "-j" jobs]
 ]

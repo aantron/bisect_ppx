@@ -104,7 +104,7 @@ Examples:
   bisect-ppx-report -html coverage/ -I _build bisect*.out
   bisect-ppx-report -text - -summary-only bisect*.out
 
-Jbuilder:
+Dune:
 
   bisect-ppx-report -html coverage/ -I _build/default _build/default/bisect*.out
 

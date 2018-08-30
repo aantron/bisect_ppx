@@ -2,8 +2,8 @@
 
 Several sections below give options that can be passed to the Bisect_ppx
 preprocessor using the Ocamlfind option `-ppxopt`. The same options can be
-passed using Ocamlbuild, using the tag `ppxopt`, and to Jbuilder, by simply
-listing them after `bisect_ppx` in the `pps` list.
+passed using Ocamlbuild, using the tag `ppxopt`, and to Dune, by simply listing
+them after `bisect_ppx` in the `pps` list.
 
 #### Table of contents
 
@@ -11,7 +11,7 @@ listing them after `bisect_ppx` in the `pps` list.
   - [With Ocamlfind](#Ocamlfind)
   - [With Ocamlbuild](#Ocamlbuild)
   - [With OASIS](#OASIS)
-  - [With Jbuilder](#Jbuilder)
+  - [With Dune](#Dune)
 - [Excluding code from coverage](#Excluding)
   - [Individual lines and line ranges](#ExcludingLines)
   - [Files and top-level values](#ExcludingValues)
@@ -146,52 +146,44 @@ directly into `myocamlbuild.ml`. Use them to replace the call to
 fields in the first step into your `_oasis` file.
 
 <a id="Jbuilder"></a>
-#### With Jbuilder
+<a id="Dune"></a>
+#### With Dune
 
-Jbuilder currently doesn't support Bisect_ppx very well. There isn't a good way
-to turn Bisect_ppx on and off conditionally during development, nor to
-permanently disable it for release. However, Bisect_ppx provides a pretty decent
-workaround:
+Dune currently doesn't support Bisect_ppx very well. There isn't a good way to
+turn Bisect_ppx on and off conditionally during development, nor to permanently
+disable it for release. However, Bisect_ppx provides a pretty decent workaround:
 
-1. List Bisect_ppx in your `jbuild` files, and pass the `-conditional` flag to
-   it:
-
-        (jbuild_version 1)
+1. List Bisect_ppx in your `dune` files, and pass the `-conditional` flag to it:
 
         (library
-         ((name my_lib)
-          (preprocess (pps (bisect_ppx -conditional)))))
+         (name my_lib)
+         (preprocess (pps bisect_ppx -conditional)))
 
 2. `-conditional` is what turns on the workaround. It makes Bisect_ppx *not*
    instrument your code by default. You can conditionally enable instrumentation
    using the `BISECT_ENABLE` environment variable. Just set it to `YES` in your
-   `Makefile`, or whatever you use to trigger Jbuilder:
+   `Makefile`, or whatever you use to trigger Dune:
 
         .PHONY : coverage
-        coverage : clean
-            BISECT_ENABLE=YES jbuilder runtest
+        coverage :
+            rm -f `find . -name 'bisect*.out'`
+            BISECT_ENABLE=YES dune runtest --force
             bisect-ppx-report -I _build/default/ -html _coverage/ \
               `find . -name 'bisect*.out'`
 
-        .PHONY : clean
-        clean :
-            rm -f `find . -name 'bisect*.out'`
-            jbuilder clean
-
    Your other rules are not affected.
 
-   Note that `coverage` triggers `clean` first. This (1) gets rid of stale old
-   `bisect*.out` files, and (2) forces to Jbuilder to rerun the tests. Normally,
-   Jbuilder doesn't rerun tests if the code they are testing hasn't changed.
+   Note that `--force` is used to make sure Dune runs all the tests. Normally,
+   Dune doesn't rerun tests if the code they are testing hasn't changed.
 
-   The `find . -name 'bisect*.out'` is needed because Jbuilder changes directory
+   The `find . -name 'bisect*.out'` is needed because Dune changes directory
    while running the tests, and the `.out` files end up written there. The
    directory usually ends up being something like `_build/default/tests/`, but
    if you have multiple test targets, there will be multiple directories.
 
 3. For release, we recommend manually removing `bisect_ppx -conditional` from
-   your `jbuild` files. If you don't want to do that, you can add a dependency
-   on package `bisect_ppx` to your `opam` files:
+   your `dune` files. If you don't want to do that, you can add a dependency on
+   package `bisect_ppx` to your `opam` files:
 
         depends: [
           "bisect_ppx" {build & >= "1.3.0"}
@@ -199,10 +191,10 @@ workaround:
 
    We hope to eliminate this chore in the future.
 
-See [Jbuilder issue #57][jbuilder-bisect] for discussion of Jbuilder/Bisect_ppx
+See [Dune issue #57][dune-bisect] for discussion of Dune/Bisect_ppx
 compatibility.
 
-[jbuilder-bisect]: https://github.com/janestreet/jbuilder/issues/57
+[dune-bisect]: https://github.com/ocaml/dune/issues/57
 
 
 

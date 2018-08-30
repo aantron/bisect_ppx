@@ -16,7 +16,7 @@ dev-repo: "https://github.com/aantron/bisect_ppx.git"
 
 depends: [
   "base-unix"
-  "jbuilder" {build & >= "1.0+beta13"}
+  "dune" {build}
   "ocamlfind" {test}
   "ocaml-migrate-parsetree" {>= "1.0.3"}
   "ounit" {test}
@@ -25,13 +25,13 @@ depends: [
 conflicts: [
   "ocveralls" {<= "0.3.2"}
 ]
-# Note that Bisect_ppx effectively requires 4.02.3, because Jbuilder requires
-# it. 4.02.0 is the natural constraint of Bisect_ppx.
+# Note that Bisect_ppx effectively requires 4.02.3, because Dune requires it.
+# 4.02.0 is the natural constraint of Bisect_ppx.
 available: ocaml-version >= "4.02.0"
 
 build: [
-  ["jbuilder" "build" "-p" name "-j" jobs]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 build-test: [
-  ["jbuilder" "runtest" "-p" name]
+  ["dune" "runtest" "-p" name]
 ]

@@ -1,10 +1,9 @@
 .PHONY : test
 test : clean
-	jbuilder build source.exe
-	_build/default/source.exe
+	dune exec ./source.exe
 	test -f bisect0001.out
 
 .PHONY : clean
 clean :
-	jbuilder clean
+	dune clean
 	rm -f bisect*.out
