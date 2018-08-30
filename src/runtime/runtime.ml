@@ -7,12 +7,15 @@
 type message =
   | Unable_to_create_file
   | Unable_to_write_file
+  | String of string
 
 let string_of_message = function
   | Unable_to_create_file ->
       " *** Bisect runtime was unable to create file."
   | Unable_to_write_file ->
       " *** Bisect runtime was unable to write file."
+  | String s ->
+      " *** " ^ s
 
 let full_path fname =
   if Filename.is_implicit fname then
@@ -49,21 +52,22 @@ let table : (string, int array * string) Hashtbl.t Lazy.t =
 
 let file_channel () =
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
-  let suffix = ref 0 in
-  let next_name () =
-    incr suffix;
-    Printf.sprintf "%s%04d.%s" base_name !suffix Extension.value
-  in
-  let rec ic_opt_loop actual_name =
+  let rec create_file numeric_suffix =
+    let filename =
+      Printf.sprintf "%s%04d.%s" base_name numeric_suffix Extension.value in
     try
-      Some (open_out_gen
-        [Open_wronly; Open_binary; Open_creat; Open_excl] 0o644 actual_name)
-    with Sys_error _ -> ic_opt_loop (next_name ())
-       | _ -> verbose Unable_to_create_file;
-              None
+      let fd = Unix.(openfile filename [O_WRONLY; O_CREAT; O_EXCL] 0o644) in
+      let channel = Unix.out_channel_of_descr fd in
+      Some channel
+    with
+    | Unix.Unix_error (Unix.EEXIST, _, _) -> create_file (numeric_suffix + 1)
+    | Unix.Unix_error (code, _, _) ->
+      let detail = Printf.sprintf "%s: %s" (Unix.error_message code) filename in
+      verbose Unable_to_create_file;
+      verbose (String detail);
+      None
   in
-  let channel_opt = ic_opt_loop (next_name ()) in
-  channel_opt
+  create_file 1
 
 let dump_counters_exn channel =
   let content =
