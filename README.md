@@ -38,8 +38,7 @@ to run that script, then refresh your browser.
    You can also install [without OPAM][without-opam].
 
 2. When compiling for testing, include Bisect_ppx. Instructions are also
-   available for [Ocamlbuild][ocamlbuild], [OASIS][oasis] and
-   [Dune][dune].
+   available for [Dune][dune], [Ocamlbuild][ocamlbuild], and [OASIS][oasis].
 
         ocamlfind c -package bisect_ppx -c my_code.ml
         ocamlfind c -c my_tests.ml

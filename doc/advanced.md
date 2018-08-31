@@ -8,10 +8,10 @@ them after `bisect_ppx` in the `pps` list.
 #### Table of contents
 
 - [Building with coverage](#Building)
+  - [With Dune](#Dune)
   - [With Ocamlfind](#Ocamlfind)
   - [With Ocamlbuild](#Ocamlbuild)
   - [With OASIS](#OASIS)
-  - [With Dune](#Dune)
 - [Excluding code from coverage](#Excluding)
   - [Individual lines and line ranges](#ExcludingLines)
   - [Files and top-level values](#ExcludingValues)
@@ -36,6 +36,57 @@ will want Bisect_ppx to preprocess the files in `src/`, but *not* the files in
 other hand, when building for release, you will want to make sure that *nothing*
 is preprocessed by, or linked with, Bisect_ppx. The way to achieve this depends
 on your build system.
+
+<a id="Jbuilder"></a>
+<a id="Dune"></a>
+#### With Dune
+
+Dune currently doesn't support Bisect_ppx very well. There isn't a good way to
+turn Bisect_ppx on and off conditionally during development, nor to permanently
+disable it for release. However, Bisect_ppx provides a pretty decent workaround:
+
+1. List Bisect_ppx in your `dune` files, and pass the `-conditional` flag to it:
+
+        (library
+         (name my_lib)
+         (preprocess (pps bisect_ppx -conditional)))
+
+2. `-conditional` is what turns on the workaround. It makes Bisect_ppx *not*
+   instrument your code by default. You can conditionally enable instrumentation
+   using the `BISECT_ENABLE` environment variable. Just set it to `YES` in your
+   `Makefile`, or whatever you use to trigger Dune:
+
+        .PHONY : coverage
+        coverage :
+            rm -f `find . -name 'bisect*.out'`
+            BISECT_ENABLE=YES dune runtest --force
+            bisect-ppx-report -I _build/default/ -html _coverage/ \
+              `find . -name 'bisect*.out'`
+
+   Your other rules are not affected.
+
+   Note that `--force` is used to make sure Dune runs all the tests. Normally,
+   Dune doesn't rerun tests if the code they are testing hasn't changed.
+
+   The `find . -name 'bisect*.out'` is needed because Dune changes directory
+   while running the tests, and the `.out` files end up written there. The
+   directory usually ends up being something like `_build/default/tests/`, but
+   if you have multiple test targets, there will be multiple directories.
+
+3. For release, we recommend manually removing `bisect_ppx -conditional` from
+   your `dune` files. If you don't want to do that, you can add a dependency on
+   package `bisect_ppx` to your `opam` files:
+
+        depends: [
+          "bisect_ppx" {build & >= "1.3.0"}
+        ]
+
+   We hope to eliminate this chore in the future.
+
+See [Dune issue #57][dune-bisect] for discussion of Dune/Bisect_ppx
+compatibility.
+
+[dune-bisect]: https://github.com/ocaml/dune/issues/57
 
 <a id="Ocamlfind"></a>
 #### With Ocamlfind
@@ -144,57 +195,6 @@ dependency, you can work the [contents][plugin-code] of `Bisect_ppx_plugin`
 directly into `myocamlbuild.ml`. Use them to replace the call to
 `Bisect_ppx_plugin.dispatch`. In that case, you don't want to put the package
 fields in the first step into your `_oasis` file.
-
-<a id="Jbuilder"></a>
-<a id="Dune"></a>
-#### With Dune
-
-Dune currently doesn't support Bisect_ppx very well. There isn't a good way to
-turn Bisect_ppx on and off conditionally during development, nor to permanently
-disable it for release. However, Bisect_ppx provides a pretty decent workaround:
-
-1. List Bisect_ppx in your `dune` files, and pass the `-conditional` flag to it:
-
-        (library
-         (name my_lib)
-         (preprocess (pps bisect_ppx -conditional)))
-
-2. `-conditional` is what turns on the workaround. It makes Bisect_ppx *not*
-   instrument your code by default. You can conditionally enable instrumentation
-   using the `BISECT_ENABLE` environment variable. Just set it to `YES` in your
-   `Makefile`, or whatever you use to trigger Dune:
-
-        .PHONY : coverage
-        coverage :
-            rm -f `find . -name 'bisect*.out'`
-            BISECT_ENABLE=YES dune runtest --force
-            bisect-ppx-report -I _build/default/ -html _coverage/ \
-              `find . -name 'bisect*.out'`
-
-   Your other rules are not affected.
-
-   Note that `--force` is used to make sure Dune runs all the tests. Normally,
-   Dune doesn't rerun tests if the code they are testing hasn't changed.
-
-   The `find . -name 'bisect*.out'` is needed because Dune changes directory
-   while running the tests, and the `.out` files end up written there. The
-   directory usually ends up being something like `_build/default/tests/`, but
-   if you have multiple test targets, there will be multiple directories.
-
-3. For release, we recommend manually removing `bisect_ppx -conditional` from
-   your `dune` files. If you don't want to do that, you can add a dependency on
-   package `bisect_ppx` to your `opam` files:
-
-        depends: [
-          "bisect_ppx" {build & >= "1.3.0"}
-        ]
-
-   We hope to eliminate this chore in the future.
-
-See [Dune issue #57][dune-bisect] for discussion of Dune/Bisect_ppx
-compatibility.
-
-[dune-bisect]: https://github.com/ocaml/dune/issues/57
 
 
 
