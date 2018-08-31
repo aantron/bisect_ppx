@@ -106,15 +106,3 @@ which bisect-ppx-report
 opam pin add -yn bisect_ppx-ocamlbuild .
 opam install -y bisect_ppx-ocamlbuild
 ocamlfind query bisect_ppx-ocamlbuild
-
-# Currently unused; awaiting restoration of self-instrumentation.
-if [ "$COVERALLS" = yes ]
-then
-    echo
-    echo "Submitting coverage report"
-    echo
-    opam install -y ocveralls
-    make dev tests
-    make -C tests coverage
-    ocveralls --prefix _build.instrumented tests/_coverage/meta*.out --send
-fi
