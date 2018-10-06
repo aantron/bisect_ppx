@@ -4,26 +4,25 @@ set -e
 set -x
 
 travis_install_on_linux () {
-    # Install OCaml and OPAM PPA
-    sudo add-apt-repository -y ppa:avsm/ocaml42+opam12
-    sudo apt-get update -qq
+    wget https://github.com/ocaml/opam/releases/download/2.0.0/opam-2.0.0-x86_64-linux
+    sudo mv opam-2.0.0-x86_64-linux /usr/local/bin/opam
+    sudo chmod a+x /usr/local/bin/opam
 
-    sudo apt-get install -qq opam time git
+    sudo apt-get install -qq time git
 
     case "$OCAML_VERSION" in
         4.02)
-            sudo apt-get install -qq ocaml-nox camlp4-extra
-            opam init -y ;;
+            opam init -y --disable-sandboxing --compiler=4.02.3 ;;
         4.03)
-            opam init -y --compiler=4.03.0 ;;
+            opam init -y --disable-sandboxing --compiler=4.03.0 ;;
         4.04)
-            opam init -y --compiler=4.04.2 ;;
+            opam init -y --disable-sandboxing --compiler=4.04.2 ;;
         4.05)
-            opam init -y --compiler=4.05.0 ;;
+            opam init -y --disable-sandboxing --compiler=4.05.0 ;;
         4.06)
-            opam init -y --compiler=4.06.1 ;;
+            opam init -y --disable-sandboxing --compiler=4.06.1 ;;
         4.07)
-            opam init -y --compiler=4.07.0 ;;
+            opam init -y --disable-sandboxing --compiler=4.07.0 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;
@@ -38,15 +37,15 @@ travis_install_on_osx () {
 
     case "$OCAML_VERSION" in
         4.02)
-            opam init -y --compiler=4.02.3 ;;
+            opam init -y --disable-sandboxing --compiler=4.02.3 ;;
         4.03)
-            opam init -y --compiler=4.03.0 ;;
+            opam init -y --disable-sandboxing --compiler=4.03.0 ;;
         4.04)
-            opam init -y --compiler=4.04.2 ;;
+            opam init -y --disable-sandboxing --compiler=4.04.2 ;;
         4.05)
-            opam init -y --compiler=4.05.0 ;;
+            opam init -y --disable-sandboxing --compiler=4.05.0 ;;
         4.06)
-            opam init -y --compiler=4.06.1 ;;
+            opam init -y --disable-sandboxing --compiler=4.06.1 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;
@@ -89,11 +88,6 @@ echo
 echo "Testing package usage and Ocamlbuild plugin"
 echo
 make usage
-
-echo
-echo "Checking OPAM file"
-echo
-ls *.opam | xargs -L1 opam lint
 
 echo
 echo "Testing installation"
