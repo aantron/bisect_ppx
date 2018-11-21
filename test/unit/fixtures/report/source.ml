@@ -21,6 +21,16 @@ let () =
     print i
   done
 
+let rec pow a = function
+  | 0 -> 1
+  | 1 -> a
+  | n ->
+      let b = pow a (n/2) in
+      b * b * (if n mod 2 = 0 then 1 else a)
+
+let () =
+  assert ((pow 2 2) = 4)
+
 let is_even x =
   if x mod 2 = 0 then true else false
 
