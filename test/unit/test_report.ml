@@ -31,5 +31,9 @@ let tests = "report" >::: [
 
   test "text" (fun () ->
     report "-text output";
-    diff "fixtures/report/reference.text")
+    diff "fixtures/report/reference.text");
+
+  test "coveralls" (fun () ->
+    report "-coveralls output -service-name travis-ci -service-job-id 123";
+    diff "fixtures/report/coveralls_reference.json")
 ]

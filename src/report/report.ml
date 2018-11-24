@@ -9,6 +9,7 @@ type output_kind =
   | Csv_output of string
   | Text_output of string
   | Dump_output of string
+  | Coveralls_output of string
 
 let report_outputs = ref []
 
@@ -37,6 +38,12 @@ let ignore_missing_files = ref false
 let add_file f =
   raw_coverage_files := f :: !raw_coverage_files
 
+let service_name = ref ""
+
+let service_job_id = ref ""
+
+let repo_token = ref ""
+
 let options = Arg.align [
   ("-html",
    Arg.String (fun s -> add_output (Html_output s)),
@@ -44,11 +51,11 @@ let options = Arg.align [
 
   ("-I",
    Arg.String add_search_path,
-   "<dir>  Look for .ml files in <dir> (HTML only)");
+   "<dir>  Look for .ml files in <dir> (HTML/Coveralls only)");
 
-   ("-ignore-missing-files",
+  ("-ignore-missing-files",
    Arg.Set ignore_missing_files,
-   " Do not fail if an .ml file can't be found (HTML only)");
+   " Do not fail if an .ml file can't be found (HTML/Coveralls only)");
 
   ("-title",
    Arg.Set_string report_title,
@@ -90,6 +97,22 @@ let options = Arg.align [
   ("-version",
    Arg.Unit (fun () -> print_endline Bisect.Version.value; exit 0),
    " Print version and exit");
+
+  ("-coveralls",
+   Arg.String (fun s -> add_output (Coveralls_output s)),
+   "<file>  Output coveralls json report to <file>");
+
+  ("-service-name",
+   Arg.Set_string service_name,
+   "<string>  Service name for Coveralls json (Coveralls only)");
+
+  ("-service-job-id",
+   Arg.Set_string service_job_id,
+   "<string>  Service job id for Coveralls json (Coveralls only)");
+
+  ("-repo-token",
+   Arg.Set_string repo_token,
+   "<string>  Repo token for Coveralls json (Coveralls only)");
 ]
 
 let usage =
@@ -176,7 +199,11 @@ let main () =
     | Text_output file ->
         generic_output file (Report_text.make !summary_only)
     | Dump_output file ->
-        generic_output file (Report_dump.make ()) in
+        generic_output file (Report_dump.make ())
+    | Coveralls_output file ->
+        Report_coveralls.output verbose file
+          !service_name !service_job_id !repo_token
+          search_in_path data points in
   List.iter write_output (List.rev !report_outputs)
 
 let () =

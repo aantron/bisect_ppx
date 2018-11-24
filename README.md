@@ -62,20 +62,33 @@ to run that script, then refresh your browser.
     - Yellow lines contain expressions, some of which were visited, but others not.
     - White lines are those that don't contain visitable expressions. They may have type declarations, keywords, or something else that Bisect_ppx did not, or cannot instrument.
 
-You can submit a coverage report to Coveralls.io using [ocveralls][ocveralls].
-Note that Bisect_ppx reports are more precise than Coveralls, which only
-considers whole lines as visited or not.
-
 See also the [advanced usage][advanced].
+
+### Coveralls.io
+
+(**New**) You can generate a Coveralls json report using the `bisect-ppx-report`
+tool with the `-coveralls` flag.
+Note that Bisect_ppx reports are more precise than Coveralls, which only
+considers whole lines as visited or not. The built in Coveralls reporter will
+consider a full line unvisited if any point on that line is not visited,
+check the html report to verify precisly which points are not covered.
+
+Example using the built in Coveralls reporter on Travis CI (which sets [`$TRAVIS_JOB_ID`][travis-vars]):
+
+      bisect-ppx-report \
+          -I _build/ \
+          -coveralls coverage.json \
+          -service-name travis-ci \
+          -service-job-id $TRAVIS_JOB_ID \
+          bisect*.out
+      curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
 
 [without-opam]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#WithoutOPAM
 [ocamlbuild]:   https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
 [oasis]:        https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#OASIS
-[dune]:          https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Dune
-[ocveralls]:    https://github.com/sagotch/ocveralls
+[dune]:         https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Dune
 [advanced]:     https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md
-
-
+[travis-vars]:  https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
 
 <br>
 
