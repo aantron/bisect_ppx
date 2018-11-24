@@ -12,15 +12,15 @@ For a live demonstration, see the [coverage report][self-coverage] Bisect_ppx
 generates for itself. You may also want to see
 [projects that use Bisect_ppx](#bisect_ppx-in-practice).
 
-[self]:          https://github.com/aantron/bisect_ppx
-[releases]:      https://github.com/aantron/bisect_ppx/releases
-[version]:       https://img.shields.io/badge/version-1.3.4-blue.svg
+[self]: https://github.com/aantron/bisect_ppx
+[releases]: https://github.com/aantron/bisect_ppx/releases
+[version]: https://img.shields.io/badge/version-1.3.4-blue.svg
 [self-coverage]: http://aantron.github.io/bisect_ppx/coverage/
-[travis]:        https://travis-ci.org/aantron/bisect_ppx/branches
-[travis-img]:    https://img.shields.io/travis/aantron/bisect_ppx/master.svg
-[coveralls]:     https://coveralls.io/github/aantron/bisect_ppx?branch=master
+[travis]: https://travis-ci.org/aantron/bisect_ppx/branches
+[travis-img]: https://img.shields.io/travis/aantron/bisect_ppx/master.svg
+[coveralls]: https://coveralls.io/github/aantron/bisect_ppx?branch=master
 [coveralls-img]: https://img.shields.io/coveralls/aantron/bisect_ppx/master.svg
-[sample]:        https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
+[sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
 
 
 
@@ -84,11 +84,11 @@ Example using the built in Coveralls reporter on Travis CI (which sets [`$TRAVIS
       curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
 
 [without-opam]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#WithoutOPAM
-[ocamlbuild]:   https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
-[oasis]:        https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#OASIS
-[dune]:         https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Dune
-[advanced]:     https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md
-[travis-vars]:  https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+[ocamlbuild]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
+[oasis]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#OASIS
+[dune]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Dune
+[advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md
+[travis-vars]: https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
 
 <br>
 
@@ -104,17 +104,17 @@ A small sample of projects using Bisect_ppx:
 - [Ketrew][ketrew]
 - [Sosa][sosa]
 
-[lwt]:                https://github.com/ocsigen/lwt
-[oml]:                https://github.com/hammerlab/oml
-[oml-coveralls]:      https://coveralls.io/github/hammerlab/oml?branch=HEAD
-[ctypes]:             https://github.com/ocamllabs/ocaml-ctypes
-[ctypes-coveralls]:   https://coveralls.io/github/ocamllabs/ocaml-ctypes
-[ocaml-irc-client]:   https://github.com/johnelse/ocaml-irc-client
-[irc-coveralls]:      https://coveralls.io/github/johnelse/ocaml-irc-client
-[markupml]:           https://github.com/aantron/markup.ml
+[lwt]: https://github.com/ocsigen/lwt
+[oml]: https://github.com/hammerlab/oml
+[oml-coveralls]: https://coveralls.io/github/hammerlab/oml?branch=HEAD
+[ctypes]: https://github.com/ocamllabs/ocaml-ctypes
+[ctypes-coveralls]: https://coveralls.io/github/ocamllabs/ocaml-ctypes
+[ocaml-irc-client]: https://github.com/johnelse/ocaml-irc-client
+[irc-coveralls]: https://coveralls.io/github/johnelse/ocaml-irc-client
+[markupml]: https://github.com/aantron/markup.ml
 [markupml-coveralls]: https://coveralls.io/github/aantron/markup.ml?branch=master
-[ketrew]:             https://github.com/hammerlab/ketrew
-[sosa]:               https://github.com/hammerlab/sosa
+[ketrew]: https://github.com/hammerlab/ketrew
+[sosa]: https://github.com/hammerlab/sosa
 
 
 
