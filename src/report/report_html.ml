@@ -77,6 +77,14 @@ let output_html_index verbose title filename l =
 
       let per_file (name, html_file, stats) =
         let dirname, basename = split_filename name in
+        let relative_html_file =
+          if Filename.is_relative html_file then
+            html_file
+          else
+            let prefix_length = String.length Filename.dir_sep in
+            String.sub
+              html_file prefix_length (String.length html_file - prefix_length)
+        in
         Report_utils.output_strings
           ["      <div>";
            "        <span class=\"meter\">";
@@ -88,7 +96,7 @@ let output_html_index verbose title filename l =
            "        </a>";
            "      </div>"]
           ["p", Printf.sprintf "%.00f" (percentage stats);
-           "link", html_file;
+           "link", relative_html_file;
            "dir", dirname;
            "name", basename]
           channel in
@@ -157,7 +165,8 @@ let output_html
       Report_utils.open_both resolved_in_file out_file in
     let rec make_path_to_report_root acc in_file_path_remaining =
       if in_file_path_remaining = "" ||
-         in_file_path_remaining = Filename.current_dir_name then
+         in_file_path_remaining = Filename.current_dir_name ||
+         in_file_path_remaining = Filename.dir_sep then
         acc
       else
         let path_component = Filename.basename in_file_path_remaining in
