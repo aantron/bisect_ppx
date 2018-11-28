@@ -1,3 +1,16 @@
+Version 1.4.0 (2018-11-28):
+---------------------------
+  Additions
+
+  - Coveralls reports with bisect-ppx-report -coveralls ... (#176, Sam Miller).
+
+  Bugs fixed
+
+  - Infinite loop when unable to create bisect*.out files (#175, reported Josh
+    Berdine).
+  - Infinite loop when source file was compiled with an absolute path (#180,
+    reported Calvin Beck).
+
 Version 1.3.4 (2018-07-23):
 ---------------------------
 
