@@ -1,16 +1,20 @@
+opam-version: "2.0"
+
+synopsis: "Ocamlbuild plugin for Bisect_ppx, the coverage tool"
 version: "dev"
-opam-version: "1.2"
+license: "Public Domain"
+homepage: "https://github.com/aantron/bisect_ppx"
+doc: "https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild"
+bug-reports: "https://github.com/aantron/bisect_ppx/issues"
+
+dev-repo: "git+https://github.com/aantron/bisect_ppx.git"
+authors: [
+  "Anton Bachin <antonbachin@yahoo.com>"
+]
 maintainer: [
   "Anton Bachin <antonbachin@yahoo.com>"
   "Leonid Rozenberg <leonidr@gmail.com>"
 ]
-authors: [
-  "Anton Bachin <antonbachin@yahoo.com>"
-]
-license: "Public Domain"
-homepage: "https://github.com/aantron/bisect_ppx"
-bug-reports: "https://github.com/aantron/bisect_ppx/issues"
-dev-repo: "https://github.com/aantron/bisect_ppx.git"
 
 depends: [
   "bisect_ppx" {>= "1.0.0"}
