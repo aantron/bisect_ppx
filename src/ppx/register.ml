@@ -40,6 +40,10 @@ let switches = [
   ("-conditional",
   Arg.Set conditional,
   "  Do not instrument unless environment variable BISECT_ENABLE is YES");
+
+  ("-no-comment-parsing",
+  Arg.Set Comments.no_comment_parsing,
+  "  Do not parse source files for BISECT-* comments");
 ]
 
 

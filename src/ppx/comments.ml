@@ -4,14 +4,24 @@
 
 
 
+let no_comment_parsing = ref false
+
 type t = {
     mutable ignored_intervals : (int * int) list;
     mutable marked_lines : int list;
   }
 
+let no_comments = {
+  ignored_intervals = [];
+  marked_lines = [];
+}
+
 let comments_cache : (string, t) Hashtbl.t = Hashtbl.create 17
 
 let get filename =
+  if !no_comment_parsing then
+    no_comments
+  else
   try
     Hashtbl.find comments_cache filename
   with Not_found ->
