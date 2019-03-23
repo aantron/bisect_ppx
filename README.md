@@ -63,31 +63,38 @@ also available for [Ocamlbuild][ocamlbuild], [ocamlfind][ocamlfind], and
 
 See also the [advanced usage][advanced].
 
-### Coveralls.io
-
-(**New**) You can generate a Coveralls json report using the `bisect-ppx-report`
-tool with the `-coveralls` flag.
-Note that Bisect_ppx reports are more precise than Coveralls, which only
-considers whole lines as visited or not. The built in Coveralls reporter will
-consider a full line unvisited if any point on that line is not visited,
-check the html report to verify precisly which points are not covered.
-
-Example using the built in Coveralls reporter on Travis CI (which sets [`$TRAVIS_JOB_ID`][travis-vars]):
-
-      bisect-ppx-report \
-          -I _build/ \
-          -coveralls coverage.json \
-          -service-name travis-ci \
-          -service-job-id $TRAVIS_JOB_ID \
-          bisect*.out
-      curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
-
-[without-opam]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#WithoutOPAM
 [ocamlbuild]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
 [oasis]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#OASIS
 [ocamlfind]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlfind
 [advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md
+
+
+
+<br/>
+
+## Coveralls.io
+
+You can generate a Coveralls json report using the `bisect-ppx-report` tool
+with the `-coveralls` flag. Note that Bisect_ppx reports are more precise than
+Coveralls, which only considers whole lines as visited or not. The built-in
+Coveralls reporter will consider a full line unvisited if any point on that
+line is not visited, check the html report to verify precisly which points are
+not covered.
+
+Example using the built-in Coveralls reporter on Travis CI (which sets
+[`$TRAVIS_JOB_ID`][travis-vars]):
+
+      bisect-ppx-report \
+          -I _build/default/ \
+          -coveralls coverage.json \
+          -service-name travis-ci \
+          -service-job-id $TRAVIS_JOB_ID \
+          `find . -name 'bisect*.out'`
+      curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+
 [travis-vars]: https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+
+
 
 <br>
 
