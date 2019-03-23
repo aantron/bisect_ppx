@@ -28,4 +28,12 @@ let tests = "bisect_ppx" >::: [
 ]
 
 let () =
+  if Test_helpers.have_package "bisect_ppx" then begin
+    prerr_newline ();
+    prerr_endline "A global package 'bisect_ppx' is already installed.";
+    prerr_endline "Please remove it to avoid spurious warnings during testing.";
+    prerr_newline ();
+    exit 2
+  end;
+
   run_test_tt_main tests

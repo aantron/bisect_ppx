@@ -23,6 +23,10 @@ val ocamlc_403_or_more : unit -> bool
 val ocamlc_404_or_more : unit -> bool
 (** [ocamlc] version is 4.04.0 or greater. *)
 
+val have_package : string -> bool
+(** Checks that the given Findlib package is installed using
+    [ocamlfind query]. *)
+
 val if_package : string -> unit
 (** If the given package is not installed (see [have_package]), skips the
     current test case. *)
