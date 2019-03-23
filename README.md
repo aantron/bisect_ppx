@@ -33,23 +33,24 @@ to run that script, then refresh your browser.
 
         opam install bisect_ppx
 
-   You can also install [without OPAM][without-opam].
+2. Add `bisect_ppx` to your library- or executable-under-test. Instructions are
+also available for [Ocamlbuild][ocamlbuild], [ocamlfind][ocamlfind], and
+[OASIS][oasis].
 
-2. When compiling for testing, include Bisect_ppx. Instructions are also
-   available for [Dune][dune], [Ocamlbuild][ocamlbuild], and [OASIS][oasis].
+        (library
+         (public_name my_code)
+         (preprocess (pps bisect_ppx -conditional)))
 
-        ocamlfind c -package bisect_ppx -c my_code.ml
-        ocamlfind c -c my_tests.ml
-        ocamlfind c -linkpkg -package bisect_ppx my_code.cmo my_tests.cmo
+   Don't add `bisect_ppx` to your tests.
 
 3. Run your test binary. In addition to testing your code, it will produce one
    or more files with names like `bisect0001.out`.
 
-        ./a.out             # Produces bisect0001.out
+        BISECT_ENABLE=yes dune runtest
 
 4. Generate the coverage report.
 
-        bisect-ppx-report -I _build/ -html coverage/ bisect*.out`
+        bisect-ppx-report -I _build/default/ -html coverage/ `find . -name 'bisect*.out'`
 
 5. Open `coverage/index.html`!
 
@@ -84,7 +85,7 @@ Example using the built in Coveralls reporter on Travis CI (which sets [`$TRAVIS
 [without-opam]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#WithoutOPAM
 [ocamlbuild]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
 [oasis]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#OASIS
-[dune]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Dune
+[ocamlfind]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlfind
 [advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md
 [travis-vars]: https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
 
