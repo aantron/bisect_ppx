@@ -72,7 +72,9 @@ let output_html_index verbose title filename l =
            "    </div>" ;
            "    <div id=\"files\">"]
         [ "title", title ;
-          "percentage", Printf.sprintf "%.02f" (percentage stats) ]
+          "percentage",
+            Printf.sprintf "%.02f"
+              (floor ((percentage stats) *. 100.) /. 100.) ]
         channel;
 
       let per_file (name, html_file, stats) =
@@ -95,7 +97,7 @@ let output_html_index verbose title filename l =
            "          <span class=\"dirname\">$(dir)</span>$(name)";
            "        </a>";
            "      </div>"]
-          ["p", Printf.sprintf "%.00f" (percentage stats);
+          ["p", Printf.sprintf "%.00f" (floor (percentage stats));
            "link", relative_html_file;
            "dir", dirname;
            "name", basename]
