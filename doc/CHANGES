@@ -1,3 +1,16 @@
+Version 1.4.1 (2018-03-25):
+---------------------------
+
+  Additions
+
+  - PPX -no-comment-parsing option, to work around Bisect_ppx trying to parse
+    (*BISECT-IGNORE*) comments (#187, reported Ben Anderson).
+
+  Bugs fixed
+
+  - Bisect_ppx should run after other PPXs (#186, reported Brian Caine).
+  - Round displayed coverage percentages down (#172, reported Iago Abal).
+
 Version 1.4.0 (2018-11-28):
 ---------------------------
   Additions
