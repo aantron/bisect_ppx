@@ -39,7 +39,7 @@ also available for [Ocamlbuild][ocamlbuild], [ocamlfind][ocamlfind], and
 
         (library
          (public_name my_code)
-         (preprocess (pps bisect_ppx -conditional)))
+         (preprocess (pps bisect_ppx -conditional -no-comment-parsing)))
 
    Don't add `bisect_ppx` to your tests.
 

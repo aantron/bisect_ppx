@@ -45,11 +45,12 @@ Dune currently doesn't support Bisect_ppx very well. There isn't a good way to
 turn Bisect_ppx on and off conditionally during development, nor to permanently
 disable it for release. However, Bisect_ppx provides a pretty decent workaround:
 
-1. List Bisect_ppx in your `dune` files, and pass the `-conditional` flag to it:
+1. List Bisect_ppx in your `dune` files, and pass the `-conditional` and
+   `-no-comment-parsing` flags to it:
 
         (library
          (name my_lib)
-         (preprocess (pps bisect_ppx -conditional)))
+         (preprocess (pps bisect_ppx -conditional -no-comment-parsing)))
 
 2. `-conditional` is what turns on the workaround. It makes Bisect_ppx *not*
    instrument your code by default. You can conditionally enable instrumentation
