@@ -10,6 +10,7 @@ type output_kind =
   | Text_output of string
   | Dump_output of string
   | Coveralls_output of string
+  | Sexp_output of string
 
 let report_outputs = ref []
 
@@ -81,6 +82,10 @@ let options = Arg.align [
   ("-csv",
    Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Output CSV report to <file>");
+
+  ("-sexp",
+   Arg.String (fun s -> add_output (Sexp_output s)),
+   "<file>  Output s-expression reports to <file>");
 
   ("-separator",
    Arg.Set_string csv_separator,
@@ -199,7 +204,9 @@ let main () =
     | Text_output file ->
         generic_output file (Report_text.make !summary_only)
     | Dump_output file ->
-        generic_output file (Report_dump.make ())
+      generic_output file (Report_dump.make ())
+    | Sexp_output file ->
+      generic_output file (Report_sexp.make ())
     | Coveralls_output file ->
         Report_coveralls.output verbose file
           !service_name !service_job_id !repo_token
