@@ -60,7 +60,7 @@ let file_channel () =
       let channel = Unix.out_channel_of_descr fd in
       Some channel
     with
-    | Unix.Unix_error (Unix.EEXIST, _, _) -> create_file (numeric_suffix + 1)
+    | Unix.Unix_error (Unix.EEXIST, _, _) -> create_file @@ abs @@ Random.int 1000000000
     | Unix.Unix_error (code, _, _) ->
       let detail = Printf.sprintf "%s: %s" (Unix.error_message code) filename in
       verbose Unable_to_create_file;
