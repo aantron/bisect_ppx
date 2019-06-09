@@ -9,9 +9,9 @@ test : clean
 	! test -f bisect0001.out
 	@# If the PPX option is passed correctly, there will be no output.
 	BISECT_COVERAGE=YES $(OCAMLBUILD) $(CONDITIONAL) source.byte --
-	! test -f bisect0001.out
+	! test -f bisect*.out
 	BISECT_COVERAGE=YES $(OCAMLBUILD) source.byte --
-	test -f bisect0001.out
+	test -f bisect*.out
 
 .PHONY : clean
 clean :

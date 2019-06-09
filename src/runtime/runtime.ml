@@ -52,22 +52,23 @@ let table : (string, int array * string) Hashtbl.t Lazy.t =
 
 let file_channel () =
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
-  let rec create_file numeric_suffix =
+  let rec create_file () =
+    let numeric_suffix = abs (Random.int 1000000000) in
     let filename =
-      Printf.sprintf "%s%04d.%s" base_name numeric_suffix Extension.value in
+      Printf.sprintf "%s%09d.%s" base_name numeric_suffix Extension.value in
     try
       let fd = Unix.(openfile filename [O_WRONLY; O_CREAT; O_EXCL] 0o644) in
       let channel = Unix.out_channel_of_descr fd in
       Some channel
     with
-    | Unix.Unix_error (Unix.EEXIST, _, _) -> create_file @@ abs @@ Random.int 1000000000
+    | Unix.Unix_error (Unix.EEXIST, _, _) -> create_file ()
     | Unix.Unix_error (code, _, _) ->
       let detail = Printf.sprintf "%s: %s" (Unix.error_message code) filename in
       verbose Unable_to_create_file;
       verbose (String detail);
       None
   in
-  create_file 1
+  create_file ()
 
 let dump_counters_exn channel =
   let content =

@@ -4,14 +4,14 @@ BISECT := -package bisect_ppx -ppxopt bisect_ppx,-conditional
 test : clean
 	ocamlfind opt -linkpkg source.ml
 	./a.out
-	! test -f bisect0001.out
+	! test -f bisect*.out
 	@# If the PPX option is passed correctly, there will be no output.
 	ocamlfind opt -linkpkg $(BISECT) source.ml
 	./a.out
-	! test -f bisect0001.out
+	! test -f bisect*.out
 	BISECT_ENABLE=YES ocamlfind opt -linkpkg $(BISECT) source.ml
 	./a.out
-	test -f bisect0001.out
+	test -f bisect*.out
 
 .PHONY : clean
 clean :
