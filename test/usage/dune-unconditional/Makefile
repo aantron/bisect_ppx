@@ -1,7 +1,7 @@
 .PHONY : test
 test : clean
 	dune exec ./source.exe
-	test -f bisect0001.out
+	test -f bisect*.out
 
 .PHONY : clean
 clean :
