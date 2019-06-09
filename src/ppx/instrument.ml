@@ -35,7 +35,10 @@
 
 
 (* From ocaml-migrate-parsetree. *)
-module Ast = Ast_405
+module Ast = Migrate_parsetree.Ast_405
+module Ast_405 = Ast
+(* Workaround for
+  https://travis-ci.org/aantron/bisect_ppx/jobs/538321848#L588 *)
 
 module Location = Ast.Location
 module Parsetree = Ast.Parsetree
