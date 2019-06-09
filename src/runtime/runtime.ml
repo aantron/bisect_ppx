@@ -50,6 +50,9 @@ let verbose message =
 let table : (string, int array * string) Hashtbl.t Lazy.t =
   lazy (Hashtbl.create 17)
 
+let () =
+  Random.self_init ()
+
 let file_channel () =
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
   let rec create_file () =
