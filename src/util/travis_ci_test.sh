@@ -23,6 +23,8 @@ travis_install_on_linux () {
             opam init -y --disable-sandboxing --compiler=4.06.1 ;;
         4.07)
             opam init -y --disable-sandboxing --compiler=4.07.1 ;;
+        4.08)
+            opam init -y --disable-sandboxing --compiler=4.08.0 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;
@@ -48,6 +50,8 @@ travis_install_on_osx () {
             opam init -y --disable-sandboxing --compiler=4.06.1 ;;
         4.07)
             opam init -y --disable-sandboxing --compiler=4.07.1 ;;
+        4.08)
+            opam init -y --disable-sandboxing --compiler=4.08.0 ;;
         *)
             echo Unknown $OCAML_VERSION
             exit 1 ;;

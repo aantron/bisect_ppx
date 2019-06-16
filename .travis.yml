@@ -19,8 +19,10 @@ matrix:
       env: OCAML_VERSION=4.06
     - os: linux
       env: OCAML_VERSION=4.07
+    - os: linux
+      env: OCAML_VERSION=4.08
     - os: osx
-      env: OCAML_VERSION=4.07
+      env: OCAML_VERSION=4.08
 
   fast_finish: true
 
