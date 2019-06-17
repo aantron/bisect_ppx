@@ -16,6 +16,8 @@ let sorted_diff () =
 
 let tests = "warnings" >::: [
   test "default" begin fun () ->
+    skip_if
+      (not @@ ocamlc_less_than_408 ()) ("4.08 has different warning output");
     compile
       ((with_bisect ()) ^ " -w +A")
       "fixtures/warnings/source.ml" ~r:"2> output.raw";

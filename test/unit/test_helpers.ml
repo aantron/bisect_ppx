@@ -126,6 +126,9 @@ let ocamlc_403_or_more () =
 let ocamlc_404_or_more () =
   ocamlc_version () >= (4,4,None)
 
+let ocamlc_less_than_408 () =
+  ocamlc_version () < (4,8,None)
+
 let if_package package =
   skip_if (not @@ have_package package) (package ^ " not installed")
 
