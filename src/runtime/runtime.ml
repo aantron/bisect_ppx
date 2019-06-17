@@ -107,7 +107,7 @@ let register_file file ~point_count ~point_definitions =
   `Staged (fun point_index ->
     let current_count = point_state.(point_index) in
     point_state.(point_index) <-
-      if current_count < Pervasives.max_int then
-        Pervasives.succ current_count
+      if current_count < max_int then
+        current_count + 1
       else
         current_count)
