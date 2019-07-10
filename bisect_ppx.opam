@@ -34,6 +34,7 @@ conflicts: [
 
 build: [
   ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name] {with-test}
 ]
 
 description: "Bisect_ppx helps you test thoroughly. It is a small preprocessor
