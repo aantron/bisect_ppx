@@ -3,5 +3,6 @@
  (libraries bisect_ppx.runtime compiler-libs.common oUnit))
 
 (alias
- (name tester)
- (deps test_main.exe (source_tree fixtures)))
+ (name runtest)
+ (deps (:tester test_main.exe) (source_tree fixtures))
+ (action (run %{tester} -runner sequential)))

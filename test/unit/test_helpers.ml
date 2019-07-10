@@ -143,8 +143,9 @@ let compile ?(r = "") arguments source =
   end;
 
   Printf.sprintf
-    "%s ocamlfind c -linkpkg %s %s %s"
+    "%s %s ocamlfind c -linkpkg %s %s %s"
     "OCAMLPATH=../../../../install/default/lib:$OCAMLPATH"
+    "OCAML_COLOR=never"
     arguments source_copy r
   |> run
 

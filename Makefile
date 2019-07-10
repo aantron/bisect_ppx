@@ -4,8 +4,7 @@ build :
 
 .PHONY : test
 test : build
-	dune build @tester
-	cd _build/default/test/unit && ./test_main.exe -runner sequential
+	dune runtest --force --no-buffer -j 1
 
 .PHONY : clean
 clean :
