@@ -126,9 +126,6 @@ let ocamlc_403_or_more () =
 let ocamlc_404_or_more () =
   ocamlc_version () >= (4,4,None)
 
-let ocamlc_less_than_408 () =
-  ocamlc_version () < (4,8,None)
-
 let if_package package =
   skip_if (not @@ have_package package) (package ^ " not installed")
 
@@ -145,7 +142,7 @@ let compile ?(r = "") arguments source =
   Printf.sprintf
     "%s %s ocamlfind c -linkpkg %s %s %s"
     "OCAMLPATH=../../../../install/default/lib:$OCAMLPATH"
-    "OCAML_COLOR=never"
+    "OCAML_COLOR=never OCAML_ERROR_STYLE=short"
     arguments source_copy r
   |> run
 
