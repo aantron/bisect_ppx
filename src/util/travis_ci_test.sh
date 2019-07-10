@@ -4,31 +4,9 @@ set -e
 set -x
 
 travis_install_on_linux () {
-    wget https://github.com/ocaml/opam/releases/download/2.0.0/opam-2.0.0-x86_64-linux
-    sudo mv opam-2.0.0-x86_64-linux /usr/local/bin/opam
+    wget https://github.com/ocaml/opam/releases/download/2.0.4/opam-2.0.4-x86_64-linux
+    sudo mv opam-2.0.4-x86_64-linux /usr/local/bin/opam
     sudo chmod a+x /usr/local/bin/opam
-
-    sudo apt-get install -qq time git
-
-    case "$OCAML_VERSION" in
-        4.02)
-            opam init -y --disable-sandboxing --compiler=4.02.3 ;;
-        4.03)
-            opam init -y --disable-sandboxing --compiler=4.03.0 ;;
-        4.04)
-            opam init -y --disable-sandboxing --compiler=4.04.2 ;;
-        4.05)
-            opam init -y --disable-sandboxing --compiler=4.05.0 ;;
-        4.06)
-            opam init -y --disable-sandboxing --compiler=4.06.1 ;;
-        4.07)
-            opam init -y --disable-sandboxing --compiler=4.07.1 ;;
-        4.08)
-            opam init -y --disable-sandboxing --compiler=4.08.0 ;;
-        *)
-            echo Unknown $OCAML_VERSION
-            exit 1 ;;
-    esac
 }
 
 travis_install_on_osx () {
@@ -36,26 +14,6 @@ travis_install_on_osx () {
     # See https://github.com/Homebrew/homebrew-core/issues/26358.
     brew upgrade python > /dev/null
     brew install opam
-
-    case "$OCAML_VERSION" in
-        4.02)
-            opam init -y --disable-sandboxing --compiler=4.02.3 ;;
-        4.03)
-            opam init -y --disable-sandboxing --compiler=4.03.0 ;;
-        4.04)
-            opam init -y --disable-sandboxing --compiler=4.04.2 ;;
-        4.05)
-            opam init -y --disable-sandboxing --compiler=4.05.0 ;;
-        4.06)
-            opam init -y --disable-sandboxing --compiler=4.06.1 ;;
-        4.07)
-            opam init -y --disable-sandboxing --compiler=4.07.1 ;;
-        4.08)
-            opam init -y --disable-sandboxing --compiler=4.08.0 ;;
-        *)
-            echo Unknown $OCAML_VERSION
-            exit 1 ;;
-    esac
 }
 
 case $TRAVIS_OS_NAME in
@@ -64,13 +22,15 @@ case $TRAVIS_OS_NAME in
     *) echo "Unknown $TRAVIS_OS_NAME"; exit 1
 esac
 
+opam init -y --bare --disable-sandboxing --disable-shell-hook
+opam switch create . $COMPILER $REPOSITORIES --no-install
+
 # Prepare environment
 eval `opam config env`
 
 # Check packages
-ocaml -version | grep $OCAML_VERSION
+ocaml -version
 opam --version
-git --version
 
 echo
 echo "Install dependencies"

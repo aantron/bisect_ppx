@@ -5,24 +5,30 @@ language: generic
 matrix:
   include:
     - os: linux
-      env: OCAML_VERSION=4.02
+      env: COMPILER=4.02.3
     - os: linux
-      env: OCAML_VERSION=4.03
+      env: COMPILER=4.03.0
     - os: linux
-      env: OCAML_VERSION=4.04
+      env: COMPILER=4.04.2
     # Awaiting restoration of self-instrumentation.
     # - os: linux
     #   env: OCAML_VERSION=4.04 COVERALLS=yes
     - os: linux
-      env: OCAML_VERSION=4.05
+      env: COMPILER=4.05.0
     - os: linux
-      env: OCAML_VERSION=4.06
+      env: COMPILER=4.06.1
     - os: linux
-      env: OCAML_VERSION=4.07
+      env: COMPILER=4.07.1
     - os: linux
-      env: OCAML_VERSION=4.08
+      env: COMPILER=4.08.0
+    - os: linux
+      env: COMPILER=ocaml-variants.4.09.0+beta1 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
     - os: osx
-      env: OCAML_VERSION=4.08
+      env: COMPILER=4.08.0
+
+  allow_failures:
+    - env: COMPILER=ocaml-variants.4.09.0+beta1 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+
 
   fast_finish: true
 
