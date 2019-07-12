@@ -3,24 +3,18 @@
 set -e
 set -x
 
-travis_install_on_linux () {
-    wget https://github.com/ocaml/opam/releases/download/2.0.4/opam-2.0.4-x86_64-linux
-    sudo mv opam-2.0.4-x86_64-linux /usr/local/bin/opam
-    sudo chmod a+x /usr/local/bin/opam
-}
-
-travis_install_on_osx () {
-    brew update > /dev/null
-    # See https://github.com/Homebrew/homebrew-core/issues/26358.
-    brew upgrade python > /dev/null
-    brew install opam
-}
-
 case $TRAVIS_OS_NAME in
-    osx) travis_install_on_osx ;;
-    linux) travis_install_on_linux ;;
-    *) echo "Unknown $TRAVIS_OS_NAME"; exit 1
+    "linux") OPAM_OS=linux;;
+    "osx") OPAM_OS=macos;;
+    *) echo Unsupported system $TRAVIS_OS_NAME; exit 1;;
 esac
+
+OPAM_VERSION=2.0.5
+OPAM_PKG=opam-${OPAM_VERSION}-x86_64-${OPAM_OS}
+
+wget https://github.com/ocaml/opam/releases/download/${OPAM_VERSION}/${OPAM_PKG}
+sudo mv ${OPAM_PKG} /usr/local/bin/opam
+sudo chmod a+x /usr/local/bin/opam
 
 opam init -y --bare --disable-sandboxing --disable-shell-hook
 opam switch create . $COMPILER $REPOSITORIES --no-install
