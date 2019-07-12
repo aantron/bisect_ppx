@@ -9,10 +9,7 @@ test : build
 .PHONY : clean
 clean :
 	dune clean
-	for TEST in `ls -d test/usage/*` ; \
-	do \
-		make -wC $$TEST clean ; \
-	done
+	make clean-usage
 
 INSTALLED_ENVIRONMENT := \
     OCAMLPATH=`pwd`/_build/install/default/lib \
@@ -25,6 +22,13 @@ usage : build
 		echo ; \
 		echo ; \
 		$(INSTALLED_ENVIRONMENT) make -wC $$TEST || exit 2 ; \
+	done
+
+.PHONY : clean-usage
+clean-usage :
+	for TEST in `ls -d test/usage/*` ; \
+	do \
+		make -wC $$TEST clean ; \
 	done
 
 PRESERVE := _build/default/test/unit/_preserve

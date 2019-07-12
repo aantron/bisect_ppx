@@ -17,7 +17,12 @@ sudo mv ${OPAM_PKG} /usr/local/bin/opam
 sudo chmod a+x /usr/local/bin/opam
 
 opam init -y --bare --disable-sandboxing --disable-shell-hook
-opam switch create . $COMPILER $REPOSITORIES --no-install
+
+if [ ! -d _opam/bin ]
+then
+    rm -rf _opam
+    opam switch create . $COMPILER $REPOSITORIES --no-install
+fi
 
 # Prepare environment
 eval `opam config env`
@@ -29,15 +34,14 @@ opam --version
 echo
 echo "Install dependencies"
 echo
-opam install -y ocamlfind ocamlbuild ocaml-migrate-parsetree ppx_tools_versioned
+opam pin add -y --no-action bisect_ppx .
+opam install -y --deps-only bisect_ppx
+opam install -y ocamlbuild
 
 echo
 echo "Compiling"
 echo
 make build
-
-opam install -y ounit
-# opam install -y ppx_blob ppx_deriving
 
 echo
 echo "Testing"
@@ -47,7 +51,7 @@ make test
 echo
 echo "Testing package usage and Ocamlbuild plugin"
 echo
-make usage
+make clean-usage usage
 
 echo
 echo "Testing installation"

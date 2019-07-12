@@ -10,9 +10,6 @@ matrix:
       env: COMPILER=4.03.0
     - os: linux
       env: COMPILER=4.04.2
-    # Awaiting restoration of self-instrumentation.
-    # - os: linux
-    #   env: OCAML_VERSION=4.04 COVERALLS=yes
     - os: linux
       env: COMPILER=4.05.0
     - os: linux
@@ -32,6 +29,12 @@ matrix:
   fast_finish: true
 
 script: bash -e ./src/util/travis_ci_test.sh
+
+cache:
+  directories:
+    - $HOME/.opam
+    - ./_opam
+    - ./_build/default
 
 notifications:
   email:
