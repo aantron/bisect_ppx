@@ -30,6 +30,7 @@ let get filename =
     let chan = open_in filename in
     try
       let lexbuf = Lexing.from_channel chan in
+      Location.init lexbuf filename;
       let stack = Stack.create () in
       let lst = Comments_lexer.normal [] [] stack (filename,[]) lexbuf in
       let as_comments =

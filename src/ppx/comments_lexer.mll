@@ -6,6 +6,15 @@
 
 {
 
+let deprecated lexbuf use_what =
+  Printf.eprintf
+    "File %s, line %i:\n%s is deprecated. Use %s instead. See\n  %s\n%!"
+    (Lexing.lexeme_start_p lexbuf).pos_fname
+    (Lexing.lexeme_start_p lexbuf).pos_lnum
+    (Lexing.lexeme lexbuf)
+    use_what
+    "https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#ExcludingExpressions"
+
 type error =
   | Unexpected_end_of_file
 
@@ -79,10 +88,12 @@ rule normal ignored marked stack files = parse
 | "'\"'"                    { normal ignored marked stack files lexbuf }
 | "'\\\"'"                  { normal ignored marked stack files lexbuf }
 | "\""                      { string 0 ignored marked stack files lexbuf }
-| "(*BISECT-IGNORE-BEGIN*)" { let line = get_line lexbuf in
+| "(*BISECT-IGNORE-BEGIN*)" { deprecated lexbuf "[@@@coverage off]";
+                              let line = get_line lexbuf in
                               Stack.push line stack;
                               normal ignored marked stack files lexbuf }
-| "(*BISECT-IGNORE-END*)"   { let ignored =
+| "(*BISECT-IGNORE-END*)"   { deprecated lexbuf "[@@@coverage on]";
+                              let ignored =
                                 try
                                   let bib = Stack.pop stack in
                                   (bib, get_line lexbuf) :: ignored
@@ -90,10 +101,13 @@ rule normal ignored marked stack files = parse
                                   report_unmatched ();
                                   ignored in
                               normal ignored marked stack files lexbuf }
-| "(*BISECT-IGNORE*)"       { let line = get_line lexbuf in
+| "(*BISECT-IGNORE*)"       { deprecated lexbuf "[@coverage off]";
+                              let line = get_line lexbuf in
                               normal ((line, line) :: ignored) marked stack files lexbuf }
-| "(*BISECT-VISIT*)"        { normal ignored (get_line lexbuf :: marked) stack files lexbuf }
-| "(*BISECT-MARK*)"         { normal ignored (get_line lexbuf :: marked) stack files lexbuf }
+| "(*BISECT-VISIT*)"        { deprecated lexbuf "[@coverage off]";
+                              normal ignored (get_line lexbuf :: marked) stack files lexbuf }
+| "(*BISECT-MARK*)"         { deprecated lexbuf "[@coverage off]";
+                              normal ignored (get_line lexbuf :: marked) stack files lexbuf }
 | "(*"                      { comment 1 ignored marked stack files lexbuf }
 | eol                       { incr_line lexbuf;
                               normal ignored marked stack files lexbuf }
