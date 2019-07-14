@@ -735,6 +735,29 @@ class instrumenter =
   let instrument_class_field_kind =
     Generated_code.instrument_class_field_kind points in
 
+  let recognize_attribute loc ({Location.txt = name; _}, payload) =
+    let is_coverage_attribute =
+      name = "coverage" ||
+      (String.length name >= String.length "coverage." &&
+       String.sub name 0 (String.length "coverage.") = "coverage.")
+    in
+    if not is_coverage_attribute then
+      `None
+    else begin
+      if payload <> Parsetree.PStr [] then
+        Location.raise_errorf
+          ~loc "Coverage attribute should not have a payload.";
+
+      match name with
+      | "coverage.off" ->
+        `Off
+      | "coverage.on" ->
+        `On
+      | _ ->
+        Location.raise_errorf ~loc "Unrecognized coverage attribute %s." name
+    end
+  in
+
   object (self)
     inherit Ast_mapper_class.mapper as super
 
@@ -845,10 +868,17 @@ class instrumenter =
       | _ ->
         e'
 
+    (* Set to [true] upon encountering [[@@@coverage.off]], and back to
+       [false] again upon encountering [[@@@coverage.on]]. *)
+    val mutable structure_instrumentation_suppressed = false
+
     method! structure_item si =
       let loc = si.pstr_loc in
       match si.pstr_desc with
       | Pstr_value (rec_flag, bindings) ->
+        if structure_instrumentation_suppressed then
+          si
+        else
         let bindings =
           bindings
           |> List.map begin fun binding ->
@@ -881,7 +911,25 @@ class instrumenter =
         Str.value ~loc rec_flag bindings
 
       | Pstr_eval (e, a) ->
+        if structure_instrumentation_suppressed then
+          si
+        else
         Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
+
+      | Pstr_attribute a ->
+        begin match recognize_attribute loc a with
+        | `None ->
+          ()
+        | `Off ->
+          if structure_instrumentation_suppressed then
+            Location.raise_errorf ~loc "Coverage is already off.";
+          structure_instrumentation_suppressed <- true
+        | `On ->
+          if not structure_instrumentation_suppressed then
+            Location.raise_errorf ~loc "Coverage is already on.";
+          structure_instrumentation_suppressed <- false
+        end;
+        si
 
       | _ ->
         super#structure_item si
@@ -914,6 +962,10 @@ class instrumenter =
       super#signature ast
 
     method! structure ast =
+      let saved_structure_instrumentation_suppressed =
+        structure_instrumentation_suppressed in
+
+      let result =
       if saw_top_level_structure_or_signature then
         super#structure ast
         (* This is *not* the first structure we see, or we are inside an
@@ -959,4 +1011,10 @@ class instrumenter =
             runtime_initialization @ instrumented_ast
           end
       end
+      in
+
+      structure_instrumentation_suppressed <-
+        saved_structure_instrumentation_suppressed;
+
+      result
 end
