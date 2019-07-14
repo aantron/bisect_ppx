@@ -879,36 +879,36 @@ class instrumenter =
         if structure_instrumentation_suppressed then
           si
         else
-        let bindings =
-          bindings
-          |> List.map begin fun binding ->
-            (* Only instrument things not excluded. *)
-            let maybe_name =
-              let open Parsetree in
-              match binding.pvb_pat.ppat_desc with
-              | Ppat_var ident
-              | Ppat_constraint ({ppat_desc = Ppat_var ident; _}, _) ->
-                Some ident
-              | _ ->
-                None
-            in
-            let do_not_instrument =
-              match maybe_name with
-              | Some name ->
-                Exclusions.contains_value
-                  Location.(Lexing.(name.loc.loc_start.pos_fname))
-                  name.txt
-              | None ->
-                false
-            in
-            if do_not_instrument then
-              binding
-            else
-              {binding with pvb_expr =
-                instrument_expr (self#expr binding.pvb_expr)}
-          end
-        in
-        Str.value ~loc rec_flag bindings
+          let bindings =
+            bindings
+            |> List.map begin fun binding ->
+              (* Only instrument things not excluded. *)
+              let maybe_name =
+                let open Parsetree in
+                match binding.pvb_pat.ppat_desc with
+                | Ppat_var ident
+                | Ppat_constraint ({ppat_desc = Ppat_var ident; _}, _) ->
+                  Some ident
+                | _ ->
+                  None
+              in
+              let do_not_instrument =
+                match maybe_name with
+                | Some name ->
+                  Exclusions.contains_value
+                    Location.(Lexing.(name.loc.loc_start.pos_fname))
+                    name.txt
+                | None ->
+                  false
+              in
+              if do_not_instrument then
+                binding
+              else
+                {binding with pvb_expr =
+                  instrument_expr (self#expr binding.pvb_expr)}
+            end
+          in
+          Str.value ~loc rec_flag bindings
 
       | Pstr_eval (e, a) ->
         if structure_instrumentation_suppressed then
@@ -966,51 +966,51 @@ class instrumenter =
         structure_instrumentation_suppressed in
 
       let result =
-      if saw_top_level_structure_or_signature then
-        super#structure ast
-        (* This is *not* the first structure we see, or we are inside an
-           interface file, so the structure is nested within the file, either
-           inside [struct]..[end] or in an attribute or extension point.
-           Traverse the structure recursively as normal. *)
+        if saw_top_level_structure_or_signature then
+          super#structure ast
+          (* This is *not* the first structure we see, or we are inside an
+             interface file, so the structure is nested within the file, either
+             inside [struct]..[end] or in an attribute or extension point.
+             Traverse the structure recursively as normal. *)
 
-      else begin
-        (* This is the first structure we see in te file, and we are not in an
-           interface file, so Bisect_ppx is beginning to (potentially)
-           instrument the current file. We need to check whether this file is
-           excluded from instrumentation before proceeding. *)
-        saw_top_level_structure_or_signature <- true;
+        else begin
+          (* This is the first structure we see in te file, and we are not in an
+             interface file, so Bisect_ppx is beginning to (potentially)
+             instrument the current file. We need to check whether this file is
+             excluded from instrumentation before proceeding. *)
+          saw_top_level_structure_or_signature <- true;
 
-        (* Bisect_ppx is hardcoded to ignore files with certain names. If we
-           have one of these, return the AST uninstrumented. In particular, do
-           not recurse into it. *)
-        let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
-        let always_ignore_basenames = [".ocamlinit"; "topfind"] in
-        let always_ignore path =
-          List.mem path always_ignore_paths ||
-          List.mem (Filename.basename path) always_ignore_basenames
-        in
+          (* Bisect_ppx is hardcoded to ignore files with certain names. If we
+             have one of these, return the AST uninstrumented. In particular, do
+             not recurse into it. *)
+          let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
+          let always_ignore_basenames = [".ocamlinit"; "topfind"] in
+          let always_ignore path =
+            List.mem path always_ignore_paths ||
+            List.mem (Filename.basename path) always_ignore_basenames
+          in
 
-        if always_ignore !Location.input_name then
-          ast
-
-        else
-          (* The file might also be excluded by the user. *)
-          if Exclusions.contains_file !Location.input_name then
+          if always_ignore !Location.input_name then
             ast
 
-          else begin
-            (* This file should be instrumented. Traverse the AST recursively,
-               then prepend some generated code for initializing the Bisect_ppx
-               runtime and telling it about the instrumentation points in this
-               file. *)
-            let instrumented_ast = super#structure ast in
-            let runtime_initialization =
-              Generated_code.runtime_initialization
-                points !Location.input_name
-            in
-            runtime_initialization @ instrumented_ast
-          end
-      end
+          else
+            (* The file might also be excluded by the user. *)
+            if Exclusions.contains_file !Location.input_name then
+              ast
+
+            else begin
+              (* This file should be instrumented. Traverse the AST recursively,
+                 then prepend some generated code for initializing the
+                 Bisect_ppx runtime and telling it about the instrumentation
+                 points in this file. *)
+              let instrumented_ast = super#structure ast in
+              let runtime_initialization =
+                Generated_code.runtime_initialization
+                  points !Location.input_name
+              in
+              runtime_initialization @ instrumented_ast
+            end
+        end
       in
 
       structure_instrumentation_suppressed <-
