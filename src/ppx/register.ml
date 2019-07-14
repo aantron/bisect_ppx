@@ -34,8 +34,9 @@ let switches = [
   "<filename>  Exclude functions listed in given file") ;
 
   ("-mode",
-  (Arg.Symbol (["safe"; "fast"; "faster"], ignore)),
-  "  Ignored") ;
+  (Arg.Symbol (["safe"; "fast"; "faster"], fun _ ->
+    prerr_endline "Bisect_ppx argument '-mode' is deprecated.")),
+  "  Deprecated") ;
 
   ("-conditional",
   Arg.Set conditional,
