@@ -13,6 +13,7 @@ them after `bisect_ppx` in the `pps` list.
   - [With Ocamlbuild](#Ocamlbuild)
   - [With OASIS](#OASIS)
 - [Excluding code from coverage](#Excluding)
+  - [Expressions and structure items](#ExcludingExpressions)
   - [Individual lines and line ranges](#ExcludingLines)
   - [Files and top-level values](#ExcludingValues)
 - [Environment variables](#EnvironmentVariables)
@@ -209,8 +210,23 @@ The easiest way to exclude a file from coverage is simply not to build it with
 need finer control. There are several ways to disable coverage analysis for
 portions of code.
 
+<a id="ExcludingExpressions"></a>
+#### Expressions and structure items
+
+You can tag expressions with `[@coverage off]`, and neither they, nor their
+subexpressions, will be instrumented by Bisect_ppx.
+
+Likewise, you can tag module-level `let`-declarations with `[@@coverage off]`,
+and they won't be instrumented.
+
+Finally, you can turn off instrumentation for blocks of declarations inside a
+module with `[@@@coverage off]` and `[@@@coverage on]`.
+
 <a id="ExcludingLines"></a>
 #### Individual lines and line ranges
+
+*Note: this method is deprecated and will be removed; use the approach
+described above in "Expressions and structure items."*
 
 If a comment `(*BISECT-IGNORE*)` is found on a line, that line is excluded from
 coverage analysis. If `(*BISECT-VISIT*)` is found, all points on that line are
