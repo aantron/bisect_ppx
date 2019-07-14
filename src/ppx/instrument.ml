@@ -735,7 +735,7 @@ class instrumenter =
   let instrument_class_field_kind =
     Generated_code.instrument_class_field_kind points in
 
-  let recognize_attribute loc ({Location.txt = name; _}, payload) =
+  let recognize_attribute loc name payload =
     let is_coverage_attribute =
       name = "coverage" ||
       (String.length name >= String.length "coverage." &&
@@ -756,6 +756,18 @@ class instrumenter =
       | _ ->
         Location.raise_errorf ~loc "Unrecognized coverage attribute %s." name
     end
+  in
+
+  let has_coverage_off_attribute attributes =
+    (* Don't short-circuit the search, because we want to error-check all
+       attributes. *)
+    List.fold_left
+      (fun found_off ({Location.txt; loc}, payload) ->
+        match recognize_attribute loc txt payload with
+        | `None -> found_off
+        | `On -> Location.raise_errorf ~loc "coverage.on is not allowed here."
+        | `Off -> true)
+      false attributes
   in
 
   object (self)
@@ -901,6 +913,10 @@ class instrumenter =
                 | None ->
                   false
               in
+              let do_not_instrument =
+                do_not_instrument
+                  || has_coverage_off_attribute binding.pvb_attributes
+              in
               if do_not_instrument then
                 binding
               else
@@ -916,8 +932,8 @@ class instrumenter =
         else
         Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
 
-      | Pstr_attribute a ->
-        begin match recognize_attribute loc a with
+      | Pstr_attribute ({txt; _}, payload) ->
+        begin match recognize_attribute loc txt payload with
         | `None ->
           ()
         | `Off ->
