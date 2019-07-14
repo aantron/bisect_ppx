@@ -63,37 +63,37 @@ sig
 end =
 struct
   let recognize loc name payload =
-      let is_coverage_attribute =
-        name = "coverage" ||
-        (String.length name >= String.length "coverage." &&
-        String.sub name 0 (String.length "coverage.") = "coverage.")
-      in
-      if not is_coverage_attribute then
-        `None
-      else begin
-        if payload <> Parsetree.PStr [] then
-          Location.raise_errorf
-            ~loc "Coverage attribute should not have a payload.";
+    let is_coverage_attribute =
+      name = "coverage" ||
+      (String.length name >= String.length "coverage." &&
+      String.sub name 0 (String.length "coverage.") = "coverage.")
+    in
+    if not is_coverage_attribute then
+      `None
+    else begin
+      if payload <> Parsetree.PStr [] then
+        Location.raise_errorf
+          ~loc "Coverage attribute should not have a payload.";
 
-        match name with
-        | "coverage.off" ->
-          `Off
-        | "coverage.on" ->
-          `On
-        | _ ->
-          Location.raise_errorf ~loc "Unrecognized coverage attribute %s." name
-      end
+      match name with
+      | "coverage.off" ->
+        `Off
+      | "coverage.on" ->
+        `On
+      | _ ->
+        Location.raise_errorf ~loc "Unrecognized coverage attribute %s." name
+    end
 
-    let has_off_attribute attributes =
-      (* Don't short-circuit the search, because we want to error-check all
-        attributes. *)
-      List.fold_left
-        (fun found_off ({Location.txt; loc}, payload) ->
-          match recognize loc txt payload with
-          | `None -> found_off
-          | `On -> Location.raise_errorf ~loc "coverage.on is not allowed here."
-          | `Off -> true)
-        false attributes
+  let has_off_attribute attributes =
+    (* Don't short-circuit the search, because we want to error-check all
+       attributes. *)
+    List.fold_left
+      (fun found_off ({Location.txt; loc}, payload) ->
+        match recognize loc txt payload with
+        | `None -> found_off
+        | `On -> Location.raise_errorf ~loc "coverage.on is not allowed here."
+        | `Off -> true)
+      false attributes
 end
 
 
@@ -147,21 +147,21 @@ struct
         if Coverage_attributes.has_off_attribute e.pexp_attributes then
           true
         else
-        (* Retrieve the expression's file and line number. The file can be
-           different from the input file to Bisect_ppx, in case of the [#line]
-           directive.
+          (* Retrieve the expression's file and line number. The file can be
+             different from the input file to Bisect_ppx, in case of the [#line]
+             directive.
 
-           That is typically emitted by cppo, ocamlyacc, and other
-           preprocessors. To be intuitive to the user, we need to make the
-           decision on ignoring this expression based on its original source
-           location, as seen by the user, not based on where it was spliced in
-           by another prerocessor that ran before Bisect_ppx. *)
-        let file, line =
-          let start = Location.(loc.loc_start) in
-          Lexing.(start.pos_fname, start.pos_lnum)
-        in
-        Comments.get file
-        |> Comments.line_is_ignored line
+             That is typically emitted by cppo, ocamlyacc, and other
+             preprocessors. To be intuitive to the user, we need to make the
+             decision on ignoring this expression based on its original source
+             location, as seen by the user, not based on where it was spliced in
+             by another prerocessor that ran before Bisect_ppx. *)
+          let file, line =
+            let start = Location.(loc.loc_start) in
+            Lexing.(start.pos_fname, start.pos_lnum)
+          in
+          Comments.get file
+          |> Comments.line_is_ignored line
 
     and get_index_of_point_at_location ~point_loc:loc =
       let point_offset = Location.(Lexing.(loc.loc_start.pos_cnum)) in
@@ -823,77 +823,77 @@ class instrumenter =
       if Coverage_attributes.has_off_attribute attrs then
         e
       else
-      let loc = e.pexp_loc in
-      let e' = super#expr e in
+        let loc = e.pexp_loc in
+        let e' = super#expr e in
 
-      match e'.pexp_desc with
-      | Pexp_let (rec_flag, bindings, e) ->
-        let bindings =
-          List.map (fun binding ->
-            Parsetree.{binding with pvb_expr =
-              instrument_expr binding.pvb_expr})
-          bindings
-        in
-        Exp.let_ ~loc ~attrs rec_flag bindings (instrument_expr e)
+        match e'.pexp_desc with
+        | Pexp_let (rec_flag, bindings, e) ->
+          let bindings =
+            List.map (fun binding ->
+              Parsetree.{binding with pvb_expr =
+                instrument_expr binding.pvb_expr})
+            bindings
+          in
+          Exp.let_ ~loc ~attrs rec_flag bindings (instrument_expr e)
 
-      | Pexp_poly (e, type_) ->
-        Exp.poly ~loc ~attrs (instrument_expr e) type_
+        | Pexp_poly (e, type_) ->
+          Exp.poly ~loc ~attrs (instrument_expr e) type_
 
-      | Pexp_fun (label, default_value, p, e) ->
-        let default_value =
-          match default_value with
-          | None -> None
-          | Some default_value -> Some (instrument_expr default_value)
-        in
-        Exp.fun_ ~loc ~attrs label default_value p (instrument_expr e)
+        | Pexp_fun (label, default_value, p, e) ->
+          let default_value =
+            match default_value with
+            | None -> None
+            | Some default_value -> Some (instrument_expr default_value)
+          in
+          Exp.fun_ ~loc ~attrs label default_value p (instrument_expr e)
 
-      | Pexp_apply (e_function, [label_1, e1; label_2, e2]) ->
-        begin match e_function with
-        | [%expr (&&)]
-        | [%expr (&)]
-        | [%expr (||)]
-        | [%expr (or)] ->
-          Exp.apply ~loc ~attrs e_function
-            [label_1, (instrument_expr e1); label_2, (instrument_expr e2)]
+        | Pexp_apply (e_function, [label_1, e1; label_2, e2]) ->
+          begin match e_function with
+          | [%expr (&&)]
+          | [%expr (&)]
+          | [%expr (||)]
+          | [%expr (or)] ->
+            Exp.apply ~loc ~attrs e_function
+              [label_1, (instrument_expr e1); label_2, (instrument_expr e2)]
 
-        | [%expr (|>)] ->
-          Exp.apply ~loc ~attrs e_function
-            [label_1, e1; label_2, (instrument_expr e2)]
+          | [%expr (|>)] ->
+            Exp.apply ~loc ~attrs e_function
+              [label_1, e1; label_2, (instrument_expr e2)]
+
+          | _ ->
+            e'
+          end
+
+        | Pexp_match (e, cases) ->
+          List.map instrument_case cases
+          |> Exp.match_ ~loc ~attrs e
+
+        | Pexp_function cases ->
+          List.map instrument_case cases
+          |> Exp.function_ ~loc ~attrs
+
+        | Pexp_try (e, cases) ->
+          List.map instrument_case cases
+          |> Exp.try_ ~loc ~attrs e
+
+        | Pexp_ifthenelse (condition, then_, else_) ->
+          Exp.ifthenelse ~loc ~attrs condition (instrument_expr then_)
+            (match else_ with
+            | Some e -> Some (instrument_expr e)
+            | None -> None)
+
+        | Pexp_sequence (e1, e2) ->
+          Exp.sequence ~loc ~attrs e1 (instrument_expr e2)
+
+        | Pexp_while (condition, body) ->
+          Exp.while_ ~loc ~attrs condition (instrument_expr body)
+
+        | Pexp_for (variable, initial, bound, direction, body) ->
+          Exp.for_
+            ~loc ~attrs variable initial bound direction (instrument_expr body)
 
         | _ ->
           e'
-        end
-
-      | Pexp_match (e, cases) ->
-        List.map instrument_case cases
-        |> Exp.match_ ~loc ~attrs e
-
-      | Pexp_function cases ->
-        List.map instrument_case cases
-        |> Exp.function_ ~loc ~attrs
-
-      | Pexp_try (e, cases) ->
-        List.map instrument_case cases
-        |> Exp.try_ ~loc ~attrs e
-
-      | Pexp_ifthenelse (condition, then_, else_) ->
-        Exp.ifthenelse ~loc ~attrs condition (instrument_expr then_)
-          (match else_ with
-          | Some e -> Some (instrument_expr e)
-          | None -> None)
-
-      | Pexp_sequence (e1, e2) ->
-        Exp.sequence ~loc ~attrs e1 (instrument_expr e2)
-
-      | Pexp_while (condition, body) ->
-        Exp.while_ ~loc ~attrs condition (instrument_expr body)
-
-      | Pexp_for (variable, initial, bound, direction, body) ->
-        Exp.for_
-          ~loc ~attrs variable initial bound direction (instrument_expr body)
-
-      | _ ->
-        e'
 
     (* Set to [true] upon encountering [[@@@coverage.off]], and back to
        [false] again upon encountering [[@@@coverage.on]]. *)
