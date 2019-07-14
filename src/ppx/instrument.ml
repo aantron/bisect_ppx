@@ -54,6 +54,50 @@ module Ast_mapper_class = Ast_mapper_class_405
 
 
 
+module Coverage_attributes :
+sig
+  val recognize :
+    Location.t -> string -> Parsetree.payload -> [ `None | `On | `Off ]
+  val has_off_attribute :
+    Parsetree.attributes -> bool
+end =
+struct
+  let recognize loc name payload =
+      let is_coverage_attribute =
+        name = "coverage" ||
+        (String.length name >= String.length "coverage." &&
+        String.sub name 0 (String.length "coverage.") = "coverage.")
+      in
+      if not is_coverage_attribute then
+        `None
+      else begin
+        if payload <> Parsetree.PStr [] then
+          Location.raise_errorf
+            ~loc "Coverage attribute should not have a payload.";
+
+        match name with
+        | "coverage.off" ->
+          `Off
+        | "coverage.on" ->
+          `On
+        | _ ->
+          Location.raise_errorf ~loc "Unrecognized coverage attribute %s." name
+      end
+
+    let has_off_attribute attributes =
+      (* Don't short-circuit the search, because we want to error-check all
+        attributes. *)
+      List.fold_left
+        (fun found_off ({Location.txt; loc}, payload) ->
+          match recognize loc txt payload with
+          | `None -> found_off
+          | `On -> Location.raise_errorf ~loc "coverage.on is not allowed here."
+          | `Off -> true)
+        false attributes
+end
+
+
+
 module Generated_code :
 sig
   type points
@@ -100,6 +144,9 @@ struct
       if Location.(loc.loc_ghost) then
         true
       else
+        if Coverage_attributes.has_off_attribute e.pexp_attributes then
+          true
+        else
         (* Retrieve the expression's file and line number. The file can be
            different from the input file to Bisect_ppx, in case of the [#line]
            directive.
@@ -735,41 +782,6 @@ class instrumenter =
   let instrument_class_field_kind =
     Generated_code.instrument_class_field_kind points in
 
-  let recognize_attribute loc name payload =
-    let is_coverage_attribute =
-      name = "coverage" ||
-      (String.length name >= String.length "coverage." &&
-       String.sub name 0 (String.length "coverage.") = "coverage.")
-    in
-    if not is_coverage_attribute then
-      `None
-    else begin
-      if payload <> Parsetree.PStr [] then
-        Location.raise_errorf
-          ~loc "Coverage attribute should not have a payload.";
-
-      match name with
-      | "coverage.off" ->
-        `Off
-      | "coverage.on" ->
-        `On
-      | _ ->
-        Location.raise_errorf ~loc "Unrecognized coverage attribute %s." name
-    end
-  in
-
-  let has_coverage_off_attribute attributes =
-    (* Don't short-circuit the search, because we want to error-check all
-       attributes. *)
-    List.fold_left
-      (fun found_off ({Location.txt; loc}, payload) ->
-        match recognize_attribute loc txt payload with
-        | `None -> found_off
-        | `On -> Location.raise_errorf ~loc "coverage.on is not allowed here."
-        | `Off -> true)
-      false attributes
-  in
-
   object (self)
     inherit Ast_mapper_class.mapper as super
 
@@ -807,8 +819,11 @@ class instrumenter =
         cf
 
     method! expr e =
-      let loc = e.pexp_loc in
       let attrs = e.pexp_attributes in
+      if Coverage_attributes.has_off_attribute attrs then
+        e
+      else
+      let loc = e.pexp_loc in
       let e' = super#expr e in
 
       match e'.pexp_desc with
@@ -914,8 +929,8 @@ class instrumenter =
                   false
               in
               let do_not_instrument =
-                do_not_instrument
-                  || has_coverage_off_attribute binding.pvb_attributes
+                do_not_instrument ||
+                  Coverage_attributes.has_off_attribute binding.pvb_attributes
               in
               if do_not_instrument then
                 binding
@@ -933,7 +948,7 @@ class instrumenter =
         Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
 
       | Pstr_attribute ({txt; _}, payload) ->
-        begin match recognize_attribute loc txt payload with
+        begin match Coverage_attributes.recognize loc txt payload with
         | `None ->
           ()
         | `Off ->
