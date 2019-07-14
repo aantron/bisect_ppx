@@ -6,13 +6,13 @@
 
 open OUnit2
 
-let _directory = "_scratch"
-let _coverage = "_coverage"
-let _preserve_directory = "_preserve"
+let directory = "_scratch"
+let coverage = "_coverage"
+let preserve_directory = "_preserve"
 
-let _test_context = ref None
+let test_context = ref None
 
-let _read_file name =
+let read_file name =
   let buffer = Buffer.create 4096 in
   let channel = open_in name in
 
@@ -30,7 +30,7 @@ let _read_file name =
     close_in_noerr channel;
     raise exn
 
-let _command_failed ?status command =
+let command_failed ?status command =
   match status with
   | None ->
     Printf.sprintf "'%s' did not exit" command |> assert_failure
@@ -38,70 +38,70 @@ let _command_failed ?status command =
     let header = Printf.sprintf "'%s' failed with status %i" command v in
     let full_message =
       try
-        let output = _read_file "output" in
+        let output = read_file "output" in
         Printf.sprintf "%s\nOutput:\n\n%s" header output
       with Sys_error _ ->
         header
     in
     assert_failure full_message
 
-let _run_int command =
+let run_int command =
   begin
-    match !_test_context with
+    match !test_context with
     | None -> ()
     | Some context -> logf context `Info "Running '%s'" command
   end;
 
   match Unix.system command with
   | Unix.WEXITED v -> v
-  | _ -> _command_failed command
+  | _ -> command_failed command
 
 let run command =
-  let v = _run_int command in
-  if v <> 0 then _command_failed command ~status:v
+  let v = run_int command in
+  if v <> 0 then command_failed command ~status:v
 
-let _run_bool command = _run_int command = 0
+let run_bool command = run_int command = 0
 
-let _with_directory context f =
-  if Sys.file_exists _directory then run ("rm -r " ^ _directory);
-  Unix.mkdir _directory 0o755;
+let with_directory context f =
+  if Sys.file_exists directory then run ("rm -r " ^ directory);
+  Unix.mkdir directory 0o755;
 
   let old_wd = Sys.getcwd () in
-  let new_wd = Filename.concat old_wd _directory in
+  let new_wd = Filename.concat old_wd directory in
   Sys.chdir new_wd;
 
-  _test_context := Some context;
+  test_context := Some context;
 
   let restore () =
-    _test_context := None;
+    test_context := None;
     Sys.chdir old_wd;
 
     let move =
-      if Sys.file_exists _coverage then true
+      if Sys.file_exists coverage then true
       else
-        try Unix.mkdir _coverage 0o755; true
+        try Unix.mkdir coverage 0o755; true
         with _ -> false
     in
 
     if move then begin
       let files =
-        Sys.readdir _directory
+        Sys.readdir directory
         |> Array.to_list
         |> List.filter (fun s -> Filename.check_suffix s ".out.meta")
       in
 
       let rec destination_file n =
         let candidate =
-          Printf.sprintf "meta%04d.out" n |> Filename.concat _coverage in
+          Printf.sprintf "meta%04d.out" n |> Filename.concat coverage in
         if Sys.file_exists candidate then destination_file (n + 1)
         else candidate
       in
 
       files |> List.iter (fun source ->
-        Sys.rename (Filename.concat _directory source) (destination_file 0))
+        Sys.rename (Filename.concat directory source) (destination_file 0))
     end;
 
-    run ("rm -r " ^ _directory)
+    run ("rm -r " ^ directory)
   in
 
   logf context `Info "In directory '%s'" new_wd;
@@ -120,10 +120,10 @@ let with_bisect_args arguments =
 let with_bisect () = with_bisect_args ""
 
 let test name f =
-  name >:: fun context -> _with_directory context f
+  name >:: fun context -> with_directory context f
 
 let have_package package =
-  _run_bool ("ocamlfind query " ^ package ^ "> /dev/null 2> /dev/null")
+  run_bool ("ocamlfind query " ^ package ^ "> /dev/null 2> /dev/null")
 
 let ocamlc_version () =
   Scanf.sscanf Sys.ocaml_version "%u.%u%[.]%[0-9]"
@@ -142,7 +142,7 @@ let if_package package =
 let compile ?(r = "") arguments source =
   let source_copy = Filename.basename source in
 
-  let intermediate = Filename.dirname source = _directory in
+  let intermediate = Filename.dirname source = directory in
   begin
     if not intermediate then
       let source_actual = Filename.concat Filename.parent_dir_name source in
@@ -161,10 +161,10 @@ let report ?(f = "bisect*.out") ?(r = "") arguments =
     "../../../../install/default/bin/bisect-ppx-report %s %s %s" arguments f r
   |> run
 
-let _preserve file destination =
+let preserve file destination =
   let destination =
     destination
-    |> Filename.concat _preserve_directory
+    |> Filename.concat preserve_directory
     |> Filename.concat Filename.parent_dir_name
   in
 
@@ -185,19 +185,19 @@ let diff ?preserve_as reference =
       preserve_as "'actual output'" reference_actual
   in
 
-  let status = _run_int (command ^ " > /dev/null") in
+  let status = run_int (command ^ " > /dev/null") in
   match status with
   | 0 -> ()
   | 1 ->
-    _preserve "output" preserve_as;
-    _run_int (command ^ " > delta") |> ignore;
-    let delta = _read_file "delta" in
+    preserve "output" preserve_as;
+    run_int (command ^ " > delta") |> ignore;
+    let delta = read_file "delta" in
     Printf.sprintf "Difference against '%s':\n\n%s" preserve_as delta
     |> assert_failure
-  | _ -> _command_failed command ~status
+  | _ -> command_failed command ~status
 
 let normalize_source source normalized =
-  let source = _read_file source in
+  let source = read_file source in
   let normalized_file = open_out normalized in
   try
     let lexbuf = Lexing.from_string source in
