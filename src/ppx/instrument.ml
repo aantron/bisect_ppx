@@ -35,8 +35,8 @@
 
 
 (* From ocaml-migrate-parsetree. *)
-module Ast = Migrate_parsetree.Ast_405
-module Ast_405 = Ast
+module Ast = Migrate_parsetree.Ast_408
+module Ast_408 = Ast
 (* Workaround for
   https://travis-ci.org/aantron/bisect_ppx/jobs/538321848#L588 *)
 
@@ -49,8 +49,8 @@ module Str = Ast.Ast_helper.Str
 module Cf = Ast.Ast_helper.Cf
 
 (* From ppx_tools_versioned. *)
-module Ast_convenience = Ast_convenience_405
-module Ast_mapper_class = Ast_mapper_class_405
+module Ast_convenience = Ast_convenience_408
+module Ast_mapper_class = Ast_mapper_class_408
 
 
 
@@ -395,8 +395,9 @@ struct
       |> fun nested_match ->
         Exp.attr
           nested_match
-          (Location.mkloc "ocaml.warning" loc,
-            PStr [[%stri "-4-8-9-11-26-27-28"]])
+          {attr_name = Location.mkloc "ocaml.warning" loc;
+           attr_payload = PStr [[%stri "-4-8-9-11-26-27-28"]];
+           attr_loc = loc}
       |> fun nested_match_with_attribute ->
         [%expr [%e nested_match_with_attribute]; [%e case.pc_rhs]])
           [@metaloc loc]
@@ -718,8 +719,8 @@ struct
       (* This requires the assumption that the mangled module name doesn't have
          any periods. *)
       Str.open_ ~loc @@
-        Opn.mk ~loc
-          (Ast_convenience.lid ~loc mangled_module_name)
+        Opn.mk ~loc @@
+          Mod.ident ~loc (Ast_convenience.lid ~loc mangled_module_name)
     in
 
     [generated_module; module_open]
