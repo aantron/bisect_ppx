@@ -32,8 +32,18 @@ let _read_file name =
 
 let _command_failed ?status command =
   match status with
-  | None -> Printf.sprintf "'%s' did not exit" command |> failwith
-  | Some v -> Printf.sprintf "'%s' failed with status %i" command v |> failwith
+  | None ->
+    Printf.sprintf "'%s' did not exit" command |> assert_failure
+  | Some v ->
+    let header = Printf.sprintf "'%s' failed with status %i" command v in
+    let full_message =
+      try
+        let output = _read_file "output" in
+        Printf.sprintf "%s\nOutput:\n\n%s" header output
+      with Sys_error _ ->
+        header
+    in
+    assert_failure full_message
 
 let _run_int command =
   begin
