@@ -48,15 +48,13 @@ let switches = [
 
 
 
-open Migrate_parsetree
-open Ppx_tools_405
-
 let () =
-  Driver.register ~name:"bisect_ppx" ~args:switches ~position:100
-    Versions.ocaml_405 begin fun _config _cookies ->
+  Migrate_parsetree.Driver.register
+    ~name:"bisect_ppx" ~args:switches ~position:100
+    Migrate_parsetree.Versions.ocaml_408 begin fun _config _cookies ->
       match enabled () with
       | `Enabled ->
-        Ast_mapper_class.to_mapper (new Instrument.instrumenter)
+        Ppx_tools_408.Ast_mapper_class.to_mapper (new Instrument.instrumenter)
       | `Disabled ->
-        Ast_405.shallow_identity
+        Migrate_parsetree.Ast_408.shallow_identity
     end

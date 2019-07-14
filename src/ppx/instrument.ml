@@ -35,8 +35,8 @@
 
 
 (* From ocaml-migrate-parsetree. *)
-module Ast = Migrate_parsetree.Ast_405
-module Ast_405 = Ast
+module Ast = Migrate_parsetree.Ast_408
+module Ast_408 = Ast
 (* Workaround for
   https://travis-ci.org/aantron/bisect_ppx/jobs/538321848#L588 *)
 
@@ -49,8 +49,8 @@ module Str = Ast.Ast_helper.Str
 module Cf = Ast.Ast_helper.Cf
 
 (* From ppx_tools_versioned. *)
-module Ast_convenience = Ast_convenience_405
-module Ast_mapper_class = Ast_mapper_class_405
+module Ast_convenience = Ast_convenience_408
+module Ast_mapper_class = Ast_mapper_class_408
 
 
 
@@ -78,11 +78,14 @@ struct
     (* Don't short-circuit the search, because we want to error-check all
        attributes. *)
     List.fold_left
-      (fun found_off ({Location.txt; loc}, payload) ->
-        match recognize loc txt payload with
-        | `None -> found_off
-        | `On -> Location.raise_errorf ~loc "coverage.on is not allowed here."
-        | `Off -> true)
+      (fun found_off {Parsetree.attr_name; attr_payload; attr_loc} ->
+        match recognize attr_loc attr_name.txt attr_payload with
+        | `None ->
+          found_off
+        | `On ->
+          Location.raise_errorf ~loc:attr_loc "coverage.on is not allowed here."
+        | `Off ->
+          true)
       false attributes
 end
 
@@ -432,8 +435,9 @@ struct
       |> fun nested_match ->
         Exp.attr
           nested_match
-          (Location.mkloc "ocaml.warning" loc,
-            PStr [[%stri "-4-8-9-11-26-27-28"]])
+          {attr_name = Location.mkloc "ocaml.warning" loc;
+           attr_payload = PStr [[%stri "-4-8-9-11-26-27-28"]];
+           attr_loc = loc}
       |> fun nested_match_with_attribute ->
         [%expr [%e nested_match_with_attribute]; [%e case.pc_rhs]])
           [@metaloc loc]
@@ -755,8 +759,8 @@ struct
       (* This requires the assumption that the mangled module name doesn't have
          any periods. *)
       Str.open_ ~loc @@
-        Opn.mk ~loc
-          (Ast_convenience.lid ~loc mangled_module_name)
+        Opn.mk ~loc @@
+          Mod.ident ~loc (Ast_convenience.lid ~loc mangled_module_name)
     in
 
     [generated_module; module_open]
@@ -937,8 +941,10 @@ class instrumenter =
         else
         Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
 
-      | Pstr_attribute ({txt; _}, payload) ->
-        begin match Coverage_attributes.recognize loc txt payload with
+      | Pstr_attribute {attr_name; attr_payload; _} ->
+        let kind =
+          Coverage_attributes.recognize loc attr_name.txt attr_payload in
+        begin match kind with
         | `None ->
           ()
         | `Off ->
