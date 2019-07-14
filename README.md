@@ -1,4 +1,4 @@
-# Bisect_ppx &nbsp; [![version 1.4.1][version]][releases] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
+# Bisect_ppx &nbsp; [![version 1.4.1][version]][releases] [![Travis status][travis-img]][travis]
 
 [Bisect_ppx][self] is a code coverage tool for OCaml. It helps you test
 thoroughly by showing which parts of your code are **not** tested.
@@ -16,8 +16,6 @@ generates for itself.
 [self-coverage]: http://aantron.github.io/bisect_ppx/coverage/
 [travis]: https://travis-ci.org/aantron/bisect_ppx/branches
 [travis-img]: https://img.shields.io/travis/aantron/bisect_ppx/master.svg
-[coveralls]: https://coveralls.io/github/aantron/bisect_ppx?branch=master
-[coveralls-img]: https://img.shields.io/coveralls/aantron/bisect_ppx/master.svg
 [sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
 
 
