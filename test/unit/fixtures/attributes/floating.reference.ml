@@ -10,15 +10,15 @@ module Bisect_visit___floating___ml =
   end
 open Bisect_visit___floating___ml
 let instrumented = ___bisect_visit___ 0; ()
-[@@@coverage.off ]
+[@@@coverage off]
 let not_instrumented = ()
 module Nested_1 = struct let also_not_instrumented = () end
-[@@@coverage.on ]
+[@@@coverage on]
 let instrumented_again = ___bisect_visit___ 1; ()
 module Nested_2 =
   struct
     let instrumented_3 = ___bisect_visit___ 2; ()
-    [@@@coverage.off ]
+    [@@@coverage off]
     let not_instrumented_3 = ()
   end
 let instrumented_4 = ___bisect_visit___ 3; ()

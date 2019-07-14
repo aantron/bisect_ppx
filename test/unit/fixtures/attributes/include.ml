@@ -2,9 +2,9 @@ module Foo =
 struct
   let instrumented = ()
 
-  [@@@coverage.off]
+  [@@@coverage off]
   let not_instrumented = ()
 end
 
-[@@@coverage.off]
+[@@@coverage off]
 include Foo

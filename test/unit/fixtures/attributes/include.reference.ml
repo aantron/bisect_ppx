@@ -12,8 +12,8 @@ open Bisect_visit___include___ml
 module Foo =
   struct
     let instrumented = ___bisect_visit___ 0; ()
-    [@@@coverage.off ]
+    [@@@coverage off]
     let not_instrumented = ()
   end
-[@@@coverage.off ]
+[@@@coverage off]
 include Foo

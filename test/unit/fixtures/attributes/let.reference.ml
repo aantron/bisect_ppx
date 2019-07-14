@@ -10,9 +10,9 @@ module Bisect_visit___let___ml =
   end
 open Bisect_visit___let___ml
 let instrumented = ___bisect_visit___ 0; ()
-let not_instrumented = ()[@@coverage.off ]
+let not_instrumented = ()[@@coverage off]
 let instrumented_again = ___bisect_visit___ 1; ()
 let instrumented_3 = ___bisect_visit___ 2; ()
-and not_instrumented_2 = ()[@@coverage.off ]
-let not_instrumented_3 = ()[@@coverage.off ]
+and not_instrumented_2 = ()[@@coverage off]
+let not_instrumented_3 = ()[@@coverage off]
 and instrumented_4 = ___bisect_visit___ 3; ()

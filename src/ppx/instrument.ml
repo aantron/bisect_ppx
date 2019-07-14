@@ -63,26 +63,16 @@ sig
 end =
 struct
   let recognize loc name payload =
-    let is_coverage_attribute =
-      name = "coverage" ||
-      (String.length name >= String.length "coverage." &&
-      String.sub name 0 (String.length "coverage.") = "coverage.")
-    in
-    if not is_coverage_attribute then
+    if name <> "coverage" then
       `None
-    else begin
-      if payload <> Parsetree.PStr [] then
-        Location.raise_errorf
-          ~loc "Coverage attribute should not have a payload.";
-
-      match name with
-      | "coverage.off" ->
+    else
+      match payload with
+      | Parsetree.PStr [%str off] ->
         `Off
-      | "coverage.on" ->
+      | PStr [%str on] ->
         `On
       | _ ->
-        Location.raise_errorf ~loc "Unrecognized coverage attribute %s." name
-    end
+        Location.raise_errorf ~loc "Bad payload in coverage attribute."
 
   let has_off_attribute attributes =
     (* Don't short-circuit the search, because we want to error-check all

@@ -1,6 +1,6 @@
 let instrumented = ()
 
-[@@@coverage.off]
+[@@@coverage off]
 
 let not_instrumented = ()
 
@@ -9,7 +9,7 @@ struct
   let also_not_instrumented = ()
 end
 
-[@@@coverage.on]
+[@@@coverage on]
 
 let instrumented_again = ()
 
@@ -17,7 +17,7 @@ module Nested_2 =
 struct
   let instrumented_3 = ()
 
-  [@@@coverage.off]
+  [@@@coverage off]
 
   let not_instrumented_3 = ()
 end
