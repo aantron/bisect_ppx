@@ -245,16 +245,16 @@ a[id]:target + .some-visited {
     background-color: rgba(0, 255, 0, 0.2);
 }
 
-#code span {
+code span {
     cursor: default;
 }
 
-#code span[data-count] {
+code span[data-count] {
     display: inline-block;
     background-color: rgba(64, 192, 64, 0.2);
 }
 
-#code span[data-count="0"] {
+code span[data-count="0"] {
     display: inline-block;
     background-color: rgba(255, 128, 128, 0.3);
 }
@@ -304,4 +304,50 @@ a[id]:target + .some-visited {
     text-decoration: none;
     border-bottom: 1px solid #ddd;
     color: inherit;
+}
+
+.hljs-link,
+.hljs-comment,
+.hljs-quote {
+    color: #6a737d;
+}
+
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+    color: #d73a49;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+    color: #005cc5;
+}
+
+.hljs-regexp,
+.hljs-string,
+.hljs-doctag {
+    color: #032f62;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+    color: #900;
+}
+
+.hljs-type,
+.hljs-class .hljs-title {
+    color: #6f42c1;
+}
+
+.hljs-meta,
+.hljs-tag,
+.hljs-name,
+.hljs-attribute {
+    color: #22863a;
 }

@@ -10,18 +10,18 @@ let css_variables =
    "some_visited_color", "#ffd";
    "highlight_color", "#a0fbff"]
 
-let output_css filename =
+let output_templated_css filename =
   Bisect.Common.try_out_channel
     false
     filename
     (fun channel ->
       Report_utils.output_strings [Assets.css] css_variables channel)
 
-let output_script filename =
+let output_file content filename =
   Bisect.Common.try_out_channel
     false
     filename
-    (fun channel -> Report_utils.output_strings [Assets.js] [] channel)
+    (fun channel -> output_string channel content)
 
 let html_footer =
   let time = Report_utils.current_time () in
@@ -184,6 +184,8 @@ let output_html
       make_path_to_report_root "" (Filename.dirname in_file) in
     let style_css = Filename.concat path_to_report_root "coverage.css" in
     let coverage_js = Filename.concat path_to_report_root "coverage.js" in
+    let highlight_js =
+      Filename.concat path_to_report_root "highlight.pack.js" in
     let index_html = Filename.concat path_to_report_root "index.html" in
     (try
       let lines, line_count =
@@ -223,6 +225,8 @@ let output_html
            "  <head>" ;
            "    <title>$(title)</title>" ;
            "    <link rel=\"stylesheet\" href=\"$(style_css)\" />" ;
+           "    <script src=\"$(highlight_js)\"></script>";
+           "    <script>hljs.initHighlightingOnLoad();</script>";
            "    <meta charset=\"utf-8\" />" ;
            "  </head>" ;
            "  <body>" ;
@@ -240,6 +244,7 @@ let output_html
           "title", title ;
           "percentage", Printf.sprintf "%.02f" (percentage stats);
           "style_css", style_css;
+          "highlight_js", highlight_js;
           "index_html", index_html ]
         out_channel;
 
@@ -294,11 +299,15 @@ let output_html
            "padded", padded]
           out_channel);
 
-      Report_utils.output_strings
-        ["</pre>";
-         "        <pre id=\"code\">"]
-        []
-        out_channel;
+      let syntax =
+        if Filename.check_suffix basename ".re" then
+          "reasonml"
+        else
+          "ocaml"
+      in
+
+      output_string out_channel "</pre>\n";
+      Printf.fprintf out_channel "<pre><code class=\"%s\">" syntax;
 
       (* Code lines. *)
       lines |> List.iter (fun (_, markup, _, _) ->
@@ -306,7 +315,7 @@ let output_html
         output_char out_channel '\n');
 
       Report_utils.output_strings
-        ["</pre>";
+        ["</code></pre>";
          "      </div>";
          "    </div>";
          "    <div id=\"footer\">$(footer)</div>";
@@ -341,5 +350,6 @@ let output verbose dir tab_size title resolver data points =
       data
       [] in
   output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);
-  output_script (Filename.concat dir "coverage.js");
-  output_css (Filename.concat dir "coverage.css")
+  output_file Assets.js (Filename.concat dir "coverage.js");
+  output_file Assets.highlight_js (Filename.concat dir "highlight.pack.js");
+  output_templated_css (Filename.concat dir "coverage.css")
