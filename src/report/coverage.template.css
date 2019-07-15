@@ -245,10 +245,6 @@ a[id]:target + .some-visited {
     background-color: rgba(0, 255, 0, 0.2);
 }
 
-code span {
-    cursor: default;
-}
-
 code span[data-count] {
     display: inline-block;
     background-color: rgba(64, 192, 64, 0.2);
@@ -257,18 +253,6 @@ code span[data-count] {
 code span[data-count="0"] {
     display: inline-block;
     background-color: rgba(255, 128, 128, 0.3);
-}
-
-#tool-tip {
-    display: none;
-    position: fixed;
-    padding: 0 0.25em;
-    background-color: black;
-    color: white;
-}
-
-#tool-tip.visible {
-    display: block;
 }
 
 #files {

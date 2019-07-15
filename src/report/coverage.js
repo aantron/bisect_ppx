@@ -1,35 +1,3 @@
-function tool_tip_element()
-{
-    var element = document.querySelector("#tool-tip");
-    if (element === null) {
-        element = document.createElement("div");
-        element.id = "tool-tip";
-        document.querySelector("body").appendChild(element);
-    }
-
-    return element;
-};
-
-var tool_tip = tool_tip_element();
-
-function attach_tool_tip()
-{
-    document.querySelector("body").onmousemove = function (event)
-    {
-        if (event.target.dataset.count)
-        {
-            tool_tip.textContent = event.target.dataset.count;
-            tool_tip.classList.add("visible");
-            tool_tip.style.top = event.clientY + 7 + "px";
-            tool_tip.style.left = event.clientX + 7 + "px";
-        }
-        else
-            tool_tip.classList.remove("visible");
-    }
-};
-
-attach_tool_tip();
-
 function move_line_to_cursor(cursor_y, line_number)
 {
     var id = "L" + line_number;
