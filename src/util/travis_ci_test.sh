@@ -36,7 +36,6 @@ echo "Install dependencies"
 echo
 opam pin add -y --no-action bisect_ppx .
 opam install -y --deps-only bisect_ppx
-opam install -y ocamlbuild
 
 echo
 echo "Compiling"
@@ -49,7 +48,7 @@ echo
 make test
 
 echo
-echo "Testing package usage and Ocamlbuild plugin"
+echo "Testing package usage"
 echo
 make clean-usage usage
 
@@ -61,6 +60,3 @@ opam pin add -yn bisect_ppx .
 opam install -y bisect_ppx
 ocamlfind query bisect_ppx bisect_ppx.runtime
 which bisect-ppx-report
-opam pin add -yn bisect_ppx-ocamlbuild .
-opam install -y bisect_ppx-ocamlbuild
-ocamlfind query bisect_ppx-ocamlbuild

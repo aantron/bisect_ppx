@@ -140,8 +140,6 @@ also happens to be open source.
 Besides proprietary licenses, MPL is compatible with BSD/MIT/Apache- and
 (L)GPL-licensed projects. See the [MPL 2.0 FAQ][mpl-faq].
 
-The Ocamlbuild plugin is dedicated to the public domain.
-
 [license]: https://github.com/aantron/bisect_ppx/blob/master/LICENSE
 [mpl-faq]: https://www.mozilla.org/en-US/MPL/2.0/FAQ/
 
