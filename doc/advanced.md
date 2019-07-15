@@ -156,7 +156,11 @@ comments, are excluded.
 <a id="ExcludingValues"></a>
 #### Files and top-level values
 
-You can pass the `-exclude-file` option to the Bisect_ppx preprocessor:
+Whole files can be excluded by placing `[@@@coverage exclude file]` anywhere in
+their top-level module.
+
+If you have generated code, you can pass the `-exclude-file` option to the
+Bisect_ppx preprocessor:
 
 ```
 ocamlfind c \

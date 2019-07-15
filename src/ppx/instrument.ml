@@ -56,37 +56,56 @@ module Ast_mapper_class = Ast_mapper_class_408
 
 module Coverage_attributes :
 sig
-  val recognize :
-    Location.t -> string -> Parsetree.payload -> [ `None | `On | `Off ]
-  val has_off_attribute :
-    Parsetree.attributes -> bool
+  val recognize : Parsetree.attribute -> [ `None | `On | `Off | `Exclude_file ]
+  val has_off_attribute : Parsetree.attributes -> bool
+  val has_exclude_file_attribute : Parsetree.structure -> bool
 end =
 struct
-  let recognize loc name payload =
-    if name <> "coverage" then
+  let recognize {Parsetree.attr_name; attr_payload; attr_loc} =
+    if attr_name.txt <> "coverage" then
       `None
     else
-      match payload with
+      match attr_payload with
       | Parsetree.PStr [%str off] ->
         `Off
       | PStr [%str on] ->
         `On
+      | PStr [%str exclude file] ->
+        `Exclude_file
       | _ ->
-        Location.raise_errorf ~loc "Bad payload in coverage attribute."
+        Location.raise_errorf ~loc:attr_loc "Bad payload in coverage attribute."
 
   let has_off_attribute attributes =
     (* Don't short-circuit the search, because we want to error-check all
        attributes. *)
     List.fold_left
-      (fun found_off {Parsetree.attr_name; attr_payload; attr_loc} ->
-        match recognize attr_loc attr_name.txt attr_payload with
+      (fun found_off attribute ->
+        match recognize attribute with
         | `None ->
           found_off
-        | `On ->
-          Location.raise_errorf ~loc:attr_loc "coverage.on is not allowed here."
         | `Off ->
-          true)
+          true
+        | `On ->
+          Location.raise_errorf
+            ~loc:attribute.attr_loc "coverage on is not allowed here."
+        | `Exclude_file ->
+          (* The only place where [@@@coverage exclude file] is allowed is the
+             top-level module of the file. However, if it is there, it will
+             already have been found by a prescan, Bisect will not be
+             instrumenting the file, and this function [has_off_attribute] won't
+             be called. So, if this function ever finds this attribute, it is in
+             a nested module, or elsewhere where it is not allowed. *)
+          Location.raise_errorf
+            ~loc:attribute.attr_loc
+            "coverage exclude file is not allowed here.")
       false attributes
+
+  let has_exclude_file_attribute structure =
+    structure |>
+    List.exists (function
+      | {Parsetree.pstr_desc = Pstr_attribute attribute; _}
+        when recognize attribute = `Exclude_file -> true
+      | _ -> false)
 end
 
 
@@ -941,20 +960,26 @@ class instrumenter =
         else
         Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
 
-      | Pstr_attribute {attr_name; attr_payload; _} ->
-        let kind =
-          Coverage_attributes.recognize loc attr_name.txt attr_payload in
+      | Pstr_attribute attribute ->
+        let kind = Coverage_attributes.recognize attribute in
         begin match kind with
         | `None ->
           ()
         | `Off ->
           if structure_instrumentation_suppressed then
-            Location.raise_errorf ~loc "Coverage is already off.";
+            Location.raise_errorf
+              ~loc:attribute.attr_loc "Coverage is already off.";
           structure_instrumentation_suppressed <- true
         | `On ->
           if not structure_instrumentation_suppressed then
-            Location.raise_errorf ~loc "Coverage is already on.";
+            Location.raise_errorf
+              ~loc:attribute.attr_loc "Coverage is already on.";
           structure_instrumentation_suppressed <- false
+        | `Exclude_file ->
+          (* See comment in [Coverage_attributes.has_off_attribute] for
+             reasoning. *)
+          Location.raise_errorf
+            ~loc:attribute.attr_loc "coverage exclude file is not allowed here."
         end;
         si
 
@@ -1007,23 +1032,23 @@ class instrumenter =
              excluded from instrumentation before proceeding. *)
           saw_top_level_structure_or_signature <- true;
 
+          let path = !Location.input_name in
+
+          let file_should_not_be_instrumented =
           (* Bisect_ppx is hardcoded to ignore files with certain names. If we
              have one of these, return the AST uninstrumented. In particular, do
              not recurse into it. *)
           let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
           let always_ignore_basenames = [".ocamlinit"; "topfind"] in
-          let always_ignore path =
+
             List.mem path always_ignore_paths ||
-            List.mem (Filename.basename path) always_ignore_basenames
+            List.mem (Filename.basename path) always_ignore_basenames ||
+            Exclusions.contains_file path ||
+            Coverage_attributes.has_exclude_file_attribute ast
           in
 
-          if always_ignore !Location.input_name then
+          if file_should_not_be_instrumented then
             ast
-
-          else
-            (* The file might also be excluded by the user. *)
-            if Exclusions.contains_file !Location.input_name then
-              ast
 
             else begin
               (* This file should be instrumented. Traverse the AST recursively,
@@ -1032,8 +1057,7 @@ class instrumenter =
                  points in this file. *)
               let instrumented_ast = super#structure ast in
               let runtime_initialization =
-                Generated_code.runtime_initialization
-                  points !Location.input_name
+                Generated_code.runtime_initialization points path
               in
               runtime_initialization @ instrumented_ast
             end
