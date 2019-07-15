@@ -50,6 +50,8 @@ make test
 echo
 echo "Testing package usage"
 echo
+# Reason has 4.08 support in master.
+opam pin add -y reason --dev-repo
 make clean-usage usage
 
 echo
