@@ -28,7 +28,7 @@ matrix:
 
   fast_finish: true
 
-script: bash -e ./src/util/travis_ci_test.sh
+script: bash -e ./test/travis.sh
 
 cache:
   directories:
