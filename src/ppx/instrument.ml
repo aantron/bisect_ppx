@@ -1035,11 +1035,11 @@ class instrumenter =
           let path = !Location.input_name in
 
           let file_should_not_be_instrumented =
-          (* Bisect_ppx is hardcoded to ignore files with certain names. If we
-             have one of these, return the AST uninstrumented. In particular, do
-             not recurse into it. *)
-          let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
-          let always_ignore_basenames = [".ocamlinit"; "topfind"] in
+            (* Bisect_ppx is hardcoded to ignore files with certain names. If we
+               have one of these, return the AST uninstrumented. In particular,
+               do not recurse into it. *)
+            let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
+            let always_ignore_basenames = [".ocamlinit"; "topfind"] in
 
             List.mem path always_ignore_paths ||
             List.mem (Filename.basename path) always_ignore_basenames ||
@@ -1050,17 +1050,17 @@ class instrumenter =
           if file_should_not_be_instrumented then
             ast
 
-            else begin
-              (* This file should be instrumented. Traverse the AST recursively,
-                 then prepend some generated code for initializing the
-                 Bisect_ppx runtime and telling it about the instrumentation
-                 points in this file. *)
-              let instrumented_ast = super#structure ast in
-              let runtime_initialization =
-                Generated_code.runtime_initialization points path
-              in
-              runtime_initialization @ instrumented_ast
-            end
+          else begin
+            (* This file should be instrumented. Traverse the AST recursively,
+               then prepend some generated code for initializing the Bisect_ppx
+               runtime and telling it about the instrumentation points in this
+               file. *)
+            let instrumented_ast = super#structure ast in
+            let runtime_initialization =
+              Generated_code.runtime_initialization points path
+            in
+            runtime_initialization @ instrumented_ast
+          end
         end
       in
 
