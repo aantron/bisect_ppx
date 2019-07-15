@@ -48,7 +48,7 @@ also available for [Ocamlbuild][ocamlbuild], [ocamlfind][ocamlfind], and
 
 4. Generate the coverage report.
 
-        bisect-ppx-report -I _build/default/ -html coverage/ `find . -name 'bisect*.out'`
+        bisect-ppx-report -I _build/default/ -html _coverage/ `find . -name 'bisect*.out'`
 
 5. Open `coverage/index.html`!
 
