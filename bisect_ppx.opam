@@ -2,7 +2,7 @@ opam-version: "2.0"
 
 synopsis: "Code coverage for OCaml"
 version: "dev"
-license: "MPL2"
+license: "MIT"
 homepage: "https://github.com/aantron/bisect_ppx"
 doc: "https://github.com/aantron/bisect_ppx"
 bug-reports: "https://github.com/aantron/bisect_ppx/issues"

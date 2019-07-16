@@ -124,29 +124,6 @@ A small sample of projects using Bisect_ppx:
 
 <br>
 
-## License
-
-Bisect_ppx is available under the Mozilla Public License 2.0 (MPL). To
-summarize, you can incorporate Bisect_ppx into proprietary projects. If you make
-modifications to Bisect_ppx, you have to open-source them. The rest of your
-project remains proprietary.
-
-Essentially, this is like the BSD or MIT licenses, except that if you include
-a customized Bisect_ppx in a release (as opposed to private use), you have to
-make the altered source visible. This can be done by contributing the changes
-back, keeping Bisect_ppx in a visible fork, or if your bigger project itself
-also happens to be open source.
-
-Besides proprietary licenses, MPL is compatible with BSD/MIT/Apache- and
-(L)GPL-licensed projects. See the [MPL 2.0 FAQ][mpl-faq].
-
-[license]: https://github.com/aantron/bisect_ppx/blob/master/LICENSE
-[mpl-faq]: https://www.mozilla.org/en-US/MPL/2.0/FAQ/
-
-
-
-<br>
-
 ## Contributing
 
 Bug reports and pull requests are warmly welcome. Bisect_ppx is developed on
