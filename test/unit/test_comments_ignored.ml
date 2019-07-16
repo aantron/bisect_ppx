@@ -8,4 +8,4 @@ open Test_helpers
 
 let tests =
   compile_compare (fun () ->
-    with_bisect_args "-no-comment-parsing") "comments-ignored"
+    with_bisect_args "--no-comment-parsing") "comments-ignored"

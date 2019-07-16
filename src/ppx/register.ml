@@ -26,25 +26,53 @@ let conditional_exclude_file filename =
 
 let switches = [
   ("-exclude",
-  Arg.String Exclusions.add,
-  "<pattern>  Exclude functions matching pattern") ;
+  Arg.String (fun s ->
+    prerr_endline "bisect_ppx argument '-exclude' is deprecated.";
+    prerr_endline "Use '--exclude' instead.";
+    Exclusions.add s),
+  " Deprecated") ;
+
+  ("--exclude",
+   Arg.String Exclusions.add,
+   "<pattern>  Exclude functions matching pattern");
 
   ("-exclude-file",
-  Arg.String conditional_exclude_file,
-  "<filename>  Exclude functions listed in given file") ;
+  Arg.String (fun s ->
+    prerr_endline "bisect_ppx argument '-exclude-file' is deprecated.";
+    prerr_endline "Use '--exclude-file' instead.";
+    conditional_exclude_file s),
+  " Deprecated") ;
+
+  ("--exclude-file",
+   Arg.String conditional_exclude_file,
+   "<filename>  Exclude functions listed in given file");
 
   ("-mode",
   (Arg.Symbol (["safe"; "fast"; "faster"], fun _ ->
-    prerr_endline "Bisect_ppx argument '-mode' is deprecated.")),
-  "  Deprecated") ;
+    prerr_endline "bisect_ppx argument '-mode' is deprecated.")),
+  " Deprecated") ;
 
   ("-conditional",
+   Arg.Unit (fun () ->
+    prerr_endline "bisect_ppx argument '-conditional' is deprecated.";
+    prerr_endline "Use '--conditional' instead.";
+    conditional := true),
+   " Deprecated");
+
+  ("--conditional",
   Arg.Set conditional,
-  "  Do not instrument unless environment variable BISECT_ENABLE is YES");
+  " Do not instrument unless environment variable BISECT_ENABLE is YES");
 
   ("-no-comment-parsing",
+   Arg.Unit (fun () ->
+    prerr_endline "bisect_ppx argument '-no-comment-parsing' is deprecated.";
+    prerr_endline "Use '--no-comment-parsing' instead.";
+    Comments.no_comment_parsing := true),
+  " Deprecated");
+
+  ("--no-comment-parsing",
   Arg.Set Comments.no_comment_parsing,
-  "  Do not parse source files for BISECT-* comments");
+  " Do not parse source files for BISECT-* comments");
 ]
 
 

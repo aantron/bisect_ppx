@@ -17,23 +17,23 @@ let test name f =
 
 let tests = "report" >::: [
   test "csv" (fun () ->
-    report "-csv output";
+    report "--csv output";
     diff "fixtures/report/reference.csv");
 
   test "dump" (fun () ->
-    report "-dump output";
+    report "--dump output";
     diff "fixtures/report/reference.dump");
 
   test "html" (fun () ->
-    report "-html html_dir";
+    report "--html html_dir";
     run "grep -v 'id=\"footer\"' html_dir/source.ml.html > output";
     diff "fixtures/report/reference.html");
 
   test "text" (fun () ->
-    report "-text output";
+    report "--text output";
     diff "fixtures/report/reference.text");
 
   test "coveralls" (fun () ->
-    report "-coveralls output -service-name travis-ci -service-job-id 123";
+    report "--coveralls output --service-name travis-ci --service-job-id 123";
     diff "fixtures/report/coveralls_reference.json")
 ]

@@ -31,7 +31,7 @@ let test ?(bisect = "") name expect_correctness =
 
     compile cflags "fixtures/thread-safety/source.ml";
     run command;
-    report "-dump -" ~r:" > output";
+    report "--dump -" ~r:" > output";
 
     if expect_correctness then
       diff "fixtures/thread-safety/reference"

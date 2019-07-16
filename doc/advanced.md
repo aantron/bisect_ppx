@@ -46,14 +46,14 @@ Dune currently doesn't support Bisect_ppx very well. There isn't a good way to
 turn Bisect_ppx on and off conditionally during development, nor to permanently
 disable it for release. However, Bisect_ppx provides a pretty decent workaround:
 
-1. List Bisect_ppx in your `dune` files, and pass the `-conditional` and
-   `-no-comment-parsing` flags to it:
+1. List Bisect_ppx in your `dune` files, and pass the `--conditional` and
+   `--no-comment-parsing` flags to it:
 
         (library
          (name my_lib)
-         (preprocess (pps bisect_ppx -conditional -no-comment-parsing)))
+         (preprocess (pps bisect_ppx --conditional --no-comment-parsing)))
 
-2. `-conditional` is what turns on the workaround. It makes Bisect_ppx *not*
+2. `--conditional` is what turns on the workaround. It makes Bisect_ppx *not*
    instrument your code by default. You can conditionally enable instrumentation
    using the `BISECT_ENABLE` environment variable. Just set it to `YES` in your
    `Makefile`, or whatever you use to trigger Dune:
@@ -62,7 +62,7 @@ disable it for release. However, Bisect_ppx provides a pretty decent workaround:
         coverage :
             rm -f `find . -name 'bisect*.out'`
             BISECT_ENABLE=YES dune runtest --force
-            bisect-ppx-report -I _build/default/ -html _coverage/ \
+            bisect-ppx-report -I _build/default/ --html _coverage/ \
               `find . -name 'bisect*.out'`
 
    Your other rules are not affected.
@@ -75,7 +75,7 @@ disable it for release. However, Bisect_ppx provides a pretty decent workaround:
    directory usually ends up being something like `_build/default/tests/`, but
    if you have multiple test targets, there will be multiple directories.
 
-3. For release, we recommend manually removing `bisect_ppx -conditional` from
+3. For release, we recommend manually removing `bisect_ppx --conditional` from
    your `dune` files. If you don't want to do that, you can add a dependency on
    package `bisect_ppx` to your `opam` files:
 
@@ -164,7 +164,7 @@ Bisect_ppx preprocessor:
 
 ```
 ocamlfind c \
-  -package bisect_ppx -ppxopt "bisect_ppx,-exclude-file .exclude" -c my_code.ml
+  -package bisect_ppx -ppxopt "bisect_ppx,--exclude-file .exclude" -c my_code.ml
 ```
 
 Here is what the `.exclude` file can look like:

@@ -37,7 +37,7 @@ also available for [Ocamlbuild][ocamlbuild], [ocamlfind][ocamlfind], and
 
         (library
          (public_name my_code)
-         (preprocess (pps bisect_ppx -conditional -no-comment-parsing)))
+         (preprocess (pps bisect_ppx --conditional --no-comment-parsing)))
 
    Don't add `bisect_ppx` to your tests.
 
@@ -48,7 +48,7 @@ also available for [Ocamlbuild][ocamlbuild], [ocamlfind][ocamlfind], and
 
 4. Generate the coverage report.
 
-        bisect-ppx-report -I _build/default/ -html _coverage/ `find . -name 'bisect*.out'`
+        bisect-ppx-report -I _build/default/ --html _coverage/ `find . -name 'bisect*.out'`
 
 5. Open `coverage/index.html`!
 
@@ -84,9 +84,9 @@ Example using the built-in Coveralls reporter on Travis CI (which sets
 
       bisect-ppx-report \
           -I _build/default/ \
-          -coveralls coverage.json \
-          -service-name travis-ci \
-          -service-job-id $TRAVIS_JOB_ID \
+          --coveralls coverage.json \
+          --service-name travis-ci \
+          --service-job-id $TRAVIS_JOB_ID \
           `find . -name 'bisect*.out'`
       curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
 

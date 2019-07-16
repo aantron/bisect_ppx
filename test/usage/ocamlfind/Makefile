@@ -1,4 +1,4 @@
-BISECT := -package bisect_ppx -ppxopt bisect_ppx,-conditional
+BISECT := -package bisect_ppx -ppxopt bisect_ppx,--conditional
 
 .PHONY : test
 test : clean

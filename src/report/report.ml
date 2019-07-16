@@ -44,8 +44,16 @@ let service_job_id = ref ""
 
 let repo_token = ref ""
 
+let deprecated argument =
+  Printf.eprintf "bisect-ppx-report argument '-%s' is deprecated." argument;
+  Printf.eprintf "Use '--%s' instead." argument
+
 let options = Arg.align [
   ("-html",
+   Arg.String (fun s -> deprecated "html"; add_output (Html_output s)),
+   " Deprecated");
+
+  ("--html",
    Arg.String (fun s -> add_output (Html_output s)),
    "<dir>  Output HTML report to <dir> (HTML only)");
 
@@ -54,14 +62,34 @@ let options = Arg.align [
    "<dir>  Look for .ml files in <dir> (HTML/Coveralls only)");
 
   ("-ignore-missing-files",
+   Arg.Unit (fun () ->
+    deprecated "ignore-missing-files";
+    ignore_missing_files := true),
+   " Deprecated");
+
+  ("--ignore-missing-files",
    Arg.Set ignore_missing_files,
    " Do not fail if an .ml file can't be found (HTML/Coveralls only)");
 
   ("-title",
+   Arg.String (fun s -> deprecated "title"; report_title := s),
+   " Deprecated");
+
+  ("--title",
    Arg.Set_string report_title,
    "<string>  Set title for report pages (HTML only)");
 
   ("-tab-size",
+   Arg.Int
+     (fun x ->
+       deprecated "tab-size";
+       if x < 0 then
+         (print_endline " *** error: tab size should be positive"; exit 1)
+       else
+         tab_size := x),
+   " Deprecated");
+
+  ("--tab-size",
    Arg.Int
      (fun x ->
        if x < 0 then
@@ -71,46 +99,94 @@ let options = Arg.align [
    "<int>  Set tab width in report (HTML only)");
 
   ("-text",
+   Arg.String (fun s -> deprecated "text"; add_output (Text_output s)),
+   " Deprecated");
+
+  ("--text",
    Arg.String (fun s -> add_output (Text_output s)),
    "<file>  Output plain text report to <file>");
 
   ("-summary-only",
+   Arg.Unit (fun () -> deprecated "summary-only"; summary_only := true),
+   " Deprecated");
+
+  ("--summary-only",
    Arg.Set summary_only,
    " Output only a whole-project summary (text only)");
 
   ("-csv",
+   Arg.String (fun s -> deprecated "csv"; add_output (Csv_output s)),
+   " Deprecated");
+
+  ("--csv",
    Arg.String (fun s -> add_output (Csv_output s)),
    "<file>  Output CSV report to <file>");
 
   ("-separator",
+   Arg.String (fun s -> deprecated "separator"; csv_separator := s),
+   " Deprecated");
+
+  ("--separator",
    Arg.Set_string csv_separator,
    "<string>  Set column separator (CSV only)");
 
   ("-dump",
+   Arg.String (fun s -> deprecated "dump"; add_output (Dump_output s)),
+   " Deprecated");
+
+  ("--dump",
    Arg.String (fun s -> add_output (Dump_output s)),
    "<file>  Output bare dump to <file>");
 
   ("-verbose",
    Arg.Set verbose,
+   " Deprecated");
+
+  ("--verbose",
+   Arg.Unit (fun () -> deprecated "verbose"; verbose := true),
    " Set verbose mode");
 
   ("-version",
+   Arg.Unit (fun () ->
+    deprecated "version";
+    print_endline Bisect.Version.value; exit 0),
+   " Deprecated");
+
+  ("--version",
    Arg.Unit (fun () -> print_endline Bisect.Version.value; exit 0),
    " Print version and exit");
 
   ("-coveralls",
+   Arg.String (fun s ->
+    deprecated "coveralls";
+    add_output (Coveralls_output s)),
+   " Deprecated");
+
+  ("--coveralls",
    Arg.String (fun s -> add_output (Coveralls_output s)),
    "<file>  Output coveralls json report to <file>");
 
   ("-service-name",
+   Arg.String (fun s -> deprecated "service-name"; service_name := s),
+   " Deprecated");
+
+  ("--service-name",
    Arg.Set_string service_name,
    "<string>  Service name for Coveralls json (Coveralls only)");
 
   ("-service-job-id",
+   Arg.String (fun s -> deprecated "service-job-id"; service_job_id := s),
+   " Deprecated");
+
+  ("--service-job-id",
    Arg.Set_string service_job_id,
    "<string>  Service job id for Coveralls json (Coveralls only)");
 
   ("-repo-token",
+   Arg.String (fun s -> deprecated "repo-token"; repo_token := s),
+   " Deprecated");
+
+  ("--repo-token",
    Arg.Set_string repo_token,
    "<string>  Repo token for Coveralls json (Coveralls only)");
 ]
@@ -124,12 +200,12 @@ Where a file is required, '-' may be used to specify STDOUT.
 
 Examples:
 
-  bisect-ppx-report -html coverage/ -I _build bisect*.out
-  bisect-ppx-report -text - -summary-only bisect*.out
+  bisect-ppx-report --html _coverage/ -I _build bisect*.out
+  bisect-ppx-report --text - --summary-only bisect*.out
 
 Dune:
 
-  bisect-ppx-report -html coverage/ -I _build/default _build/default/bisect*.out
+  bisect-ppx-report --html _coverage/ -I _build/default bisect*.out
 
 Options are:
 |}

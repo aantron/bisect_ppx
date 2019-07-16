@@ -11,6 +11,6 @@ let tests =
     compile ((with_bisect ()) ^ " -package oUnit")
       "fixtures/ounit-integration/test.ml";
     run "./a.out > /dev/null";
-    report "-csv output";
+    report "--csv output";
     diff "fixtures/ounit-integration/reference.csv"
   end
