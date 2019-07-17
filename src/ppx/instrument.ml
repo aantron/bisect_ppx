@@ -129,7 +129,7 @@ sig
     Parsetree.expression ->
       Parsetree.expression
 
-  val instrument_case :
+  val instrument_pattern :
     points -> Parsetree.case -> Parsetree.case
 
   val instrument_class_field_kind :
@@ -378,7 +378,7 @@ struct
       - We also don't instrument refutation cases ([| -> .]).
 
       So, without further ado, here is the function that does all this magic: *)
-  let instrument_case points case =
+  let instrument_pattern points case =
     let module Helper_types =
       struct
         type location_trace = Location.t list
@@ -812,7 +812,7 @@ end
 class instrumenter =
   let points = Generated_code.init () in
   let instrument_expr = Generated_code.instrument_expr points in
-  let instrument_case = Generated_code.instrument_case points in
+  let instrument_pattern = Generated_code.instrument_pattern points in
   let instrument_class_field_kind =
     Generated_code.instrument_class_field_kind points in
 
@@ -1058,7 +1058,7 @@ class instrumenter =
                 (traverse ~is_in_tail_position:false) case.Parsetree.pc_guard;
             pc_rhs = traverse ~is_in_tail_position case.pc_rhs;
           }
-          |> instrument_case
+          |> instrument_pattern
         end
       in
 
