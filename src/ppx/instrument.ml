@@ -54,6 +54,12 @@ module Ast_mapper_class = Ast_mapper_class_408
 
 
 
+let option_map f = function
+  | Some v -> Some (f v)
+  | None -> None
+
+
+
 module Coverage_attributes :
 sig
   val recognize : Parsetree.attribute -> [ `None | `On | `Off | `Exclude_file ]
@@ -117,7 +123,10 @@ sig
   val init : unit -> points
 
   val instrument_expr :
-    points -> ?override_loc:Location.t -> Parsetree.expression ->
+    points ->
+    ?override_loc:Location.t ->
+    ?at_end:bool ->
+    Parsetree.expression ->
       Parsetree.expression
 
   val instrument_case :
@@ -137,15 +146,24 @@ struct
   (* Given an AST for an expression [e], replaces it by the sequence expression
      [instrumentation; e], where [instrumentation] is some code that tells
      Bisect_ppx, at runtime, that [e] has been visited. *)
-  let instrument_expr points ?override_loc e =
+  let instrument_expr points ?override_loc ?(at_end = false) e =
     let rec outline () =
       let point_loc = choose_location_of_point ~override_loc e in
       if expression_should_not_be_instrumented ~point_loc then
         e
       else
         let point_index = get_index_of_point_at_location ~point_loc in
-        [%expr ___bisect_visit___ [%e point_index]; [%e e]]
-          [@metaloc point_loc]
+        if not at_end then
+          [%expr
+            ___bisect_visit___ [%e point_index];
+            [%e e]]
+            [@metaloc point_loc]
+        else
+          [%expr
+            let ___bisect_result___ = [%e e] in
+            ___bisect_visit___ [%e point_index];
+            ___bisect_result___]
+            [@metaloc point_loc]
 
     and choose_location_of_point ~override_loc e =
       match override_loc with
@@ -176,7 +194,12 @@ struct
           |> Comments.line_is_ignored line
 
     and get_index_of_point_at_location ~point_loc:loc =
-      let point_offset = Location.(Lexing.(loc.loc_start.pos_cnum)) in
+      let point_offset =
+        if not at_end then
+          Location.(Lexing.(loc.loc_start.pos_cnum))
+        else
+          Location.(Lexing.(loc.loc_end.pos_cnum - 1))
+      in
       let point =
         try
           List.find
@@ -426,9 +449,7 @@ struct
         pc_guard = instrument_when_clause case}
 
     and instrument_when_clause case =
-      match Parsetree.(case.pc_guard) with
-      | None -> None
-      | Some guard -> Some (instrument_expr points guard)
+      option_map (instrument_expr points) case.Parsetree.pc_guard
 
     and instrumentation_for_location_trace e location_trace =
       location_trace
@@ -832,81 +853,216 @@ class instrumenter =
         cf
 
     method! expr e =
-      let attrs = e.pexp_attributes in
-      if Coverage_attributes.has_off_attribute attrs then
-        e
-      else
-        let loc = e.pexp_loc in
-        let e' = super#expr e in
+      let instrument_if_not ~is_in_tail_position e =
+        if is_in_tail_position then
+          e
+        else
+          instrument_expr ~at_end:true e
+      in
 
-        match e'.pexp_desc with
-        | Pexp_let (rec_flag, bindings, e) ->
-          let bindings =
-            List.map (fun binding ->
-              Parsetree.{binding with pvb_expr =
-                instrument_expr binding.pvb_expr})
-            bindings
-          in
-          Exp.let_ ~loc ~attrs rec_flag bindings (instrument_expr e)
+      let rec traverse ~is_in_tail_position e =
+        let attrs = e.Parsetree.pexp_attributes in
+        if Coverage_attributes.has_off_attribute attrs then
+          e
 
-        | Pexp_poly (e, type_) ->
-          Exp.poly ~loc ~attrs (instrument_expr e) type_
+        else begin
+          let loc = e.pexp_loc in
 
-        | Pexp_fun (label, default_value, p, e) ->
-          let default_value =
-            match default_value with
-            | None -> None
-            | Some default_value -> Some (instrument_expr default_value)
-          in
-          Exp.fun_ ~loc ~attrs label default_value p (instrument_expr e)
+          match e.pexp_desc with
+          (* Expressions that invoke arbitrary code, and may not terminate. *)
+          | Pexp_apply (e, arguments) ->
+            Exp.apply ~loc ~attrs
+              (traverse ~is_in_tail_position:false e)
+              (arguments
+              |> List.map (fun (label, e) ->
+                (label, traverse ~is_in_tail_position:false e)))
+            |> instrument_if_not ~is_in_tail_position
 
-        | Pexp_apply (e_function, [label_1, e1; label_2, e2]) ->
-          begin match e_function with
-          | [%expr (&&)]
-          | [%expr (&)]
-          | [%expr (||)]
-          | [%expr (or)] ->
-            Exp.apply ~loc ~attrs e_function
-              [label_1, (instrument_expr e1); label_2, (instrument_expr e2)]
+          | Pexp_send (e, m) ->
+            Exp.send ~loc ~attrs (traverse ~is_in_tail_position:false e) m
+            |> instrument_if_not ~is_in_tail_position
 
-          | [%expr (|>)] ->
-            Exp.apply ~loc ~attrs e_function
-              [label_1, e1; label_2, (instrument_expr e2)]
+          | Pexp_new _ ->
+            instrument_if_not ~is_in_tail_position e
 
-          | _ ->
-            e'
-          end
+          | Pexp_assert e ->
+            Exp.assert_ (traverse ~is_in_tail_position:false e)
+            |> instrument_expr ~at_end:true
 
-        | Pexp_match (e, cases) ->
-          List.map instrument_case cases
-          |> Exp.match_ ~loc ~attrs e
+          (* Expressions that have subexpressions that might not get visited. *)
+          | Pexp_function cases ->
+            Exp.function_
+              ~loc ~attrs (traverse_cases ~is_in_tail_position:true cases)
 
-        | Pexp_function cases ->
-          List.map instrument_case cases
-          |> Exp.function_ ~loc ~attrs
+          | Pexp_fun (label, default_value, p, e) ->
+            Exp.fun_ ~loc ~attrs
+              label
+              (option_map (fun e ->
+                instrument_expr
+                  (traverse ~is_in_tail_position:false e)) default_value)
+              p
+              (instrument_expr (traverse ~is_in_tail_position:true e))
 
-        | Pexp_try (e, cases) ->
-          List.map instrument_case cases
-          |> Exp.try_ ~loc ~attrs e
+          | Pexp_match (e, cases) ->
+            Exp.match_ ~loc ~attrs
+              (traverse ~is_in_tail_position:false e)
+              (traverse_cases ~is_in_tail_position cases)
 
-        | Pexp_ifthenelse (condition, then_, else_) ->
-          Exp.ifthenelse ~loc ~attrs condition (instrument_expr then_)
-            (match else_ with
-            | Some e -> Some (instrument_expr e)
-            | None -> None)
+          | Pexp_try (e, cases) ->
+            Exp.try_ ~loc ~attrs
+              (traverse ~is_in_tail_position:false e)
+              (traverse_cases ~is_in_tail_position cases)
 
-        | Pexp_sequence (e1, e2) ->
-          Exp.sequence ~loc ~attrs e1 (instrument_expr e2)
+          | Pexp_ifthenelse (if_, then_, else_) ->
+            Exp.ifthenelse ~loc ~attrs
+              (traverse ~is_in_tail_position:false if_)
+              (instrument_expr (traverse ~is_in_tail_position then_))
+              (option_map (fun e ->
+                instrument_expr (traverse ~is_in_tail_position e)) else_)
 
-        | Pexp_while (condition, body) ->
-          Exp.while_ ~loc ~attrs condition (instrument_expr body)
+          | Pexp_while (while_, do_) ->
+            Exp.while_ ~loc ~attrs
+              (traverse ~is_in_tail_position:false while_)
+              (instrument_expr (traverse ~is_in_tail_position:false do_))
 
-        | Pexp_for (variable, initial, bound, direction, body) ->
-          Exp.for_
-            ~loc ~attrs variable initial bound direction (instrument_expr body)
+          | Pexp_for (v, initial, to_, direction, do_) ->
+            Exp.for_ ~loc ~attrs
+              v
+              (traverse ~is_in_tail_position:false initial)
+              (traverse ~is_in_tail_position:false to_)
+              direction
+              (instrument_expr (traverse ~is_in_tail_position:false do_))
 
-        | _ ->
-          e'
+          | Pexp_lazy e ->
+            Exp.lazy_ ~loc ~attrs
+              (instrument_expr (traverse ~is_in_tail_position:true e))
+
+          | Pexp_poly (e, t) ->
+            Exp.poly ~loc ~attrs
+              (instrument_expr (traverse ~is_in_tail_position:true e))
+              t
+
+          | Pexp_newtype (t, e) ->
+            Exp.newtype ~loc ~attrs
+              t
+              (instrument_expr (traverse ~is_in_tail_position:true e))
+
+          | Pexp_letop {let_; ands; body} ->
+            let traverse_binding_op binding_op =
+              {binding_op with
+                Parsetree.pbop_exp =
+                  traverse
+                    ~is_in_tail_position:false binding_op.Parsetree.pbop_exp}
+            in
+            Exp.letop ~loc ~attrs
+              (traverse_binding_op let_)
+              (List.map traverse_binding_op ands)
+              (instrument_expr (traverse ~is_in_tail_position:true body))
+
+          (* Expressions that don't fit either of the above categories. These
+             don't need to be instrumented. *)
+          | Pexp_ident _ | Pexp_constant _ ->
+            e
+
+          | Pexp_let (rec_flag, bindings, e) ->
+            Exp.let_ ~loc ~attrs
+              rec_flag
+              (bindings
+              |> List.map (fun binding ->
+                Parsetree.{binding with pvb_expr =
+                  traverse ~is_in_tail_position:false binding.pvb_expr}))
+              (traverse ~is_in_tail_position e)
+
+          | Pexp_tuple es ->
+            Exp.tuple ~loc ~attrs
+              (List.map (traverse ~is_in_tail_position:false) es)
+
+          | Pexp_construct (c, e) ->
+            Exp.construct ~loc ~attrs
+              c (option_map (traverse ~is_in_tail_position:false) e)
+
+          | Pexp_variant (c, e) ->
+            Exp.variant ~loc ~attrs
+              c (option_map (traverse ~is_in_tail_position:false) e)
+
+          | Pexp_record (fields, e) ->
+            Exp.record ~loc ~attrs
+              (fields
+              |> List.map (fun (f, e) ->
+                (f, traverse ~is_in_tail_position:false e)))
+              (option_map (traverse ~is_in_tail_position:false) e)
+
+          | Pexp_field (e, f) ->
+            Exp.field ~loc ~attrs (traverse ~is_in_tail_position:false e) f
+
+          | Pexp_setfield (e, f, e') ->
+            Exp.setfield ~loc ~attrs
+              (traverse ~is_in_tail_position:false e)
+              f
+              (traverse ~is_in_tail_position:false e')
+
+          | Pexp_array es ->
+            Exp.array ~loc ~attrs
+              (List.map (traverse ~is_in_tail_position:false) es)
+
+          | Pexp_sequence (e, e') ->
+            Exp.sequence ~loc ~attrs
+              (traverse ~is_in_tail_position:false e)
+              (traverse ~is_in_tail_position e')
+
+          | Pexp_constraint (e, t) ->
+            Exp.constraint_ ~loc ~attrs (traverse ~is_in_tail_position e) t
+
+          | Pexp_coerce (e, t, t') ->
+            Exp.coerce ~loc ~attrs (traverse ~is_in_tail_position e) t t'
+
+          | Pexp_setinstvar (f, e) ->
+            Exp.setinstvar ~loc ~attrs f (traverse ~is_in_tail_position:false e)
+
+          | Pexp_override fs ->
+            Exp.override ~loc ~attrs
+              (fs
+              |> List.map (fun (f, e) ->
+                (f, traverse ~is_in_tail_position:false e)))
+
+          | Pexp_letmodule (m, e, e') ->
+            Exp.letmodule ~loc ~attrs
+              m
+              (self#module_expr e)
+              (traverse ~is_in_tail_position e')
+
+          | Pexp_letexception (c, e) ->
+            Exp.letexception ~loc ~attrs c (traverse ~is_in_tail_position e)
+
+          | Pexp_object c ->
+            Exp.object_ ~loc ~attrs (self#class_structure c)
+
+          | Pexp_pack m ->
+            Exp.pack ~loc ~attrs (self#module_expr m)
+
+          | Pexp_open (m, e) ->
+            Exp.open_ ~loc ~attrs
+              (self#open_declaration m)
+              (traverse ~is_in_tail_position e)
+
+          | Pexp_extension _ | Pexp_unreachable ->
+            e
+        end
+
+      and traverse_cases ~is_in_tail_position cases =
+        cases
+        |> List.map begin fun case ->
+          {case with
+            Parsetree.pc_guard =
+              option_map
+                (traverse ~is_in_tail_position:false) case.Parsetree.pc_guard;
+            pc_rhs = traverse ~is_in_tail_position case.pc_rhs;
+          }
+          |> instrument_case
+        end
+      in
+
+      traverse ~is_in_tail_position:false e
 
     (* Set to [true] upon encountering [[@@@coverage.off]], and back to
        [false] again upon encountering [[@@@coverage.on]]. *)

@@ -13,7 +13,7 @@
           <span class="dirname"></span>source.ml
         </a>
       </h1>
-      <h2>55.56%</h2>
+      <h2>60.34%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:41.67%"></span>
@@ -28,7 +28,6 @@
       <span class="unvisited" style="top:73.33%"></span>
       <span class="unvisited" style="top:78.33%"></span>
       <span class="unvisited" style="top:80.00%"></span>
-      <span class="unvisited" style="top:81.67%"></span>
       <span class="unvisited" style="top:83.33%"></span>
       <span class="unvisited" style="top:93.33%"></span>
       <span class="unvisited" style="top:100.00%"></span>
@@ -50,7 +49,7 @@
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span class="visited"> </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span class="visited"> </span>
@@ -84,7 +83,7 @@
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span class="unvisited"> </span>
 <a id="L48"></a><span class="unvisited"> </span>
-<a id="L49"></a><span class="unvisited"> </span>
+<a id="L49"></a><span > </span>
 <a id="L50"></a><span class="unvisited"> </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
@@ -92,7 +91,7 @@
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span class="visited"> </span>
 <a id="L56"></a><span class="unvisited"> </span>
-<a id="L57"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
 <a id="L58"></a><span class="visited"> </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span class="unvisited"> </span>
@@ -161,8 +160,8 @@
 <a href="#L59">59</a>
 <a href="#L60">60</a>
 </pre>
-<pre><code class="ocaml">let inf = <span data-count="2">r</span>ef 0
-let sup = <span data-count="2">r</span>ef 3
+<pre><code class="ocaml">let inf = <span data-count="2">r</span>ef <span data-count="2">0</span>
+let sup = <span data-count="2">r</span>ef <span data-count="2">3</span>
 
 let args = <span data-count="2">[</span>
   ("-inf", (Arg.Set_int inf), "inferior bound") ;
@@ -170,32 +169,32 @@ let args = <span data-count="2">[</span>
 ]
 
 let kind = <span data-count="2">f</span>unction
-  | <span data-count="2">x</span> when <span data-count="18">x</span> &gt; 9 || <span data-count="7">x</span> &lt; 0 -&gt; print_endline "not a digit"
+  | <span data-count="2">x</span> when <span data-count="9">x</span> &gt; <span data-count="9">9</span> || x &lt; <span data-count="16">0</span> -&gt; print_endline "not a digit"
   | <span data-count="7">_</span> -&gt; print_endline "digit"
 
 let print x =
-  <span data-count="9">p</span>rint_int x;
-  <span data-count="9">p</span>rint_newline ()
+  <span data-count="9">p</span>rint_int <span data-count="9">x</span>;
+  print_newline ()
 
 let () =
-  <span data-count="2">A</span>rg.parse args ignore "report test";
-  <span data-count="2">f</span>or i = !inf to !sup do
-    <span data-count="9">k</span>ind i;
-    <span data-count="9">p</span>rint i
+  <span data-count="2">A</span>rg.parse args ignore "report test<span data-count="2">"</span>;
+  for i = !in<span data-count="2">f</span> to !su<span data-count="2">p</span> do
+    <span data-count="9">k</span>ind <span data-count="9">i</span>;
+    print <span data-count="9">i</span>
   done
 
 let rec pow a = <span data-count="4">f</span>unction
   | <span data-count="0">0</span> -&gt; 1
   | <span data-count="2">1</span> -&gt; a
   | <span data-count="2">n</span> -&gt;
-      let b = <span data-count="2">p</span>ow a (n/2) in
-      <span data-count="2">b</span> * b * (if n mod 2 = 0 then <span data-count="2">1</span> else <span data-count="0">a</span>)
+      let b = pow a (n/2<span data-count="4">)</span> in
+      b * <span data-count="2">b</span> * (if n mod <span data-count="2">2</span> = <span data-count="2">0</span> then <span data-count="2">1</span> else <span data-count="0">a</span>)
 
 let () =
-  <span data-count="2">a</span>ssert ((pow 2 2) = 4)
+  assert ((pow 2 2<span data-count="2">)</span> = 4<span data-count="2">)</span>
 
 let is_even x =
-  <span data-count="0">i</span>f x mod 2 = 0 then <span data-count="0">t</span>rue else <span data-count="0">f</span>alse
+  <span data-count="0">i</span>f x mod <span data-count="0">2</span> = <span data-count="0">0</span> then <span data-count="0">t</span>rue else <span data-count="0">f</span>alse
 
 let rec is_odd x =
   <span data-count="0">m</span>atch x with
@@ -204,12 +203,12 @@ let rec is_odd x =
   | <span data-count="0">5</span>
   | <span data-count="0">7</span>
   | <span data-count="0">9</span> -&gt; true
-  | <span data-count="0">x</span> -&gt; if is_even x then <span data-count="0">f</span>alse else <span data-count="0">i</span>s_odd (x mod 10)
+  | <span data-count="0">x</span> -&gt; if is_even <span data-count="0">x</span> then <span data-count="0">f</span>alse else <span data-count="0">i</span>s_odd (x mod 10<span data-count="0">)</span>
 
 let is_zero x =
   <span data-count="0">t</span>ry
-    let _ = <span data-count="0">2</span>0 / x in
-    <span data-count="0">f</span>alse
+    let _ = 20 / <span data-count="0">x</span> in
+    false
   with <span data-count="0">D</span>ivision_by_zero -&gt; true
 
 let () =
@@ -217,8 +216,8 @@ let () =
     <span data-count="2">m</span>atch x with
     | <span data-count="2">0</span>, 0 -&gt; 0
     | <span data-count="0">_</span> -&gt; 1)
-  (0, 0)
-  |&gt; <span data-count="2">i</span>gnore
+  (0, 0<span data-count="2">)</span>
+  |&gt; ignor<span data-count="2">e</span>
 
 let f _ = <span data-count="0">"</span>a string to confound Buffer.add_substitute $("
 </code></pre>
