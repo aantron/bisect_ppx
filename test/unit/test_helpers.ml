@@ -136,6 +136,9 @@ let ocamlc_403_or_more () =
 let ocamlc_404_or_more () =
   ocamlc_version () >= (4,4,None)
 
+let ocamlc_408_or_more () =
+  ocamlc_version () >= (4,8,None)
+
 let if_package package =
   skip_if (not @@ have_package package) (package ^ " not installed")
 
@@ -248,6 +251,8 @@ let compile_compare cflags directory =
           skip_if (not (ocamlc_403_or_more ())) "requires OCaml 4.03 or more";
         if Filename.check_suffix title "_404" then
           skip_if (not (ocamlc_404_or_more ())) "requires OCaml 4.04 or more";
+        if Filename.check_suffix title "_408" then
+          skip_if (not (ocamlc_408_or_more ())) "requires OCaml 4.04 or more";
         compile ((cflags ()) ^ " -c -w -A -dsource") source ~r:"2> output";
         diff_ast reference)
     end
