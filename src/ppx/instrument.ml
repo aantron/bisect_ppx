@@ -1070,10 +1070,12 @@ class instrumenter =
 
     method! structure_item si =
       let loc = si.pstr_loc in
+
       match si.pstr_desc with
       | Pstr_value (rec_flag, bindings) ->
         if structure_instrumentation_suppressed then
           si
+
         else
           let bindings =
             bindings
@@ -1104,8 +1106,7 @@ class instrumenter =
               if do_not_instrument then
                 binding
               else
-                {binding with pvb_expr =
-                  instrument_expr (self#expr binding.pvb_expr)}
+                {binding with pvb_expr = self#expr binding.pvb_expr}
             end
           in
           Str.value ~loc rec_flag bindings
@@ -1114,7 +1115,7 @@ class instrumenter =
         if structure_instrumentation_suppressed then
           si
         else
-        Str.eval ~loc ~attrs:a (instrument_expr (self#expr e))
+          Str.eval ~loc ~attrs:a (self#expr e)
 
       | Pstr_attribute attribute ->
         let kind = Coverage_attributes.recognize attribute in

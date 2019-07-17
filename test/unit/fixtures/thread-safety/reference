@@ -1,5 +1,4 @@
 file "source.ml"
-  point at offset     11:      1
   point at offset     26:      2
   point at offset     44: 2000000
   point at offset     81:      1

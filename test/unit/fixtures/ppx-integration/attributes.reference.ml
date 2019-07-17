@@ -2,15 +2,14 @@ module Bisect_visit___attributes___ml =
   struct
     let ___bisect_visit___ =
       let point_definitions =
-        "\132\149\166\190\000\000\000M\000\000\000\017\000\000\000A\000\000\000A\b\000\000@\000\160KO\160oN\160\127L\160\000UM\160\000kJ\160\001\000\128K\160\001\000\152H\160\001\000\164I\160\001\000\202E\160\001\000\213F\160\001\000\240G\160\001\001\tC\160\001\001\019D\160\001\001\028B\160\001\001BA\160\001\001J@" in
+        "\132\149\166\190\000\000\000J\000\000\000\016\000\000\000=\000\000\000=\b\000\000<\000\160oN\160\127L\160\000UM\160\000kJ\160\001\000\128K\160\001\000\152H\160\001\000\164I\160\001\000\202E\160\001\000\213F\160\001\000\240G\160\001\001\tC\160\001\001\019D\160\001\001\028B\160\001\001BA\160\001\001J@" in
       let `Staged cb =
-        Bisect.Runtime.register_file "attributes.ml" ~point_count:16
+        Bisect.Runtime.register_file "attributes.ml" ~point_count:15
           ~point_definitions in
       cb
   end
 open Bisect_visit___attributes___ml
 let () =
-  ___bisect_visit___ 15;
   (let ___bisect_result___ = ((let x = 1 in x)[@testing ]) |> ignore in
    ___bisect_visit___ 14; ___bisect_result___);
   (let ___bisect_result___ =

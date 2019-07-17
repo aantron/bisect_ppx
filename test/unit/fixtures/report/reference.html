@@ -13,7 +13,7 @@
           <span class="dirname"></span>source.ml
         </a>
       </h1>
-      <h2>60.34%</h2>
+      <h2>55.77%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:41.67%"></span>
@@ -38,12 +38,12 @@
 <a id="L1"></a><span class="visited"> </span>
 <a id="L2"></a><span class="visited"> </span>
 <a id="L3"></a><span > </span>
-<a id="L4"></a><span class="visited"> </span>
+<a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
-<a id="L9"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
 <a id="L10"></a><span class="visited"> </span>
 <a id="L11"></a><span class="visited"> </span>
 <a id="L12"></a><span > </span>
@@ -87,7 +87,7 @@
 <a id="L50"></a><span class="unvisited"> </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
-<a id="L53"></a><span class="visited"> </span>
+<a id="L53"></a><span > </span>
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span class="visited"> </span>
 <a id="L56"></a><span class="unvisited"> </span>
@@ -160,15 +160,15 @@
 <a href="#L59">59</a>
 <a href="#L60">60</a>
 </pre>
-<pre><code class="ocaml">let inf = <span data-count="2">r</span>ef <span data-count="2">0</span>
-let sup = <span data-count="2">r</span>ef <span data-count="2">3</span>
+<pre><code class="ocaml">let inf = ref <span data-count="2">0</span>
+let sup = ref <span data-count="2">3</span>
 
-let args = <span data-count="2">[</span>
+let args = [
   ("-inf", (Arg.Set_int inf), "inferior bound") ;
   ("-sup", (Arg.Set_int sup), "superior bound")
 ]
 
-let kind = <span data-count="2">f</span>unction
+let kind = function
   | <span data-count="2">x</span> when <span data-count="9">x</span> &gt; <span data-count="9">9</span> || x &lt; <span data-count="16">0</span> -&gt; print_endline "not a digit"
   | <span data-count="7">_</span> -&gt; print_endline "digit"
 
@@ -177,7 +177,7 @@ let print x =
   print_newline ()
 
 let () =
-  <span data-count="2">A</span>rg.parse args ignore "report test<span data-count="2">"</span>;
+  Arg.parse args ignore "report test<span data-count="2">"</span>;
   for i = !in<span data-count="2">f</span> to !su<span data-count="2">p</span> do
     <span data-count="9">k</span>ind <span data-count="9">i</span>;
     print <span data-count="9">i</span>
@@ -212,7 +212,7 @@ let is_zero x =
   with <span data-count="0">D</span>ivision_by_zero -&gt; true
 
 let () =
-  <span data-count="2">(</span>fun x -&gt;
+  (fun x -&gt;
     <span data-count="2">m</span>atch x with
     | <span data-count="2">0</span>, 0 -&gt; 0
     | <span data-count="0">_</span> -&gt; 1)
