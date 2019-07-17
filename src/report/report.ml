@@ -84,7 +84,7 @@ let options = Arg.align [
      (fun x ->
        deprecated "tab-size";
        if x < 0 then
-         (print_endline " *** error: tab size should be positive"; exit 1)
+         (prerr_endline " *** error: tab size should be positive"; exit 1)
        else
          tab_size := x),
    " Deprecated");
@@ -93,7 +93,7 @@ let options = Arg.align [
    Arg.Int
      (fun x ->
        if x < 0 then
-         (print_endline " *** error: tab size should be positive"; exit 1)
+         (prerr_endline " *** error: tab size should be positive"; exit 1)
        else
          tab_size := x),
    "<int>  Set tab width in report (HTML only)");
