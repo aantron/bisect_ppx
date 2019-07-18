@@ -2,19 +2,19 @@ module Bisect_visit___override___ml =
   struct
     let ___bisect_visit___ =
       let point_definitions =
-        "\132\149\166\190\000\000\000\012\000\000\000\004\000\000\000\r\000\000\000\r\176\160t@\160\000OB\160\000iA" in
+        "\132\149\166\190\000\000\000\t\000\000\000\003\000\000\000\t\000\000\000\t\160\160\000OA\160\000i@" in
       let `Staged cb =
-        Bisect.Runtime.register_file "override.ml" ~point_count:3
+        Bisect.Runtime.register_file "override.ml" ~point_count:2
           ~point_definitions in
       cb
   end
 open Bisect_visit___override___ml
 let _ =
   object
-    val mutable foo = ___bisect_visit___ 0; ()
+    val mutable foo = ()
     method bar =
-      ___bisect_visit___ 2;
+      ___bisect_visit___ 1;
       {<foo =
           (let ___bisect_result___ = print_endline "foo" in
-           ___bisect_visit___ 1; ___bisect_result___)>}
+           ___bisect_visit___ 0; ___bisect_result___)>}
   end

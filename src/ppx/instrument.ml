@@ -46,6 +46,7 @@ module Parsetree = Ast.Parsetree
 module Pat = Ast.Ast_helper.Pat
 module Exp = Ast.Ast_helper.Exp
 module Str = Ast.Ast_helper.Str
+module Cl = Ast.Ast_helper.Cl
 module Cf = Ast.Ast_helper.Cf
 
 (* From ppx_tools_versioned. *)
@@ -131,9 +132,6 @@ sig
 
   val instrument_pattern :
     points -> Parsetree.case -> Parsetree.case
-
-  val instrument_class_field_kind :
-    points -> Parsetree.class_field_kind -> Parsetree.class_field_kind
 
   val runtime_initialization :
     points -> string -> Parsetree.structure_item list
@@ -678,12 +676,6 @@ struct
 
     outline ()
 
-  let instrument_class_field_kind points = function
-    | Parsetree.Cfk_virtual _ as cf ->
-      cf
-    | Parsetree.Cfk_concrete (o,e) ->
-      Cf.concrete o (instrument_expr points e)
-
   let runtime_initialization points file =
     let loc = Location.in_file file in
 
@@ -813,24 +805,18 @@ class instrumenter =
   let points = Generated_code.init () in
   let instrument_expr = Generated_code.instrument_expr points in
   let instrument_pattern = Generated_code.instrument_pattern points in
-  let instrument_class_field_kind =
-    Generated_code.instrument_class_field_kind points in
 
   object (self)
     inherit Ast_mapper_class.mapper as super
 
     method! class_expr ce =
       let loc = ce.pcl_loc in
+      let attrs = ce.pcl_attributes in
       let ce = super#class_expr ce in
+
       match ce.pcl_desc with
-      | Pcl_apply (ce, args) ->
-        let args =
-          List.map
-            (fun (label, e) ->
-              (label, (instrument_expr e)))
-            args
-        in
-        Ast.Ast_helper.Cl.apply ~loc ~attrs:ce.pcl_attributes ce args
+      | Pcl_fun (l, e, p, ce) ->
+        Cl.fun_ ~loc ~attrs l (option_map instrument_expr e) p ce
 
       | _ ->
         ce
@@ -839,12 +825,15 @@ class instrumenter =
       let loc = cf.pcf_loc in
       let attrs = cf.pcf_attributes in
       let cf = super#class_field cf in
-      match cf.pcf_desc with
-      | Pcf_val (name, mutable_, cf) ->
-        Cf.val_ ~loc ~attrs name mutable_ (instrument_class_field_kind cf)
 
+      match cf.pcf_desc with
       | Pcf_method (name, private_, cf) ->
-        Cf.method_ ~loc ~attrs name private_ (instrument_class_field_kind cf)
+        Cf.method_ ~loc ~attrs
+          name private_
+          (match cf with
+          | Cfk_virtual _ -> cf
+          | Cfk_concrete (o, e) ->
+            Cf.concrete o (instrument_expr e))
 
       | Pcf_initializer e ->
         Cf.initializer_ ~loc ~attrs (instrument_expr e)
