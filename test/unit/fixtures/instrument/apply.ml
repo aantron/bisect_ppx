@@ -23,3 +23,20 @@ let helper () =
 
 let () =
   print_endline (helper ())
+
+(* Short-circuiting operators. *)
+let _ =
+  false || true
+
+let _ =
+  false or true
+
+let _ =
+  true && true
+
+let _ =
+  true & true
+
+(* Short-circuiting operators with subexpressions. *)
+let _ =
+  (print_endline "foo"; false) || (print_endline "bar"; true)

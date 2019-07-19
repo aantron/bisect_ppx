@@ -856,12 +856,42 @@ class instrumenter =
           match e.pexp_desc with
           (* Expressions that invoke arbitrary code, and may not terminate. *)
           | Pexp_apply (e, arguments) ->
+            let instrument_apply =
+              match e with
+              | [%expr (||)]
+              | [%expr (or)]
+              | [%expr (&&)]
+              | [%expr (&)] ->
+                fun e -> e
+              | _ ->
+                instrument_if_not ~is_in_tail_position
+            in
+
+            let instrument_arguments =
+              match e with
+              | [%expr (||)]
+              | [%expr (or)]
+              | [%expr (&&)]
+              | [%expr (&)] ->
+                begin function
+                | [(ll, el); (lr, er)] ->
+                  [(ll,
+                    traverse ~is_in_tail_position:false el);
+                   (lr,
+                    instrument_expr (traverse ~is_in_tail_position:false er))]
+                | _ ->
+                  assert false
+                end
+
+              | _ ->
+                List.map (fun (label, e) ->
+                  (label, traverse ~is_in_tail_position:false e))
+            in
+
             Exp.apply ~loc ~attrs
               (traverse ~is_in_tail_position:false e)
-              (arguments
-              |> List.map (fun (label, e) ->
-                (label, traverse ~is_in_tail_position:false e)))
-            |> instrument_if_not ~is_in_tail_position
+              (instrument_arguments arguments)
+            |> instrument_apply
 
           | Pexp_send (e, m) ->
             Exp.send ~loc ~attrs (traverse ~is_in_tail_position:false e) m
