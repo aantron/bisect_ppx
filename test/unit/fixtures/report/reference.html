@@ -13,7 +13,7 @@
           <span class="dirname"></span>source.ml
         </a>
       </h1>
-      <h2>56.60%</h2>
+      <h2>50.00%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:41.67%"></span>
@@ -35,8 +35,8 @@
     <div id="report">
       <div id="lines-layer">
         <pre>
-<a id="L1"></a><span class="visited"> </span>
-<a id="L2"></a><span class="visited"> </span>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
 <a id="L3"></a><span > </span>
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
@@ -53,7 +53,7 @@
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
 <a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span > </span>
@@ -160,8 +160,8 @@
 <a href="#L59">59</a>
 <a href="#L60">60</a>
 </pre>
-<pre><code class="ocaml">let inf = ref <span data-count="2">0</span>
-let sup = ref <span data-count="2">3</span>
+<pre><code class="ocaml">let inf = ref 0
+let sup = ref 3
 
 let args = [
   ("-inf", (Arg.Set_int inf), "inferior bound") ;
@@ -169,7 +169,7 @@ let args = [
 ]
 
 let kind = function
-  | <span data-count="9">x</span> when x &gt; <span data-count="9">9</span> || <span data-count="7">x</span> &lt; <span data-count="7">0</span> -&gt; <span data-count="2">p</span>rint_endline "not a digit"
+  | <span data-count="9">x</span> when x &gt; 9 || <span data-count="7">x</span> &lt; 0 -&gt; <span data-count="2">p</span>rint_endline "not a digit"
   | <span data-count="7">_</span> -&gt; print_endline "digit"
 
 let print x =
@@ -178,7 +178,7 @@ let print x =
 
 let () =
   Arg.parse args ignore "report test<span data-count="2">"</span>;
-  for i = !in<span data-count="2">f</span> to !su<span data-count="2">p</span> do
+  for i = !inf to !sup do
     <span data-count="9">k</span>ind <span data-count="9">i</span>;
     print <span data-count="9">i</span>
   done
@@ -188,13 +188,13 @@ let rec pow a = <span data-count="4">f</span>unction
   | <span data-count="2">1</span> -&gt; a
   | <span data-count="2">n</span> -&gt;
       let b = pow a (n/2<span data-count="4">)</span> in
-      b * <span data-count="2">b</span> * (if n mod <span data-count="2">2</span> = <span data-count="2">0</span> then <span data-count="2">1</span> else <span data-count="0">a</span>)
+      b * <span data-count="2">b</span> * (if n mod <span data-count="2">2</span> = 0 then <span data-count="2">1</span> else <span data-count="0">a</span>)
 
 let () =
-  assert ((pow 2 2<span data-count="2">)</span> = 4<span data-count="2">)</span>
+  assert ((pow 2 2<span data-count="2">)</span> = 4)
 
 let is_even x =
-  <span data-count="0">i</span>f x mod <span data-count="0">2</span> = <span data-count="0">0</span> then <span data-count="0">t</span>rue else <span data-count="0">f</span>alse
+  <span data-count="0">i</span>f x mod <span data-count="0">2</span> = 0 then <span data-count="0">t</span>rue else <span data-count="0">f</span>alse
 
 let rec is_odd x =
   <span data-count="0">m</span>atch x with

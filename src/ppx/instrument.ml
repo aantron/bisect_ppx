@@ -861,7 +861,19 @@ class instrumenter =
               | [%expr (||)]
               | [%expr (or)]
               | [%expr (&&)]
-              | [%expr (&)] ->
+              | [%expr (&)]
+              | [%expr (=)]
+              | [%expr (<>)]
+              | [%expr (<)]
+              | [%expr (<=)]
+              | [%expr (>)]
+              | [%expr (>=)]
+              | [%expr (==)]
+              | [%expr (!=)]
+              | [%expr ref]
+              | [%expr (!)]
+              | [%expr (:=)]
+              ->
                 fun e -> e
               | _ ->
                 instrument_if_not ~is_in_tail_position
