@@ -4,23 +4,24 @@ file "source.ml"
   point at offset    196:      2
   point at offset    228:      7
   point at offset    272:      9
-  point at offset    282:      9
-  point at offset    350:      2
+  point at offset    280:      9
+  point at offset    324:      2
   point at offset    383:      9
-  point at offset    388:      9
-  point at offset    401:      9
+  point at offset    386:      9
+  point at offset    399:      9
   point at offset    427:      4
   point at offset    440:      0
   point at offset    451:      2
   point at offset    462:      2
-  point at offset    491:      4
-  point at offset    506:      2
-  point at offset    520:      2
+  point at offset    483:      2
+  point at offset    489:      2
+  point at offset    504:      2
+  point at offset    518:      2
   point at offset    531:      2
   point at offset    538:      0
-  point at offset    569:      2
+  point at offset    564:      2
   point at offset    595:      0
-  point at offset    604:      0
+  point at offset    602:      0
   point at offset    615:      0
   point at offset    625:      0
   point at offset    653:      0
@@ -30,16 +31,16 @@ file "source.ml"
   point at offset    688:      0
   point at offset    694:      0
   point at offset    708:      0
-  point at offset    724:      0
+  point at offset    722:      0
   point at offset    731:      0
   point at offset    742:      0
-  point at offset    758:      0
+  point at offset    754:      0
   point at offset    779:      0
-  point at offset    800:      0
+  point at offset    798:      0
   point at offset    822:      0
   point at offset    873:      2
   point at offset    892:      2
   point at offset    908:      0
-  point at offset    923:      2
-  point at offset    935:      2
+  point at offset    914:      2
+  point at offset    928:      2
   point at offset    948:      0

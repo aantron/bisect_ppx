@@ -838,11 +838,11 @@ class instrumenter =
         cf
 
     method! expr e =
-      let instrument_if_not ~is_in_tail_position e =
+      let instrument_if_not ?override_loc ~is_in_tail_position e =
         if is_in_tail_position then
           e
         else
-          instrument_expr ~at_end:true e
+          instrument_expr ?override_loc ~at_end:true e
       in
 
       let rec traverse ~is_in_tail_position e =
@@ -876,7 +876,7 @@ class instrumenter =
               ->
                 fun e -> e
               | _ ->
-                instrument_if_not ~is_in_tail_position
+                instrument_if_not ~override_loc:e.pexp_loc ~is_in_tail_position
             in
 
             let instrument_arguments =

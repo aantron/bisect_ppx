@@ -2,7 +2,7 @@ module Bisect_visit___override___ml =
   struct
     let ___bisect_visit___ =
       let point_definitions =
-        "\132\149\166\190\000\000\000\t\000\000\000\003\000\000\000\t\000\000\000\t\160\160\000OA\160\000i@" in
+        "\132\149\166\190\000\000\000\t\000\000\000\003\000\000\000\t\000\000\000\t\160\160\000OA\160\000c@" in
       let `Staged cb =
         Bisect.Runtime.register_file "override.ml" ~point_count:2
           ~point_definitions in
