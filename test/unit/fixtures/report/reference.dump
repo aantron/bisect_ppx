@@ -1,10 +1,10 @@
 file "source.ml"
   point at offset     14:      2
   point at offset     30:      2
-  point at offset    171:      2
-  point at offset    178:      9
+  point at offset    171:      9
   point at offset    182:      9
   point at offset    191:     16
+  point at offset    196:      2
   point at offset    228:      7
   point at offset    272:      9
   point at offset    282:      9

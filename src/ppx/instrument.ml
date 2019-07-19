@@ -399,25 +399,25 @@ struct
           rotate_or_patterns_to_top loc ~non_exception_pattern in
 
         match rotated_cases with
-        | [] ->
-          empty_case_list case    (* Should be unreachable. *)
+        | [] -> (* Should be unreachable. *)
+          insert_instrumentation
+            case
+            (fun e -> instrument_expr points e)
 
         | [(location_trace, _)] ->
-          no_or_patterns case location_trace
+          insert_instrumentation
+            case
+            (instrumentation_for_location_trace location_trace)
 
         | _::_::_ ->
           let new_case_pattern_with_alias =
             add_bisect_matched_value_alias loc ~non_exception_pattern
             |> reassemble_exception_pattern_if_present
           in
-
-          let new_case_expr_with_nested_match =
-            generate_nested_match loc rotated_cases in
-
-          Exp.case
-            new_case_pattern_with_alias
-            ?guard:(instrument_when_clause case)
-            new_case_expr_with_nested_match
+          let nested_match = generate_nested_match loc rotated_cases in
+          insert_instrumentation
+            {case with pc_lhs = new_case_pattern_with_alias}
+            (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])
 
     and is_assert_false_or_refutation case =
       match case.pc_rhs with
@@ -436,20 +436,19 @@ struct
         (entire_pattern,
          (fun p -> p))
 
-    and empty_case_list case =
-      Parsetree.{case with
-        pc_rhs = instrument_expr points case.pc_rhs;
-        pc_guard = instrument_when_clause case}
+    and insert_instrumentation case f =
+      match case.pc_guard with
+      | None ->
+        {case with
+          pc_rhs = f case.pc_rhs;
+        }
+      | Some guard ->
+        {case with
+          pc_guard = Some (f guard);
+          pc_rhs = instrument_expr points case.pc_rhs;
+        }
 
-    and no_or_patterns case location_trace =
-      Parsetree.{case with
-        pc_rhs = instrumentation_for_location_trace case.pc_rhs location_trace;
-        pc_guard = instrument_when_clause case}
-
-    and instrument_when_clause case =
-      option_map (instrument_expr points) case.Parsetree.pc_guard
-
-    and instrumentation_for_location_trace e location_trace =
+    and instrumentation_for_location_trace location_trace e =
       location_trace
       |> List.sort_uniq (fun l l' ->
         l.Location.loc_start.Lexing.pos_cnum -
@@ -462,11 +461,11 @@ struct
         [@metaloc loc]
 
     and generate_nested_match loc rotated_cases =
-      (rotated_cases
+      rotated_cases
       |> List.map (fun (location_trace, rotated_pattern) ->
         Exp.case
           rotated_pattern
-          (instrumentation_for_location_trace [%expr ()] location_trace))
+          (instrumentation_for_location_trace location_trace [%expr ()]))
       |> fun nested_match_cases ->
         nested_match_cases @ [Exp.case [%pat? _] [%expr ()]]
       |> Exp.match_ ~loc ([%expr ___bisect_matched_value___])
@@ -476,9 +475,6 @@ struct
           {attr_name = Location.mkloc "ocaml.warning" loc;
            attr_payload = PStr [[%stri "-4-8-9-11-26-27-28"]];
            attr_loc = loc}
-      |> fun nested_match_with_attribute ->
-        [%expr [%e nested_match_with_attribute]; [%e case.pc_rhs]])
-          [@metaloc loc]
 
     (* This function works recursively. It should be called with a pattern [p]
        (second argument) and its location (first argument).
