@@ -2,9 +2,9 @@ module Bisect_visit___expr_binding___ml =
   struct
     let ___bisect_visit___ =
       let point_definitions =
-        "\132\149\166\190\000\000\000!\000\000\000\b\000\000\000\029\000\000\000\029\240\160}@\160\000vB\160\001\000\142A\160\001\000\183D\160\001\000\186C\160\001\000\211F\160\001\000\223E" in
+        "\132\149\166\190\000\000\000\028\000\000\000\007\000\000\000\025\000\000\000\025\224\160}@\160\000vB\160\001\000\142A\160\001\000\183C\160\001\000\211E\160\001\000\223D" in
       let `Staged cb =
-        Bisect.Runtime.register_file "expr_binding.ml" ~point_count:7
+        Bisect.Runtime.register_file "expr_binding.ml" ~point_count:6
           ~point_definitions in
       cb
   end
@@ -19,12 +19,9 @@ let f' x =
      let ___bisect_result___ = String.uppercase x in
      ___bisect_visit___ 1; ___bisect_result___ in
    print_endline x')
-let g x y z =
-  ___bisect_visit___ 4;
-  (let ___bisect_result___ = x + y in
-   ___bisect_visit___ 3; ___bisect_result___) * z
+let g x y z = ___bisect_visit___ 3; (x + y) * z
 let g' x y =
-  ___bisect_visit___ 6;
+  ___bisect_visit___ 5;
   (let ___bisect_result___ = print_endline x in
-   ___bisect_visit___ 5; ___bisect_result___);
+   ___bisect_visit___ 4; ___bisect_result___);
   print_endline y

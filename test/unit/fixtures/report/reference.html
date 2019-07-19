@@ -13,7 +13,7 @@
           <span class="dirname"></span>source.ml
         </a>
       </h1>
-      <h2>51.11%</h2>
+      <h2>51.28%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:41.67%"></span>
@@ -27,7 +27,6 @@
       <span class="unvisited" style="top:71.67%"></span>
       <span class="unvisited" style="top:73.33%"></span>
       <span class="unvisited" style="top:78.33%"></span>
-      <span class="unvisited" style="top:80.00%"></span>
       <span class="unvisited" style="top:83.33%"></span>
       <span class="some-visited" style="top:93.33%"></span>
       <span class="unvisited" style="top:100.00%"></span>
@@ -82,7 +81,7 @@
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span class="unvisited"> </span>
-<a id="L48"></a><span class="unvisited"> </span>
+<a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span class="unvisited"> </span>
 <a id="L51"></a><span > </span>
@@ -187,14 +186,14 @@ let rec pow a = <span data-count="4">f</span>unction
   | <span data-count="0">0</span> -&gt; 1
   | <span data-count="2">1</span> -&gt; a
   | <span data-count="2">n</span> -&gt;
-      let b = po<span data-count="2">w</span> a (n<span data-count="2">/</span>2) in
-      b <span data-count="2">*</span> b * (if n mo<span data-count="2">d</span> 2 = 0 then <span data-count="2">1</span> else <span data-count="0">a</span>)
+      let b = po<span data-count="2">w</span> a (n/2) in
+      b * b * (if n mod 2 = 0 then <span data-count="2">1</span> else <span data-count="0">a</span>)
 
 let () =
   assert ((po<span data-count="2">w</span> 2 2) = 4)
 
 let is_even x =
-  <span data-count="0">i</span>f x mo<span data-count="0">d</span> 2 = 0 then <span data-count="0">t</span>rue else <span data-count="0">f</span>alse
+  <span data-count="0">i</span>f x mod 2 = 0 then <span data-count="0">t</span>rue else <span data-count="0">f</span>alse
 
 let rec is_odd x =
   <span data-count="0">m</span>atch x with
@@ -203,11 +202,11 @@ let rec is_odd x =
   | <span data-count="0">5</span>
   | <span data-count="0">7</span>
   | <span data-count="0">9</span> -&gt; true
-  | <span data-count="0">x</span> -&gt; if is_eve<span data-count="0">n</span> x then <span data-count="0">f</span>alse else <span data-count="0">i</span>s_odd (x mo<span data-count="0">d</span> 10)
+  | <span data-count="0">x</span> -&gt; if is_eve<span data-count="0">n</span> x then <span data-count="0">f</span>alse else <span data-count="0">i</span>s_odd (x mod 10)
 
 let is_zero x =
   <span data-count="0">t</span>ry
-    let _ = 20 <span data-count="0">/</span> x in
+    let _ = 20 / x in
     false
   with <span data-count="0">D</span>ivision_by_zero -&gt; true
 
