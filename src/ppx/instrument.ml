@@ -919,11 +919,16 @@ class instrumenter =
                 List.map (fun (label, e) ->
                   (label, traverse ~is_in_tail_position:false e)) arguments
             in
-            let apply =
-              Exp.apply ~loc ~attrs
-                (traverse ~is_in_tail_position:false e)
-                arguments
+            let e =
+              match e.pexp_desc with
+              | Pexp_new _ ->
+                e
+              | Pexp_send _ ->
+                traverse ~successor:`Redundant ~is_in_tail_position:false e
+              | _ ->
+                traverse ~is_in_tail_position:false e
             in
+            let apply = Exp.apply ~loc ~attrs e arguments in
             if is_in_tail_position then
               apply
             else
@@ -998,13 +1003,28 @@ class instrumenter =
             if is_in_tail_position then
               apply
             else
-              instrument_expr ~at_end:true ~post:true apply
+              begin match successor with
+              | `None ->
+                instrument_expr ~at_end:true ~post:true apply
+              | `Redundant ->
+                apply
+              | `Expression e' ->
+                instrument_expr
+                  ~override_loc:e'.Parsetree.pexp_loc ~post:true apply
+              end
 
           | Pexp_new _ ->
             if is_in_tail_position then
               e
             else
-              instrument_expr ~at_end:true ~post:true e
+              begin match successor with
+              | `None ->
+                instrument_expr ~at_end:true ~post:true e
+              | `Redundant ->
+                e
+              | `Expression e' ->
+                instrument_expr ~override_loc:e'.Parsetree.pexp_loc ~post:true e
+              end
 
           | Pexp_assert e ->
             Exp.assert_ (traverse ~is_in_tail_position:false e)
@@ -1066,9 +1086,13 @@ class instrumenter =
               (instrument_expr (traverse ~is_in_tail_position:true e))
 
           | Pexp_poly (e, t) ->
-            Exp.poly ~loc ~attrs
-              (instrument_expr (traverse ~is_in_tail_position:true e))
-              t
+            let e = traverse ~is_in_tail_position:true e in
+            let e =
+              match e.pexp_desc with
+              | Pexp_function _ | Pexp_fun _ -> e
+              | _ -> instrument_expr e
+            in
+            Exp.poly ~loc ~attrs e t
 
           | Pexp_newtype (t, e) ->
             Exp.newtype ~loc ~attrs t (traverse ~is_in_tail_position:true e)
