@@ -1005,7 +1005,7 @@ class instrumenter =
 
           | Pexp_match (e, cases) ->
             Exp.match_ ~loc ~attrs
-              (traverse ~is_in_tail_position:false e)
+              (traverse ~successor:`Redundant ~is_in_tail_position:false e)
               (traverse_cases ~is_in_tail_position cases)
 
           | Pexp_try (e, cases) ->
