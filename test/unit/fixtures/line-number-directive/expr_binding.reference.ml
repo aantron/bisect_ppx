@@ -2,7 +2,7 @@ module Bisect_visit___expr_binding___ml =
   struct
     let ___bisect_visit___ =
       let point_definitions =
-        "\132\149\166\190\000\000\000\028\000\000\000\007\000\000\000\025\000\000\000\025\224\160}@\160\000vB\160\001\000\142A\160\001\000\183C\160\001\000\211E\160\001\000\223D" in
+        "\132\149\166\190\000\000\000\028\000\000\000\007\000\000\000\025\000\000\000\025\224\160}@\160\000vB\160\001\000\151A\160\001\000\183C\160\001\000\211E\160\001\000\223D" in
       let `Staged cb =
         Bisect.Runtime.register_file "expr_binding.ml" ~point_count:6
           ~point_definitions in
