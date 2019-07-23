@@ -839,13 +839,6 @@ class instrumenter =
         cf
 
     method! expr e =
-      let instrument_if_not ?override_loc ~is_in_tail_position e =
-        if is_in_tail_position then
-          e
-        else
-          instrument_expr ?override_loc ~at_end:true ~post:true e
-      in
-
       let rec traverse ?(successor = `None) ~is_in_tail_position e =
         let attrs = e.Parsetree.pexp_attributes in
         if Coverage_attributes.has_off_attribute attrs then
@@ -885,75 +878,13 @@ class instrumenter =
               end
 
           | Pexp_apply (e, arguments) ->
-            let instrument_apply =
-              if is_in_tail_position then
-                fun e -> e
-              else
-                match e with
-                | [%expr (||)]
-                | [%expr (or)]
-                | [%expr (&&)]
-                | [%expr (&)]
-                | [%expr not]
-                | [%expr (=)]
-                | [%expr (<>)]
-                | [%expr (<)]
-                | [%expr (<=)]
-                | [%expr (>)]
-                | [%expr (>=)]
-                | [%expr (==)]
-                | [%expr (!=)]
-                | [%expr ref]
-                | [%expr (!)]
-                | [%expr (:=)]
-                | [%expr (@)]
-                | [%expr (^)]
-                | [%expr (+)]
-                | [%expr (-)]
-                | [%expr ( * )]
-                | [%expr (/)]
-                | [%expr (+.)]
-                | [%expr (-.)]
-                | [%expr ( *. )]
-                | [%expr (/.)]
-                | [%expr (mod)]
-                | [%expr (land)]
-                | [%expr (lor)]
-                | [%expr (lxor)]
-                | [%expr (lsl)]
-                | [%expr (lsr)]
-                | [%expr (asr)]
-                | [%expr raise]
-                | [%expr raise_notrace]
-                | [%expr failwith]
-                | [%expr ignore]
-                | [%expr Sys.opaque_identity]
-                | [%expr Obj.magic]
-                 ->
-                  fun e -> e
-                | _ ->
-                  match successor with
-                  | `None ->
-                    instrument_expr
-                      ~override_loc:e.pexp_loc
-                      ~at_end:true
-                      ~post:true
-                  | `Redundant ->
-                    fun e -> e
-                  | `Expression e' ->
-                    instrument_expr
-                      ~override_loc:e'.Parsetree.pexp_loc
-                      ~at_end:false
-                      ~post:true
-            in
-
-            let instrument_arguments =
+            let arguments =
               match e with
               | [%expr (||)]
               | [%expr (or)]
               | [%expr (&&)]
               | [%expr (&)] ->
-                begin function
+                begin match arguments with
                 | [(ll, el); (lr, er)] ->
                   [(ll,
                     traverse ~is_in_tail_position:false el);
@@ -965,20 +896,89 @@ class instrumenter =
 
               | _ ->
                 List.map (fun (label, e) ->
-                  (label, traverse ~is_in_tail_position:false e))
+                  (label, traverse ~is_in_tail_position:false e)) arguments
             in
-
-            Exp.apply ~loc ~attrs
-              (traverse ~is_in_tail_position:false e)
-              (instrument_arguments arguments)
-            |> instrument_apply
+            let apply =
+              Exp.apply ~loc ~attrs
+                (traverse ~is_in_tail_position:false e)
+                arguments
+            in
+            if is_in_tail_position then
+              apply
+            else
+              begin match e with
+              | [%expr (||)]
+              | [%expr (or)]
+              | [%expr (&&)]
+              | [%expr (&)]
+              | [%expr not]
+              | [%expr (=)]
+              | [%expr (<>)]
+              | [%expr (<)]
+              | [%expr (<=)]
+              | [%expr (>)]
+              | [%expr (>=)]
+              | [%expr (==)]
+              | [%expr (!=)]
+              | [%expr ref]
+              | [%expr (!)]
+              | [%expr (:=)]
+              | [%expr (@)]
+              | [%expr (^)]
+              | [%expr (+)]
+              | [%expr (-)]
+              | [%expr ( * )]
+              | [%expr (/)]
+              | [%expr (+.)]
+              | [%expr (-.)]
+              | [%expr ( *. )]
+              | [%expr (/.)]
+              | [%expr (mod)]
+              | [%expr (land)]
+              | [%expr (lor)]
+              | [%expr (lxor)]
+              | [%expr (lsl)]
+              | [%expr (lsr)]
+              | [%expr (asr)]
+              | [%expr raise]
+              | [%expr raise_notrace]
+              | [%expr failwith]
+              | [%expr ignore]
+              | [%expr Sys.opaque_identity]
+              | [%expr Obj.magic]
+                ->
+                apply
+              | _ ->
+                match successor with
+                | `None ->
+                  instrument_expr
+                    ~override_loc:e.pexp_loc
+                    ~at_end:true
+                    ~post:true
+                    apply
+                | `Redundant ->
+                  apply
+                | `Expression e' ->
+                  instrument_expr
+                    ~override_loc:e'.Parsetree.pexp_loc
+                    ~at_end:false
+                    ~post:true
+                    apply
+              end
 
           | Pexp_send (e, m) ->
-            Exp.send ~loc ~attrs (traverse ~is_in_tail_position:false e) m
-            |> instrument_if_not ~is_in_tail_position
+            let apply =
+              Exp.send ~loc ~attrs (traverse ~is_in_tail_position:false e) m in
+            if is_in_tail_position then
+              apply
+            else
+              instrument_expr ~at_end:true ~post:true apply
 
           | Pexp_new _ ->
-            instrument_if_not ~is_in_tail_position e
+            if is_in_tail_position then
+              e
+            else
+              instrument_expr ~at_end:true ~post:true e
 
           | Pexp_assert e ->
             Exp.assert_ (traverse ~is_in_tail_position:false e)
