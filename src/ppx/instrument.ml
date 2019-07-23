@@ -1131,10 +1131,16 @@ class instrumenter =
               (List.map (traverse ~is_in_tail_position:false) es)
 
           | Pexp_sequence (e, e') ->
+            let e' = traverse ~is_in_tail_position e' in
+            let e' =
+              match e.pexp_desc with
+              | Pexp_ifthenelse (_, _, None) -> instrument_expr e'
+              | _ -> e'
+            in
             Exp.sequence ~loc ~attrs
               (traverse
                 ~successor:(`Expression e') ~is_in_tail_position:false e)
-              (traverse ~is_in_tail_position e')
+              e'
 
           | Pexp_constraint (e, t) ->
             Exp.constraint_ ~loc ~attrs (traverse ~is_in_tail_position e) t
