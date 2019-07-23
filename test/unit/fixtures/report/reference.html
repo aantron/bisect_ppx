@@ -48,11 +48,11 @@
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span class="visited"> </span>
-<a id="L15"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span > </span>
@@ -172,14 +172,14 @@ let kind = function
   | <span data-count="7">_</span> -&gt; print_endline "digit"
 
 let print x =
-  <span data-count="9">p</span>rint_in<span data-count="9">t</span> x;
-  print_newline ()
+  <span data-count="9">p</span>rint_int x;
+  <span data-count="9">p</span>rint_newline ()
 
 let () =
-  Arg.pars<span data-count="2">e</span> args ignore "report test";
-  for i = !inf to !sup do
-    <span data-count="9">k</span>in<span data-count="9">d</span> i;
-    prin<span data-count="9">t</span> i
+  Arg.parse args ignore "report test";
+  <span data-count="2">f</span>or i = !inf to !sup do
+    <span data-count="9">k</span>ind i;
+    <span data-count="9">p</span>rin<span data-count="9">t</span> i
   done
 
 let rec pow a = function

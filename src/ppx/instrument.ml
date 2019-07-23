@@ -1113,7 +1113,8 @@ class instrumenter =
 
           | Pexp_sequence (e, e') ->
             Exp.sequence ~loc ~attrs
-              (traverse ~is_in_tail_position:false e)
+              (traverse
+                ~successor:(`Expression e') ~is_in_tail_position:false e)
               (traverse ~is_in_tail_position e')
 
           | Pexp_constraint (e, t) ->
