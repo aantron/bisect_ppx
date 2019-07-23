@@ -877,11 +877,32 @@ class instrumenter =
                 instrument_expr ~override_loc:e.pexp_loc ~post:true apply
               end
 
+          | Pexp_apply (([%expr (||)] | [%expr (or)]), [(_l, e); (_l', e')]) ->
+            let e_mark =
+              instrument_expr
+                ~override_loc:e.pexp_loc ~at_end:true [%expr true]
+            in
+            let e'_mark =
+              match e'.pexp_desc with
+              | Pexp_apply ([%expr (||)], _) ->
+                [%expr true]
+              | _ ->
+                instrument_expr
+                  ~override_loc:e'.pexp_loc ~at_end:true [%expr true]
+            in
+            [%expr
+              if [%e traverse ~is_in_tail_position:false e] then
+                [%e e_mark]
+              else
+                if [%e traverse ~is_in_tail_position:false e'] then
+                  [%e e'_mark]
+                else
+                  false]
+              [@mealoc loc]
+
           | Pexp_apply (e, arguments) ->
             let arguments =
               match e with
-              | [%expr (||)]
-              | [%expr (or)]
               | [%expr (&&)]
               | [%expr (&)] ->
                 begin match arguments with
@@ -907,8 +928,6 @@ class instrumenter =
               apply
             else
               begin match e with
-              | [%expr (||)]
-              | [%expr (or)]
               | [%expr (&&)]
               | [%expr (&)]
               | [%expr not]
