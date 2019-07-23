@@ -856,6 +856,34 @@ class instrumenter =
 
           match e.pexp_desc with
           (* Expressions that invoke arbitrary code, and may not terminate. *)
+          | Pexp_apply ([%expr (|>)] as operator, [(l, e); (l', e')]) ->
+            let apply =
+              Exp.apply ~loc ~attrs
+                operator
+                [(l,
+                  traverse
+                    ~successor:(`Expression e') ~is_in_tail_position:false e);
+                (l',
+                  traverse ~successor:`Redundant ~is_in_tail_position:false e')]
+            in
+            if is_in_tail_position then
+              apply
+            else
+              begin match successor with
+              | `None ->
+                let rec fn e' =
+                  match e'.Parsetree.pexp_desc with
+                  | Pexp_apply (e', _) -> fn e'
+                  | _ -> e'
+                in
+                instrument_expr
+                  ~override_loc:(fn e').pexp_loc ~at_end:true ~post:true apply
+              | `Redundant ->
+                apply
+              | `Expression e ->
+                instrument_expr ~override_loc:e.pexp_loc ~post:true apply
+              end
+
           | Pexp_apply (e, arguments) ->
             let instrument_apply =
               if is_in_tail_position then

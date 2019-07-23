@@ -28,7 +28,7 @@
       <span class="unvisited" style="top:73.33%"></span>
       <span class="unvisited" style="top:78.33%"></span>
       <span class="unvisited" style="top:83.33%"></span>
-      <span class="some-visited" style="top:93.33%"></span>
+      <span class="unvisited" style="top:93.33%"></span>
       <span class="unvisited" style="top:100.00%"></span>
     </div>
     <div id="report">
@@ -89,7 +89,7 @@
 <a id="L53"></a><span > </span>
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span class="visited"> </span>
-<a id="L56"></a><span class="some-visited"> </span>
+<a id="L56"></a><span class="unvisited"> </span>
 <a id="L57"></a><span > </span>
 <a id="L58"></a><span class="visited"> </span>
 <a id="L59"></a><span > </span>
@@ -214,9 +214,9 @@ let () =
   (fun x -&gt;
     <span data-count="2">m</span>atch x with
     | <span data-count="2">0</span>, 0 -&gt; 0
-    | <span data-count="0">_</span> -&gt; 1<span data-count="2">)</span>
+    | <span data-count="0">_</span> -&gt; 1)
   (0, 0)
-  |<span data-count="2">&gt;</span> ignore
+  |&gt; <span data-count="2">i</span>gnor<span data-count="2">e</span>
 
 let f _ = <span data-count="0">"</span>a string to confound Buffer.add_substitute $("
 </code></pre>
