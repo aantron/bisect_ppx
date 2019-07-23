@@ -2,11 +2,11 @@ module Bisect_visit___newtype___ml =
   struct
     let ___bisect_visit___ =
       let point_definitions =
-        "\132\149\166\190\000\000\000\004\000\000\000\002\000\000\000\005\000\000\000\005\144\160g@" in
+        "\132\149\166\190\000\000\000\001\000\000\000\000\000\000\000\000\000\000\000\000\128" in
       let `Staged cb =
-        Bisect.Runtime.register_file "newtype.ml" ~point_count:1
+        Bisect.Runtime.register_file "newtype.ml" ~point_count:0
           ~point_definitions in
       cb
   end
 open Bisect_visit___newtype___ml
-let f (type t) = ___bisect_visit___ 0; print_endline "foo"
+let f (type t) = print_endline "foo"

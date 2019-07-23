@@ -1071,9 +1071,7 @@ class instrumenter =
               t
 
           | Pexp_newtype (t, e) ->
-            Exp.newtype ~loc ~attrs
-              t
-              (instrument_expr (traverse ~is_in_tail_position:true e))
+            Exp.newtype ~loc ~attrs t (traverse ~is_in_tail_position:true e)
 
           | Pexp_letop {let_; ands; body} ->
             let traverse_binding_op binding_op =
