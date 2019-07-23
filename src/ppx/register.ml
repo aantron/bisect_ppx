@@ -24,11 +24,15 @@ let conditional_exclude_file filename =
   | `Enabled -> Exclusions.add_file filename
   | `Disabled -> ()
 
+let deprecated argument =
+  Printf.eprintf "bisect_ppx argument '-%s' is deprecated.\n" argument;
+  Printf.eprintf "Use '--%s' instead.\n" argument;
+  Printf.eprintf "This requires Bisect_ppx >= 1.5.0.\n"
+
 let switches = [
   ("-exclude",
   Arg.String (fun s ->
-    prerr_endline "bisect_ppx argument '-exclude' is deprecated.";
-    prerr_endline "Use '--exclude' instead.";
+    deprecated "exclude";
     Exclusions.add s),
   " Deprecated") ;
 
@@ -38,8 +42,7 @@ let switches = [
 
   ("-exclude-file",
   Arg.String (fun s ->
-    prerr_endline "bisect_ppx argument '-exclude-file' is deprecated.";
-    prerr_endline "Use '--exclude-file' instead.";
+    deprecated "exclude-file";
     conditional_exclude_file s),
   " Deprecated") ;
 
@@ -54,8 +57,7 @@ let switches = [
 
   ("-conditional",
    Arg.Unit (fun () ->
-    prerr_endline "bisect_ppx argument '-conditional' is deprecated.";
-    prerr_endline "Use '--conditional' instead.";
+    deprecated "conditional";
     conditional := true),
    " Deprecated");
 
@@ -65,8 +67,7 @@ let switches = [
 
   ("-no-comment-parsing",
    Arg.Unit (fun () ->
-    prerr_endline "bisect_ppx argument '-no-comment-parsing' is deprecated.";
-    prerr_endline "Use '--no-comment-parsing' instead.";
+    deprecated "no-comment-parsing";
     Comments.no_comment_parsing := true),
   " Deprecated");
 

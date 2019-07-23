@@ -45,8 +45,9 @@ let service_job_id = ref ""
 let repo_token = ref ""
 
 let deprecated argument =
-  Printf.eprintf "bisect-ppx-report argument '-%s' is deprecated." argument;
-  Printf.eprintf "Use '--%s' instead." argument
+  Printf.eprintf "bisect-ppx-report argument '-%s' is deprecated.\n" argument;
+  Printf.eprintf "Use '--%s' instead.\n" argument;
+  Printf.eprintf "This requires Bisect_ppx >= 1.5.0.\n"
 
 let options = Arg.align [
   ("-html",
