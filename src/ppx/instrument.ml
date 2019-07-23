@@ -1016,18 +1016,20 @@ class instrumenter =
               ~loc ~attrs (traverse_cases ~is_in_tail_position:true cases)
 
           | Pexp_fun (label, default_value, p, e) ->
-            let instrument_body =
-              match e.pexp_desc with
-              | Pexp_function _ | Pexp_fun _ -> fun e -> e
-              | _ -> fun e -> instrument_expr e
-            in
-            Exp.fun_ ~loc ~attrs
-              label
-              (option_map (fun e ->
+            let default_value =
+              option_map (fun e ->
                 instrument_expr
-                  (traverse ~is_in_tail_position:false e)) default_value)
-              p
-              (instrument_body (traverse ~is_in_tail_position:true e))
+                  (traverse ~is_in_tail_position:false e)) default_value
+            in
+            let e = traverse ~is_in_tail_position:true e in
+            let e =
+              match e.pexp_desc with
+              | Pexp_function _ | Pexp_fun _ -> e
+              | Pexp_constraint (e', t) ->
+                {e with pexp_desc = Pexp_constraint (instrument_expr e', t)}
+              | _ -> instrument_expr e
+            in
+            Exp.fun_ ~loc ~attrs label default_value p e
 
           | Pexp_match (e, cases) ->
             Exp.match_ ~loc ~attrs
