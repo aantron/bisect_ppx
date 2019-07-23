@@ -856,7 +856,7 @@ class instrumenter =
                 [(l,
                   traverse
                     ~successor:(`Expression e') ~is_in_tail_position:false e);
-                (l',
+                 (l',
                   traverse ~successor:`Redundant ~is_in_tail_position:false e')]
             in
             if is_in_tail_position then
@@ -970,8 +970,15 @@ class instrumenter =
               | _ ->
                 match successor with
                 | `None ->
+                  let override_loc =
+                    match e, arguments with
+                    | [%expr (@@)], [(_, e'); _] ->
+                      e'.pexp_loc
+                    | _ ->
+                      e.pexp_loc
+                  in
                   instrument_expr
-                    ~override_loc:e.pexp_loc
+                    ~override_loc
                     ~at_end:true
                     ~post:true
                     apply
