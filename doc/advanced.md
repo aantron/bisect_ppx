@@ -22,6 +22,7 @@ them after `bisect_ppx` in the `pps` list.
 - [File formats](#FileFormats)
   - [Output files](#OutputFileFormat)
 - [Installing without OPAM](#WithoutOPAM)
+- [Sending to Coveralls.io](#Coveralls)
 
 
 
@@ -274,6 +275,42 @@ ocamlfind bisect_ppx/bisect-ppx-report
 
 unless you add the `bisect_ppx` package directory to your `PATH`, or symlink the
 `bisect-ppx-report` binary from a directory in your `PATH`.
+
+<br>
+
+<a id="Coveralls"></a>
+## Sending to Coveralls.io
+
+You can generate a Coveralls JSON report using the `bisect-ppx-report` tool
+with the `--coveralls` flag. Note that Bisect_ppx reports are more precise than
+Coveralls, which only considers whole lines as visited or not. The built-in
+Coveralls reporter will consider a full line unvisited if any point on that
+line is not visited, check the html report to verify precisly which points are
+not covered.
+
+Example using the built-in Coveralls reporter on Travis CI (which sets
+[`$TRAVIS_JOB_ID`][travis-vars]):
+
+      bisect-ppx-report \
+          -I _build/default/ \
+          --coveralls coverage.json \
+          --service-name travis-ci \
+          --service-job-id $TRAVIS_JOB_ID \
+          `find . -name 'bisect*.out'`
+      curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+
+For other CI services, replace `--service-name` and `--service-job-id` as
+follows:
+
+| CI service | `--service-name` | `--service-job-id`  |
+| ---------- | ---------------- | ------------------- |
+| Travis     | `travis-ci`      | `$TRAVIS_JOB_ID`    |
+| CircleCI   | `circleci`       | `$CIRCLE_BUILD_NUM` |
+| Semaphore  | `semaphore`      | `$REVISION`         |
+| Jenkins    | `jenkins`        | `$BUILD_ID`         |
+| Codeship   | `codeship`       | `$CI_BUILD_NUMBER`  |
+
+[travis-vars]: https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
 
 
 
