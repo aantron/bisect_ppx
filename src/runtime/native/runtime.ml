@@ -53,9 +53,7 @@ let () =
 let file_channel () =
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
   let rec create_file () =
-    let numeric_suffix = abs (Random.int 1000000000) in
-    let filename =
-      Printf.sprintf "%s%09d.out" base_name numeric_suffix in
+    let filename = Bisect_common.random_filename base_name in
     try
       let fd = Unix.(openfile filename [O_WRONLY; O_CREAT; O_EXCL] 0o644) in
       let channel = Unix.out_channel_of_descr fd in

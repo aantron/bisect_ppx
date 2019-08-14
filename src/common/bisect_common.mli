@@ -60,6 +60,9 @@ val runtime_data_to_string : unit -> string
 (** Same as {!write_runtime_data}, but accumulates output in a string
     instead. *)
 
+val random_filename : string -> string
+(** Returns a random filename, with the given prefix. *)
+
 val write_points : point_definition list -> string
 (** [write_points pts] converts the point definitions [pts] to a string. The
     string is a binary byte sequence; it is not meant to be legible. *)

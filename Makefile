@@ -10,6 +10,7 @@ test : build
 clean :
 	dune clean
 	make clean-usage
+	make -C test/bucklescript clean
 
 INSTALLED_ENVIRONMENT := \
     OCAMLPATH=`pwd`/_build/install/default/lib \

@@ -17,3 +17,12 @@ val get_coverage_data : unit -> string
 (** Returns the binary coverage data accumulated by the program so far. This
     should eventually be written to a file, to be processed by
     [bisect-ppx-report]. *)
+
+val write_coverage_data : unit -> unit
+(** On Node.js, writes the same coverage data that is returned by
+    {!get_coverage_data} to a [.out] file with a randomized name in the current
+    directory. *)
+
+val write_coverage_data_on_exit : unit -> unit
+(** Registers {!write_coverage_data} to be called automatically on process
+    exit. *)

@@ -9,3 +9,26 @@ let register_file =
 
 let get_coverage_data =
   Bisect_common.runtime_data_to_string
+
+let write_coverage_data () =
+  let rec create_file attempts =
+    let filename = Bisect_common.random_filename "bisect" in
+    match Node.Fs.openSync filename `Write_fail_if_exists with
+    | exception exn ->
+      if attempts = 0 then
+        raise exn
+      else
+        create_file (attempts - 1)
+    | _ ->
+      Node.Fs.writeFileSync filename (get_coverage_data ()) `binary
+  in
+  create_file 100
+
+let node_at_exit = [%bs.raw {|
+  function (callback) {
+    process.on("exit", callback);
+  }
+|}]
+
+let write_coverage_data_on_exit () =
+  node_at_exit write_coverage_data
