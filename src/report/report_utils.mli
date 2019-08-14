@@ -7,8 +7,6 @@
 (** This module defines utility functions for the report program. *)
 
 
-val url : string
-(** The Bisect URL, as a string. *)
 
 val version : string
 (** The current version of Bisect. *)
@@ -75,10 +73,6 @@ val output_bytes : int array -> string -> unit
     byte value.
 
     Raises an exception if an error occurs. *)
-
-val current_time : unit -> string
-(** Returns the current time as a string, using the following format:
-    ["2001-01-01 01:01:01"]. *)
 
 (** Types and functions related to visitation counts.
     All operations gracefully handle overflows by ensuring that:

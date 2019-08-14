@@ -23,13 +23,6 @@ let output_file content filename =
     filename
     (fun channel -> output_string channel content)
 
-let html_footer =
-  let time = Report_utils.current_time () in
-  Printf.sprintf "Generated on %s by <a href=\"%s\">Bisect_ppx</a> %s"
-    time
-    Report_utils.url
-    Report_utils.version
-
 let split_filename name =
   let dirname =
     match Filename.dirname name with
@@ -106,10 +99,9 @@ let output_html_index verbose title filename l =
 
       Report_utils.output_strings
         [ "    </div>" ;
-          "    <div id=\"footer\">$(footer)</div>" ;
           "  </body>" ;
           "</html>" ]
-        ["footer", html_footer]
+        []
         channel)
 
 let escape_line tab_size line offset points =
@@ -325,12 +317,10 @@ let output_html
         ["</code></pre>";
          "      </div>";
          "    </div>";
-         "    <div id=\"footer\">$(footer)</div>";
          "    <script src=\"$(coverage_js)\"></script>";
          "  </body>";
          "</html>"]
-        ["footer", html_footer;
-         "coverage_js", coverage_js]
+        ["coverage_js", coverage_js]
         out_channel
 
     with e ->

@@ -41,9 +41,9 @@ h2 {
 }
 
 #footer {
-    margin: 1.5em 0 1.5em 3em;
+    margin: 1em 0 1em 4em;
     color: #aaa;
-    font-style: oblique;
+    font-size: 12px;
 }
 
 #footer a {
