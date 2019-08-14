@@ -2,7 +2,7 @@
  (names report)
  (public_names bisect-ppx-report)
  (package bisect_ppx)
- (libraries bisect_ppx.runtime unix))
+ (libraries bisect_ppx.common unix))
 
 (rule
  (targets assets.ml)

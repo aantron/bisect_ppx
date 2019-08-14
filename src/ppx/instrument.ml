@@ -138,7 +138,7 @@ sig
     points -> string -> Parsetree.structure_item list
 end =
 struct
-  type points = Bisect.Common.point_definition list ref
+  type points = Bisect_common.point_definition list ref
 
   let init () = ref []
 
@@ -202,12 +202,12 @@ struct
       let point =
         try
           List.find
-            (fun point -> Bisect.Common.(point.offset) = point_offset)
+            (fun point -> Bisect_common.(point.offset) = point_offset)
             !points
         with Not_found ->
           let new_index = List.length !points in
           let new_point =
-            Bisect.Common.{offset = point_offset; identifier = new_index} in
+            Bisect_common.{offset = point_offset; identifier = new_index} in
           points := new_point::!points;
           new_point
       in
@@ -688,7 +688,7 @@ struct
 
     let point_count = Ast_convenience.int ~loc (List.length !points) in
     let points_data =
-      Ast_convenience.str ~loc (Bisect.Common.write_points !points) in
+      Ast_convenience.str ~loc (Bisect_common.write_points !points) in
     let file = Ast_convenience.str ~loc file in
 
     (* ___bisect_visit___ is a function with a reference to a point count array.

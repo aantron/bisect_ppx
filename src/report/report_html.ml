@@ -11,14 +11,14 @@ let css_variables =
    "highlight_color", "#a0fbff"]
 
 let output_templated_css filename =
-  Bisect.Common.try_out_channel
+  Bisect_common.try_out_channel
     false
     filename
     (fun channel ->
       Report_utils.output_strings [Assets.css] css_variables channel)
 
 let output_file content filename =
-  Bisect.Common.try_out_channel
+  Bisect_common.try_out_channel
     false
     filename
     (fun channel -> output_string channel content)
@@ -54,7 +54,7 @@ let output_html_index verbose title filename l =
       (Report_utils.make ())
       l in
 
-  Bisect.Common.try_out_channel
+  Bisect_common.try_out_channel
     false
     filename
     (fun channel ->
@@ -148,19 +148,19 @@ let output_html
     None
   | Some resolved_in_file ->
     let cmp_content =
-      Hashtbl.find points in_file |> Bisect.Common.read_points' in
+      Hashtbl.find points in_file |> Bisect_common.read_points' in
     verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
     let len = Array.length visited in
     let stats = Report_utils.make () in
     let pts = ref (List.map
                      (fun p ->
                        let nb =
-                         if Bisect.Common.(p.identifier) < len then
-                           visited.(Bisect.Common.(p.identifier))
+                         if Bisect_common.(p.identifier) < len then
+                           visited.(Bisect_common.(p.identifier))
                          else
                            0 in
                        Report_utils.update stats (nb > 0);
-                       (Bisect.Common.(p.offset), nb))
+                       (Bisect_common.(p.offset), nb))
                      cmp_content) in
     let dirname, basename = split_filename in_file in
     let in_channel, out_channel =
