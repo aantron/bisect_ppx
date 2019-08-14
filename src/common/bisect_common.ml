@@ -35,29 +35,120 @@ let try_out_channel bin x f =
 (* filename + reason *)
 exception Invalid_file of string * string
 
-exception Unsupported_version of string
+let magic_number_rtd = "BISECTOUT3"
 
-exception Modified_file of string
+module Writer :
+sig
+  type 'a t
 
-let magic_number_rtd = "BISECT-RTD"
+  val int : int t
+  val string : string t
+  val pair : 'a t -> 'b t -> ('a * 'b) t
+  val array : 'a t -> 'a array t
 
-let supported_versions = [
-  2, 0
-]
+  val write : 'a t -> 'a -> string
+end =
+struct
+  type 'a t = Buffer.t -> 'a -> unit
 
-let format_version = (2, 0)
+  let w =
+    Printf.bprintf
+
+  let int b i =
+    w b " %i" i
+
+  let string b s =
+    w b " %i %s" (String.length s) s
+
+  let pair left right b (l, r) =
+    left b l;
+    right b r
+
+  let array element b a =
+    w b " %i" (Array.length a);
+    Array.iter (element b) a
+
+  let write writer v =
+    let b = Buffer.create 4096 in
+    Buffer.add_string b magic_number_rtd;
+    writer b v;
+    Buffer.contents b
+end
+
+module Reader :
+sig
+  type 'a t
+
+  val int : int t
+  val string : string t
+  val pair : 'a t -> 'b t -> ('a * 'b) t
+  val array : 'a t -> 'a array t
+
+  val read : 'a t -> filename:string -> 'a
+end =
+struct
+  type 'a t = Buffer.t -> in_channel -> 'a
+
+  let junk c =
+    try ignore (input_char c)
+    with End_of_file -> ()
+
+  let int b c =
+    Buffer.clear b;
+    let rec loop () =
+      match input_char c with
+      | exception End_of_file -> ()
+      | ' ' -> ()
+      | c -> Buffer.add_char b c; loop ()
+    in
+    loop ();
+    int_of_string (Buffer.contents b)
+
+  let string b c =
+    let length = int b c in
+    let s = really_input_string c length in
+    junk c;
+    s
+
+  let pair left right b c =
+    let l = left b c in
+    let r = right b c in
+    l, r
+
+  let array element b c =
+    let length = int b c in
+    Array.init length (fun _index -> element b c)
+
+  let read reader ~filename =
+    try_in_channel true filename begin fun c ->
+      let magic_number_in_file =
+        try really_input_string c (String.length magic_number_rtd)
+        with End_of_file ->
+          raise
+            (Invalid_file
+              (filename, "unexpected end of file while reading magic number"))
+      in
+      if magic_number_in_file <> magic_number_rtd then
+        raise (Invalid_file (filename, "bad magic number"));
+
+      junk c;
+
+      let b = Buffer.create 4096 in
+      try reader b c
+      with e ->
+        raise
+          (Invalid_file
+            (filename, "exception reading data: " ^ Printexc.to_string e))
+    end
+end
 
 let table : (string, int array * string) Hashtbl.t Lazy.t =
   lazy (Hashtbl.create 17)
 
 let runtime_data_to_string () =
-  let content =
-    Hashtbl.fold (fun k v acc -> (k, v)::acc) (Lazy.force table) []
-    |> Array.of_list
-  in
-  magic_number_rtd ^
-  Marshal.to_string format_version [] ^
-  Marshal.to_string content []
+  Hashtbl.fold (fun k v acc -> (k, v)::acc) (Lazy.force table) []
+  |> Array.of_list
+  |> Writer.(write (array (pair string (pair (array int) string))))
 
 let write_runtime_data channel =
   output_string channel (runtime_data_to_string ())
@@ -67,50 +158,9 @@ let write_points points =
   Array.sort compare points_array;
   Marshal.to_string points_array []
 
-let check_channel channel filename magic check_digest =
-  let magic_length = String.length magic in
-  let file_magic = Bytes.create magic_length in
-  begin
-    try really_input channel file_magic 0 magic_length;
-    with End_of_file ->
-      raise
-        (Invalid_file
-          (filename, "unexpected end of file while reading magic number"))
-  end;
-  let file_version =
-    if file_magic = Bytes.unsafe_of_string magic then
-      let file_version : (int * int) = input_value channel in
-      if not (List.mem file_version supported_versions) then
-        raise (Unsupported_version filename)
-      else
-        file_version
-    else
-      raise (Invalid_file (filename, "bad magic number")) in
-  (match check_digest with
-  | Some file ->
-      let file_digest : string = input_value channel in
-      let digest = Digest.file file in
-      if file_digest <> digest then raise (Modified_file filename)
-  | None -> ());
-  file_version
-
 let read_runtime_data' filename =
-  try_in_channel
-    true
-    filename
-    (fun channel ->
-      let version = check_channel channel filename magic_number_rtd None in
-      match version with
-      | 2, 0 ->
-        let file_content : (string * (int array * string)) array =
-          try input_value channel
-          with e ->
-            raise
-              (Invalid_file
-                (filename, "exception reading data: " ^ Printexc.to_string e))
-        in
-        Array.to_list file_content
-      | _ -> assert false)
+  Reader.(read (array (pair string (pair (array int) string)))) ~filename
+  |> Array.to_list
 
 let read_points' s =
   let points_array : point_definition array = Marshal.from_string s 0 in

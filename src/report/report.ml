@@ -297,12 +297,6 @@ let () =
   | Bisect_common.Invalid_file (f, reason) ->
       Printf.eprintf " *** invalid file: '%s' error: \"%s\"\n" f reason;
       exit 1
-  | Bisect_common.Unsupported_version s ->
-      Printf.eprintf " *** unsupported file version: '%s'\n" s;
-      exit 1
-  | Bisect_common.Modified_file s ->
-      Printf.eprintf " *** source file modified since instrumentation: '%s'\n" s;
-      exit 1
   | e ->
       Printf.eprintf " *** error: %s\n" (Printexc.to_string e);
       exit 1

@@ -46,15 +46,6 @@ exception Invalid_file of string * string
     Bisect format. The parameter is the name of the incriminated file
     and the reason of the error. *)
 
-exception Unsupported_version of string
-(** Exception to be raised when a read file has a format whose version is
-    unsupported. The parameter is the name of the incriminated file. *)
-
-exception Modified_file of string
-(** Exception to be raised when the source file has been modified since
-    instrumentation. The parameter is the name of the incriminated
-    file. *)
-
 val write_runtime_data : out_channel -> unit
 (** [write_runtime_data o] writes the current runtime data to the output
     channel [oc] using the Bisect file format. The runtime data list

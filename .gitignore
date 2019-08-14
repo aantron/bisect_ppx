@@ -23,7 +23,7 @@ scratch/
 *~
 
 # Pollution from the usage tests.
-bisect*.out
+*.out
 a.out
 *.cmi
 *.cmx
