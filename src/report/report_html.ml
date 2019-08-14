@@ -139,7 +139,14 @@ let escape_line tab_size line offset points =
   Buffer.contents buff
 
 let output_html
-    verbose tab_size title in_file out_file resolver visited points =
+    verbose
+    tab_size
+    title
+    in_file
+    trimmed_in_file
+    out_file
+    resolver
+    visited points =
 
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
   match resolver in_file with
@@ -162,7 +169,7 @@ let output_html
                        Report_utils.update stats (nb > 0);
                        (Bisect_common.(p.offset), nb))
                      cmp_content) in
-    let dirname, basename = split_filename in_file in
+    let dirname, basename = split_filename trimmed_in_file in
     let in_channel, out_channel =
       Report_utils.open_both resolved_in_file out_file in
     let rec make_path_to_report_root acc in_file_path_remaining =
@@ -181,7 +188,7 @@ let output_html
             parent
     in
     let path_to_report_root =
-      make_path_to_report_root "" (Filename.dirname in_file) in
+      make_path_to_report_root "" (Filename.dirname trimmed_in_file) in
     let style_css = Filename.concat path_to_report_root "coverage.css" in
     let coverage_js = Filename.concat path_to_report_root "coverage.js" in
     let highlight_js =
@@ -335,18 +342,76 @@ let output_html
     close_out_noerr out_channel;
     Some stats
 
+let parse_path path =
+  let rec loop path accumulator =
+    match path with
+    | "" -> accumulator
+    | _ when path = Filename.current_dir_name -> accumulator
+    | _ when path = Filename.dir_sep -> accumulator
+    | _ -> loop (Filename.dirname path) ((Filename.basename path)::accumulator)
+  in
+  loop path []
+
+let common_prefix path path' =
+  let rec loop path path' accumulator =
+    match path, path' with
+    | first::rest, first'::rest' when first = first' ->
+      loop rest rest' (first::accumulator)
+    | _ ->
+      List.rev accumulator
+  in
+  loop path path' []
+
+let longest_common_prefix paths =
+  match paths with
+  | [] ->
+    0
+  | [path] when Filename.dirname path = path ->
+    0
+  | [path] ->
+    String.length path - String.length (Filename.basename path)
+  | first::rest ->
+    let first_is_relative = Filename.is_relative first in
+    let all_of_same_kind =
+      List.for_all
+        (fun path -> Filename.is_relative path = first_is_relative)
+        rest
+    in
+    if not all_of_same_kind then
+      0
+    else
+      rest
+      |> List.map parse_path
+      |> List.fold_left common_prefix (parse_path first)
+      |> fun prefix ->
+        prefix
+        |> List.map String.length
+        |> List.fold_left (+) 0
+        |> (+) ((String.length Filename.dir_sep) * (List.length prefix))
+        |> fun n ->
+          if first_is_relative then n else n + String.length Filename.dir_sep
+
+let trim_prefix s n =
+  String.sub s n (String.length s - n)
+
 let output verbose dir tab_size title resolver data points =
+  let longest_common_prefix =
+    Hashtbl.fold (fun path _ acc -> path::acc) data []
+    |> longest_common_prefix
+  in
   let files =
     Hashtbl.fold
       (fun in_file visited acc ->
-        let out_file = (Filename.concat dir in_file) ^ ".html" in
+        let trimmed_in_file = trim_prefix in_file longest_common_prefix in
+        let out_file = (Filename.concat dir trimmed_in_file) ^ ".html" in
         let maybe_stats =
-          output_html verbose tab_size title in_file out_file resolver
-            visited points
+          output_html verbose tab_size title in_file trimmed_in_file out_file
+            resolver visited points
         in
         match maybe_stats with
         | None -> acc
-        | Some stats -> (in_file, (in_file ^ ".html"), stats) :: acc)
+        | Some stats ->
+          (trimmed_in_file, (trimmed_in_file ^ ".html"), stats) :: acc)
       data
       [] in
   output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);
