@@ -47,9 +47,6 @@ let verbose =
 let verbose message =
   (Lazy.force verbose) message
 
-let table : (string, int array * string) Hashtbl.t Lazy.t =
-  lazy (Hashtbl.create 17)
-
 let () =
   Random.self_init ()
 
@@ -75,7 +72,8 @@ let file_channel () =
 
 let dump_counters_exn channel =
   let content =
-    Hashtbl.fold (fun k v acc -> (k, v) :: acc) (Lazy.force table) [] in
+    Hashtbl.fold (fun k v acc -> (k, v) :: acc)
+      (Lazy.force Bisect_common.table) [] in
   Bisect_common.write_runtime_data channel content
 
 let reset_counters () =
@@ -83,7 +81,7 @@ let reset_counters () =
       match Array.length point_state with
       | 0 -> ()
       | n -> Array.(fill point_state 0 (n - 1) 0)
-    ) (Lazy.force table)
+    ) (Lazy.force Bisect_common.table)
 
 let dump () =
   match file_channel () with
@@ -100,14 +98,4 @@ let register_dump : unit Lazy.t =
 
 let register_file file ~point_count ~point_definitions =
   let () = Lazy.force register_dump in
-  let point_state = Array.make point_count 0 in
-  let table = Lazy.force table in
-  if not (Hashtbl.mem table file) then
-    Hashtbl.add table file (point_state, point_definitions);
-  `Staged (fun point_index ->
-    let current_count = point_state.(point_index) in
-    point_state.(point_index) <-
-      if current_count < max_int then
-        current_count + 1
-      else
-        current_count)
+  Bisect_common.register_file file ~point_count ~point_definitions

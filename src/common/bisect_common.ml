@@ -113,6 +113,22 @@ let read_points' s =
   Array.sort compare points_array;
   Array.to_list points_array
 
+let table : (string, int array * string) Hashtbl.t Lazy.t =
+  lazy (Hashtbl.create 17)
+
+let register_file file ~point_count ~point_definitions =
+  let point_state = Array.make point_count 0 in
+  let table = Lazy.force table in
+  if not (Hashtbl.mem table file) then
+    Hashtbl.add table file (point_state, point_definitions);
+  `Staged (fun point_index ->
+    let current_count = point_state.(point_index) in
+    point_state.(point_index) <-
+      if current_count < max_int then
+        current_count + 1
+      else
+        current_count)
+
 (* Simulate the old behavior for current ocveralls. This is quite fragile,
    because it depends on two things:
    - read_points is only called after all .out files are read with

@@ -79,6 +79,18 @@ val read_runtime_data' : string -> (string * (int array * string)) list
 val read_points' : string -> point_definition list
 (** [read_points s] reads point definitions from the string [s]. *)
 
+val table : (string, int array * string) Hashtbl.t Lazy.t
+(** Coverage statistics table used by the runtime. *)
+
+val register_file :
+  string -> point_count:int -> point_definitions:string ->
+    [`Staged of (int -> unit)]
+(** [register_file file ~point_count ~point_definitions] indicates that the file
+    [file] is part of the application that has been instrumented.
+    [point_definitions] is a serialized [Common.point_definition list] giving
+    the locations of all points in the file. The returned callback is used to
+    increment visitation counts. *)
+
 val read_runtime_data : string -> (string * int array) list
   [@@ocaml.deprecated "read_runtime_data' will take the place of this function"]
 
