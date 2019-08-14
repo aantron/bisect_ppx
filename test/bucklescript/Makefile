@@ -8,11 +8,11 @@ full-test : clean install test
 
 .PHONY : install
 install :
+	npm pack ../..
+	tar xf *.tgz
 	npm install
 	npm list || true
 
 .PHONY : clean
 clean :
-	make -C ../.. local-clean || true
-	rm -rf ../../node_modules ../../lib ../../esy.lock ../../_esy ../../_build
-	rm -rf node_modules lib _esy
+	rm -rf node_modules lib _esy *.tgz package

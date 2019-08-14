@@ -37,6 +37,5 @@ node_modules/
 package-lock.json
 lib/
 _esy/
-esy.lock
-ppx.exe
-./ppx
+*.tgz
+package/

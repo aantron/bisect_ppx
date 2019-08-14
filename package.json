@@ -26,9 +26,16 @@
     "esy": "*"
   },
   "scripts": {
-    "preinstall": "esy install && esy dune build --profile release && esy dune build src/ppx/wrapper/wrapper.exe && cp _build/default/src/ppx/wrapper/wrapper.exe ./ppx.exe"
+    "preinstall": "esy install && esy dune build -p bisect_ppx && esy dune build -p bisect_ppx src/ppx/wrapper/wrapper.exe && cp _build/default/src/ppx/wrapper/wrapper.exe ./ppx.exe"
   },
   "bin": {
     "bisect-ppx-report.exe": "_build/install/default/bin/bisect-ppx-report"
-  }
+  },
+  "files": [
+    "bisect_ppx.opam",
+    "bsconfig.json",
+    "dune-project",
+    "esy.json",
+    "src"
+  ]
 }
