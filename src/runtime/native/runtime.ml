@@ -70,11 +70,8 @@ let file_channel () =
   in
   create_file ()
 
-let dump_counters_exn channel =
-  let content =
-    Hashtbl.fold (fun k v acc -> (k, v) :: acc)
-      (Lazy.force Bisect_common.table) [] in
-  Bisect_common.write_runtime_data channel content
+let dump_counters_exn =
+  Bisect_common.write_runtime_data
 
 let reset_counters () =
   Hashtbl.iter (fun _ (point_state, _) ->

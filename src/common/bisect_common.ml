@@ -39,7 +39,7 @@ exception Unsupported_version of string
 
 exception Modified_file of string
 
-let magic_number_rtd = Bytes.of_string "BISECT-RTD"
+let magic_number_rtd = "BISECT-RTD"
 
 let supported_versions = [
   2, 0
@@ -47,16 +47,28 @@ let supported_versions = [
 
 let format_version = (2, 0)
 
-let write_channel channel magic write_digest x =
-  output_bytes channel magic;
-  output_value channel format_version;
-  (match write_digest with
-  | Some file -> output_value channel (Digest.file file)
-  | None -> ());
-  output_value channel x
+let table : (string, int array * string) Hashtbl.t Lazy.t =
+  lazy (Hashtbl.create 17)
+
+let runtime_data_to_string () =
+  let content =
+    Hashtbl.fold (fun k v acc -> (k, v)::acc) (Lazy.force table) []
+    |> Array.of_list
+  in
+  magic_number_rtd ^
+  Marshal.to_string format_version [] ^
+  Marshal.to_string content []
+
+let write_runtime_data channel =
+  output_string channel (runtime_data_to_string ())
+
+let write_points points =
+  let points_array = Array.of_list points in
+  Array.sort compare points_array;
+  Marshal.to_string points_array []
 
 let check_channel channel filename magic check_digest =
-  let magic_length = Bytes.length magic in
+  let magic_length = String.length magic in
   let file_magic = Bytes.create magic_length in
   begin
     try really_input channel file_magic 0 magic_length;
@@ -66,7 +78,7 @@ let check_channel channel filename magic check_digest =
           (filename, "unexpected end of file while reading magic number"))
   end;
   let file_version =
-    if file_magic = magic then
+    if file_magic = Bytes.unsafe_of_string magic then
       let file_version : (int * int) = input_value channel in
       if not (List.mem file_version supported_versions) then
         raise (Unsupported_version filename)
@@ -81,14 +93,6 @@ let check_channel channel filename magic check_digest =
       if file_digest <> digest then raise (Modified_file filename)
   | None -> ());
   file_version
-
-let write_runtime_data channel content =
-  write_channel channel magic_number_rtd None (Array.of_list content)
-
-let write_points points =
-  let points_array = Array.of_list points in
-  Array.sort compare points_array;
-  Marshal.to_string points_array []
 
 let read_runtime_data' filename =
   try_in_channel
@@ -112,9 +116,6 @@ let read_points' s =
   let points_array : point_definition array = Marshal.from_string s 0 in
   Array.sort compare points_array;
   Array.to_list points_array
-
-let table : (string, int array * string) Hashtbl.t Lazy.t =
-  lazy (Hashtbl.create 17)
 
 let register_file file ~point_count ~point_definitions =
   let point_state = Array.make point_count 0 in

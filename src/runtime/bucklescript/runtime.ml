@@ -4,4 +4,8 @@
 
 
 
-let register_file = Bisect_common.register_file
+let register_file =
+  Bisect_common.register_file
+
+let get_coverage_data =
+  Bisect_common.runtime_data_to_string

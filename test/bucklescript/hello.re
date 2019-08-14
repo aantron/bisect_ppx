@@ -1,4 +1,4 @@
 let () = {
   print_endline("Hello, world!");
-  Bisect.Runtime.register_file |> ignore;
+  Node.Fs.writeFileSync("foo.out", Bisect.Runtime.get_coverage_data(), `binary);
 }
