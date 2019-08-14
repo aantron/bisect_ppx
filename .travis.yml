@@ -39,6 +39,8 @@ cache:
     - $HOME/.opam
     - ./_opam
     - ./_build/default
+    - $HOME/.esy
+    - ./test/bucklescript/node_modules/bs-platform
 
 notifications:
   email:
