@@ -5,6 +5,10 @@ language: generic
 matrix:
   include:
     - os: osx
+      env: BUCKLESCRIPT=YES
+    - os: linux
+      env: BUCKLESCRIPT=YES
+    - os: osx
       env: COMPILER=4.08.1
     - os: linux
       env: COMPILER=4.02.3
@@ -28,7 +32,7 @@ matrix:
 
   fast_finish: true
 
-script: bash -e ./test/travis-opam.sh
+script: bash -e ./test/travis.sh
 
 cache:
   directories:
