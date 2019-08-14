@@ -1,7 +1,7 @@
 .PHONY : test
 test :
 	npm run instrument
-	node ./lib/js/hello.js
+	npm run execute
 
 .PHONY : full-test
 full-test : clean install test
