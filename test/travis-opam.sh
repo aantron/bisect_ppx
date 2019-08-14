@@ -32,7 +32,7 @@ ocaml -version
 opam --version
 
 echo
-echo "Install dependencies"
+echo "Installing dependencies"
 echo
 opam pin add -y --no-action bisect_ppx .
 opam install -y --deps-only bisect_ppx

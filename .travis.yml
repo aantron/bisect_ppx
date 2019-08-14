@@ -28,7 +28,7 @@ matrix:
 
   fast_finish: true
 
-script: bash -e ./test/travis.sh
+script: bash -e ./test/travis-opam.sh
 
 cache:
   directories:
