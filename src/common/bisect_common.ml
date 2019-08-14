@@ -129,23 +129,3 @@ let register_file file ~point_count ~point_definitions =
         current_count + 1
       else
         current_count)
-
-(* Simulate the old behavior for current ocveralls. This is quite fragile,
-   because it depends on two things:
-   - read_points is only called after all .out files are read with
-     read_runtime_data.
-   - There are no duplicate source file names anywhere in the project. This is
-     necessary because read_runtime_data finds unprefixed source file names,
-     while read_points receives file names with the -I option already
-     applied. *)
-let points : (string, point_definition list) Hashtbl.t = Hashtbl.create 17
-
-let read_runtime_data filename =
-  let data = read_runtime_data' filename in
-  data |> List.map (fun (source_file, (counts, file_points)) ->
-    let basename = Filename.basename source_file in
-    Hashtbl.replace points basename (read_points' file_points);
-    source_file, counts)
-
-let read_points filename =
-  Hashtbl.find points (Filename.basename filename)

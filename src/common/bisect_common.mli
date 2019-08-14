@@ -93,9 +93,3 @@ val register_file :
     [point_definitions] is a serialized [Common.point_definition list] giving
     the locations of all points in the file. The returned callback is used to
     increment visitation counts. *)
-
-val read_runtime_data : string -> (string * int array) list
-  [@@ocaml.deprecated "read_runtime_data' will take the place of this function"]
-
-val read_points : string -> point_definition list
-  [@@ocaml.deprecated "read_points' will take the place of this function"]
