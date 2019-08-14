@@ -60,7 +60,7 @@ let options = Arg.align [
 
   ("-I",
    Arg.String add_search_path,
-   "<dir>  Look for .ml files in <dir> (HTML/Coveralls only)");
+   "<dir>  Look for .ml/.re files in <dir> (HTML/Coveralls only)");
 
   ("-ignore-missing-files",
    Arg.Unit (fun () ->
@@ -70,7 +70,7 @@ let options = Arg.align [
 
   ("--ignore-missing-files",
    Arg.Set ignore_missing_files,
-   " Do not fail if an .ml file can't be found (HTML/Coveralls only)");
+   " Do not fail if an .ml/.re file can't be found (HTML/Coveralls only)");
 
   ("-title",
    Arg.String (fun s -> deprecated "title"; report_title := s),

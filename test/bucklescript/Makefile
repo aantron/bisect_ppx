@@ -3,7 +3,7 @@ test :
 	npm run instrument
 	npm run execute
 	rm -rf _coverage
-	./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ -I . *.out
+	./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.out
 	@echo "See _coverage/index.html."
 
 .PHONY : full-test
