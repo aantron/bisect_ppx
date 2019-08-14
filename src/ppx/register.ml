@@ -30,25 +30,33 @@ let deprecated argument =
   Printf.eprintf "This requires Bisect_ppx >= 1.5.0.\n"
 
 let switches = [
+  ("--exclude",
+   Arg.String Exclusions.add,
+   "<pattern>  Exclude functions matching pattern");
+
+  ("--exclude-file",
+   Arg.String conditional_exclude_file,
+   "<filename>  Exclude functions listed in given file");
+
+  ("--conditional",
+  Arg.Set conditional,
+  " Do not instrument unless environment variable BISECT_ENABLE is YES");
+
+  ("--no-comment-parsing",
+  Arg.Set Comments.no_comment_parsing,
+  " Do not parse source files for BISECT-* comments");
+
   ("-exclude",
   Arg.String (fun s ->
     deprecated "exclude";
     Exclusions.add s),
   " Deprecated") ;
 
-  ("--exclude",
-   Arg.String Exclusions.add,
-   "<pattern>  Exclude functions matching pattern");
-
   ("-exclude-file",
   Arg.String (fun s ->
     deprecated "exclude-file";
     conditional_exclude_file s),
   " Deprecated") ;
-
-  ("--exclude-file",
-   Arg.String conditional_exclude_file,
-   "<filename>  Exclude functions listed in given file");
 
   ("-mode",
   (Arg.Symbol (["safe"; "fast"; "faster"], fun _ ->
@@ -61,19 +69,11 @@ let switches = [
     conditional := true),
    " Deprecated");
 
-  ("--conditional",
-  Arg.Set conditional,
-  " Do not instrument unless environment variable BISECT_ENABLE is YES");
-
   ("-no-comment-parsing",
    Arg.Unit (fun () ->
     deprecated "no-comment-parsing";
     Comments.no_comment_parsing := true),
   " Deprecated");
-
-  ("--no-comment-parsing",
-  Arg.Set Comments.no_comment_parsing,
-  " Do not parse source files for BISECT-* comments");
 ]
 
 
