@@ -6,6 +6,8 @@
 
 let url = "https://github.com/aantron/bisect_ppx"
 
+let version = "1.4.1"
+
 module Infix =
 struct
   let (++) x y =

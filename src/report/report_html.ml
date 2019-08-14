@@ -28,7 +28,7 @@ let html_footer =
   Printf.sprintf "Generated on %s by <a href=\"%s\">Bisect_ppx</a> %s"
     time
     Report_utils.url
-    Bisect.Version.value
+    Report_utils.version
 
 let split_filename name =
   let dirname =

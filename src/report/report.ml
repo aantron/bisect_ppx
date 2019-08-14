@@ -150,11 +150,11 @@ let options = Arg.align [
   ("-version",
    Arg.Unit (fun () ->
     deprecated "version";
-    print_endline Bisect.Version.value; exit 0),
+    print_endline Report_utils.version; exit 0),
    " Deprecated");
 
   ("--version",
-   Arg.Unit (fun () -> print_endline Bisect.Version.value; exit 0),
+   Arg.Unit (fun () -> print_endline Report_utils.version; exit 0),
    " Print version and exit");
 
   ("-coveralls",

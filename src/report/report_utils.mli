@@ -10,6 +10,9 @@
 val url : string
 (** The Bisect URL, as a string. *)
 
+val version : string
+(** The current version of Bisect. *)
+
 module Infix :
 sig
   val (++) : int -> int -> int
