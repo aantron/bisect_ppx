@@ -31,3 +31,12 @@ a.out
 
 # opam 2.
 _opam/
+
+# BuckleScript, NPM, esy.
+node_modules/
+package-lock.json
+lib/
+_esy/
+esy.lock
+ppx.exe
+./ppx

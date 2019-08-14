@@ -1,0 +1,11 @@
+{
+  "name": "bisect_ppx-test",
+  "bs-dependencies": [
+    "@aantron/bisect_ppx"
+  ],
+  "ppx-flags": [
+    "@aantron/bisect_ppx/ppx.exe"
+  ],
+  "refmt": 3,
+  "sources": ["."]
+}

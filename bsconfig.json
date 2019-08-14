@@ -1,0 +1,5 @@
+{
+  "name": "@aantron/bisect_ppx",
+  "namespace": "Bisect",
+  "sources": ["src/runtime"]
+}

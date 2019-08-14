@@ -1,0 +1,12 @@
+{
+  "name": "bisect_ppx-test",
+  "dependencies": {
+    "@aantron/bisect_ppx": "../..",
+    "bs-platform": "^6.0.0"
+  },
+  "scripts": {
+    "build": "bsb -make-world",
+    "instrument": "BISECT_ENABLE=yes bsb -make-world",
+    "clean": "bsb -clean-world"
+  }
+}

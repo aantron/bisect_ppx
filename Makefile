@@ -8,6 +8,10 @@ test : build
 
 .PHONY : clean
 clean :
+	make -C test/bucklescript clean
+
+.PHONY : local-clean
+local-clean :
 	dune clean
 	make clean-usage
 
