@@ -228,7 +228,7 @@ instrument the code under test, but not the tester:
 <br>
 
 <a id="Coveralls"></a>
-## Sending to Coveralls.io
+## Sending to [Coveralls.io](https://coveralls.io)
 
 You can generate a Coveralls JSON report using the `bisect-ppx-report` tool
 with the `--coveralls` flag. Note that Bisect_ppx reports are more precise than
