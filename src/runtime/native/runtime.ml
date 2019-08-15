@@ -51,20 +51,24 @@ let get_coverage_data =
   Bisect_common.runtime_data_to_string
 
 let write_coverage_data () =
-  let rec create_file attempts =
-    let filename = Bisect_common.random_filename "bisect" in
-    let flags = [Open_wronly; Open_creat; Open_excl; Open_binary] in
-    match open_out_gen flags 0o644 filename with
-    | exception exn ->
-      if attempts = 0 then
-        raise exn
-      else
-        create_file (attempts - 1)
-    | channel ->
-      output_string channel (get_coverage_data ());
-      close_out_noerr channel
-  in
-  create_file 100
+  match get_coverage_data () with
+  | None ->
+    ()
+  | Some data ->
+    let rec create_file attempts =
+      let filename = Bisect_common.random_filename "bisect" in
+      let flags = [Open_wronly; Open_creat; Open_excl; Open_binary] in
+      match open_out_gen flags 0o644 filename with
+      | exception exn ->
+        if attempts = 0 then
+          raise exn
+        else
+          create_file (attempts - 1)
+      | channel ->
+        output_string channel data;
+        close_out_noerr channel
+    in
+    create_file 100
 
 let file_channel () =
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in

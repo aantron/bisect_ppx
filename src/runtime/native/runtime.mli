@@ -47,7 +47,7 @@ val register_file :
     the locations of all points in the file. The returned callback is used to
     increment visitation counts. *)
 
-val get_coverage_data : unit -> string
+val get_coverage_data : unit -> string option
 (** Returns the binary coverage data accumulated by the program so far. This
     should eventually be written to a file, to be processed by
     [bisect-ppx-report]. *)

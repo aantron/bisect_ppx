@@ -146,12 +146,22 @@ let table : (string, int array * string) Hashtbl.t Lazy.t =
   lazy (Hashtbl.create 17)
 
 let runtime_data_to_string () =
-  Hashtbl.fold (fun k v acc -> (k, v)::acc) (Lazy.force table) []
-  |> Array.of_list
-  |> Writer.(write (array (pair string (pair (array int) string))))
+  let data = Hashtbl.fold (fun k v acc -> (k, v)::acc) (Lazy.force table) [] in
+  match data with
+  | [] ->
+    None
+  | _ ->
+    Array.of_list data
+    |> Writer.(write (array (pair string (pair (array int) string))))
+    |> fun s -> Some s
 
 let write_runtime_data channel =
-  output_string channel (runtime_data_to_string ())
+  let data =
+    match runtime_data_to_string () with
+    | Some s -> s
+    | None -> Writer.(write (array int)) [||]
+  in
+  output_string channel data
 
 let () =
   Random.self_init ()

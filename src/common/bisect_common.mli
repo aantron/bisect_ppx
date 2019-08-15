@@ -56,7 +56,7 @@ val write_runtime_data : out_channel -> unit
 
     Raises [Sys_error] if an i/o error occurs. *)
 
-val runtime_data_to_string : unit -> string
+val runtime_data_to_string : unit -> string option
 (** Same as {!write_runtime_data}, but accumulates output in a string
     instead. *)
 
