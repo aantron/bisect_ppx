@@ -26,7 +26,7 @@ for itself.
 
 - [Usage](#Usage)
   - [Dune](#Dune)
-  - [BuckleScript](#BuckleScript) ([starter repo][bsb-repo])
+  - [BuckleScript](#BuckleScript) &nbsp; ([starter repo][bsb-repo], [report][bsb-report])
   - [Js_of_ocaml](#Js_of_ocaml)
   - [Ocamlfind, Ocamlbuild, and OASIS](#Ocamlbuild)
 - [Sending to Coveralls.io](#Coveralls)
@@ -84,73 +84,67 @@ from your `dune` files. This is a limitation of Dune we hope to address in
 <a id="BuckleScript"></a>
 ### BuckleScript
 
-Despite how the instructions may look, the setup is actually quite simple. See
-the starter repo [**aantron/bisect-example-bsb**][bsb-repo] and the
-[coverage report](https://aantron.github.io/bisect-example-bsb/) it produces.
+Refer to [**aantron/bisect-starter-bsb**][bsb-repo], which produces
+[this report][bsb-report].
 
-[bsb-repo]: https://github.com/aantron/bisect-example-bsb#readme
+1. Depend on Bisect_ppx in `package.json`, and install it:
 
-Depend on Bisect_ppx:
+    ```json
+    "dependencies": {
+      "@aantron/bisect_ppx": "*",
+      "bs-platform": "^6.0.0"
+    }
+    ```
 
-```
-"dependencies": {
-  "@aantron/bisect_ppx": "*",
-  "bs-platform": "^6.0.0"
-}
-```
+    ```
+    npm install -g esy
+    npm install
+    ```
 
-Bisect_ppx uses [esy](https://esy.sh) to build its binaries on NPM, so install
-esy first:
+    If you have not used [esy](https://esy.sh) before, the first install of
+    Bisect_ppx will take several minutes while esy builds an OCaml compiler.
+    Subsequent builds will be fast, because of esy's cache.
 
-```
-npm install -g esy
-npm install
-```
+2. Add Bisect_ppx to your `bsconfig.json`:
 
-If you have not used esy before, the first install will take several minutes
-while esy builds an OCaml compiler. Subsequent builds will be fast, because of
-the esy cache.
+    ```json
+    "bs-dependencies": [
+      "@aantron/bisect_ppx"
+    ],
+    "ppx-flags": [
+      "@aantron/bisect_ppx/ppx.exe"
+    ]
+    ```
 
-Add Bisect_ppx to your `bsconfig.json`:
-
-```
-"bs-dependencies": [
-  "@aantron/bisect_ppx"
-],
-"ppx-flags": [
-  "@aantron/bisect_ppx/ppx.exe"
-]
-```
-
-If your tests will be running on Node, call this function somewhere in your
+3. If your tests will be running on Node, call this function somewhere in your
 tester, which will have Node write a file like `bisect0123456789.out` when the
 tester exits:
 
-```ocaml
-Bisect.Runtime.write_coverage_data_on_exit();
-```
+    ```ocaml
+    Bisect.Runtime.write_coverage_data_on_exit();
+    ```
 
-If the tests will be running in the browser, at the end of testing, call
+    If the tests will be running in the browser, at the end of testing, call
 
-```ocaml
-Bisect.Runtime.get_coverage_data();
-```
+    ```ocaml
+    Bisect.Runtime.get_coverage_data();
+    ```
 
-This returns binary coverage data in a `string option`, which you should upload
-or otherwise get out of the browser, and write into an `.out` file.
+    This returns binary coverage data in a `string option`, which you should
+    upload or otherwise get out of the browser, and write into an `.out` file
+    yourself.
 
-Build in development with `BISECT_ENABLE=yes`:
+4. Build in development with `BISECT_ENABLE=yes`, run tests, and generate the
+[coverage report][bsb-report] in `_coverage/index.html`:
 
-```
-BISECT_ENABLE=yes npm run build
-```
+    ```
+    BISECT_ENABLE=yes npm run build
+    npm run test
+    ./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.out
+    ```
 
-Run tests, and generate the coverage report in `_coverage/index.html`:
-
-```
-npm run test
-./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.out
-```
+[bsb-repo]: https://github.com/aantron/bisect-starter-bsb#readme
+[bsb-report]: https://aantron.github.io/bisect-starter-bsb/
 
 
 
