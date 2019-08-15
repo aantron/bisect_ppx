@@ -233,7 +233,7 @@ let main () =
       let points = Hashtbl.create 17 in
 
       !raw_coverage_files |> List.iter (fun out_file ->
-        Bisect_common.read_runtime_data' out_file
+        Bisect_common.read_runtime_data out_file
         |> List.iter (fun (source_file, (file_counts, file_points)) ->
           let file_counts =
             let open Report_utils.Infix in

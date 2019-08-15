@@ -17,7 +17,7 @@ class type converter =
 
 let output_file verbose in_file conv visited points =
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
-  let cmp_content = Hashtbl.find points in_file |> Bisect_common.read_points' in
+  let cmp_content = Hashtbl.find points in_file |> Bisect_common.read_points in
   verbose (Printf.sprintf "... file has the following points: %s"
     (String.concat ","
       (List.map (fun pd ->

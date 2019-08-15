@@ -67,13 +67,13 @@ val write_points : point_definition list -> string
 (** [write_points pts] converts the point definitions [pts] to a string. The
     string is a binary byte sequence; it is not meant to be legible. *)
 
-val read_runtime_data' : string -> (string * (int array * string)) list
+val read_runtime_data : string -> (string * (int array * string)) list
 (** [read_runtime_data f] reads the runtime data from file [f].
 
     Raises [Sys_error] if an i/o error occurs. May also raise
     [Invalid_file], [Unsupported_version], or [Modified_file]. *)
 
-val read_points' : string -> point_definition list
+val read_points : string -> point_definition list
 (** [read_points s] reads point definitions from the string [s]. *)
 
 val table : (string, int array * string) Hashtbl.t Lazy.t

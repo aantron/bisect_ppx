@@ -174,11 +174,11 @@ let write_points points =
   Array.sort compare points_array;
   Marshal.to_string points_array []
 
-let read_runtime_data' filename =
+let read_runtime_data filename =
   Reader.(read (array (pair string (pair (array int) string)))) ~filename
   |> Array.to_list
 
-let read_points' s =
+let read_points s =
   let points_array : point_definition array = Marshal.from_string s 0 in
   Array.sort compare points_array;
   Array.to_list points_array

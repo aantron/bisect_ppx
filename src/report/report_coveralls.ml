@@ -13,7 +13,7 @@ let file_json verbose indent in_file resolver visited points =
     None
   | Some resolved_in_file ->
     let cmp_content =
-      Hashtbl.find points in_file |> Bisect_common.read_points' in
+      Hashtbl.find points in_file |> Bisect_common.read_points in
     verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
     let len = Array.length visited in
     let pts = (List.map
