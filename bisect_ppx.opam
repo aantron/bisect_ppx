@@ -28,9 +28,6 @@ depends: [
   "ocamlfind" {dev}
   "ounit" {dev}
 ]
-conflicts: [
-  "ocveralls" {<= "0.3.2"}
-]
 
 build: [
   ["dune" "build" "-p" name "-j" jobs]
