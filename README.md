@@ -408,7 +408,7 @@ A small sample of projects using Bisect_ppx:
 [markupml]: https://github.com/aantron/markup.ml#readme
 [markupml-coveralls]: https://coveralls.io/github/aantron/markup.ml?branch=master
 [soup]: https://github.com/aantron/lambdasoup#readme
-[gh-pages-report]: http://aantron.github.io/bisect_ppx/demo/index.html
+[gh-pages-report]: http://aantron.github.io/bisect_ppx/demo/
 
 
 
