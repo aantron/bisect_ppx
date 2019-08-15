@@ -210,8 +210,9 @@ With Ocamlfind, you must have your build script issue the right commands, to
 instrument the code under test, but not the tester:
 
 ```
-ocamlfind c -package bisect_ppx -c src/source.ml
-ocamlfind c -linkpkg -package bisect_ppx src/source.cmo tests/tests.ml
+ocamlfind opt -package bisect_ppx -c src/source.ml
+ocamlfind opt -c test/test.ml
+ocamlfind opt -linkpkg -package bisect_ppx src/source.cmx test/test.cmx
 ```
 
 Running the tester will then produce `bisect0123456789.out` files, which you can
