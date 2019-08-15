@@ -1,7 +1,7 @@
 # Bisect_ppx &nbsp; [![version 1.4.1][version]][releases] [![Travis status][travis-img]][travis]
 
-[Bisect_ppx][self] is a code coverage tool for OCaml. It helps you test
-thoroughly by showing which parts of your code are **not** tested.
+[Bisect_ppx][self] is a code coverage tool for OCaml and Reason. It helps you
+test thoroughly by showing what's **not** tested.
 
 [![Bisect_ppx usage example][sample]][gh-pages-report]
 
@@ -28,7 +28,7 @@ is generated are in the [worked example](#Example).
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
 - [**Sending to Coveralls.io**](#Coveralls)
 - [**Controlling coverage with `[@coverage off]`**](#Exclusion)
-- [**Real-world example detailed**](#Example) &nbsp; ([repo][markupml], [report][gh-pages-report], [coveralls][markupml-coveralls])
+- [**Real-world example examined**](#Example) &nbsp; ([repo][markupml], [report][gh-pages-report], [coveralls][markupml-coveralls])
 - [**Other topics**](#Other)
 - [**Bisect_ppx users**](#Users)
 - [**Contributing**](#Contributing)
@@ -282,7 +282,7 @@ module with `[@@@coverage off]` and `[@@@coverage on]`.
 <br>
 
 <a id="Example"></a>
-## Real-world example detailed
+## Real-world example examined
 
 Refer to:
 
@@ -408,7 +408,7 @@ A small sample of projects using Bisect_ppx:
 [markupml]: https://github.com/aantron/markup.ml#readme
 [markupml-coveralls]: https://coveralls.io/github/aantron/markup.ml?branch=master
 [soup]: https://github.com/aantron/lambdasoup#readme
-[gh-pages-report]: http://aantron.github.io/bisect_ppx/demo/
+[gh-pages-report]: http://aantron.github.io/bisect_ppx/demo/index.html
 
 
 
