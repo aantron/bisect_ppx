@@ -87,7 +87,8 @@ from your `dune` files. This is a limitation of Dune we hope to address in
 Refer to [**aantron/bisect-starter-bsb**][bsb-repo], which produces
 [this report][bsb-report].
 
-1. Depend on Bisect_ppx in `package.json`, and install it:
+1. [Depend on Bisect_ppx in `package.json`](https://github.com/aantron/bisect-starter-bsb/blob/597b9f901d0782b1f8c56b3a6bdf04c6c67ae56b/package.json#L3-L6),
+and install it:
 
     ```json
     "dependencies": {
@@ -105,7 +106,7 @@ Refer to [**aantron/bisect-starter-bsb**][bsb-repo], which produces
     Bisect_ppx will take several minutes while esy builds an OCaml compiler.
     Subsequent builds will be fast, because of esy's cache.
 
-2. Add Bisect_ppx to your `bsconfig.json`:
+2. [Add Bisect_ppx to your `bsconfig.json`](https://github.com/aantron/bisect-starter-bsb/blob/597b9f901d0782b1f8c56b3a6bdf04c6c67ae56b/bsconfig.json#L3-L8):
 
     ```json
     "bs-dependencies": [
@@ -116,7 +117,9 @@ Refer to [**aantron/bisect-starter-bsb**][bsb-repo], which produces
     ]
     ```
 
-3. If your tests will be running on Node, call this function somewhere in your
+3. If your tests will be running on Node,
+[call this function](https://github.com/aantron/bisect-starter-bsb/blob/master/hello.re#L2)
+somewhere in your
 tester, which will have Node write a file like `bisect0123456789.out` when the
 tester exits:
 
