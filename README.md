@@ -71,7 +71,7 @@ the [coverage report][dune-report] in `_coverage/index.html`:
 
     ```
     BISECT_ENABLE=yes dune runtest --force
-    dune exec bisect-ppx-report -- --html _coverage/ -I _build/default/ `find . -name 'bisect*.out'`
+    bisect-ppx-report --html _coverage/ -I _build/default/ `find . -name 'bisect*.out'`
     ```
 
 4. During release, you have to manually remove `(preprocess (pps bisect_ppx))`
@@ -195,7 +195,7 @@ test, then run the reporter to generate the [coverage report][jsoo-report] in
 
     ```
     BISECT_ENABLE=yes dune build my_tester.bc.js
-    dune exec bisect-ppx-report -- --html _coverage/ *.out
+    bisect-ppx-report --html _coverage/ *.out
     ```
 
 [jsoo-repo]: https://github.com/aantron/bisect-starter-jsoo#readme
