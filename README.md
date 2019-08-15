@@ -24,15 +24,15 @@ for itself.
 
 #### Table of contents
 
-- [Usage](#Usage)
-  - [Dune](#Dune)
-  - [BuckleScript](#BuckleScript) &nbsp; ([starter repo][bsb-repo], [report][bsb-report])
-  - [Js_of_ocaml](#Js_of_ocaml)
-  - [Ocamlfind, Ocamlbuild, and OASIS](#Ocamlbuild)
-- [Sending to Coveralls.io](#Coveralls)
-- [Other topics](#Other)
-- [Bisect_ppx users](#Users)
-- [Contributing](#Contributing)
+- [**Usage**](#Usage)
+  - [**Dune**](#Dune)
+  - [**BuckleScript**](#BuckleScript) &nbsp; ([starter repo][bsb-repo], [report][bsb-report])
+  - [**Js_of_ocaml**](#Js_of_ocaml)
+  - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
+- [**Sending to Coveralls.io**](#Coveralls)
+- [**Other topics**](#Other)
+- [**Bisect_ppx users**](#Users)
+- [**Contributing**](#Contributing)
 
 
 
