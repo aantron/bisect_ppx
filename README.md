@@ -7,8 +7,8 @@ thoroughly by showing which parts of your code are **not** tested.
 
 <br>
 
-For a live demonstration, see the [coverage report][self-coverage] Bisect_ppx
-generates for itself.
+For a live demo, see the [coverage report][self-coverage] Bisect_ppx generates
+for itself.
 
 [self]: https://github.com/aantron/bisect_ppx
 [releases]: https://github.com/aantron/bisect_ppx/releases
@@ -22,54 +22,253 @@ generates for itself.
 
 <br>
 
-## Instructions
+#### Table of contents
 
-Most of these commands go in a `Makefile` or other script, so that you only have
-to run that script, then refresh your browser.
+- [Usage](#Usage)
+  - [Dune](#Dune)
+  - [BuckleScript](#BuckleScript)
+  - [Js_of_ocaml](#Js_of_ocaml)
+  - [Ocamlfind, Ocamlbuild, and OASIS](#Ocamlbuild)
+- [Sending to Coveralls.io](#Coveralls)
+- [Other topics](#Other)
+- [Bisect_ppx users](#Users)
+- [Contributing](#Contributing)
 
-1. Install Bisect_ppx.
 
-        opam install bisect_ppx
 
-2. Add `bisect_ppx` to your library- or executable-under-test. Instructions are
-also available for [Ocamlbuild][ocamlbuild], [ocamlfind][ocamlfind], and
-[OASIS][oasis].
+<br>
 
-        (library
-         (public_name my_code)
-         (preprocess (pps bisect_ppx --conditional --no-comment-parsing)))
+<a id="Usage"></a>
+## Usage
 
-   Don't add `bisect_ppx` to your tests.
+<a id="Dune"></a>
+### Dune
 
-3. Run your test binary. In addition to testing your code, it will produce one
-   or more files with names like `bisect0001.out`.
+Depend on Bisect_ppx:
 
-        BISECT_ENABLE=yes dune runtest
+```
+depends: [
+  "bisect_ppx" {dev & >= "1.3.0"}
+]
+```
 
-4. Generate the coverage report.
+Add `bisect_ppx` to your code under test (but not to your tester itself):
 
-        bisect-ppx-report -I _build/default/ --html _coverage/ `find . -name 'bisect*.out'`
+```
+(library
+ (public_name my_lib)
+ (preprocess (pps bisect_ppx --conditional --no-comment-parsing)))
+```
 
-5. Open `coverage/index.html`!
+Run your test binary. In addition to testing your code, when exiting, it will
+produce one or more files with names like `bisect0123456789.out`:
 
-    In each file of the report,
+```
+BISECT_ENABLE=yes dune runtest --force
+```
 
-    - Green lines contain expressions, all of which were visited.
-    - Red lines contain expressions, none of which were visited.
-    - Yellow lines contain expressions, some of which were visited, but others not.
-    - White lines are those that don't contain visitable expressions. They may have type declarations, keywords, or something else that Bisect_ppx did not, or cannot instrument.
+Generate the coverage report and open `_coverage/index.html`:
 
-See also the [advanced usage][advanced].
+```
+dune exec bisect-ppx-report -- --html _coverage/ -I _build/default/ `find . -name 'bisect*.out'`
+```
 
-[ocamlbuild]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlbuild
-[oasis]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#OASIS
-[ocamlfind]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#Ocamlfind
+During release, you have to manually remove `(preprocess (pps bisect_ppx))`
+from your `dune` files. This is a limitation of Dune we hope to address in
+[ocaml/dune#57](https://github.com/ocaml/dune/issues/57).
+
+
+
+<br>
+
+<a id="BuckleScript"></a>
+### BuckleScript
+
+Depend on Bisect_ppx:
+
+```
+"dependencies": {
+  "@aantron/bisect_ppx": "*",
+  "bs-platform": "^6.0.0"
+}
+```
+
+Bisect_ppx uses [esy](https://esy.sh) to build its binaries on NPM, so install
+esy first:
+
+```
+npm install -g esy
+npm install
+```
+
+If you have not used esy before, the first install will take several minutes
+while esy builds an OCaml compiler. Subsequent builds will be fast, because of
+the esy cache.
+
+Add Bisect_ppx to your `bsconfig.json`:
+
+```
+"bs-dependencies": [
+  "@aantron/bisect_ppx"
+],
+"ppx-flags": [
+  "@aantron/bisect_ppx/ppx.exe"
+]
+```
+
+If your tests will be running on Node, call this function somewhere in your
+tester, which will have Node write a file like `bisect0123456789.out` when the
+tester exits:
+
+```ocaml
+Bisect.Runtime.write_coverage_data_on_exit();
+```
+
+If the tests will be running in the browser, at the end of testing, call
+
+```ocaml
+Bisect.Runtime.get_coverage_data();
+```
+
+This returns binary coverage data in a `string option`, which you should upload
+or otherwise get out of the browser, and write into an `.out` file.
+
+Build in development with `BISECT_ENABLE=yes`:
+
+```
+BISECT_ENABLE=yes npm run build
+```
+
+Run tests, and generate the coverage report in `_coverage/index.html`:
+
+```
+npm run test
+./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.out
+```
+
+
+
+<br>
+
+<a id="Js_of_ocaml"></a>
+### Js_of_ocaml
+
+Follow the [Dune instructions](#Dune) above, except that the final test script
+must be linked with `bisect_ppx.runtime` (but not instrumented):
+
+```
+(executable
+ (name my_tester)
+ (libraries bisect_ppx.runtime))
+```
+
+Build the usual Js_of_ocaml target, including the instrumented code under test:
+
+```
+BISECT_ENABLE=yes dune build my_tester.bc.js
+```
+
+If the tests will run on Node, call this function at the end of testing to
+write `bisect0123456789.out`:
+
+```ocaml
+Bisect.Runtime.write_coverage_data ()
+```
+
+If the tests will run in the browser, call
+
+```ocaml
+Bisect.Runtime.get_coverage_data ()
+```
+
+to get binary coverage data in a string option. Upload this string or otherwise
+extract it from the browser to create an `.out` file.
+
+Then, run the reporter to generate the coverage report in
+`_coverage/index.html`:
+
+```
+dune exec bisect-ppx-report -- --html _coverage/ *.out
+```
+
+
+
+<br>
+
+<a id="Ocamlbuild"></a>
+### Ocamlfind, Ocamlbuild, and OASIS
+
+[Ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-ocamlbuild)
+and [OASIS](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-oasis)
+instructions can be found at
+[aantron/bisect_ppx-ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#readme).
+
+With Ocamlfind, you must have your build script issue the right commands, to
+instrument the code under test, but not the tester:
+
+```
+ocamlfind c -package bisect_ppx -c src/source.ml
+ocamlfind c -linkpkg -package bisect_ppx src/source.cmo tests/tests.ml
+```
+
+Running the tester will then produce `bisect0123456789.out` files, which you can
+process with `bisect-ppx-report`.
+
+
+
+<br>
+
+<a id="Coveralls"></a>
+## Sending to Coveralls.io
+
+You can generate a Coveralls JSON report using the `bisect-ppx-report` tool
+with the `--coveralls` flag. Note that Bisect_ppx reports are more precise than
+Coveralls, which only considers whole lines as visited or not. The built-in
+Coveralls reporter will consider a full line unvisited if any point on that
+line is not visited, check the html report to verify precisly which points are
+not covered.
+
+Example using the built-in Coveralls reporter on Travis CI (which sets
+[`$TRAVIS_JOB_ID`][travis-vars]):
+
+      bisect-ppx-report \
+          -I _build/default/ \
+          --coveralls coverage.json \
+          --service-name travis-ci \
+          --service-job-id $TRAVIS_JOB_ID \
+          `find . -name 'bisect*.out'`
+      curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+
+For other CI services, replace `--service-name` and `--service-job-id` as
+follows:
+
+| CI service | `--service-name` | `--service-job-id`  |
+| ---------- | ---------------- | ------------------- |
+| Travis     | `travis-ci`      | `$TRAVIS_JOB_ID`    |
+| CircleCI   | `circleci`       | `$CIRCLE_BUILD_NUM` |
+| Semaphore  | `semaphore`      | `$REVISION`         |
+| Jenkins    | `jenkins`        | `$BUILD_ID`         |
+| Codeship   | `codeship`       | `$CI_BUILD_NUMBER`  |
+
+[travis-vars]: https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+
+
+
+<br>
+
+<a id="Other"></a>
+## Other topics
+
+See [advanced usage][advanced] for how to exclude code from coverage, and
+supported environment variables.
+
 [advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#readme
 
 
 
 <br>
 
+<a id="Users"></a>
 ## Bisect_ppx users
 
 A small sample of projects using Bisect_ppx:
@@ -115,17 +314,25 @@ A small sample of projects using Bisect_ppx:
 
 <br>
 
+<a id="Contributing"></a>
 ## Contributing
 
 Bug reports and pull requests are warmly welcome. Bisect_ppx is developed on
 GitHub, so please [open an issue][issues].
 
-To get the latest development version of Bisect_ppx using OPAM, run
+Bisect_ppx is developed mainly using opam. To get the latest development
+version, run
 
 ```
 opam source --dev-repo --pin bisect_ppx
 ```
 
-You will now have a `bisect_ppx` subdirectory to work in.
+You will now have a `bisect_ppx` subdirectory to work in. Try these `Makefile`
+targets:
+
+- `make test` for unit tests.
+- `make usage` for build system integration tests, except BuckleScript.
+- `make -C test/bucklescript full-test` for BuckleScript. This requires NPM and
+  esy.
 
 [issues]: https://github.com/aantron/bisect_ppx/issues
