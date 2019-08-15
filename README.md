@@ -30,6 +30,7 @@ for itself.
   - [**Js_of_ocaml**](#Js_of_ocaml) &nbsp; ([starter repo][jsoo-repo], [report][jsoo-report])
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
 - [**Sending to Coveralls.io**](#Coveralls)
+- [**Controlling coverage with `[@coverage off]`**](#Exclusion)
 - [**Other topics**](#Other)
 - [**Bisect_ppx users**](#Users)
 - [**Contributing**](#Contributing)
@@ -266,11 +267,28 @@ follows:
 
 <br>
 
+<a id="Exclusion"></a>
+## Controlling coverage with `[@coverage off]`
+
+You can tag expressions with `[@coverage off]`, and neither they, nor their
+subexpressions, will be instrumented by Bisect_ppx.
+
+Likewise, you can tag module-level `let`-declarations with `[@@coverage off]`,
+and they won't be instrumented.
+
+Finally, you can turn off instrumentation for blocks of declarations inside a
+module with `[@@@coverage off]` and `[@@@coverage on]`.
+
+
+
+<br>
+
 <a id="Other"></a>
 ## Other topics
 
-See [advanced usage][advanced] for how to exclude code from coverage, and
-supported environment variables.
+See [advanced usage][advanced] for how to exclude files from coverage, and
+supported environment variables. Use of these features is discouraged. They are
+meant for working around build system issues and for build debugging.
 
 [advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#readme
 

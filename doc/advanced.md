@@ -5,7 +5,6 @@
 #### Table of contents
 
 - [Excluding code from coverage](#Excluding)
-  - [Expressions and structure items](#ExcludingExpressions)
   - [Individual lines and line ranges](#ExcludingLines)
   - [Files and top-level values](#ExcludingValues)
 - [Environment variables](#EnvironmentVariables)
@@ -23,18 +22,6 @@ The easiest way to exclude a file from coverage is simply not to build it with
 `-package bisect_ppx`, or not to tag it with `coverage`. However, sometimes you
 need finer control. There are several ways to disable coverage analysis for
 portions of code.
-
-<a id="ExcludingExpressions"></a>
-#### Expressions and structure items
-
-You can tag expressions with `[@coverage off]`, and neither they, nor their
-subexpressions, will be instrumented by Bisect_ppx.
-
-Likewise, you can tag module-level `let`-declarations with `[@@coverage off]`,
-and they won't be instrumented.
-
-Finally, you can turn off instrumentation for blocks of declarations inside a
-module with `[@@@coverage off]` and `[@@@coverage on]`.
 
 <a id="ExcludingLines"></a>
 #### Individual lines and line ranges
