@@ -52,6 +52,7 @@ echo "Testing package usage"
 echo
 # Reason has 4.08 support in master.
 opam pin add -y reason --dev-repo
+opam install -y js_of_ocaml
 make clean-usage usage
 
 echo
