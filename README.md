@@ -26,7 +26,7 @@ for itself.
 
 - [Usage](#Usage)
   - [Dune](#Dune)
-  - [BuckleScript](#BuckleScript)
+  - [BuckleScript](#BuckleScript) ([starter repo][bsb-repo])
   - [Js_of_ocaml](#Js_of_ocaml)
   - [Ocamlfind, Ocamlbuild, and OASIS](#Ocamlbuild)
 - [Sending to Coveralls.io](#Coveralls)
@@ -83,6 +83,12 @@ from your `dune` files. This is a limitation of Dune we hope to address in
 
 <a id="BuckleScript"></a>
 ### BuckleScript
+
+Despite how the instructions may look, the setup is actually quite simple. See
+the starter repo [**aantron/bisect-example-bsb**][bsb-repo] and the
+[coverage report](https://aantron.github.io/bisect-example-bsb/) it produces.
+
+[bsb-repo]: https://github.com/aantron/bisect-example-bsb#readme
 
 Depend on Bisect_ppx:
 
