@@ -27,7 +27,7 @@ for itself.
 - [**Usage**](#Usage)
   - [**Dune**](#Dune) &nbsp; ([starter repo][dune-repo], [report][dune-report])
   - [**BuckleScript**](#BuckleScript) &nbsp; ([starter repo][bsb-repo], [report][bsb-report])
-  - [**Js_of_ocaml**](#Js_of_ocaml)
+  - [**Js_of_ocaml**](#Js_of_ocaml) &nbsp; ([starter repo][jsoo-repo], [report][jsoo-report])
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
 - [**Sending to Coveralls.io**](#Coveralls)
 - [**Other topics**](#Other)
@@ -56,7 +56,7 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     ```
 
 2. [Preprocess the code under test with `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/master/dune#L4)
-(but not the tester itself):
+(but don't preprocess the tester itself):
 
     ```
     (library
@@ -159,43 +159,46 @@ tester exits:
 <a id="Js_of_ocaml"></a>
 ### Js_of_ocaml
 
-Follow the [Dune instructions](#Dune) above, except that the final test script
-must be linked with `bisect_ppx.runtime` (but not instrumented):
+Refer to [**aantron/bisect-starter-jsoo**][jsoo-repo], which produces
+[this report][jsoo-report].
 
-```
-(executable
- (name my_tester)
- (libraries bisect_ppx.runtime))
-```
+1. Follow the [Dune instructions](#Dune) above, except that [the final test
+script must be linked with `bisect_ppx.runtime`](https://github.com/aantron/bisect-starter-jsoo/blob/master/dune#L9)
+(but not instrumented):
 
-Build the usual Js_of_ocaml target, including the instrumented code under test:
+    ```
+    (executable
+    (name my_tester)
+    (libraries bisect_ppx.runtime))
+    ```
 
-```
-BISECT_ENABLE=yes dune build my_tester.bc.js
-```
+2. If the tests will run on Node, [call this function](https://github.com/aantron/bisect-starter-jsoo/blob/master/tester.ml#L3)
+at the end of testing to write `bisect0123456789.out`:
 
-If the tests will run on Node, call this function at the end of testing to
-write `bisect0123456789.out`:
+    ```ocaml
+    Bisect.Runtime.write_coverage_data ()
+    ```
 
-```ocaml
-Bisect.Runtime.write_coverage_data ()
-```
+    If the tests will run in the browser, call
 
-If the tests will run in the browser, call
+    ```ocaml
+    Bisect.Runtime.get_coverage_data ()
+    ```
 
-```ocaml
-Bisect.Runtime.get_coverage_data ()
-```
+    to get binary coverage data in a string option. Upload this string or
+    otherwise extract it from the browser to create an `.out` file.
 
-to get binary coverage data in a string option. Upload this string or otherwise
-extract it from the browser to create an `.out` file.
-
-Then, run the reporter to generate the coverage report in
+3. Build the usual Js_of_ocaml target, including the instrumented code under
+test, then run the reporter to generate the [coverage report][jsoo-report] in
 `_coverage/index.html`:
 
-```
-dune exec bisect-ppx-report -- --html _coverage/ *.out
-```
+    ```
+    BISECT_ENABLE=yes dune build my_tester.bc.js
+    dune exec bisect-ppx-report -- --html _coverage/ *.out
+    ```
+
+[jsoo-repo]: https://github.com/aantron/bisect-starter-jsoo#readme
+[jsoo-report]: https://aantron.github.io/bisect-starter-jsoo/
 
 
 
@@ -204,22 +207,22 @@ dune exec bisect-ppx-report -- --html _coverage/ *.out
 <a id="Ocamlbuild"></a>
 ### Ocamlfind, Ocamlbuild, and OASIS
 
-[Ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-ocamlbuild)
+- [Ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-ocamlbuild)
 and [OASIS](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-oasis)
 instructions can be found at
 [aantron/bisect_ppx-ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#readme).
 
-With Ocamlfind, you must have your build script issue the right commands, to
+- With Ocamlfind, you must have your build script issue the right commands, to
 instrument the code under test, but not the tester:
 
-```
-ocamlfind opt -package bisect_ppx -c src/source.ml
-ocamlfind opt -c test/test.ml
-ocamlfind opt -linkpkg -package bisect_ppx src/source.cmx test/test.cmx
-```
+    ```
+    ocamlfind opt -package bisect_ppx -c src/source.ml
+    ocamlfind opt -c test/test.ml
+    ocamlfind opt -linkpkg -package bisect_ppx src/source.cmx test/test.cmx
+    ```
 
-Running the tester will then produce `bisect0123456789.out` files, which you can
-process with `bisect-ppx-report`.
+    Running the tester will then produce `bisect0123456789.out` files, which
+    you can process with `bisect-ppx-report`.
 
 
 
