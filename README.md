@@ -70,29 +70,46 @@ See also the [advanced usage][advanced].
 
 <br>
 
-## Bisect_ppx in practice
+## Bisect_ppx users
 
 A small sample of projects using Bisect_ppx:
 
-- [Lwt][lwt]
-- [Oml][oml] ([report][oml-coveralls])
-- [ctypes][ctypes] ([report][ctypes-coveralls])
-- [ocaml-irc-client][ocaml-irc-client] ([report][irc-coveralls])
-- [Markup.ml][markupml] ([report][markupml-coveralls])
-- [Ketrew][ketrew]
-- [Sosa][sosa]
+<!-- Sort OCaml and Reason first if Bisect_ppx usage is merged. -->
+
+- Core tools
+  - [Lwt][lwt]
+  - [Odoc][odoc]
+  - [ocamlformat][ocamlformat]
+  - [OCaml][ocaml]
+  - [Reason][reason]
+  - [ctypes][ctypes]
+
+- Libraries
+  - [Markup.ml][markupml] ([report][markupml-coveralls])
+  - [Lambda Soup][soup]
+  - [Trie](https://github.com/brendanlong/ocaml-trie) ([report](https://coveralls.io/github/brendanlong/ocaml-trie?branch=master))
+  - [ocaml-ooxml](https://github.com/brendanlong/ocaml-ooxml) ([report](https://coveralls.io/github/brendanlong/ocaml-ooxml?branch=master))
+
+- Applications
+
+  - [XAPI](https://xenproject.org/developers/teams/xen-api/) ([1](https://coveralls.io/github/xapi-project/xen-api?branch=master), [2](https://coveralls.io/github/xapi-project/nbd), [3](https://coveralls.io/github/xapi-project/xcp-idl), [4](https://coveralls.io/github/xapi-project/rrd-transport?branch=master), [5](https://github.com/xapi-project/xenopsd))
+  - [Scilla](https://github.com/Zilliqa/scilla#readme) ([report](https://coveralls.io/github/Zilliqa/scilla?branch=master))
+  - [Coda](https://github.com/CodaProtocol/coda)
+  - [snarky](https://github.com/o1-labs/snarky)
+  - [comby](https://github.com/comby-tools/comby) ([report](https://coveralls.io/github/comby-tools/comby?branch=master))
+  - [ocaml-irc-client][ocaml-irc-client] ([report][irc-coveralls])
 
 [lwt]: https://github.com/ocsigen/lwt
-[oml]: https://github.com/hammerlab/oml
-[oml-coveralls]: https://coveralls.io/github/hammerlab/oml?branch=HEAD
+[odoc]: https://github.com/ocaml/odoc
+[ocaml]: https://github.com/ocaml/ocaml/pull/8874
+[reason]: https://github.com/facebook/reason/pull/1794#issuecomment-361440670
+[ocamlformat]: https://github.com/ocaml-ppx/ocamlformat
 [ctypes]: https://github.com/ocamllabs/ocaml-ctypes
-[ctypes-coveralls]: https://coveralls.io/github/ocamllabs/ocaml-ctypes
-[ocaml-irc-client]: https://github.com/johnelse/ocaml-irc-client
+[ocaml-irc-client]: https://github.com/johnelse/ocaml-irc-client#readme
 [irc-coveralls]: https://coveralls.io/github/johnelse/ocaml-irc-client
-[markupml]: https://github.com/aantron/markup.ml
+[markupml]: https://github.com/aantron/markup.ml#readme
 [markupml-coveralls]: https://coveralls.io/github/aantron/markup.ml?branch=master
-[ketrew]: https://github.com/hammerlab/ketrew
-[sosa]: https://github.com/hammerlab/sosa
+[soup]: https://github.com/aantron/lambdasoup#readme
 
 
 
