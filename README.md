@@ -3,17 +3,14 @@
 [Bisect_ppx][self] is a code coverage tool for OCaml. It helps you test
 thoroughly by showing which parts of your code are **not** tested.
 
-[![Bisect_ppx usage example][sample]][self-coverage]
+[![Bisect_ppx usage example][sample]][gh-pages-report]
 
-<br>
-
-For a live demo, see the [coverage report][self-coverage] Bisect_ppx generates
-for itself.
+For a live demo, see the [this report][gh-pages-report]. The details of how it
+is generated are in the [worked example](#Example).
 
 [self]: https://github.com/aantron/bisect_ppx
 [releases]: https://github.com/aantron/bisect_ppx/releases
 [version]: https://img.shields.io/badge/version-1.4.1-blue.svg
-[self-coverage]: http://aantron.github.io/bisect_ppx/coverage/
 [travis]: https://travis-ci.org/aantron/bisect_ppx/branches
 [travis-img]: https://img.shields.io/travis/aantron/bisect_ppx/master.svg
 [sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
@@ -31,6 +28,7 @@ for itself.
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
 - [**Sending to Coveralls.io**](#Coveralls)
 - [**Controlling coverage with `[@coverage off]`**](#Exclusion)
+- [**Real-world example detailed**](#Example) &nbsp; ([repo][markupml], [report][gh-pages-report], [coveralls][markupml-coveralls])
 - [**Other topics**](#Other)
 - [**Bisect_ppx users**](#Users)
 - [**Contributing**](#Contributing)
@@ -76,7 +74,7 @@ the [coverage report][dune-report] in `_coverage/index.html`:
 
 4. During release, you have to manually remove `(preprocess (pps bisect_ppx))`
 from your `dune` files. This is a limitation of Dune that we hope to address in
-[ocaml/dune#57](https://github.com/ocaml/dune/issues/57).
+[ocaml/dune#57][dune-57].
 
 [dune-repo]: https://github.com/aantron/bisect-starter-dune#readme
 [dune-report]: https://aantron.github.io/bisect-starter-dune/
@@ -283,6 +281,79 @@ module with `[@@@coverage off]` and `[@@@coverage on]`.
 
 <br>
 
+<a id="Example"></a>
+## Real-world example detailed
+
+Refer to:
+
+- [**aantron/markup.ml**][markupml], which produces
+[this local report][gh-pages-report], and
+[this report on Coveralls.io][markupml-coveralls].
+- The [Dune instructions](#Dune) and [Coveralls instructions](#Coveralls) above.
+
+The details:
+
+1. The project [depeds on package `bisect_ppx`](https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/markup.opam#L21),
+so that Bisect_ppx is installed by `opam pin --dev-repo markup` and `opam install .`
+
+2. There are three libraries in [`src/`](https://github.com/aantron/markup.ml/tree/33e40c49827fca4e10cc6a9c64a073f30d797f5b/src), each set to have its
+sources preprocessed by Bisect_ppx:
+
+    - [`markup`](https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/src/dune#L5)
+    - [`markup-lwt`](https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/src/lwt/dune#L5)
+    - [`markup-lwt.unix`](https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/src/lwt_unix/dune#L5)
+
+    Because of the `--conditional` flag, preprocessing is enabled only when
+    `BISECT_ENABLE=yes` is set in the environment, so it is off by default.
+
+3. A coverage build is triggered by running [`make coverage`](https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/Makefile#L19-L25). This target...
+
+    - Depends on `make clean`. This is a workaround until
+    [ocaml/dune#57][dune-57] is solved. The problem is that doing a coverage
+    build, after normal builds, should force all sources to be recompiled, so
+    that they can be instrumented by the Bisect_ppx preprocessor. However, Dune
+    doesn't know about this &mdash; it doesn't know that the behavior of the
+    preprocessor depends on the `BISECT_ENABLE` environment variable.
+
+        Indeed, the preprocessor shouldn't read this environment variable. The
+        preprocessor should just be turned off by Dune when not building for
+        coverage. However, Dune does not currently have the ability to
+        conditionally turn off a preprocessor.
+
+        In any case, to deal with this problem, the project always does a clean
+        build when building for coverage.
+
+    - Does a fresh build with `BISECT_ENABLE=yes`, causing the sources of the
+    three libraries mentioned above to be instrumented.
+
+    - Runs the test suite. `bisect*.out` files with coverage data are produced
+    as a side effect.
+
+    - Runs `bisect-ppx-report` to generate both the typical HTML report in
+    `_coverage/index.html`, and also a textual summary in the terminal for very
+    fast iteration.
+
+4. `make coverage` is also [used in Travis](https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/.travis.yml#L33-L35)
+to submit coverage reports to Coveralls. At the end of `make coverage`, the
+`bisect*.out` files are still present, so `.travis.yml` runs `bisect-ppx-report`
+again to generate the Coveralls report. This follows the [Coveralls](#Coveralls)
+instructions exactly.
+
+    Coveralls can be configured to [leave comments](https://github.com/aantron/markup.ml/pull/47#issuecomment-521707675)
+    about changes in coverage. It is usually configured to at least add an
+    additional check to branches and PRs &mdash; see the "3 checks passed" in
+    the hidden Details of the [linked PR](https://github.com/aantron/markup.ml/pull/47).
+
+5. During release, `(preprocess (pps bisect_ppx))` is [removed from all libraries that are being released](https://github.com/aantron/markup.ml/commit/ea68bebf5c3a19f56350393e359d444f864154e3#diff-d218652a79a651b9be8eee7641ea0893L5). This is typically in a one-commit release branch off master, which is what ends up being tagged.
+
+    This won't be necessary after [ocaml/dune#57][dune-57] is addressed.
+
+[dune-57]: https://github.com/ocaml/dune/issues/57
+
+
+
+<br>
+
 <a id="Other"></a>
 ## Other topics
 
@@ -337,6 +408,7 @@ A small sample of projects using Bisect_ppx:
 [markupml]: https://github.com/aantron/markup.ml#readme
 [markupml-coveralls]: https://coveralls.io/github/aantron/markup.ml?branch=master
 [soup]: https://github.com/aantron/lambdasoup#readme
+[gh-pages-report]: http://aantron.github.io/bisect_ppx/demo/
 
 
 
