@@ -25,7 +25,7 @@ for itself.
 #### Table of contents
 
 - [**Usage**](#Usage)
-  - [**Dune**](#Dune)
+  - [**Dune**](#Dune) &nbsp; ([starter repo][dune-repo], [report][dune-report])
   - [**BuckleScript**](#BuckleScript) &nbsp; ([starter repo][bsb-repo], [report][bsb-report])
   - [**Js_of_ocaml**](#Js_of_ocaml)
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
@@ -44,38 +44,41 @@ for itself.
 <a id="Dune"></a>
 ### Dune
 
-Depend on Bisect_ppx:
+Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
+[this report][dune-report].
 
-```
-depends: [
-  "bisect_ppx" {dev & >= "1.3.0"}
-]
-```
+1. [Depend on Bisect_ppx in your `opam` file](https://github.com/aantron/bisect-starter-dune/blob/master/bisect-starter-dune.opam#L10):
 
-Add `bisect_ppx` to your code under test (but not to your tester itself):
+    ```
+    depends: [
+      "bisect_ppx" {dev & >= "1.5.0"}
+    ]
+    ```
 
-```
-(library
- (public_name my_lib)
- (preprocess (pps bisect_ppx --conditional --no-comment-parsing)))
-```
+2. [Preprocess the code under test with `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/master/dune#L4)
+(but not the tester itself):
 
-Run your test binary. In addition to testing your code, when exiting, it will
-produce one or more files with names like `bisect0123456789.out`:
+    ```
+    (library
+     (public_name my_lib)
+     (preprocess (pps bisect_ppx --conditional --no-comment-parsing)))
+    ```
 
-```
-BISECT_ENABLE=yes dune runtest --force
-```
+3. Run your test binary. In addition to testing your code, when exiting, it will
+write one or more files with names like `bisect0123456789.out`. Then, generate
+the [coverage report][dune-report] in `_coverage/index.html`:
 
-Generate the coverage report and open `_coverage/index.html`:
+    ```
+    BISECT_ENABLE=yes dune runtest --force
+    dune exec bisect-ppx-report -- --html _coverage/ -I _build/default/ `find . -name 'bisect*.out'`
+    ```
 
-```
-dune exec bisect-ppx-report -- --html _coverage/ -I _build/default/ `find . -name 'bisect*.out'`
-```
-
-During release, you have to manually remove `(preprocess (pps bisect_ppx))`
-from your `dune` files. This is a limitation of Dune we hope to address in
+4. During release, you have to manually remove `(preprocess (pps bisect_ppx))`
+from your `dune` files. This is a limitation of Dune that we hope to address in
 [ocaml/dune#57](https://github.com/ocaml/dune/issues/57).
+
+[dune-repo]: https://github.com/aantron/bisect-starter-dune#readme
+[dune-report]: https://aantron.github.io/bisect-starter-dune/
 
 
 
