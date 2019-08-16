@@ -1,6 +1,6 @@
-(executables
- (names report)
- (public_names bisect-ppx-report)
+(executable
+ (name report)
+ (public_name bisect-ppx-report)
  (package bisect_ppx)
  (libraries bisect_ppx.common unix))
 
