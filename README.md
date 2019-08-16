@@ -26,7 +26,7 @@ details of how it is generated are in the [worked example](#Example).
   - [**BuckleScript**](#BuckleScript) &nbsp; ([starter repo][bsb-repo], [report][bsb-report])
   - [**Js_of_ocaml**](#Js_of_ocaml) &nbsp; ([starter repo][jsoo-repo], [report][jsoo-report])
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
-- [**Sending to Coveralls.io**](#Coveralls)
+- [**Sending to Coveralls**](#Coveralls)
 - [**Controlling coverage with `[@coverage off]`**](#Exclusion)
 - [**Real-world example examined**](#Example) &nbsp; ([repo][markupml], [report][gh-pages-report], [coveralls][markupml-coveralls])
 - [**Other topics**](#Other)
@@ -228,7 +228,7 @@ instrument the code under test, but not the tester:
 <br>
 
 <a id="Coveralls"></a>
-## Sending to [Coveralls.io](https://coveralls.io)
+## Sending to [Coveralls](https://coveralls.io)
 
 You can generate a Coveralls JSON report using the `bisect-ppx-report` tool
 with the `--coveralls` flag. Note that Bisect_ppx reports are more precise than
@@ -240,13 +240,15 @@ not covered.
 Example using the built-in Coveralls reporter on Travis CI (which sets
 [`$TRAVIS_JOB_ID`][travis-vars]):
 
-      bisect-ppx-report \
-          -I _build/default/ \
-          --coveralls coverage.json \
-          --service-name travis-ci \
-          --service-job-id $TRAVIS_JOB_ID \
-          `find . -name 'bisect*.out'`
-      curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+```
+bisect-ppx-report \
+  -I _build/default/ \
+  --coveralls coverage.json \
+  --service-name travis-ci \
+  --service-job-id $TRAVIS_JOB_ID \
+  `find . -name 'bisect*.out'`
+curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+```
 
 For other CI services, replace `--service-name` and `--service-job-id` as
 follows:
@@ -288,7 +290,7 @@ Refer to:
 
 - [**aantron/markup.ml**][markupml], which produces
 [this local report][gh-pages-report], and
-[this report on Coveralls.io][markupml-coveralls].
+[this report on Coveralls][markupml-coveralls].
 - The [Dune instructions](#Dune) and [Coveralls instructions](#Coveralls) above.
 
 The details:
