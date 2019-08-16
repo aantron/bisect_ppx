@@ -43,15 +43,6 @@ GH_PAGES := gh-pages
 
 .PHONY : gh-pages
 gh-pages:
-	opam list --installed lambdasoup
-	opam list --installed omd
-	dune build doc/postprocess.exe
-	rm -rf $(GH_PAGES)
-	git clone git@github.com:aantron/bisect_ppx.git $(GH_PAGES)
-	cd $(GH_PAGES) && \
-	  git checkout gh-pages
-	omd README.md | dune exec doc/postprocess.exe > $(GH_PAGES)/index.html
-	cd $(GH_PAGES) && \
-	  git add -A && \
-	  git commit --amend --no-edit && \
-	  git push -f
+	cat doc/header.html > $(GH_PAGES)/index.html
+	cat README.md | node doc/convert-readme.js >> $(GH_PAGES)/index.html
+	cat doc/footer.html >> $(GH_PAGES)/index.html
