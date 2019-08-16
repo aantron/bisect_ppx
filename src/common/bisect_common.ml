@@ -174,9 +174,27 @@ let write_points points =
   Array.sort compare points_array;
   Marshal.to_string points_array []
 
+let get_relative_path file =
+  if Filename.is_relative file then
+    file
+  else
+    let cwd = Sys.getcwd () in
+    let cwd_end = String.length cwd in
+    let sep_length = String.length Filename.dir_sep in
+    let sep_end = sep_length + cwd_end in
+    try
+      if String.sub file 0 cwd_end = cwd &&
+          String.sub file cwd_end sep_length = Filename.dir_sep then
+        String.sub file sep_end (String.length file - sep_end)
+      else
+        file
+    with Invalid_argument _ ->
+      file
+
 let read_runtime_data filename =
   Reader.(read (array (pair string (pair (array int) string)))) ~filename
   |> Array.to_list
+  |> List.map (fun (file, data) -> get_relative_path file, data)
 
 let read_points s =
   let points_array : point_definition array = Marshal.from_string s 0 in
