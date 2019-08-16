@@ -5,8 +5,8 @@ test thoroughly by showing what's **not** tested.
 
 [![Bisect_ppx usage example][sample]][gh-pages-report]
 
-For a live demo, see the [this report][gh-pages-report]. The details of how it
-is generated are in the [worked example](#Example).
+You can browse the report seen above [online here][gh-pages-report]. The
+details of how it is generated are in the [worked example](#Example).
 
 [self]: https://github.com/aantron/bisect_ppx
 [releases]: https://github.com/aantron/bisect_ppx/releases
