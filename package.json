@@ -25,7 +25,7 @@
     "bs-platform": "^6.0.0"
   },
   "scripts": {
-    "preinstall": "esy install && esy dune build -p bisect_ppx && esy dune build -p bisect_ppx src/ppx/wrapper/wrapper.exe && cp _build/default/src/ppx/wrapper/wrapper.exe ./ppx.exe"
+    "preinstall": "esy install && esy build && esy dune build -p bisect_ppx src/ppx/wrapper/wrapper.exe && cp _build/default/src/ppx/wrapper/wrapper.exe ./ppx.exe"
   },
   "bin": {
     "bisect-ppx-report.exe": "_build/install/default/bin/bisect-ppx-report"
