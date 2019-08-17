@@ -4,9 +4,7 @@
 
 #### Table of contents
 
-- [Excluding code from coverage](#Excluding)
-  - [Individual lines and line ranges](#ExcludingLines)
-  - [Files and top-level values](#ExcludingValues)
+- [Excluding generated files from coverage](#Excluding)
 - [Environment variables](#EnvironmentVariables)
   - [Naming the output files](#OutFiles)
   - [Logging](#Logging)
@@ -16,43 +14,17 @@
 <br>
 
 <a id="Excluding"></a>
-## Excluding code from coverage
-
-The easiest way to exclude a file from coverage is simply not to build it with
-`-package bisect_ppx`, or not to tag it with `coverage`. However, sometimes you
-need finer control. There are several ways to disable coverage analysis for
-portions of code.
-
-<a id="ExcludingLines"></a>
-#### Individual lines and line ranges
-
-*Note: this method is deprecated and will be removed; use the approach
-described above in "Expressions and structure items."*
-
-If a comment `(*BISECT-IGNORE*)` is found on a line, that line is excluded from
-coverage analysis. If `(*BISECT-VISIT*)` is found, all points on that line are
-unconditionally marked as visited.
-
-Note that both comments affect the entire line they are found on. For example,
-if you have an `if`-`then`-`else` on one line, the comments will affect the
-overall expression and both branches.
-
-If there is a range of lines delimited by `(*BISECT-IGNORE-BEGIN*)` and
-`(*BISECT-IGNORE-END*)`, all the lines in the range, including the ones with the
-comments, are excluded.
-
-<a id="ExcludingValues"></a>
-#### Files and top-level values
+## Excluding generated files from coverage
 
 Whole files can be excluded by placing `[@@@coverage exclude file]` anywhere in
 their top-level module.
 
-If you have generated code, you can pass the `-exclude-file` option to the
-Bisect_ppx preprocessor:
+If you have generated code that you cannot easily place an attribute into, nor
+is it easy to avoid preprocessing it, you can pass the `-exclude-file` option
+to the Bisect_ppx preprocessor:
 
 ```
-ocamlfind c \
-  -package bisect_ppx -ppxopt "bisect_ppx,--exclude-file .exclude" -c my_code.ml
+(preprocess (pps bisect_ppx --exclude-file .exclude))
 ```
 
 Here is what the `.exclude` file can look like:

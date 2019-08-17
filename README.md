@@ -276,8 +276,12 @@ subexpressions, will be instrumented by Bisect_ppx.
 Likewise, you can tag module-level `let`-declarations with `[@@coverage off]`,
 and they won't be instrumented.
 
-Finally, you can turn off instrumentation for blocks of declarations inside a
+You can also turn off instrumentation for blocks of declarations inside a
 module with `[@@@coverage off]` and `[@@@coverage on]`.
+
+Finally, you can exclude an entire file by putting `[@@@coverage exclude_file]`
+into its top-level module. However, whenever possible, it is recommended to
+exclude files by not preprocessing with Bisect_ppx to begin with.
 
 
 
@@ -359,9 +363,9 @@ instructions exactly.
 <a id="Other"></a>
 ## Other topics
 
-See [advanced usage][advanced] for how to exclude files from coverage, and
-supported environment variables. Use of these features is discouraged. They are
-meant for working around build system issues and for build debugging.
+See [advanced usage][advanced] for how to exclude generated files from coverage,
+and supported environment variables. Use of these features is discouraged. They
+are meant for working around build system issues and for build debugging.
 
 [advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#readme
 
