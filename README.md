@@ -125,13 +125,13 @@ somewhere in your
 tester, which will have Node write a file like `bisect0123456789.out` when the
 tester exits:
 
-    ```ocaml
+    ```reason
     Bisect.Runtime.write_coverage_data_on_exit();
     ```
 
     If the tests will be running in the browser, at the end of testing, call
 
-    ```ocaml
+    ```reason
     Bisect.Runtime.get_coverage_data();
     ```
 
