@@ -57,7 +57,7 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
 2. [Preprocess the code under test with `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/master/dune#L4)
 (but don't preprocess the tester itself):
 
-    ```
+    ```scheme
     (library
      (public_name my_lib)
      (preprocess (pps bisect_ppx --conditional --no-comment-parsing)))
@@ -165,10 +165,10 @@ Refer to [**aantron/bisect-starter-jsoo**][jsoo-repo], which produces
 script must be linked with `bisect_ppx.runtime`](https://github.com/aantron/bisect-starter-jsoo/blob/master/dune#L9)
 (but not instrumented):
 
-    ```
+    ```scheme
     (executable
-    (name my_tester)
-    (libraries bisect_ppx.runtime))
+     (name my_tester)
+     (libraries bisect_ppx.runtime))
     ```
 
 2. If the tests will run on Node, [call this function](https://github.com/aantron/bisect-starter-jsoo/blob/master/tester.ml#L3)
