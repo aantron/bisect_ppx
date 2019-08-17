@@ -1,2 +1,2 @@
 let not_instrumented = ()
-[@@@coverage exclude file]
+[@@@coverage exclude_file]

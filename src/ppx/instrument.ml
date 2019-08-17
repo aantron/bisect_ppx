@@ -77,7 +77,7 @@ struct
         `Off
       | PStr [%str on] ->
         `On
-      | PStr [%str exclude file] ->
+      | PStr [%str exclude_file] ->
         `Exclude_file
       | _ ->
         Location.raise_errorf ~loc:attr_loc "Bad payload in coverage attribute."
@@ -96,7 +96,7 @@ struct
           Location.raise_errorf
             ~loc:attribute.attr_loc "coverage on is not allowed here."
         | `Exclude_file ->
-          (* The only place where [@@@coverage exclude file] is allowed is the
+          (* The only place where [@@@coverage exclude_file] is allowed is the
              top-level module of the file. However, if it is there, it will
              already have been found by a prescan, Bisect will not be
              instrumenting the file, and this function [has_off_attribute] won't
@@ -104,7 +104,7 @@ struct
              a nested module, or elsewhere where it is not allowed. *)
           Location.raise_errorf
             ~loc:attribute.attr_loc
-            "coverage exclude file is not allowed here.")
+            "coverage exclude_file is not allowed here.")
       false attributes
 
   let has_exclude_file_attribute structure =
@@ -1299,7 +1299,7 @@ class instrumenter =
           (* See comment in [Coverage_attributes.has_off_attribute] for
              reasoning. *)
           Location.raise_errorf
-            ~loc:attribute.attr_loc "coverage exclude file is not allowed here."
+            ~loc:attribute.attr_loc "coverage exclude_file is not allowed here."
         end;
         si
 
