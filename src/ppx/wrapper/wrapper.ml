@@ -24,9 +24,15 @@ let () =
 
   let arguments =
     match Array.to_list Sys.argv with
-    | program::arguments ->
-      Array.of_list (program::
-        "--as-ppx"::"--no-comment-parsing"::"--conditional"::arguments)
+    | [program; input_file; output_file] ->
+      Array.of_list [
+        program;
+        input_file;
+        "-o"; output_file;
+        "--dump-ast";
+        "--no-comment-parsing";
+        "--conditional";
+      ]
     | _ ->
       Sys.argv
   in
