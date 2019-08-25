@@ -57,7 +57,8 @@ SOURCES := bisect_ppx.opam dune-project src/
 
 .PHONY : self-coverage-workspace
 self-coverage-workspace :
-	rm -rf $(SELF_COVERAGE)
+	rm -rf $(SELF_COVERAGE)/bisect_ppx
+	rm -rf $(SELF_COVERAGE)/meta_bisect_ppx
 	mkdir -p $(SELF_COVERAGE)
 	touch $(SELF_COVERAGE)/dune-workspace
 	mkdir -p $(SELF_COVERAGE)/meta_bisect_ppx
