@@ -4,6 +4,8 @@
 
 
 
+module Common = Bisect_common
+
 class type converter =
   object
     method header : string
@@ -17,12 +19,11 @@ class type converter =
 
 let output_file verbose in_file conv visited points =
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
-  let cmp_content = Hashtbl.find points in_file |> Bisect_common.read_points in
+  let cmp_content = Hashtbl.find points in_file |> Common.read_points in
   verbose (Printf.sprintf "... file has the following points: %s"
     (String.concat ","
       (List.map (fun pd ->
-        Printf.sprintf "[%d %d]\n"
-          Bisect_common.(pd.offset) Bisect_common.(pd.identifier))
+        Printf.sprintf "[%d %d]\n" Common.(pd.offset) Common.(pd.identifier))
         cmp_content)));
   let len = Array.length visited in
   let stats = Report_utils.make () in
@@ -30,12 +31,12 @@ let output_file verbose in_file conv visited points =
     List.map
       (fun p ->
         let nb =
-          if Bisect_common.(p.identifier) < len then
-            visited.(Bisect_common.(p.identifier))
+          if Common.(p.identifier) < len then
+            visited.(Common.(p.identifier))
           else
             0 in
         Report_utils.update stats (nb > 0);
-        Bisect_common.(p.offset, nb))
+        Common.(p.offset, nb))
       cmp_content in
   let buffer = Buffer.create 64 in
   Buffer.add_string buffer (conv#file_header in_file);
@@ -70,4 +71,4 @@ let output verbose file conv data points =
     output_string ch conv#footer in
   match file with
   | "-" -> write stdout
-  | f -> Bisect_common.try_out_channel false f write
+  | f -> Common.try_out_channel false f write

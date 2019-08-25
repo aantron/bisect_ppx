@@ -11,6 +11,7 @@ test/_coverage
 test/_report
 test/_preserve
 _coverage/
+_self/
 
 # Scratch directory for notes, etc.
 scratch/

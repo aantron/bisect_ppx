@@ -4,6 +4,8 @@
 
 
 
+module Common = Bisect_common
+
 let css_variables =
   ["unvisited_color", "#ffecec";
    "visited_color", "#eaffea";
@@ -11,14 +13,14 @@ let css_variables =
    "highlight_color", "#a0fbff"]
 
 let output_templated_css filename =
-  Bisect_common.try_out_channel
+  Common.try_out_channel
     false
     filename
     (fun channel ->
       Report_utils.output_strings [Assets.css] css_variables channel)
 
 let output_file content filename =
-  Bisect_common.try_out_channel
+  Common.try_out_channel
     false
     filename
     (fun channel -> output_string channel content)
@@ -47,7 +49,7 @@ let output_html_index verbose title filename l =
       (Report_utils.make ())
       l in
 
-  Bisect_common.try_out_channel
+  Common.try_out_channel
     false
     filename
     (fun channel ->
@@ -139,20 +141,19 @@ let output_html
     verbose "... file not found";
     None
   | Some resolved_in_file ->
-    let cmp_content =
-      Hashtbl.find points in_file |> Bisect_common.read_points in
+    let cmp_content = Hashtbl.find points in_file |> Common.read_points in
     verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
     let len = Array.length visited in
     let stats = Report_utils.make () in
     let pts = ref (List.map
                      (fun p ->
                        let nb =
-                         if Bisect_common.(p.identifier) < len then
-                           visited.(Bisect_common.(p.identifier))
+                         if Common.(p.identifier) < len then
+                           visited.(Common.(p.identifier))
                          else
                            0 in
                        Report_utils.update stats (nb > 0);
-                       (Bisect_common.(p.offset), nb))
+                       (Common.(p.offset), nb))
                      cmp_content) in
     let dirname, basename = split_filename in_file in
     let in_channel, out_channel =

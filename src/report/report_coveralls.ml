@@ -4,26 +4,26 @@
 
 
 
-let file_json verbose indent in_file resolver visited points =
+module Common = Bisect_common
 
+let file_json verbose indent in_file resolver visited points =
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
   match resolver in_file with
   | None ->
     verbose "... file not found";
     None
   | Some resolved_in_file ->
-    let cmp_content =
-      Hashtbl.find points in_file |> Bisect_common.read_points in
+    let cmp_content = Hashtbl.find points in_file |> Common.read_points in
     verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
     let len = Array.length visited in
     let pts = (List.map
                  (fun p ->
                    let nb =
-                     if Bisect_common.(p.identifier) < len then
-                       visited.(Bisect_common.(p.identifier))
+                     if Common.(p.identifier) < len then
+                       visited.(Common.(p.identifier))
                      else
                        0 in
-                   (Bisect_common.(p.offset), nb))
+                   (Common.(p.offset), nb))
                  cmp_content) in
     let digest = Digest.to_hex (Digest.file resolved_in_file) in
     let in_channel = open_in resolved_in_file in
@@ -107,4 +107,4 @@ let output verbose file service_name service_job_id repo_token resolver data poi
   in
   match file with
   | "-" -> write stdout
-  | f -> Bisect_common.try_out_channel false f write
+  | f -> Common.try_out_channel false f write

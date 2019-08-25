@@ -53,6 +53,9 @@ module Cf = Ast.Ast_helper.Cf
 module Ast_convenience = Ast_convenience_408
 module Ast_mapper_class = Ast_mapper_class_408
 
+(* From Bisect_ppx. *)
+module Common = Bisect_common
+
 
 
 let option_map f = function
@@ -138,7 +141,7 @@ sig
     points -> string -> Parsetree.structure_item list
 end =
 struct
-  type points = Bisect_common.point_definition list ref
+  type points = Common.point_definition list ref
 
   let init () = ref []
 
@@ -202,12 +205,12 @@ struct
       let point =
         try
           List.find
-            (fun point -> Bisect_common.(point.offset) = point_offset)
+            (fun point -> Common.(point.offset) = point_offset)
             !points
         with Not_found ->
           let new_index = List.length !points in
           let new_point =
-            Bisect_common.{offset = point_offset; identifier = new_index} in
+            Common.{offset = point_offset; identifier = new_index} in
           points := new_point::!points;
           new_point
       in
@@ -687,8 +690,7 @@ struct
     in
 
     let point_count = Ast_convenience.int ~loc (List.length !points) in
-    let points_data =
-      Ast_convenience.str ~loc (Bisect_common.write_points !points) in
+    let points_data = Ast_convenience.str ~loc (Common.write_points !points) in
     let file = Ast_convenience.str ~loc file in
 
     (* ___bisect_visit___ is a function with a reference to a point count array.

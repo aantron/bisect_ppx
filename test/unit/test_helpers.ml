@@ -10,6 +10,15 @@ let directory = "_scratch"
 let coverage = "_coverage"
 let preserve_directory = "_preserve"
 
+let dune_build_directory =
+  let rec scan path =
+    if Filename.basename path = "_build" then
+      path
+    else
+      scan (Filename.dirname path)
+  in
+  scan (Sys.getcwd ())
+
 let test_context = ref None
 
 let read_file name =
@@ -153,15 +162,18 @@ let compile ?(r = "") arguments source =
   end;
 
   Printf.sprintf
-    "%s %s ocamlfind c -linkpkg %s %s %s"
-    "OCAMLPATH=../../../../install/default/lib:$OCAMLPATH"
+    "OCAMLPATH=%s:$OCAMLPATH %s ocamlfind c -linkpkg %s %s %s"
+    (Filename.concat dune_build_directory "install/default/lib")
     "OCAML_COLOR=never OCAML_ERROR_STYLE=short"
     arguments source_copy r
   |> run
 
 let report ?(f = "bisect*.out") ?(r = "") arguments =
   Printf.sprintf
-    "../../../../install/default/bin/bisect-ppx-report %s %s %s" arguments f r
+    "%s %s %s %s"
+    (Filename.concat
+      dune_build_directory "install/default/bin/bisect-ppx-report")
+    arguments f r
   |> run
 
 let preserve file destination =

@@ -4,6 +4,8 @@
 
 
 
+module Common = Bisect_common
+
 type output_kind =
   | Html_output of string
   | Csv_output of string
@@ -233,7 +235,7 @@ let main () =
       let points = Hashtbl.create 17 in
 
       !raw_coverage_files |> List.iter (fun out_file ->
-        Bisect_common.read_runtime_data out_file
+        Common.read_runtime_data out_file
         |> List.iter (fun (source_file, (file_counts, file_points)) ->
           let file_counts =
             let open Report_utils.Infix in
@@ -294,7 +296,7 @@ let () =
   | Unix.Unix_error (e, _, _) ->
       Printf.eprintf " *** system error: %s\n" (Unix.error_message e);
       exit 1
-  | Bisect_common.Invalid_file (f, reason) ->
+  | Common.Invalid_file (f, reason) ->
       Printf.eprintf " *** invalid file: '%s' error: \"%s\"\n" f reason;
       exit 1
   | e ->

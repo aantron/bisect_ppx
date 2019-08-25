@@ -4,6 +4,8 @@
 
 
 
+module Common = Bisect_common
+
 type message =
   | Unable_to_create_file
   | Unable_to_write_file
@@ -48,7 +50,7 @@ let verbose message =
   (Lazy.force verbose) message
 
 let get_coverage_data =
-  Bisect_common.runtime_data_to_string
+  Common.runtime_data_to_string
 
 let write_coverage_data () =
   match get_coverage_data () with
@@ -56,7 +58,7 @@ let write_coverage_data () =
     ()
   | Some data ->
     let rec create_file attempts =
-      let filename = Bisect_common.random_filename "bisect" in
+      let filename = Common.random_filename "bisect" in
       let flags = [Open_wronly; Open_creat; Open_excl; Open_binary] in
       match open_out_gen flags 0o644 filename with
       | exception exn ->
@@ -73,7 +75,7 @@ let write_coverage_data () =
 let file_channel () =
   let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
   let rec create_file () =
-    let filename = Bisect_common.random_filename base_name in
+    let filename = Common.random_filename base_name in
     try
       let fd = Unix.(openfile filename [O_WRONLY; O_CREAT; O_EXCL] 0o644) in
       let channel = Unix.out_channel_of_descr fd in
@@ -89,14 +91,14 @@ let file_channel () =
   create_file ()
 
 let dump_counters_exn =
-  Bisect_common.write_runtime_data
+  Common.write_runtime_data
 
 let reset_counters () =
   Hashtbl.iter (fun _ (point_state, _) ->
       match Array.length point_state with
       | 0 -> ()
       | n -> Array.(fill point_state 0 (n - 1) 0)
-    ) (Lazy.force Bisect_common.table)
+    ) (Lazy.force Common.table)
 
 let dump () =
   match file_channel () with
@@ -113,4 +115,4 @@ let register_dump : unit Lazy.t =
 
 let register_file file ~point_count ~point_definitions =
   let () = Lazy.force register_dump in
-  Bisect_common.register_file file ~point_count ~point_definitions
+  Common.register_file file ~point_count ~point_definitions

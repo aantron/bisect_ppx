@@ -71,6 +71,10 @@ val with_bisect_args : string -> string
 (** The same as [with_bisect], but passes the given flags to the ppx
     extension. *)
 
+val dune_build_directory : string
+(** Path to the Dune _build directory in which the Bisect_ppx under test is
+    installed. *)
+
 
 
 val report : ?f:string -> ?r:string -> string -> unit
