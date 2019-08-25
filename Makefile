@@ -103,9 +103,10 @@ self-coverage-test :
 	cd $(SELF_COVERAGE) && dune build
 	cd $(SELF_COVERAGE) && dune runtest --force --no-buffer -j 1
 	rm -rf _coverage
-	$(SELF_COVERAGE)/_build/install/default/bin/meta-bisect-ppx-report \
-	  -I $(SELF_COVERAGE)/_build/default \
-	  --text - --summary-only \
-	  --html _coverage \
-	  $(SELF_COVERAGE)/bisect*.meta
+	cd $(SELF_COVERAGE) && \
+	  _build/install/default/bin/meta-bisect-ppx-report \
+	    -I _build/default \
+	    --text - --summary-only \
+	    --html ../_coverage \
+	    bisect*.meta
 	@echo See _coverage/index.html

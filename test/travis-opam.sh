@@ -67,10 +67,11 @@ which bisect-ppx-report
 if [ "$SELF_COVERAGE" == YES ]
 then
     make self-coverage
-    _self/_build/install/default/bin/meta-bisect-ppx-report \
-        -I _self/_build/default \
-        --coveralls coverage.json \
-        --service-name travis-ci --service-job-id $TRAVIS_JOB_ID \
-        _self/bisect*.meta
+    (cd _self && \
+        _build/install/default/bin/meta-bisect-ppx-report \
+            -I _build/default \
+            --coveralls ../coverage.json \
+            --service-name travis-ci --service-job-id $TRAVIS_JOB_ID \
+            bisect*.meta)
     curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
 fi
