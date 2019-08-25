@@ -26,7 +26,7 @@ let report_title = ref "Coverage report"
 
 let csv_separator = ref ";"
 
-let search_path = ref [""]
+let search_path = ref ["_build/default"; ""]
 
 let add_search_path sp =
   search_path := sp :: !search_path
