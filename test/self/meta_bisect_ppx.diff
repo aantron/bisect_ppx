@@ -1,5 +1,15 @@
-Only in src/common: bisect_common.ml
-Only in src/common: bisect_common.mli
+diff -ru src/common/bisect_common.ml _self/meta_bisect_ppx/src/common/bisect_common.ml
+--- src/common/bisect_common.ml
++++ _self/meta_bisect_ppx/src/common/bisect_common.ml
+@@ -167,7 +167,7 @@
+   Random.self_init ()
+ 
+ let random_filename base_name =
+-  Printf.sprintf "%s%09d.out" base_name (abs (Random.int 1000000000))
++  Printf.sprintf "%s%09d.meta" base_name (abs (Random.int 1000000000))
+ 
+ let write_points points =
+   let points_array = Array.of_list points in
 diff -ru src/common/dune _self/meta_bisect_ppx/src/common/dune
 --- src/common/dune
 +++ _self/meta_bisect_ppx/src/common/dune
@@ -10,8 +20,6 @@ diff -ru src/common/dune _self/meta_bisect_ppx/src/common/dune
 + (name meta_bisect_common)
 + (public_name meta_bisect_ppx.common)
   (synopsis "Bisect_ppx internal functions (internal)"))
-Only in _self/meta_bisect_ppx/src/common: meta_bisect_common.ml
-Only in _self/meta_bisect_ppx/src/common: meta_bisect_common.mli
 diff -ru src/ppx/dune _self/meta_bisect_ppx/src/ppx/dune
 --- src/ppx/dune
 +++ _self/meta_bisect_ppx/src/ppx/dune
@@ -150,3 +158,22 @@ diff -ru src/runtime/native/runtime.ml _self/meta_bisect_ppx/src/runtime/native/
  
  type message =
    | Unable_to_create_file
+@@ -72,8 +72,17 @@
+     in
+     create_file 100
+ 
++let base_name () =
++  let rec scan path =
++    if Filename.basename path = "_self" then
++      Filename.concat path "bisect"
++    else
++      scan (Filename.dirname path)
++  in
++  scan (Sys.getcwd ())
++
+ let file_channel () =
+-  let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
++  let base_name = base_name () in
+   let rec create_file () =
+     let filename = Common.random_filename base_name in
+     try

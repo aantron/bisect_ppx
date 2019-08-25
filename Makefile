@@ -50,6 +50,9 @@ gh-pages:
 	cat README.md | node doc/convert-readme.js >> $(GH_PAGES)/index.html
 	cat doc/footer.html >> $(GH_PAGES)/index.html
 
+.PHONY : self-coverage
+self-coverage : self-coverage-workspace self-coverage-rename self-coverage-test
+
 SOURCES := bisect_ppx.opam dune-project src/
 
 .PHONY : self-coverage-workspace
@@ -63,6 +66,13 @@ self-coverage-workspace :
 	cp -r $(SOURCES) $(SELF_COVERAGE)/bisect_ppx/
 	mkdir -p $(SELF_COVERAGE)/bisect_ppx/test
 	cp -r test/unit $(SELF_COVERAGE)/bisect_ppx/test/
+	cd $(SELF_COVERAGE)/meta_bisect_ppx && \
+	  patch -p2 < ../../test/self/meta_bisect_ppx.diff
+	cd $(SELF_COVERAGE)/bisect_ppx && \
+	  patch -p2 < ../../test/self/bisect_ppx.diff
+
+.PHONY : self-coverage-rename
+self-coverage-rename :
 	mv \
 	  $(SELF_COVERAGE)/meta_bisect_ppx/bisect_ppx.opam \
 	  $(SELF_COVERAGE)/meta_bisect_ppx/meta_bisect_ppx.opam
@@ -72,8 +82,6 @@ self-coverage-workspace :
 	mv \
 	  $(SELF_COVERAGE)/meta_bisect_ppx/src/common/bisect_common.mli \
 	  $(SELF_COVERAGE)/meta_bisect_ppx/src/common/meta_bisect_common.mli
-	cd $(SELF_COVERAGE)/meta_bisect_ppx && \
-	  patch -p2 < ../../test/self/meta_bisect_ppx.diff
 
 FILTER := 's/^\(\(---\|+++\) [^ \t]*\).*$$/\1/g'
 
@@ -83,8 +91,20 @@ self-coverage-diff :
 	  sed $(FILTER) > \
 	  test/self/meta_bisect_ppx.diff || \
 	  true
+	diff -ru src _self/bisect_ppx/src | \
+	  sed $(FILTER) > \
+	  test/self/bisect_ppx.diff || \
+	  true
 
-.PHONY : self-coverage
-self-coverage : self-coverage-workspace
-	cd $(SELF_COVERAGE) && dune build -p bisect_ppx
-	cd $(SELF_COVERAGE) && dune runtest -p bisect_ppx --force --no-buffer -j 1
+.PHONY : self-coverage-test
+self-coverage-test :
+	cd $(SELF_COVERAGE) && rm -f bisect*.meta
+	cd $(SELF_COVERAGE) && dune build
+	cd $(SELF_COVERAGE) && dune runtest --force --no-buffer -j 1
+	rm -rf _coverage
+	$(SELF_COVERAGE)/_build/install/default/bin/meta-bisect-ppx-report \
+	  -I $(SELF_COVERAGE)/_build/default \
+	  --text - --summary-only \
+	  --html _coverage \
+	  $(SELF_COVERAGE)/bisect*.meta
+	@echo See _coverage/index.html

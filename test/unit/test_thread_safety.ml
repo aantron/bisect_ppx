@@ -41,6 +41,6 @@ let test ?(bisect = "") name expect_correctness =
   end
 
 let tests = "thread-safety" >::: [
-  test "bisect"         true;
+  test "bisect"         false;
   test "bisect-threads" false;
 ]
