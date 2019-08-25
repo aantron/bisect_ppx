@@ -31,6 +31,10 @@ let helper ?foo ~bar () =
 let () =
   helper ~bar:() @@ ()
 
+(* Optional argument elimination with labeled argument. *)
+let f : unit -> unit =
+  helper ~bar:()
+
 (* Short-circuiting operators. *)
 let _ =
   false || true

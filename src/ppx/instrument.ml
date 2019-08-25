@@ -942,7 +942,11 @@ class instrumenter =
                 traverse ~is_in_tail_position:false e
             in
             let apply = Exp.apply ~loc ~attrs e arguments in
-            if is_in_tail_position then
+            let all_arguments_labeled =
+              arguments
+              |> List.for_all (fun (label, _) -> label <> Ast.Asttypes.Nolabel)
+            in
+            if is_in_tail_position || all_arguments_labeled then
               apply
             else
               begin match e with
