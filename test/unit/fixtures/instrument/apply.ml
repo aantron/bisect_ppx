@@ -24,6 +24,13 @@ let helper () =
 let () =
   print_endline (helper ())
 
+(* Optional argument elimination with @@. *)
+let helper ?foo ~bar () =
+  ()
+
+let () =
+  helper ~bar:() @@ ()
+
 (* Short-circuiting operators. *)
 let _ =
   false || true

@@ -915,6 +915,19 @@ class instrumenter =
                   assert false
                 end
 
+              | [%expr (@@)] ->
+                begin match arguments with
+                | [(ll, ({pexp_desc = Pexp_apply _; _} as el)); (lr, er)] ->
+                  [(ll,
+                    traverse
+                      ~successor:`Redundant ~is_in_tail_position:false el);
+                   (lr,
+                    traverse ~is_in_tail_position:false er)]
+                | _ ->
+                  List.map (fun (label, e) ->
+                    (label, traverse ~is_in_tail_position:false e)) arguments
+                end
+
               | _ ->
                 List.map (fun (label, e) ->
                   (label, traverse ~is_in_tail_position:false e)) arguments
