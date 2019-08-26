@@ -34,8 +34,7 @@ opam --version
 echo
 echo "Installing dependencies"
 echo
-opam pin add -y --no-action bisect_ppx .
-opam install -y --deps-only bisect_ppx
+opam install -y --deps-only .
 
 echo
 echo "Compiling"
@@ -47,22 +46,16 @@ echo "Testing"
 echo
 make test
 
-echo
-echo "Testing package usage"
-echo
-# Reason has 4.08 support in master.
-opam pin add -y reason --dev-repo
-opam install -y js_of_ocaml
-make clean-usage usage
-
-echo
-echo "Testing installation"
-echo
-make clean
-opam pin add -yn bisect_ppx .
-opam install -y bisect_ppx
-ocamlfind query bisect_ppx bisect_ppx.runtime
-which bisect-ppx-report
+if [ "$USAGE_TEST" == YES ]
+then
+    echo
+    echo "Testing package usage"
+    echo
+    # Reason has 4.08 support in master.
+    opam install -y reason
+    opam install -y js_of_ocaml
+    make clean-usage usage
+fi
 
 if [ "$SELF_COVERAGE" == YES ]
 then
@@ -74,3 +67,5 @@ then
             bisect*.meta)
     curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
 fi
+
+opam clean
