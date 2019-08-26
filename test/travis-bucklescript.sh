@@ -3,7 +3,17 @@
 set -e
 set -x
 
+date
+
 npm --version
 npm install -g esy
 
-make -C test/bucklescript full-test
+date
+
+make -C test/bucklescript install
+
+date
+
+make -C test/bucklescript test
+
+date

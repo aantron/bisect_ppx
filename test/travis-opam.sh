@@ -12,9 +12,13 @@ esac
 OPAM_VERSION=2.0.5
 OPAM_PKG=opam-${OPAM_VERSION}-x86_64-${OPAM_OS}
 
+date
+
 wget https://github.com/ocaml/opam/releases/download/${OPAM_VERSION}/${OPAM_PKG}
 sudo mv ${OPAM_PKG} /usr/local/bin/opam
 sudo chmod a+x /usr/local/bin/opam
+
+date
 
 opam init -y --bare --disable-sandboxing --disable-shell-hook
 
@@ -23,6 +27,8 @@ then
     rm -rf _opam
     opam switch create . $COMPILER $REPOSITORIES --no-install
 fi
+
+date
 
 # Prepare environment
 eval `opam config env`
@@ -36,15 +42,21 @@ echo "Installing dependencies"
 echo
 opam install -y --deps-only .
 
+date
+
 echo
 echo "Compiling"
 echo
 make build
 
+date
+
 echo
 echo "Testing"
 echo
 make test
+
+date
 
 if [ "$USAGE_TEST" == YES ]
 then
