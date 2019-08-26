@@ -11,23 +11,23 @@ matrix:
     - os: osx
       env: COMPILER=4.08.1
     - os: linux
+      env: COMPILER=ocaml-variants.4.09.0+beta1 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+    - os: linux
       env: COMPILER=4.08.1 SELF_COVERAGE=YES
-    - os: linux
-      env: COMPILER=4.02.3
-    - os: linux
-      env: COMPILER=4.03.0
-    - os: linux
-      env: COMPILER=4.04.2
-    - os: linux
-      env: COMPILER=4.05.0
-    - os: linux
-      env: COMPILER=4.06.1
-    - os: linux
-      env: COMPILER=4.07.1
     - os: linux
       env: COMPILER=4.08.1 USAGE_TEST=YES
     - os: linux
-      env: COMPILER=ocaml-variants.4.09.0+beta1 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+      env: COMPILER=4.07.1
+    - os: linux
+      env: COMPILER=4.06.1
+    - os: linux
+      env: COMPILER=4.05.0
+    - os: linux
+      env: COMPILER=4.04.2
+    - os: linux
+      env: COMPILER=4.03.0
+    - os: linux
+      env: COMPILER=4.02.3
 
   allow_failures:
     - env: COMPILER=4.08.1 SELF_COVERAGE=YES
