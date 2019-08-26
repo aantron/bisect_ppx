@@ -42,6 +42,7 @@ cache:
     - $HOME/.opam
     - ./_opam
     - $HOME/.esy
+    - ./_cache
 
 notifications:
   email:

@@ -3,6 +3,10 @@
 set -e
 set -x
 
+mkdir -p _cache
+
+date
+
 case $TRAVIS_OS_NAME in
     "linux") OPAM_OS=linux;;
     "osx") OPAM_OS=macos;;
@@ -12,10 +16,13 @@ esac
 OPAM_VERSION=2.0.5
 OPAM_PKG=opam-${OPAM_VERSION}-x86_64-${OPAM_OS}
 
-date
+if [ ! -f _cache/opam ]
+then
+    wget https://github.com/ocaml/opam/releases/download/${OPAM_VERSION}/${OPAM_PKG}
+    mv ${OPAM_PKG} _cache/opam
+fi
 
-wget https://github.com/ocaml/opam/releases/download/${OPAM_VERSION}/${OPAM_PKG}
-sudo mv ${OPAM_PKG} /usr/local/bin/opam
+sudo cp _cache/opam /usr/local/bin/opam
 sudo chmod a+x /usr/local/bin/opam
 
 date
@@ -44,6 +51,11 @@ opam install -y --deps-only .
 
 date
 
+if [ -d _cache/_build ]
+then
+    cp -r _cache/_build .
+fi
+
 echo
 echo "Compiling"
 echo
@@ -55,6 +67,11 @@ echo
 echo "Testing"
 echo
 make test
+
+if [ ! -d _cache/_build ]
+then
+    cp -r _build _cache
+fi
 
 date
 
