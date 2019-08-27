@@ -6,16 +6,26 @@
 
 module Common = Bisect_common
 
-module Arguments =
-struct
-  type output_kind = [
-    | `Html
-    | `Csv
-    | `Text
-    | `Dump
-    | `Coveralls
-  ]
+module Arguments :
+sig
+  val report_outputs :
+    ([ `Html | `Csv | `Text | `Dump | `Coveralls ] * string) list ref
+  val verbose : bool ref
+  val tab_size : int ref
+  val report_title : string ref
+  val csv_separator : string ref
+  val search_path : string list ref
+  val raw_coverage_files : string list ref
+  val summary_only : bool ref
+  val ignore_missing_files : bool ref
+  val service_name : string ref
+  val service_job_id : string ref
+  val repo_token : string ref
 
+  val parse_args : unit -> unit
+  val print_usage : unit -> unit
+end =
+struct
   let report_outputs = ref []
 
   let add_output o =
