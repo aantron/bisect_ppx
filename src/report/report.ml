@@ -185,6 +185,12 @@ let main () =
     exit 0
   end;
   let data, points =
+    let have_out_file =
+      List.exists
+        (fun file -> Filename.check_suffix file ".out") !raw_coverage_files
+    in
+    if have_out_file then
+      prerr_endline " *** warning: .out files are now .coverage files";
     match !raw_coverage_files with
     | [] ->
         prerr_endline " *** warning: no .coverage files provided";
