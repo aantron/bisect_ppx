@@ -30,7 +30,6 @@ let () =
         input_file;
         "-o"; output_file;
         "--dump-ast";
-        "--no-comment-parsing";
         "--conditional";
       ]
     | _ ->

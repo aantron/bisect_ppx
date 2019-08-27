@@ -24,7 +24,7 @@ scratch/
 *~
 
 # Pollution from the usage tests.
-*.out
+*.coverage
 a.out
 *.cmi
 *.cmx
