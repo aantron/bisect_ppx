@@ -29,8 +29,11 @@ date
 
 opam init -y --bare --disable-sandboxing --disable-shell-hook
 
+OPAM_FROM_CACHE=YES
+
 if [ ! -d _opam/bin ]
 then
+    OPAM_FROM_CACHE=NO
     rm -rf _opam
     opam switch create . $COMPILER $REPOSITORIES --no-install
 fi
@@ -44,10 +47,12 @@ eval `opam config env`
 ocaml -version
 opam --version
 
-echo
-echo "Installing dependencies"
-echo
-opam install -y --deps-only .
+date
+
+if [ "$OPAM_FROM_CACHE" == NO ]
+then
+    opam install -y --deps-only .
+fi
 
 date
 
@@ -56,16 +61,10 @@ then
     cp -r _cache/_build .
 fi
 
-echo
-echo "Compiling"
-echo
 make build
 
 date
 
-echo
-echo "Testing"
-echo
 make test
 
 if [ ! -d _cache/_build ]
@@ -77,10 +76,6 @@ date
 
 if [ "$USAGE_TEST" == YES ]
 then
-    echo
-    echo "Testing package usage"
-    echo
-    # Reason has 4.08 support in master.
     opam install -y reason
     opam install -y js_of_ocaml
     make clean-usage usage
