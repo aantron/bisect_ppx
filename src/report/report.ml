@@ -8,195 +8,195 @@ module Common = Bisect_common
 
 module Arguments =
 struct
-type output_kind =
-  | Html_output of string
-  | Csv_output of string
-  | Text_output of string
-  | Dump_output of string
-  | Coveralls_output of string
+  type output_kind =
+    | Html_output of string
+    | Csv_output of string
+    | Text_output of string
+    | Dump_output of string
+    | Coveralls_output of string
 
-let report_outputs = ref []
+  let report_outputs = ref []
 
-let add_output o =
-  report_outputs := o :: !report_outputs
+  let add_output o =
+    report_outputs := o :: !report_outputs
 
-let verbose = ref false
+  let verbose = ref false
 
-let tab_size = ref 8
+  let tab_size = ref 8
 
-let report_title = ref "Coverage report"
+  let report_title = ref "Coverage report"
 
-let csv_separator = ref ";"
+  let csv_separator = ref ";"
 
-let search_path = ref ["_build/default"; ""]
+  let search_path = ref ["_build/default"; ""]
 
-let add_search_path sp =
-  search_path := sp :: !search_path
+  let add_search_path sp =
+    search_path := sp :: !search_path
 
-let raw_coverage_files = ref []
+  let raw_coverage_files = ref []
 
-let summary_only = ref false
+  let summary_only = ref false
 
-let ignore_missing_files = ref false
+  let ignore_missing_files = ref false
 
-let add_file f =
-  raw_coverage_files := f :: !raw_coverage_files
+  let add_file f =
+    raw_coverage_files := f :: !raw_coverage_files
 
-let service_name = ref ""
+  let service_name = ref ""
 
-let service_job_id = ref ""
+  let service_job_id = ref ""
 
-let repo_token = ref ""
+  let repo_token = ref ""
 
-let deprecated argument =
-  Printf.eprintf "bisect-ppx-report argument '-%s' is deprecated.\n" argument;
-  Printf.eprintf "Use '--%s' instead.\n" argument;
-  Printf.eprintf "This requires Bisect_ppx >= 2.0.0.\n"
+  let deprecated argument =
+    Printf.eprintf "bisect-ppx-report argument '-%s' is deprecated.\n" argument;
+    Printf.eprintf "Use '--%s' instead.\n" argument;
+    Printf.eprintf "This requires Bisect_ppx >= 2.0.0.\n"
 
-let options = Arg.align [
-  ("--html",
-   Arg.String (fun s -> add_output (Html_output s)),
-   "<dir>  Output HTML report to <dir> (HTML only)");
+  let options = Arg.align [
+    ("--html",
+    Arg.String (fun s -> add_output (Html_output s)),
+    "<dir>  Output HTML report to <dir> (HTML only)");
 
-  ("-I",
-   Arg.String add_search_path,
-   "<dir>  Look for .ml/.re files in <dir> (HTML/Coveralls only)");
+    ("-I",
+    Arg.String add_search_path,
+    "<dir>  Look for .ml/.re files in <dir> (HTML/Coveralls only)");
 
-  ("--ignore-missing-files",
-   Arg.Set ignore_missing_files,
-   " Do not fail if an .ml/.re file can't be found (HTML/Coveralls only)");
+    ("--ignore-missing-files",
+    Arg.Set ignore_missing_files,
+    " Do not fail if an .ml/.re file can't be found (HTML/Coveralls only)");
 
-  ("--title",
-   Arg.Set_string report_title,
-   "<string>  Set title for report pages (HTML only)");
+    ("--title",
+    Arg.Set_string report_title,
+    "<string>  Set title for report pages (HTML only)");
 
-  ("--tab-size",
-   Arg.Int
-     (fun x ->
-       if x < 0 then
-         (prerr_endline " *** error: tab size should be positive"; exit 1)
-       else
-         tab_size := x),
-   "<int>  Set tab width in report (HTML only)");
+    ("--tab-size",
+    Arg.Int
+      (fun x ->
+        if x < 0 then
+          (prerr_endline " *** error: tab size should be positive"; exit 1)
+        else
+          tab_size := x),
+    "<int>  Set tab width in report (HTML only)");
 
-  ("--text",
-   Arg.String (fun s -> add_output (Text_output s)),
-   "<file>  Output plain text report to <file>");
+    ("--text",
+    Arg.String (fun s -> add_output (Text_output s)),
+    "<file>  Output plain text report to <file>");
 
-  ("--summary-only",
-   Arg.Set summary_only,
-   " Output only a whole-project summary (text only)");
+    ("--summary-only",
+    Arg.Set summary_only,
+    " Output only a whole-project summary (text only)");
 
-  ("--csv",
-   Arg.String (fun s -> add_output (Csv_output s)),
-   "<file>  Output CSV report to <file>");
+    ("--csv",
+    Arg.String (fun s -> add_output (Csv_output s)),
+    "<file>  Output CSV report to <file>");
 
-  ("--separator",
-   Arg.Set_string csv_separator,
-   "<string>  Set column separator (CSV only)");
+    ("--separator",
+    Arg.Set_string csv_separator,
+    "<string>  Set column separator (CSV only)");
 
-  ("--dump",
-   Arg.String (fun s -> add_output (Dump_output s)),
-   "<file>  Output bare dump to <file>");
+    ("--dump",
+    Arg.String (fun s -> add_output (Dump_output s)),
+    "<file>  Output bare dump to <file>");
 
-  ("--verbose",
-   Arg.Unit (fun () -> deprecated "verbose"; verbose := true),
-   " Set verbose mode");
+    ("--verbose",
+    Arg.Unit (fun () -> deprecated "verbose"; verbose := true),
+    " Set verbose mode");
 
-  ("--version",
-   Arg.Unit (fun () -> print_endline Report_utils.version; exit 0),
-   " Print version and exit");
+    ("--version",
+    Arg.Unit (fun () -> print_endline Report_utils.version; exit 0),
+    " Print version and exit");
 
-  ("--coveralls",
-   Arg.String (fun s -> add_output (Coveralls_output s)),
-   "<file>  Output coveralls json report to <file>");
+    ("--coveralls",
+    Arg.String (fun s -> add_output (Coveralls_output s)),
+    "<file>  Output coveralls json report to <file>");
 
-  ("--service-name",
-   Arg.Set_string service_name,
-   "<string>  Service name for Coveralls json (Coveralls only)");
+    ("--service-name",
+    Arg.Set_string service_name,
+    "<string>  Service name for Coveralls json (Coveralls only)");
 
-  ("--service-job-id",
-   Arg.Set_string service_job_id,
-   "<string>  Service job id for Coveralls json (Coveralls only)");
+    ("--service-job-id",
+    Arg.Set_string service_job_id,
+    "<string>  Service job id for Coveralls json (Coveralls only)");
 
-  ("--repo-token",
-   Arg.Set_string repo_token,
-   "<string>  Repo token for Coveralls json (Coveralls only)");
+    ("--repo-token",
+    Arg.Set_string repo_token,
+    "<string>  Repo token for Coveralls json (Coveralls only)");
 
-  ("-html",
-   Arg.String (fun s -> deprecated "html"; add_output (Html_output s)),
-   " Deprecated");
+    ("-html",
+    Arg.String (fun s -> deprecated "html"; add_output (Html_output s)),
+    " Deprecated");
 
-  ("-ignore-missing-files",
-   Arg.Unit (fun () ->
-    deprecated "ignore-missing-files";
-    ignore_missing_files := true),
-   " Deprecated");
+    ("-ignore-missing-files",
+    Arg.Unit (fun () ->
+      deprecated "ignore-missing-files";
+      ignore_missing_files := true),
+    " Deprecated");
 
-  ("-title",
-   Arg.String (fun s -> deprecated "title"; report_title := s),
-   " Deprecated");
+    ("-title",
+    Arg.String (fun s -> deprecated "title"; report_title := s),
+    " Deprecated");
 
-  ("-tab-size",
-   Arg.Int
-     (fun x ->
-       deprecated "tab-size";
-       if x < 0 then
-         (prerr_endline " *** error: tab size should be positive"; exit 1)
-       else
-         tab_size := x),
-   " Deprecated");
+    ("-tab-size",
+    Arg.Int
+      (fun x ->
+        deprecated "tab-size";
+        if x < 0 then
+          (prerr_endline " *** error: tab size should be positive"; exit 1)
+        else
+          tab_size := x),
+    " Deprecated");
 
-  ("-text",
-   Arg.String (fun s -> deprecated "text"; add_output (Text_output s)),
-   " Deprecated");
+    ("-text",
+    Arg.String (fun s -> deprecated "text"; add_output (Text_output s)),
+    " Deprecated");
 
-  ("-summary-only",
-   Arg.Unit (fun () -> deprecated "summary-only"; summary_only := true),
-   " Deprecated");
+    ("-summary-only",
+    Arg.Unit (fun () -> deprecated "summary-only"; summary_only := true),
+    " Deprecated");
 
-  ("-csv",
-   Arg.String (fun s -> deprecated "csv"; add_output (Csv_output s)),
-   " Deprecated");
+    ("-csv",
+    Arg.String (fun s -> deprecated "csv"; add_output (Csv_output s)),
+    " Deprecated");
 
-  ("-separator",
-   Arg.String (fun s -> deprecated "separator"; csv_separator := s),
-   " Deprecated");
+    ("-separator",
+    Arg.String (fun s -> deprecated "separator"; csv_separator := s),
+    " Deprecated");
 
-  ("-dump",
-   Arg.String (fun s -> deprecated "dump"; add_output (Dump_output s)),
-   " Deprecated");
+    ("-dump",
+    Arg.String (fun s -> deprecated "dump"; add_output (Dump_output s)),
+    " Deprecated");
 
-  ("-verbose",
-   Arg.Set verbose,
-   " Deprecated");
+    ("-verbose",
+    Arg.Set verbose,
+    " Deprecated");
 
-  ("-version",
-   Arg.Unit (fun () ->
-    deprecated "version";
-    print_endline Report_utils.version; exit 0),
-   " Deprecated");
+    ("-version",
+    Arg.Unit (fun () ->
+      deprecated "version";
+      print_endline Report_utils.version; exit 0),
+    " Deprecated");
 
-  ("-coveralls",
-   Arg.String (fun s ->
-    deprecated "coveralls";
-    add_output (Coveralls_output s)),
-   " Deprecated");
+    ("-coveralls",
+    Arg.String (fun s ->
+      deprecated "coveralls";
+      add_output (Coveralls_output s)),
+    " Deprecated");
 
-  ("-service-name",
-   Arg.String (fun s -> deprecated "service-name"; service_name := s),
-   " Deprecated");
+    ("-service-name",
+    Arg.String (fun s -> deprecated "service-name"; service_name := s),
+    " Deprecated");
 
-  ("-service-job-id",
-   Arg.String (fun s -> deprecated "service-job-id"; service_job_id := s),
-   " Deprecated");
+    ("-service-job-id",
+    Arg.String (fun s -> deprecated "service-job-id"; service_job_id := s),
+    " Deprecated");
 
-  ("-repo-token",
-   Arg.String (fun s -> deprecated "repo-token"; repo_token := s),
-   " Deprecated");
+    ("-repo-token",
+    Arg.String (fun s -> deprecated "repo-token"; repo_token := s),
+    " Deprecated");
 ]
 
-let usage =
+  let usage =
 {|Usage:
 
   bisect-ppx-report <options> <.out files>
@@ -215,9 +215,9 @@ Dune:
 Options are:
 |}
 
-let parse_args () = Arg.parse options add_file usage
+  let parse_args () = Arg.parse options add_file usage
 
-let print_usage () = Arg.usage options usage
+  let print_usage () = Arg.usage options usage
 end
 open Arguments
 
