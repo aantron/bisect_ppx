@@ -427,13 +427,13 @@ let main () =
 
     if !Arguments.service_name = "" then begin
       let service_name = CI.name_in_report (Lazy.force ci) in
-      info "using service_name '%s'" service_name;
+      info "using service name '%s'" service_name;
       Arguments.service_name := service_name;
     end;
 
     if !Arguments.service_job_id = "" then begin
       let job_id_variable = CI.job_id_variable (Lazy.force ci) in
-      info "using service_job_id variable $%s" job_id_variable;
+      info "using job ID variable $%s" job_id_variable;
       match Sys.getenv job_id_variable with
       | value ->
         Arguments.service_job_id := value
