@@ -86,10 +86,7 @@ then
     make self-coverage
     (cd _self && \
         _build/install/default/bin/meta-bisect-ppx-report \
-            --coveralls ../coverage.json \
-            --service-name travis-ci --service-job-id $TRAVIS_JOB_ID \
-            bisect*.meta)
-    curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+            bisect*.meta --send-to Coveralls)
 fi
 
 opam clean
