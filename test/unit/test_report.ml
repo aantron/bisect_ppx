@@ -26,7 +26,7 @@ let tests = "report" >::: [
 
   test "html" (fun () ->
     report "--html html_dir";
-    run "grep -v 'id=\"footer\"' html_dir/source.ml.html > output";
+    run "mv html_dir/source.ml.html output";
     diff "fixtures/report/reference.html");
 
   test "text" (fun () ->
