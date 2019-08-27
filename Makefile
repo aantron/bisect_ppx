@@ -68,9 +68,9 @@ self-coverage-workspace :
 	mkdir -p $(SELF_COVERAGE)/bisect_ppx/test
 	cp -r test/unit $(SELF_COVERAGE)/bisect_ppx/test/
 	cd $(SELF_COVERAGE)/meta_bisect_ppx && \
-	  patch -p2 < ../../test/self/meta_bisect_ppx.diff
+	  patch --no-backup-if-mismatch -p2 < ../../test/self/meta_bisect_ppx.diff
 	cd $(SELF_COVERAGE)/bisect_ppx && \
-	  patch -p2 < ../../test/self/bisect_ppx.diff
+	  patch --no-backup-if-mismatch -p2 < ../../test/self/bisect_ppx.diff
 
 .PHONY : self-coverage-rename
 self-coverage-rename :

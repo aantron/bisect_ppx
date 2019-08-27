@@ -49,12 +49,7 @@ struct
 
   let repo_token = ref ""
 
-  let deprecated argument =
-    Printf.eprintf "bisect-ppx-report argument '-%s' is deprecated.\n" argument;
-    Printf.eprintf "Use '--%s' instead.\n" argument;
-    Printf.eprintf "This requires Bisect_ppx >= 2.0.0.\n"
-
-  let options = Arg.align [
+  let options = [
     ("--html",
     Arg.String (fun s -> add_output (`Html, s)),
     "<dir>  Output HTML report to <dir> (HTML only)");
@@ -101,7 +96,7 @@ struct
     "<file>  Output bare dump to <file>");
 
     ("--verbose",
-    Arg.Unit (fun () -> deprecated "verbose"; verbose := true),
+    Arg.Set verbose,
     " Set verbose mode");
 
     ("--version",
@@ -123,79 +118,28 @@ struct
     ("--repo-token",
     Arg.Set_string repo_token,
     "<string>  Repo token for Coveralls json (Coveralls only)");
-
-    ("-html",
-    Arg.String (fun s -> deprecated "html"; add_output (`Html, s)),
-    " Deprecated");
-
-    ("-ignore-missing-files",
-    Arg.Unit (fun () ->
-      deprecated "ignore-missing-files";
-      ignore_missing_files := true),
-    " Deprecated");
-
-    ("-title",
-    Arg.String (fun s -> deprecated "title"; report_title := s),
-    " Deprecated");
-
-    ("-tab-size",
-    Arg.Int
-      (fun x ->
-        deprecated "tab-size";
-        if x < 0 then
-          (prerr_endline " *** error: tab size should be positive"; exit 1)
-        else
-          tab_size := x),
-    " Deprecated");
-
-    ("-text",
-    Arg.String (fun s -> deprecated "text"; add_output (`Text, s)),
-    " Deprecated");
-
-    ("-summary-only",
-    Arg.Unit (fun () -> deprecated "summary-only"; summary_only := true),
-    " Deprecated");
-
-    ("-csv",
-    Arg.String (fun s -> deprecated "csv"; add_output (`Csv, s)),
-    " Deprecated");
-
-    ("-separator",
-    Arg.String (fun s -> deprecated "separator"; csv_separator := s),
-    " Deprecated");
-
-    ("-dump",
-    Arg.String (fun s -> deprecated "dump"; add_output (`Dump, s)),
-    " Deprecated");
-
-    ("-verbose",
-    Arg.Set verbose,
-    " Deprecated");
-
-    ("-version",
-    Arg.Unit (fun () ->
-      deprecated "version";
-      print_endline Report_utils.version; exit 0),
-    " Deprecated");
-
-    ("-coveralls",
-    Arg.String (fun s ->
-      deprecated "coveralls";
-      add_output (`Coveralls, s)),
-    " Deprecated");
-
-    ("-service-name",
-    Arg.String (fun s -> deprecated "service-name"; service_name := s),
-    " Deprecated");
-
-    ("-service-job-id",
-    Arg.String (fun s -> deprecated "service-job-id"; service_job_id := s),
-    " Deprecated");
-
-    ("-repo-token",
-    Arg.String (fun s -> deprecated "repo-token"; repo_token := s),
-    " Deprecated");
 ]
+
+  let deprecated = Common.deprecated
+
+  let options =
+    options
+    |> deprecated "-html"
+    |> deprecated "-ignore-missing-files"
+    |> deprecated "-title"
+    |> deprecated "-tab-size"
+    |> deprecated "-text"
+    |> deprecated "-summary-only"
+    |> deprecated "-csv"
+    |> deprecated "-separator"
+    |> deprecated "-dump"
+    |> deprecated "-verbose"
+    |> deprecated "-version"
+    |> deprecated "-coveralls"
+    |> deprecated "-service-name"
+    |> deprecated "-service-job-id"
+    |> deprecated "-repo-token"
+    |> Arg.align
 
   let usage =
 {|Usage:

@@ -4,6 +4,8 @@
 
 
 
+module Common = Bisect_common
+
 let conditional = ref false
 
 let enabled () =
@@ -24,11 +26,6 @@ let conditional_exclude_file filename =
   | `Enabled -> Exclusions.add_file filename
   | `Disabled -> ()
 
-let deprecated argument =
-  Printf.eprintf "bisect_ppx argument '-%s' is deprecated.\n" argument;
-  Printf.eprintf "Use '--%s' instead.\n" argument;
-  Printf.eprintf "This requires Bisect_ppx >= 2.0.0.\n"
-
 let switches = [
   ("--exclude",
    Arg.String Exclusions.add,
@@ -46,35 +43,21 @@ let switches = [
   Arg.Set Comments.no_comment_parsing,
   " Do not parse source files for BISECT-* comments");
 
-  ("-exclude",
-  Arg.String (fun s ->
-    deprecated "exclude";
-    Exclusions.add s),
-  " Deprecated") ;
-
-  ("-exclude-file",
-  Arg.String (fun s ->
-    deprecated "exclude-file";
-    conditional_exclude_file s),
-  " Deprecated") ;
-
   ("-mode",
   (Arg.Symbol (["safe"; "fast"; "faster"], fun _ ->
     prerr_endline "bisect_ppx argument '-mode' is deprecated.")),
   " Deprecated") ;
-
-  ("-conditional",
-   Arg.Unit (fun () ->
-    deprecated "conditional";
-    conditional := true),
-   " Deprecated");
-
-  ("-no-comment-parsing",
-   Arg.Unit (fun () ->
-    deprecated "no-comment-parsing";
-    Comments.no_comment_parsing := true),
-  " Deprecated");
 ]
+
+let deprecated = Common.deprecated
+
+let switches =
+  switches
+  |> deprecated "-exclude"
+  |> deprecated "-exclude-file"
+  |> deprecated "-conditional"
+  |> deprecated "-no-comment-parsing"
+  |> Arg.align
 
 
 

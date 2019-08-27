@@ -87,3 +87,10 @@ val register_file :
     [point_definitions] is a serialized [Common.point_definition list] giving
     the locations of all points in the file. The returned callback is used to
     increment visitation counts. *)
+
+
+
+type options = (Arg.key * Arg.spec * Arg.doc) list
+
+val deprecated : string -> options -> options
+(** Appends a specification for a deprecated command-line argument. *)

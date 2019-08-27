@@ -59,6 +59,18 @@ diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
                  [%e file] ~point_count:[%e point_count] ~point_definitions
              in
              cb
+diff -ru src/ppx/register.ml _self/meta_bisect_ppx/src/ppx/register.ml
+--- src/ppx/register.ml
++++ _self/meta_bisect_ppx/src/ppx/register.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ let conditional = ref false
+ 
 diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
 --- src/report/dune
 +++ _self/meta_bisect_ppx/src/report/dune
@@ -120,8 +132,8 @@ diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
 -module Common = Bisect_common
 +module Common = Meta_bisect_common
  
- type output_kind =
-   | Html_output of string
+ module Arguments =
+ struct
 diff -ru src/report/report_utils.ml _self/meta_bisect_ppx/src/report/report_utils.ml
 --- src/report/report_utils.ml
 +++ _self/meta_bisect_ppx/src/report/report_utils.ml
