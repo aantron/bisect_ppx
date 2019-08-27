@@ -6,7 +6,9 @@ set -x
 date
 
 npm --version
-npm install -g esy
+npm install --no-save esy
+WD=`pwd`
+export PATH="$WD/node_modules/.bin:$PATH"
 
 date
 
