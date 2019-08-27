@@ -372,7 +372,7 @@ struct
 
   let send_command = function
     | `Codecov ->
-      "bash <(curl -s https://codecov.io/bash)"
+      "bash -c \"bash <(curl -s https://codecov.io/bash)\""
     | `Coveralls ->
       "curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs"
 end
