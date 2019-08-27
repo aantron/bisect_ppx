@@ -4,7 +4,7 @@
 
 
 
-let version = "1.5.0~dev0"
+let version = "2.0.0~dev0"
 
 module Infix =
 struct

@@ -27,7 +27,7 @@ let conditional_exclude_file filename =
 let deprecated argument =
   Printf.eprintf "bisect_ppx argument '-%s' is deprecated.\n" argument;
   Printf.eprintf "Use '--%s' instead.\n" argument;
-  Printf.eprintf "This requires Bisect_ppx >= 1.5.0.\n"
+  Printf.eprintf "This requires Bisect_ppx >= 2.0.0.\n"
 
 let switches = [
   ("--exclude",
