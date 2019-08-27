@@ -11,7 +11,7 @@ details of how it is generated are in the [worked example](#Example).
 [self]: https://github.com/aantron/bisect_ppx
 [releases]: https://github.com/aantron/bisect_ppx/releases
 [version]: https://img.shields.io/badge/version-1.5.0~dev0-blue.svg
-[travis]: https://travis-ci.org/aantron/bisect_ppx/branches
+[travis]: https://travis-ci.org/aantron/bisect_ppx
 [travis-img]: https://img.shields.io/travis/aantron/bisect_ppx/master.svg?label=travis
 [appveyor]: https://ci.appveyor.com/project/aantron/bisect-ppx/branch/master
 [appveyor-img]: https://img.shields.io/appveyor/ci/aantron/bisect-ppx/master.svg?label=appveyor
