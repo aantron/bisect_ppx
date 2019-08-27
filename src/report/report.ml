@@ -6,6 +6,8 @@
 
 module Common = Bisect_common
 
+module Arguments =
+struct
 type output_kind =
   | Html_output of string
   | Csv_output of string
@@ -216,6 +218,8 @@ Options are:
 let parse_args () = Arg.parse options add_file usage
 
 let print_usage () = Arg.usage options usage
+end
+open Arguments
 
 
 
