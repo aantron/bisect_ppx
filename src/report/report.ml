@@ -314,6 +314,7 @@ sig
   val pretty_name : ci -> string
   val name_in_report : ci -> string
   val job_id_variable : ci -> string
+  val needs_repo_token : ci -> bool
 end =
 struct
   let environment_variable name value result k =
@@ -338,6 +339,10 @@ struct
   let job_id_variable = function
     | `CircleCI -> "CIRCLE_BUILD_NUM"
     | `Travis -> "TRAVIS_JOB_ID"
+
+  let needs_repo_token = function
+    | `CircleCI -> true
+    | `Travis -> false
 end
 
 
@@ -353,6 +358,7 @@ sig
   val pretty_name : coverage_service -> string
   val report_filename : coverage_service -> string
   val send_command : coverage_service -> string
+  val repo_token_variables : coverage_service -> string list
 end =
 struct
   let from_argument () =
@@ -375,6 +381,13 @@ struct
       "bash -c \"bash <(curl -s https://codecov.io/bash)\""
     | `Coveralls ->
       "curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs"
+
+  let common_repo_token_variables =
+    ["COVERAGE_REPO_TOKEN"; "REPO_TOKEN"]
+
+  let repo_token_variables = function
+    | `Codecov -> "CODECOV_TOKEN"::common_repo_token_variables
+    | `Coveralls -> "COVERALLS_REPO_TOKEN"::common_repo_token_variables
 end
 
 
@@ -426,7 +439,28 @@ let main () =
         Arguments.service_job_id := value
       | exception Not_found ->
         error "expected job id in $%s" job_id_variable
-    end
+    end;
+
+    if !Arguments.repo_token = "" then
+      if CI.needs_repo_token (Lazy.force ci) then begin
+        let repo_token_variables =
+          Coverage_service.repo_token_variables service in
+        let rec try_variables = function
+          | variable::more ->
+            begin match Sys.getenv variable with
+            | "" ->
+              try_variables more
+            | exception Not_found ->
+              try_variables more
+            | value ->
+              info "using repo token variable $%s" variable;
+              Arguments.repo_token := value
+            end
+          | [] ->
+            error "expected repo token in $%s" (List.hd repo_token_variables)
+        in
+        try_variables repo_token_variables
+      end
   end;
 
   let data, points =
