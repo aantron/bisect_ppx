@@ -20,8 +20,8 @@ val get_coverage_data : unit -> string option
 
 val write_coverage_data : unit -> unit
 (** On Node.js, writes the same coverage data that is returned by
-    {!get_coverage_data} to a [.out] file with a randomized name in the current
-    directory. *)
+    {!get_coverage_data} to a [.coverage] file with a randomized name in the
+    current directory. *)
 
 val write_coverage_data_on_exit : unit -> unit
 (** Registers {!write_coverage_data} to be called automatically on process

@@ -154,18 +154,18 @@ struct
   let usage =
 {|Usage:
 
-  bisect-ppx-report <options> <.out files>
+  bisect-ppx-report <options> <.coverage files>
 
 Where a file is required, '-' may be used to specify STDOUT.
 
 Examples:
 
-  bisect-ppx-report --html _coverage/ -I _build bisect*.out
-  bisect-ppx-report --text - --summary-only bisect*.out
+  bisect-ppx-report --html _coverage/ -I _build bisect*.coverage
+  bisect-ppx-report --text - --summary-only bisect*.coverage
 
 Dune:
 
-  bisect-ppx-report --html _coverage/ -I _build/default bisect*.out
+  bisect-ppx-report --html _coverage/ -I _build/default bisect*.coverage
 
 Options are:
 |}
@@ -187,7 +187,7 @@ let main () =
   let data, points =
     match !raw_coverage_files with
     | [] ->
-        prerr_endline " *** warning: no .out files provided";
+        prerr_endline " *** warning: no .coverage files provided";
         exit 0
     | (_ :: _) ->
       let total_counts = Hashtbl.create 17 in

@@ -68,12 +68,12 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     ```
 
 3. Run your test binary. In addition to testing your code, when exiting, it will
-write one or more files with names like `bisect0123456789.out`. Then, generate
-the [coverage report][dune-report] in `_coverage/index.html`:
+write one or more files with names like `bisect0123456789.coverage`. Then,
+generate the [coverage report][dune-report] in `_coverage/index.html`:
 
     ```
     BISECT_ENABLE=yes dune runtest --force
-    bisect-ppx-report --html _coverage/ -I _build/default/ `find . -name 'bisect*.out'`
+    bisect-ppx-report --html _coverage/ -I _build/default/ `find . -name 'bisect*.coverage'`
     ```
 
 4. During release, you have to manually remove `(preprocess (pps bisect_ppx))`
@@ -125,9 +125,8 @@ and install it:
 
 3. If your tests will be running on Node,
 [call this function](https://github.com/aantron/bisect-starter-bsb/blob/master/hello.re#L2)
-somewhere in your
-tester, which will have Node write a file like `bisect0123456789.out` when the
-tester exits:
+somewhere in your tester, which will have Node write a file like
+`bisect0123456789.coverage` when the tester exits:
 
     ```reason
     Bisect.Runtime.write_coverage_data_on_exit();
@@ -140,8 +139,8 @@ tester exits:
     ```
 
     This returns binary coverage data in a `string option`, which you should
-    upload or otherwise get out of the browser, and write into an `.out` file
-    yourself.
+    upload or otherwise get out of the browser, and write into an `.coverage`
+    file yourself.
 
 4. Build in development with `BISECT_ENABLE=yes`, run tests, and generate the
 [coverage report][bsb-report] in `_coverage/index.html`:
@@ -149,7 +148,7 @@ tester exits:
     ```
     BISECT_ENABLE=yes npm run build
     npm run test
-    ./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.out
+    ./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.coverage
     ```
 
 [bsb-repo]: https://github.com/aantron/bisect-starter-bsb#readme
@@ -176,7 +175,7 @@ script must be linked with `bisect_ppx.runtime`](https://github.com/aantron/bise
     ```
 
 2. If the tests will run on Node, [call this function](https://github.com/aantron/bisect-starter-jsoo/blob/master/tester.ml#L3)
-at the end of testing to write `bisect0123456789.out`:
+at the end of testing to write `bisect0123456789.coverage`:
 
     ```ocaml
     Bisect.Runtime.write_coverage_data ()
@@ -189,7 +188,7 @@ at the end of testing to write `bisect0123456789.out`:
     ```
 
     to get binary coverage data in a string option. Upload this string or
-    otherwise extract it from the browser to create an `.out` file.
+    otherwise extract it from the browser to create an `.coverage` file.
 
 3. Build the usual Js_of_ocaml target, including the instrumented code under
 test, then run the reporter to generate the [coverage report][jsoo-report] in
@@ -197,7 +196,7 @@ test, then run the reporter to generate the [coverage report][jsoo-report] in
 
     ```
     BISECT_ENABLE=yes dune build my_tester.bc.js
-    bisect-ppx-report --html _coverage/ *.out
+    bisect-ppx-report --html _coverage/ *.coverage
     ```
 
 [jsoo-repo]: https://github.com/aantron/bisect-starter-jsoo#readme
@@ -224,8 +223,8 @@ instrument the code under test, but not the tester:
     ocamlfind opt -linkpkg -package bisect_ppx src/source.cmx test/test.cmx
     ```
 
-    Running the tester will then produce `bisect0123456789.out` files, which
-    you can process with `bisect-ppx-report`.
+    Running the tester will then produce `bisect0123456789.coverage` files,
+    which you can process with `bisect-ppx-report`.
 
 
 
@@ -250,7 +249,7 @@ bisect-ppx-report \
   --coveralls coverage.json \
   --service-name travis-ci \
   --service-job-id $TRAVIS_JOB_ID \
-  `find . -name 'bisect*.out'`
+  `find . -name 'bisect*.coverage'`
 curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
 ```
 
@@ -336,8 +335,8 @@ sources preprocessed by Bisect_ppx:
     - Does a fresh build with `BISECT_ENABLE=yes`, causing the sources of the
     three libraries mentioned above to be instrumented.
 
-    - Runs the test suite. `bisect*.out` files with coverage data are produced
-    as a side effect.
+    - Runs the test suite. `bisect*.coverage` files with coverage data are
+    produced as a side effect.
 
     - Runs `bisect-ppx-report` to generate both the typical HTML report in
     `_coverage/index.html`, and also a textual summary in the terminal for very
@@ -345,9 +344,9 @@ sources preprocessed by Bisect_ppx:
 
 4. `make coverage` is also [used in Travis](https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/.travis.yml#L33-L35)
 to submit coverage reports to Coveralls. At the end of `make coverage`, the
-`bisect*.out` files are still present, so `.travis.yml` runs `bisect-ppx-report`
-again to generate the Coveralls report. This follows the [Coveralls](#Coveralls)
-instructions exactly.
+`bisect*.coverage` files are still present, so `.travis.yml` runs
+`bisect-ppx-report` again to generate the Coveralls report. This follows the
+[Coveralls](#Coveralls) instructions exactly.
 
     Coveralls can be configured to [leave comments](https://github.com/aantron/markup.ml/pull/47#issuecomment-521707675)
     about changes in coverage. It is usually configured to at least add an

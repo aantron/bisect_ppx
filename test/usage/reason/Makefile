@@ -1,14 +1,14 @@
 .PHONY : test
 test : clean
 	dune exec ./source.exe
-	! test -f bisect*.out
+	! test -f bisect*.coverage
 	dune clean
 	BISECT_ENABLE=YES dune exec ./source.exe
 	ls -l _build
-	test -f bisect*.out
-	bisect-ppx-report --html _coverage/ `find . -name 'bisect*.out'`
+	test -f bisect*.coverage
+	bisect-ppx-report --html _coverage/ `find . -name 'bisect*.coverage'`
 
 .PHONY : clean
 clean :
 	dune clean
-	rm -rf bisect*.out _coverage
+	rm -rf bisect*.coverage _coverage

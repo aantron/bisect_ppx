@@ -5,7 +5,7 @@ diff -ru src/common/bisect_common.ml _self/meta_bisect_ppx/src/common/bisect_com
    Random.self_init ()
  
  let random_filename base_name =
--  Printf.sprintf "%s%09d.out" base_name (abs (Random.int 1000000000))
+-  Printf.sprintf "%s%09d.coverage" base_name (abs (Random.int 1000000000))
 +  Printf.sprintf "%s%09d.meta" base_name (abs (Random.int 1000000000))
  
  let write_points points =

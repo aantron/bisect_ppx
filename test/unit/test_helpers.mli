@@ -87,8 +87,8 @@ val report : ?f:string -> ?r:string -> string -> unit
     If [~r] is supplied, that string is appended to the end of the command
     invocation. This is intended for redirections.
 
-    If [~f] is supplied, [report] uses the pattern to find [*.out] files. The
-    default value is [bisect*.out]. *)
+    If [~f] is supplied, [report] uses the pattern to find [*.coverage] files.
+    The default value is [bisect*.coverage]. *)
 
 val diff : ?preserve_as:string -> string -> unit
 (** [diff f] runs the command [diff] between the file [f] and [_scratch/output].

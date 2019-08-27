@@ -1,9 +1,9 @@
 .PHONY : test
 test :
-	rm -rf _coverage *.out
+	rm -rf _coverage *.coverage
 	npm run instrument
 	npm run execute
-	./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.out
+	./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.coverage
 	@echo "See _coverage/index.html."
 
 .PHONY : full-test
@@ -18,7 +18,7 @@ install :
 
 .PHONY : clean
 clean :
-	rm -rf node_modules lib _esy *.tgz package *.out _coverage
+	rm -rf node_modules lib _esy *.tgz package *.coverage _coverage
 
 .PHONY : clean-for-caching
 clean-for-caching :

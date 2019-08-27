@@ -19,5 +19,5 @@ let tests = "top-level" >::: [
          "-ppx '" ^ dune_build_directory ^
           "/install/default/lib/bisect_ppx/ppx.exe --as-ppx' " ^
          "-stdin > /dev/null");
-    run "! ls bisect0001.out 2> /dev/null")
+    run "! ls bisect0001.coverage 2> /dev/null")
 ]

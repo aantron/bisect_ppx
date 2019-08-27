@@ -58,7 +58,7 @@ All regular expressions are in the syntax of the [`Str`][Str] module.
 <a id="EnvironmentVariables"></a>
 ## Environment variables
 
-A program instrumented by Bisect_ppx writes `.out` files, which contain the
+A program instrumented by Bisect_ppx writes `.coverage` files, which contain the
 numbers of times various points in the program's code were visited during
 execution. Two environment variables are available to control the writing of
 these files.
@@ -66,15 +66,15 @@ these files.
 <a id="OutFiles"></a>
 #### Naming the output files
 
-By default, the counts files are called  `bisect0001.out`, `bisect0002.out`,
-etc. The prefix `bisect` can be changed by setting the environment variable
-`BISECT_FILE`. In particular, you can set it to something like
-`_coverage/bisect` to put the counts files in a different directory, in this
-example `_coverage/`.
+By default, the counts files are called  `bisect0001.coverage`,
+`bisect0002.coverage`, etc. The prefix `bisect` can be changed by setting the
+environment variable `BISECT_FILE`. In particular, you can set it to something
+like `_coverage/bisect` to put the counts files in a different directory, in
+this example `_coverage/`.
 
 `BISECT_FILE` can also be used to control the prefix programmatically. For
 example, the following code bases the prefix on the program name, and puts the
-`.out` files into the system temporary directory:
+`.coverage` files into the system temporary directory:
 
     let () =
       let (//) = Filename.concat in
@@ -85,7 +85,7 @@ example, the following code bases the prefix on the program name, and puts the
 <a id="Logging"></a>
 #### Logging
 
-If the instrumented program fails to write an `.out` file, it will log a
+If the instrumented program fails to write an `.coverage` file, it will log a
 message. By default, these messages go to a file `bisect.log`. `BISECT_SILENT`
 can be set to `YES` to turn off logging completely. Alternatively, it can be set
 to another filename, or to `ERR` in order to log to `STDERR`.

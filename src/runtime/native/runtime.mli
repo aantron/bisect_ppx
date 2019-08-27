@@ -15,7 +15,7 @@
     The default base name for the output file is [bisect] in the current
     directory, but another base name can be specified using the [BISECT_FILE]
     environment variable. The actual file name is the first non-existing
-    [<base><n>.out] file where [base] is the base name and [n] a natural
+    [<base><n>.coverage] file where [base] is the base name and [n] a natural
     number value padded with zeroes to 4 digits (i.e. "0001", "0002", and
     so on).
 
@@ -54,8 +54,8 @@ val get_coverage_data : unit -> string option
 
 val write_coverage_data : unit -> unit
 (** On Node.js, writes the same coverage data that is returned by
-    {!get_coverage_data} to a [.out] file with a randomized name in the current
-    directory. *)
+    {!get_coverage_data} to a [.coverage] file with a randomized name in the
+    current directory. *)
 
 val dump_counters_exn : out_channel -> unit
 (** [dump_counters_exn channel] dumps the runtime coverage counters
