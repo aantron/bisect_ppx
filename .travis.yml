@@ -48,6 +48,7 @@ cache:
     - ./_opam
     - $HOME/.esy
     - ./test/bucklescript/node_modules
+    - ./node_modules
     - ./_cache
 
 notifications:

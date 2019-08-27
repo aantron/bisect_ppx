@@ -3,12 +3,16 @@
 set -e
 set -x
 
+npm --version
+
 date
 
-npm --version
-npm install --no-save esy
 WD=`pwd`
 export PATH="$WD/node_modules/.bin:$PATH"
+if [ ! -f node_modules/.bin/esy ]
+then
+    npm install --no-save esy
+fi
 
 date
 
