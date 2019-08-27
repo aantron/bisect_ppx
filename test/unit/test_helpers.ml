@@ -7,7 +7,6 @@
 open OUnit2
 
 let directory = "_scratch"
-let coverage = "_coverage"
 let preserve_directory = "_preserve"
 
 let dune_build_directory =
@@ -97,32 +96,6 @@ let with_directory context test_name f =
   let restore () =
     test_context := None;
     Sys.chdir old_wd;
-
-    let move =
-      if Sys.file_exists coverage then true
-      else
-        try Unix.mkdir coverage 0o755; true
-        with _ -> false
-    in
-
-    if move then begin
-      let files =
-        Sys.readdir directory
-        |> Array.to_list
-        |> List.filter (fun s -> Filename.check_suffix s ".out.meta")
-      in
-
-      let rec destination_file n =
-        let candidate =
-          Printf.sprintf "meta%04d.out" n |> Filename.concat coverage in
-        if Sys.file_exists candidate then destination_file (n + 1)
-        else candidate
-      in
-
-      files |> List.iter (fun source ->
-        Sys.rename (Filename.concat directory source) (destination_file 0))
-    end;
-
     run ("rm -r " ^ directory)
   in
 
