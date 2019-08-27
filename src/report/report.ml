@@ -8,12 +8,13 @@ module Common = Bisect_common
 
 module Arguments =
 struct
-  type output_kind =
-    | Html_output of string
-    | Csv_output of string
-    | Text_output of string
-    | Dump_output of string
-    | Coveralls_output of string
+  type output_kind = [
+    | `Html
+    | `Csv
+    | `Text
+    | `Dump
+    | `Coveralls
+  ]
 
   let report_outputs = ref []
 
@@ -55,7 +56,7 @@ struct
 
   let options = Arg.align [
     ("--html",
-    Arg.String (fun s -> add_output (Html_output s)),
+    Arg.String (fun s -> add_output (`Html, s)),
     "<dir>  Output HTML report to <dir> (HTML only)");
 
     ("-I",
@@ -80,7 +81,7 @@ struct
     "<int>  Set tab width in report (HTML only)");
 
     ("--text",
-    Arg.String (fun s -> add_output (Text_output s)),
+    Arg.String (fun s -> add_output (`Text, s)),
     "<file>  Output plain text report to <file>");
 
     ("--summary-only",
@@ -88,7 +89,7 @@ struct
     " Output only a whole-project summary (text only)");
 
     ("--csv",
-    Arg.String (fun s -> add_output (Csv_output s)),
+    Arg.String (fun s -> add_output (`Csv, s)),
     "<file>  Output CSV report to <file>");
 
     ("--separator",
@@ -96,7 +97,7 @@ struct
     "<string>  Set column separator (CSV only)");
 
     ("--dump",
-    Arg.String (fun s -> add_output (Dump_output s)),
+    Arg.String (fun s -> add_output (`Dump, s)),
     "<file>  Output bare dump to <file>");
 
     ("--verbose",
@@ -108,7 +109,7 @@ struct
     " Print version and exit");
 
     ("--coveralls",
-    Arg.String (fun s -> add_output (Coveralls_output s)),
+    Arg.String (fun s -> add_output (`Coveralls, s)),
     "<file>  Output coveralls json report to <file>");
 
     ("--service-name",
@@ -124,7 +125,7 @@ struct
     "<string>  Repo token for Coveralls json (Coveralls only)");
 
     ("-html",
-    Arg.String (fun s -> deprecated "html"; add_output (Html_output s)),
+    Arg.String (fun s -> deprecated "html"; add_output (`Html, s)),
     " Deprecated");
 
     ("-ignore-missing-files",
@@ -148,7 +149,7 @@ struct
     " Deprecated");
 
     ("-text",
-    Arg.String (fun s -> deprecated "text"; add_output (Text_output s)),
+    Arg.String (fun s -> deprecated "text"; add_output (`Text, s)),
     " Deprecated");
 
     ("-summary-only",
@@ -156,7 +157,7 @@ struct
     " Deprecated");
 
     ("-csv",
-    Arg.String (fun s -> deprecated "csv"; add_output (Csv_output s)),
+    Arg.String (fun s -> deprecated "csv"; add_output (`Csv, s)),
     " Deprecated");
 
     ("-separator",
@@ -164,7 +165,7 @@ struct
     " Deprecated");
 
     ("-dump",
-    Arg.String (fun s -> deprecated "dump"; add_output (Dump_output s)),
+    Arg.String (fun s -> deprecated "dump"; add_output (`Dump, s)),
     " Deprecated");
 
     ("-verbose",
@@ -180,7 +181,7 @@ struct
     ("-coveralls",
     Arg.String (fun s ->
       deprecated "coveralls";
-      add_output (Coveralls_output s)),
+      add_output (`Coveralls, s)),
     " Deprecated");
 
     ("-service-name",
@@ -272,18 +273,18 @@ let main () =
   let generic_output file conv =
     Report_generic.output verbose file conv data points in
   let write_output = function
-    | Html_output dir ->
+    | `Html, dir ->
         Report_utils.mkdirs dir;
         Report_html.output verbose dir
           !tab_size !report_title
           search_in_path data points
-    | Csv_output file ->
+    | `Csv, file ->
         generic_output file (Report_csv.make !csv_separator)
-    | Text_output file ->
+    | `Text, file ->
         generic_output file (Report_text.make !summary_only)
-    | Dump_output file ->
+    | `Dump, file ->
         generic_output file (Report_dump.make ())
-    | Coveralls_output file ->
+    | `Coveralls, file ->
         Report_coveralls.output verbose file
           !service_name !service_job_id !repo_token
           search_in_path data points in
