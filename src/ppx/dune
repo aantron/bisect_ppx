@@ -1,4 +1,4 @@
-(ocamllex exclude_lexer comments_lexer)
+(ocamllex exclude_lexer)
 (ocamlyacc exclude_parser)
 
 (library

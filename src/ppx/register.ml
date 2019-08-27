@@ -40,8 +40,9 @@ let switches = [
   " Do not instrument unless environment variable BISECT_ENABLE is YES");
 
   ("--no-comment-parsing",
-  Arg.Set Comments.no_comment_parsing,
-  " Do not parse source files for BISECT-* comments");
+  Arg.Unit (fun () ->
+    prerr_endline "bisect_ppx argument '--no-comment-parsing' is deprecated."),
+  " Deprecated");
 
   ("-mode",
   (Arg.Symbol (["safe"; "fast"; "faster"], fun _ ->

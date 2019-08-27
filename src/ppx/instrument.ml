@@ -173,27 +173,8 @@ struct
       | _ -> Parsetree.(e.pexp_loc)
 
     and expression_should_not_be_instrumented ~point_loc:loc =
-      if Location.(loc.loc_ghost) then
-        true
-      else
-        if Coverage_attributes.has_off_attribute e.pexp_attributes then
-          true
-        else
-          (* Retrieve the expression's file and line number. The file can be
-             different from the input file to Bisect_ppx, in case of the [#line]
-             directive.
-
-             That is typically emitted by cppo, ocamlyacc, and other
-             preprocessors. To be intuitive to the user, we need to make the
-             decision on ignoring this expression based on its original source
-             location, as seen by the user, not based on where it was spliced in
-             by another prerocessor that ran before Bisect_ppx. *)
-          let file, line =
-            let start = Location.(loc.loc_start) in
-            Lexing.(start.pos_fname, start.pos_lnum)
-          in
-          Comments.get file
-          |> Comments.line_is_ignored line
+      Location.(loc.loc_ghost) ||
+      Coverage_attributes.has_off_attribute e.pexp_attributes
 
     and get_index_of_point_at_location ~point_loc:loc =
       let point_offset =
