@@ -73,7 +73,7 @@ generate the [coverage report][dune-report] in `_coverage/index.html`:
 
     ```
     BISECT_ENABLE=yes dune runtest --force
-    bisect-ppx-report --html _coverage/ -I _build/default/ `find . -name 'bisect*.coverage'`
+    bisect-ppx-report --html _coverage/
     ```
 
 4. During release, you have to manually remove `(preprocess (pps bisect_ppx))`
@@ -148,7 +148,7 @@ somewhere in your tester, which will have Node write a file like
     ```
     BISECT_ENABLE=yes npm run build
     npm run test
-    ./node_modules/.bin/bisect-ppx-report.exe --html _coverage/ *.coverage
+    ./node_modules/.bin/bisect-ppx-report.exe --html _coverage/
     ```
 
 [bsb-repo]: https://github.com/aantron/bisect-starter-bsb#readme
@@ -196,7 +196,7 @@ test, then run the reporter to generate the [coverage report][jsoo-report] in
 
     ```
     BISECT_ENABLE=yes dune build my_tester.bc.js
-    bisect-ppx-report --html _coverage/ *.coverage
+    bisect-ppx-report --html _coverage/
     ```
 
 [jsoo-repo]: https://github.com/aantron/bisect-starter-jsoo#readme
@@ -245,11 +245,9 @@ Example using the built-in Coveralls reporter on Travis CI (which sets
 
 ```
 bisect-ppx-report \
-  -I _build/default/ \
   --coveralls coverage.json \
   --service-name travis-ci \
-  --service-job-id $TRAVIS_JOB_ID \
-  `find . -name 'bisect*.coverage'`
+  --service-job-id $TRAVIS_JOB_ID
 curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
 ```
 

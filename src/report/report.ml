@@ -24,6 +24,8 @@ sig
 
   val parse_args : unit -> unit
   val print_usage : unit -> unit
+
+  val is_report_being_written_to_stdout : unit -> bool
 end =
 struct
   let report_outputs = ref []
@@ -173,10 +175,128 @@ Options are:
   let parse_args () = Arg.parse options add_file usage
 
   let print_usage () = Arg.usage options usage
+
+  let is_report_being_written_to_stdout () =
+    !report_outputs |> List.exists (fun (_, file) -> file = "-")
 end
+
+
+
+let quiet =
+  ref false
+
+let info =
+  Printf.ksprintf (fun s ->
+    if not !quiet then
+      Printf.printf "Info: %s\n%!" s)
+
+let warning =
+  Printf.ksprintf (fun s ->
+    Printf.eprintf "Warning: %s\n%!" s)
+
+let error =
+  Printf.ksprintf (fun s ->
+    Printf.eprintf "Error: %s\n%!" s; exit 1)
+
+
+
+module Coverage_input_files :
+sig
+  val list : unit -> string list
+end =
+struct
+  let has_extension extension filename =
+    Filename.check_suffix filename extension
+
+  let list_recursively directory filename_filter =
+    let rec traverse directory files =
+      Sys.readdir directory
+      |> Array.fold_left begin fun files entry ->
+        let entry_path = Filename.concat directory entry in
+        if Sys.is_directory entry_path then
+          traverse entry_path files
+        else
+          if filename_filter entry_path entry then
+            entry_path::files
+          else
+            files
+      end files
+    in
+    traverse directory []
+
+  let list () =
+    let files_on_command_line = !Arguments.raw_coverage_files in
+
+    (* Check for .out files on the command line. If there is such a file, it is
+       most likely an unexpaned pattern bisect*.out, from a former user of
+       Bisect_ppx 1.x. *)
+    begin match List.find (has_extension ".out") files_on_command_line with
+    | exception Not_found -> ()
+    | filename ->
+      warning
+        "file '%s' on command line: Bisect_ppx 2.x uses extension '.coverage'"
+        filename
+    end;
+
+    (* If there are files on the command line, use those. Otherwise, search for
+       files in ./ and ./_build. During the search, we look for files with
+       extension .coverage. If we find any files bisect*.out, we display a
+       warning. *)
+    match files_on_command_line with
+    | _::_ ->
+      files_on_command_line
+    | _ ->
+      let filename_filter path filename =
+        if has_extension ".coverage" filename then
+          true
+        else
+          if has_extension ".out" filename then
+            let prefix = "bisect" in
+            match String.sub filename 0 (String.length prefix) with
+            | prefix' when prefix' = prefix ->
+              warning
+                "found file '%s': Bisect_ppx 2.x uses extension '.coverage'"
+                path;
+              true
+            | _ ->
+              false
+            | exception Invalid_argument _ ->
+              false
+          else
+            false
+      in
+
+      let in_current_directory =
+        Sys.readdir Filename.current_dir_name
+        |> Array.to_list
+        |> List.filter (fun entry ->
+          filename_filter (Filename.(concat current_dir_name) entry) entry)
+      in
+      let in_build_directory =
+        if Sys.file_exists "_build" && Sys.is_directory "_build" then
+          list_recursively "./_build" filename_filter
+        else
+          []
+      in
+      let all_coverage_files = in_current_directory @ in_build_directory in
+
+      (* Display feedback about where coverage files were found. *)
+      all_coverage_files
+      |> List.map Filename.dirname
+      |> List.sort_uniq String.compare
+      |> List.map (fun directory -> directory ^ Filename.dir_sep)
+      |> List.iter (info "found coverage files in '%s'");
+
+      if all_coverage_files = [] then
+        error
+      "no coverage files given on command line, or found in '.' or in '_build'"
+      else
+        all_coverage_files
+end
+
+
+
 open Arguments
-
-
 
 let main () =
   parse_args ();
@@ -184,22 +304,14 @@ let main () =
     print_usage ();
     exit 0
   end;
+
+  quiet := Arguments.is_report_being_written_to_stdout ();
+
   let data, points =
-    let have_out_file =
-      List.exists
-        (fun file -> Filename.check_suffix file ".out") !raw_coverage_files
-    in
-    if have_out_file then
-      prerr_endline " *** warning: .out files are now .coverage files";
-    match !raw_coverage_files with
-    | [] ->
-        prerr_endline " *** warning: no .coverage files provided";
-        exit 0
-    | (_ :: _) ->
       let total_counts = Hashtbl.create 17 in
       let points = Hashtbl.create 17 in
 
-      !raw_coverage_files |> List.iter (fun out_file ->
+      Coverage_input_files.list () |> List.iter (fun out_file ->
         Common.read_runtime_data out_file
         |> List.iter (fun (source_file, (file_counts, file_points)) ->
           let file_counts =

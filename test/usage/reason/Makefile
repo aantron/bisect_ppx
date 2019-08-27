@@ -6,7 +6,7 @@ test : clean
 	BISECT_ENABLE=YES dune exec ./source.exe
 	ls -l _build
 	test -f bisect*.coverage
-	bisect-ppx-report --html _coverage/ `find . -name 'bisect*.coverage'`
+	bisect-ppx-report --html _coverage/
 
 .PHONY : clean
 clean :

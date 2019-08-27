@@ -154,7 +154,7 @@ let compile ?(r = "") arguments source =
     arguments source_copy r
   |> run
 
-let report ?(f = "bisect*.coverage") ?(r = "") arguments =
+let report ?(f = "") ?(r = "> /dev/null") arguments =
   Printf.sprintf
     "%s %s %s %s"
     (Filename.concat
