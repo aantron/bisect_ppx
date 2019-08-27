@@ -491,7 +491,7 @@ let main () =
     let name = Coverage_service.pretty_name coverage_service in
     let command = Coverage_service.send_command coverage_service in
     info "sending to %s with command:" name;
-    info " %s" command;
+    info "%s" command;
     Sys.command command |> exit
 
 let () =
