@@ -12,7 +12,8 @@ open Test_helpers
 let sorted_diff () =
   run "sort < output.raw > output";
   run "sort < ../fixtures/warnings/source.reference.ml > reference";
-  diff ~preserve_as:"warnings/source.reference.ml" "_scratch/reference"
+  let reference = Filename.concat (test_directory ()) "reference" in
+  diff ~preserve_as:"warnings/source.reference.ml" reference
 
 let tests = "warnings" >::: [
   test "default" begin fun () ->

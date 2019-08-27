@@ -15,6 +15,9 @@ val test : string -> (unit -> unit) -> OUnit2.test
 
     The OUnit path of both generated tests includes [name]. *)
 
+val test_directory : unit -> string
+(** Path to the working directory for the current test. *)
+
 
 
 val ocamlc_403_or_more : unit -> bool

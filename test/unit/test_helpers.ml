@@ -71,7 +71,20 @@ let run command =
 
 let run_bool command = run_int command = 0
 
-let with_directory context f =
+let test_directory = ref directory
+
+let () =
+  Random.self_init ()
+
+let with_directory context test_name f =
+  let ms =
+    Unix.gettimeofday () |> modf |> fst |> ( *. ) 1000. |> int_of_float in
+  let directory =
+    Printf.sprintf "%s.%s.%i.%i.%i"
+      directory test_name (Unix.getpid ()) (Random.int 1000000000) ms
+  in
+  test_directory := directory;
+
   if Sys.file_exists directory then run ("rm -r " ^ directory);
   Unix.mkdir directory 0o755;
 
@@ -129,7 +142,7 @@ let with_bisect_args arguments =
 let with_bisect () = with_bisect_args ""
 
 let test name f =
-  name >:: fun context -> with_directory context f
+  name >:: fun context -> with_directory context name f
 
 let have_package package =
   run_bool ("ocamlfind query " ^ package ^ "> /dev/null 2> /dev/null")
@@ -231,7 +244,8 @@ let normalize_source source normalized =
 let diff_ast reference =
   let reference_actual = Filename.concat Filename.parent_dir_name reference in
   normalize_source reference_actual "_dsource";
-  diff ~preserve_as:reference "_scratch/_dsource"
+  let dsource = Filename.concat !test_directory "_dsource" in
+  diff ~preserve_as:reference dsource
 
 let compile_compare cflags directory =
   let directory = Filename.concat "fixtures" directory in
@@ -271,3 +285,6 @@ let compile_compare cflags directory =
   in
 
   directory >::: tests
+
+let test_directory () =
+  !test_directory

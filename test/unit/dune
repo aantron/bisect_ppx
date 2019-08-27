@@ -5,4 +5,4 @@
 (alias
  (name runtest)
  (deps (:tester test_main.exe) (source_tree fixtures))
- (action (run %{tester} -runner sequential)))
+ (action (run %{tester} -runner processes -shards 6)))
