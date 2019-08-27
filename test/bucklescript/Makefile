@@ -19,3 +19,8 @@ install :
 .PHONY : clean
 clean :
 	rm -rf node_modules lib _esy *.tgz package *.out _coverage
+
+.PHONY : clean-for-caching
+clean-for-caching :
+	npm uninstall --no-save @aantron/bisect_ppx
+	rm -rf node_modules/@aantron

@@ -17,3 +17,7 @@ date
 make -C test/bucklescript test
 
 date
+
+make -C test/bucklescript clean-for-caching
+
+date
