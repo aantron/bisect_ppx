@@ -168,20 +168,9 @@ struct
     |> Arg.align
 
   let usage =
-{|Usage:
+{|This is the legacy command line. Please see
 
-  bisect-ppx-report <options> <.coverage files>
-
-Where a file is required, '-' may be used to specify STDOUT.
-
-Examples:
-
-  bisect-ppx-report --html _coverage/ -I _build bisect*.coverage
-  bisect-ppx-report --text - --summary-only bisect*.coverage
-
-Dune:
-
-  bisect-ppx-report --html _coverage/ -I _build/default bisect*.coverage
+  bisect-ppx-report --help
 
 Options are:
 |}
@@ -407,12 +396,6 @@ end
 open Arguments
 
 let main () =
-  parse_args ();
-  if !report_outputs = [] && !Arguments.send_to = None then begin
-    print_usage ();
-    exit 0
-  end;
-
   quiet := Arguments.is_report_being_written_to_stdout ();
 
   let coverage_service = Coverage_service.from_argument () in
@@ -546,9 +529,219 @@ let main () =
     info "%s" command;
     Sys.command command |> exit
 
+
+
+module Command_line :
+sig
+  val eval : unit -> unit
+end =
+struct
+  open Cmdliner
+
+  let (-->) a f = Term.(const f $ a)
+  let (&&&) a b = Term.(const (fun () () -> ()) $ a $ b)
+  let main' = Term.(app (const main))
+  let term_info = Term.info ~sdocs:"COMMON OPTIONS"
+
+  let coverage_files from_position =
+    Arg.(value @@ pos_right (from_position - 1) string [] @@
+      info [] ~docv:"COVERAGE_FILES" ~doc:
+        ("Optional list of *.coverage files produced during testing. If not " ^
+        "specified, bisect-ppx-report will search for *.coverage files in ./ " ^
+        "and ./_build"))
+    --> (:=) Arguments.raw_coverage_files
+
+  let output_file kind =
+    Arg.(required @@ pos 0 (some string) None @@
+      info [] ~docv:"FILE" ~doc:"Output file name.")
+    --> fun f -> Arguments.report_outputs := [kind, f]
+
+  let search_directories =
+    Arg.(value @@ opt_all string ["."; "./_build/default"] @@
+      info ["I"] ~docv:"DIRECTORY" ~doc:
+        ("Directory in which to look for source files. This option can be " ^
+        "specified multiple times. File paths are concatenated with each " ^
+        "$(b,-I) directory when looking for files. The default directories " ^
+        "are ./ and ./_build/default/"))
+    --> (:=) Arguments.search_path
+
+  let ignore_missing_files =
+    Arg.(value @@ flag @@
+      info ["ignore-missing-files"] ~doc:
+        "Do not fail if a particular .ml or .re file can't be found.")
+    --> (:=) Arguments.ignore_missing_files
+
+  let service_name =
+    Arg.(value @@ opt string "" @@
+      info ["service-name"] ~docv:"STRING" ~doc:
+        "Include \"service_name\": \"$(i,STRING)\" in the generated report.")
+    --> (:=) Arguments.service_name
+
+  let service_job_id =
+    Arg.(value @@ opt string "" @@
+      info ["service-job-id"] ~docv:"STRING" ~doc:
+        "Include \"service_job_id\": \"$(i,STRING)\" in the generated report.")
+    --> (:=) Arguments.service_job_id
+
+  let repo_token =
+    Arg.(value @@ opt string "" @@
+      info ["repo-token"] ~docv:"STRING" ~doc:
+        "Include \"repo_token\": \"$(i,STRING)\" in the generated report.")
+    --> (:=) Arguments.repo_token
+
+  let git =
+    Arg.(value @@ flag @@
+      info ["git"] ~doc:"Include git commit info in the generated report.")
+    --> (:=) Arguments.git
+
+  let html =
+    let output_directory =
+      Arg.(value @@ opt string "./_coverage" @@
+        info ["o"] ~docv:"DIRECTORY" ~doc:"Output directory.")
+      --> fun d -> Arguments.report_outputs := [`Html, d]
+    in
+    let title =
+      Arg.(value @@ opt string "Coverage report" @@
+        info ["title"] ~docv:"STRING" ~doc:
+          "Report title for use in HTML pages.")
+      --> (:=) Arguments.report_title
+    in
+    let tab_size =
+      Arg.(value @@ opt int 2 @@
+        info ["tab-size"] ~docv:"N" ~doc:"Set TAB width in HTML pages.")
+      --> (:=) Arguments.tab_size
+    in
+    output_directory &&&
+    coverage_files 0 &&&
+    search_directories &&&
+    ignore_missing_files &&&
+    title &&&
+    tab_size
+    |> main',
+    term_info "html" ~doc:"Generate HTML report locally."
+      ~man:[
+        `S "USAGE EXAMPLE";
+        `P "Run";
+        `Pre "    bisect-ppx-report html";
+        `P
+          ("Then view the generated report at _coverage/index.html with your " ^
+          "browser. All arguments are optional.")
+      ]
+
+  let send_to =
+    let service =
+      Arg.(required @@ pos 0 (some string) None @@
+        info [] ~docv:"SERVICE" ~doc:"'Coveralls' or 'Codecov'.")
+      --> fun s -> Arguments.send_to := Some s
+    in
+    service &&&
+    coverage_files 1 &&&
+    search_directories &&&
+    ignore_missing_files &&&
+    service_name &&&
+    service_job_id &&&
+    repo_token &&&
+    git
+    |> main',
+    term_info "send-to" ~doc:"Send report to a supported web service."
+      ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
+
+  let text =
+    let per_file =
+      Arg.(value @@ flag @@
+        info ["per-file"] ~doc:"Include coverage per source file.")
+      --> fun b -> Arguments.summary_only := not b
+    in
+    Term.const () --> (fun () -> Arguments.report_outputs := [`Text, "-"]) &&&
+    coverage_files 0 &&&
+    per_file
+    |> main',
+    term_info "summary" ~doc:"Write coverage summary to STDOUT."
+
+  let coveralls =
+    output_file `Coveralls &&&
+    coverage_files 1 &&&
+    search_directories &&&
+    ignore_missing_files &&&
+    service_name &&&
+    service_job_id &&&
+    repo_token &&&
+    git
+    |> main',
+    term_info "coveralls" ~doc:
+      ("Generate Coveralls JSON report (for manual integration with web " ^
+      "services).")
+
+  let csv =
+    let separator =
+      Arg.(value @@ opt string ";" @@
+        info ["separator"] ~docv:"STRING" ~doc:"Field separator to use.")
+      --> (:=) Arguments.csv_separator
+    in
+    output_file `Csv &&&
+    coverage_files 1 &&&
+    separator
+    |> main',
+    term_info "csv" ~doc:"(Debug) Generate CSV report."
+
+  let dump =
+    output_file `Dump &&&
+    coverage_files 1
+    |> main',
+    term_info "dump" ~doc:"(Debug) Dump binary report."
+
+  let ordinary_subcommands =
+    [html; send_to; text; coveralls]
+
+  let debug_subcommands =
+    [csv; dump]
+
+  let all_subcommands =
+    ordinary_subcommands @ debug_subcommands
+
+  let is_legacy_command_line =
+    let subcommand_names =
+      List.map (fun (_, info) -> Term.name info) all_subcommands in
+    match List.mem Sys.argv.(1) ("--help"::"--version"::subcommand_names) with
+    | result -> not result
+    | exception Invalid_argument _ -> false
+
+  let eval () =
+    if is_legacy_command_line then begin
+      warning
+        "you are using the old command-line syntax. %s"
+        "See bisect-ppx-report --help";
+      Arguments.parse_args ();
+      if !Arguments.report_outputs = [] && !Arguments.send_to = None then begin
+        Arguments.print_usage ();
+        exit 0
+      end;
+      main ()
+    end
+    else
+      Term.exit @@ Term.eval_choice Term.(
+        ret (const (`Help (`Auto, None))),
+        term_info
+          "bisect-ppx-report"
+          ~version:Report_utils.version
+          ~doc:"Generate coverage reports for OCaml and Reason."
+          ~man:[
+            `S "USAGE EXAMPLE";
+            `Pre
+              ("bisect-ppx-report html\nbisect-ppx-report send-to Coveralls\n" ^
+              "bisect-ppx-report summary");
+            `P
+              ("See bisect-ppx-report $(i,COMMAND) --help for further " ^
+              "information on each command, including options.")
+          ])
+        ordinary_subcommands
+end
+
+
+
 let () =
   try
-    main ()
+    Command_line.eval ()
   with
   | Sys_error s ->
       Printf.eprintf " *** system error: %s\n" s;

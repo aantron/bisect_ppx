@@ -86,7 +86,7 @@ then
     make self-coverage
     (cd _self && \
         _build/install/default/bin/meta-bisect-ppx-report \
-            bisect*.meta --send-to Coveralls)
+            send-to Coveralls bisect*.meta)
 fi
 
 opam clean

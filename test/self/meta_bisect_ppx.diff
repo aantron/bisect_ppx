@@ -50,7 +50,7 @@ diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
  
  
  
-@@ -768,7 +768,7 @@
+@@ -749,7 +749,7 @@
            let ___bisect_visit___ =
              let point_definitions = [%e points_data] in
              let `Staged cb =
@@ -79,10 +79,10 @@ diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
   (name report)
 - (public_name bisect-ppx-report)
 - (package bisect_ppx)
-- (libraries bisect_ppx.common unix))
+- (libraries bisect_ppx.common cmdliner unix))
 + (public_name meta-bisect-ppx-report)
 + (package meta_bisect_ppx)
-+ (libraries meta_bisect_ppx.common unix))
++ (libraries meta_bisect_ppx.common cmdliner unix))
  
  (rule
   (targets assets.ml)
@@ -132,8 +132,8 @@ diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
 -module Common = Bisect_common
 +module Common = Meta_bisect_common
  
- module Arguments =
- struct
+ module Arguments :
+ sig
 diff -ru src/report/report_utils.ml _self/meta_bisect_ppx/src/report/report_utils.ml
 --- src/report/report_utils.ml
 +++ _self/meta_bisect_ppx/src/report/report_utils.ml

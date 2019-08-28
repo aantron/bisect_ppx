@@ -25,8 +25,8 @@ diff -ru src/report/dune _self/bisect_ppx/src/report/dune
   (public_name bisect-ppx-report)
   (package bisect_ppx)
 + (preprocess (pps meta_bisect_ppx))
-  (libraries bisect_ppx.common unix))
- 
+  (libraries bisect_ppx.common cmdliner unix))
+
  (rule
 diff -ru src/runtime/native/dune _self/bisect_ppx/src/runtime/native/dune
 --- src/runtime/native/dune

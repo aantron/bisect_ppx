@@ -105,7 +105,8 @@ self-coverage-test :
 	rm -rf _coverage
 	cd $(SELF_COVERAGE) && \
 	  _build/install/default/bin/meta-bisect-ppx-report \
-	    --text - --summary-only \
-	    --html ../_coverage \
-	    bisect*.meta
+	    html -o ../_coverage bisect*.meta
+	cd $(SELF_COVERAGE) && \
+	  _build/install/default/bin/meta-bisect-ppx-report \
+	    summary bisect*.meta
 	@echo See _coverage/index.html

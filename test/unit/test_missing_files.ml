@@ -12,7 +12,7 @@ let tests = "missing-files" >::: [
     run "echo 'let () = ()' > source.ml";
     compile (with_bisect () ^ " -package findlib.dynload") "_scratch/source.ml";
     run "./a.out";
-    report "--html report" ~r:"> /dev/null 2> /dev/null || touch failed";
+    report "html -o report" ~r:"> /dev/null 2> /dev/null || touch failed";
     run "[ -f failed ]"
   end;
 
@@ -20,6 +20,6 @@ let tests = "missing-files" >::: [
     run "echo 'let () = ()' > source.ml";
     compile (with_bisect () ^ " -package findlib.dynload") "_scratch/source.ml";
     run "./a.out";
-    report "--ignore-missing-files --html report"
+    report "html --ignore-missing-files -o report"
   end
 ]

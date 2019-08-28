@@ -54,7 +54,7 @@ let tests = "ppx-integration" >::: [
     compile ("-package ppx_deriving.show " ^ (with_bisect ()))
       "fixtures/ppx-integration/deriving.ml";
     run "./a.out > /dev/null";
-    report "-text -" ~r:"| grep -v '<!--.*Bisect' > output";
+    report "summary --per-file" ~r:"| grep -v '<!--.*Bisect' > output";
     diff "fixtures/ppx-integration/deriving_then_bisect_report.reference.ml"
   end;
 
