@@ -21,6 +21,7 @@ sig
   val service_name : string ref
   val service_job_id : string ref
   val repo_token : string ref
+  val git : bool ref
   val send_to : string option ref
 
   val parse_args : unit -> unit
@@ -61,6 +62,8 @@ struct
   let service_job_id = ref ""
 
   let repo_token = ref ""
+
+  let git = ref false
 
   let send_to = ref None
 
@@ -133,6 +136,10 @@ struct
     ("--repo-token",
     Arg.Set_string repo_token,
     "<string>  Repo token for Coveralls json (Coveralls only)");
+
+    ("--git",
+    Arg.Set git,
+    " Parse git HEAD info (Coveralls only)");
 
     ("--send-to",
     Arg.String (fun s -> send_to := Some s),
@@ -514,7 +521,7 @@ let main () =
         generic_output file (Report_dump.make ())
     | `Coveralls, file ->
         Report_coveralls.output verbose file
-          !service_name !service_job_id !repo_token
+          !service_name !service_job_id !repo_token !Arguments.git
           search_in_path data points in
   List.iter write_output (List.rev !report_outputs);
 

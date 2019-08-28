@@ -8,8 +8,11 @@
 
 
 val output :
-  (string -> unit) -> string -> string -> string -> string -> (string -> string option) ->
-  (string, int array) Hashtbl.t -> (string, string) Hashtbl.t ->
+  (string -> unit) ->
+  string -> string -> string -> string -> bool ->
+  (string -> string option) ->
+  (string, int array) Hashtbl.t ->
+  (string, string) Hashtbl.t ->
     unit
 (** [output verbose file service_name service_job_id repo_token resolver data points]
     writes a Coveralls JSON [file] for [data]. [verbose] is used for verbose

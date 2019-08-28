@@ -72,7 +72,52 @@ let file_json verbose indent in_file resolver visited points =
       |> String.concat "\n"
     )
 
-let output verbose file service_name service_job_id repo_token resolver data points =
+let output_of command =
+  let channel = Unix.open_process_in command in
+  let line = input_line channel in
+  match Unix.close_process_in channel with
+  | WEXITED 0 ->
+    line
+  | _ ->
+    Printf.eprintf "Error: command failed: '%s'\n%!" command;
+    exit 1
+
+let metadata name field =
+  output_of ("git log -1 --pretty=format:'" ^ field ^ "'")
+  |> String.escaped
+  |> Printf.sprintf "\"%s\":\"%s\"" name
+
+let output
+    verbose
+    file
+    service_name
+    service_job_id
+    repo_token
+    git
+    resolver
+    data
+    points =
+
+  let git =
+    if not git then
+      ""
+    else
+      let metadata =
+        String.concat "," [
+          metadata "id" "%H";
+          metadata "author_name" "%an";
+          metadata "author_email" "%ae";
+          metadata "committer_name" "%cn";
+          metadata "committer_email" "%ce";
+          metadata "message" "%s";
+        ]
+      in
+      let branch = output_of "git rev-parse --abbrev-ref HEAD" in
+      Printf.sprintf
+        "    \"git\":{\"head\":{%s},\"branch\":\"%s\",\"remotes\":{}},"
+        metadata branch
+  in
+
   Report_utils.mkdirs (Filename.dirname file);
   let file_jsons =
     Hashtbl.fold
@@ -97,6 +142,7 @@ let output verbose file service_name service_job_id repo_token resolver data poi
     Report_utils.output_strings
       [ "{" ;
         repo_params ;
+        git ;
         "    \"source_files\": [" ;
         (String.concat ",\n" file_jsons) ;
         "    ]" ;
