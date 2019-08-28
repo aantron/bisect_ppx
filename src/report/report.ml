@@ -199,10 +199,10 @@ end
 let quiet =
   ref false
 
-let info =
+let info arguments =
   Printf.ksprintf (fun s ->
     if not !quiet then
-      Printf.printf "Info: %s\n%!" s)
+      Printf.printf "Info: %s\n%!" s) arguments
 
 let warning =
   Printf.ksprintf (fun s ->
@@ -322,6 +322,7 @@ sig
   val name_in_report : ci -> string
   val job_id_variable : ci -> string
   val needs_repo_token : ci -> bool
+  val needs_git_info : ci -> bool
 end =
 struct
   let environment_variable name value result k =
@@ -348,6 +349,10 @@ struct
     | `Travis -> "TRAVIS_JOB_ID"
 
   let needs_repo_token = function
+    | `CircleCI -> true
+    | `Travis -> false
+
+  let needs_git_info = function
     | `CircleCI -> true
     | `Travis -> false
 end
@@ -467,6 +472,12 @@ let main () =
             error "expected repo token in $%s" (List.hd repo_token_variables)
         in
         try_variables repo_token_variables
+      end;
+
+    if not !Arguments.git then
+      if CI.needs_git_info (Lazy.force ci) then begin
+        info "including git info";
+        Arguments.git := true
       end
   end;
 
