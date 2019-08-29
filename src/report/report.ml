@@ -556,8 +556,13 @@ let main () =
     let command = Coverage_service.send_command coverage_service in
     info "sending to %s with command:" name;
     info "%s" command;
-    if not !Arguments.dry_run then
-      Sys.command command |> exit
+    if not !Arguments.dry_run then begin
+      let exit_code = Sys.command command in
+      let report = Coverage_service.report_filename coverage_service in
+      if Sys.file_exists report then
+        Sys.remove report;
+      exit exit_code
+    end
 
 
 
@@ -705,7 +710,9 @@ struct
     in
     let dry_run =
       Arg.(value @@ flag @@
-        info ["dry-run"] ~doc:"Don't issue the final upload command.")
+        info ["dry-run"] ~doc:
+          ("Don't issue the final upload command and don't delete the " ^
+          "intermediate coverage report file."))
       --> (:=) Arguments.dry_run
     in
     service &&&
