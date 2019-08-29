@@ -27,6 +27,8 @@ sig
   val parallel : bool ref
   val send_to : string option ref
   val dry_run : bool ref
+  val expect : string list ref
+  val do_not_expect : string list ref
 
   val parse_args : unit -> unit
   val print_usage : unit -> unit
@@ -78,6 +80,10 @@ struct
   let send_to = ref None
 
   let dry_run = ref false
+
+  let expect = ref []
+
+  let do_not_expect = ref []
 
   let options = [
     ("--html",
@@ -218,6 +224,7 @@ let error arguments =
 module Coverage_input_files :
 sig
   val list : unit -> string list
+  val expected_sources_are_present : string list -> unit
 end =
 struct
   let has_extension extension filename =
@@ -307,6 +314,41 @@ struct
       "no coverage files given on command line, or found in '.' or in '_build'"
       else
         all_coverage_files
+
+  let strip_extensions filename =
+    let dirname, basename = Filename.(dirname filename, basename filename) in
+    let basename =
+      match String.index basename '.' with
+      | index -> String.sub basename 0 index
+      | exception Not_found -> basename
+    in
+    Filename.concat dirname basename
+
+  let list_expected_files paths =
+    paths
+    |> List.map (fun path ->
+      if Filename.(check_suffix path dir_sep) then
+        list_recursively path (fun _path filename ->
+          [".ml"; ".re"; ".mll"; ".mly"]
+          |> List.exists (Filename.check_suffix filename))
+      else
+        [path])
+    |> List.flatten
+    |> List.sort_uniq String.compare
+
+  let filtered_expected_files () =
+    let expected_files = list_expected_files !Arguments.expect in
+    let excluded_files = list_expected_files !Arguments.do_not_expect in
+    expected_files
+    |> List.filter (fun path -> not (List.mem path excluded_files))
+    (* Not the fastest way. *)
+
+  let expected_sources_are_present present_files =
+    let present_files = List.map strip_extensions present_files in
+    let expected_files = filtered_expected_files () in
+    expected_files |> List.iter (fun file ->
+      if not (List.mem (strip_extensions file) present_files) then
+        error "expected file '%s' is not included in the report" file)
 end
 
 
@@ -508,6 +550,11 @@ let main () =
 
       total_counts, points
   in
+
+  let present_files =
+    Hashtbl.fold (fun file _ acc -> file::acc) data [] in
+  Coverage_input_files.expected_sources_are_present present_files;
+
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_file l f =
     let fail () =
@@ -673,6 +720,33 @@ struct
         "Include \"parallel\": true in the generated report.")
     --> (:=) Arguments.parallel
 
+  let expect =
+    Arg.(value @@ opt_all string [] @@
+      info ["expect"] ~docv:"PATH" ~docs:"COMMON OPTIONS" ~doc:
+        ("Check that the files at $(i,PATH) are included in the coverage " ^
+        "report. This option can be given multiple times. If $(i,PATH) ends " ^
+        "with a path separator (slash), it is treated as a directory name. " ^
+        "The reporter scans the directory recursively, and expects all files " ^
+        "in the directory to appear in the report. If $(i,PATH) does not end " ^
+        "with a path separator, it is treated as the name of a single file, " ^
+        "and the reporter expects that file to appear in the report. In both " ^
+        "cases, files expected are limited to those with extensions .ml, " ^
+        ".re, .mll, and .mly. When matching files, extensions are stripped, " ^
+        "including nested .cppo extensions."))
+    --> (:=) Arguments.expect
+
+  let do_not_expect =
+    Arg.(value @@ opt_all string [] @@
+      info ["do-not-expect"] ~docv:"PATH" ~docs:"COMMON OPTIONS" ~doc:
+        ("Excludes files from those specified with $(b,--expect). This " ^
+        "option can be given multiple times. If $(i,PATH) ends with a path " ^
+        "separator (slash), it is treated as a directory name. All files " ^
+        "found recursively in the directory are then not required to appear " ^
+        "in the report. If $(i,PATH) does not end with a path separator, it " ^
+        "is treated as the name of a single file, and that file is not " ^
+        "required to appear in the report."))
+    --> (:=) Arguments.do_not_expect
+
   let html =
     let output_directory =
       Arg.(value @@ opt string "./_coverage" @@
@@ -696,7 +770,9 @@ struct
     search_directories &&&
     ignore_missing_files &&&
     title &&&
-    tab_size
+    tab_size &&&
+    expect &&&
+    do_not_expect
     |> main',
     term_info "html" ~doc:"Generate HTML report locally."
       ~man:[
@@ -732,7 +808,9 @@ struct
     repo_token &&&
     git &&&
     parallel &&&
-    dry_run
+    dry_run &&&
+    expect &&&
+    do_not_expect
     |> main',
     term_info "send-to" ~doc:"Send report to a supported web service."
       ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
@@ -745,7 +823,9 @@ struct
     in
     Term.const () --> (fun () -> Arguments.report_outputs := [`Text, "-"]) &&&
     coverage_files 0 &&&
-    per_file
+    per_file &&&
+    expect &&&
+    do_not_expect
     |> main',
     term_info "summary" ~doc:"Write coverage summary to STDOUT."
 
@@ -760,7 +840,9 @@ struct
     service_pull_request &&&
     repo_token &&&
     git &&&
-    parallel
+    parallel &&&
+    expect &&&
+    do_not_expect
     |> main',
     term_info "coveralls" ~doc:
       ("Generate Coveralls JSON report (for manual integration with web " ^
@@ -774,13 +856,17 @@ struct
     in
     output_file `Csv &&&
     coverage_files 1 &&&
-    separator
+    separator &&&
+    expect &&&
+    do_not_expect
     |> main',
     term_info "csv" ~doc:"(Debug) Generate CSV report."
 
   let dump =
     output_file `Dump &&&
-    coverage_files 1
+    coverage_files 1 &&&
+    expect &&&
+    do_not_expect
     |> main',
     term_info "dump" ~doc:"(Debug) Dump binary report."
 

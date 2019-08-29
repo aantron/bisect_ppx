@@ -97,6 +97,11 @@ self-coverage-diff :
 	  test/self/bisect_ppx.diff || \
 	  true
 
+EXPECTED_FILES := \
+  --expect bisect_ppx/src/ \
+  --do-not-expect bisect_ppx/src/ppx/wrapper/ \
+  --do-not-expect bisect_ppx/src/runtime/bucklescript/
+
 .PHONY : self-coverage-test
 self-coverage-test :
 	cd $(SELF_COVERAGE) && rm -f bisect*.meta
@@ -105,7 +110,7 @@ self-coverage-test :
 	rm -rf _coverage
 	cd $(SELF_COVERAGE) && \
 	  _build/install/default/bin/meta-bisect-ppx-report \
-	    html -o ../_coverage bisect*.meta
+	    html -o ../_coverage bisect*.meta $(EXPECTED_FILES)
 	cd $(SELF_COVERAGE) && \
 	  _build/install/default/bin/meta-bisect-ppx-report \
 	    summary bisect*.meta
