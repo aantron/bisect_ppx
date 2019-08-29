@@ -468,8 +468,6 @@ let main () =
         let rec try_variables = function
           | variable::more ->
             begin match Sys.getenv variable with
-            | "" ->
-              try_variables more
             | exception Not_found ->
               try_variables more
             | value ->
