@@ -65,7 +65,7 @@ make build
 
 date
 
-make test
+(unset TRAVIS && unset TRAVIS_JOB_ID && make test)
 
 if [ ! -d _cache/_build ]
 then
@@ -83,7 +83,7 @@ fi
 
 if [ "$SELF_COVERAGE" == YES ]
 then
-    make self-coverage
+    (unset TRAVIS && unset TRAVIS_JOB_ID && make self-coverage)
     (cd _self && \
         _build/install/default/bin/meta-bisect-ppx-report \
             send-to Coveralls bisect*.meta)

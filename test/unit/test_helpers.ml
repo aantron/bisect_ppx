@@ -84,7 +84,7 @@ let with_directory context test_name f =
   in
   test_directory := directory;
 
-  if Sys.file_exists directory then run ("rm -r " ^ directory);
+  if Sys.file_exists directory then run ("rm -rf " ^ directory);
   Unix.mkdir directory 0o755;
 
   let old_wd = Sys.getcwd () in
@@ -96,7 +96,7 @@ let with_directory context test_name f =
   let restore () =
     test_context := None;
     Sys.chdir old_wd;
-    run ("rm -r " ^ directory)
+    run ("rm -rf " ^ directory)
   in
 
   logf context `Info "In directory '%s'" new_wd;
@@ -154,9 +154,20 @@ let compile ?(r = "") arguments source =
     arguments source_copy r
   |> run
 
-let report ?(f = "bisect*.coverage") ?(r = "> /dev/null") arguments =
+let report
+    ?(env = []) ?(f = "bisect*.coverage") ?(r = "> /dev/null") arguments =
+
+  let env =
+    env
+    |> List.map (fun (variable, value) ->
+      Printf.sprintf "export %s=%s" variable value)
+    |> fun l -> l @ [""]
+    |> String.concat " && "
+  in
+
   Printf.sprintf
-    "%s %s %s %s"
+    "%s%s %s %s %s"
+    env
     (Filename.concat
       dune_build_directory "install/default/bin/bisect-ppx-report")
     arguments f r
@@ -182,7 +193,7 @@ let diff ?preserve_as reference =
   let reference_actual = Filename.concat Filename.parent_dir_name reference in
   let command =
     Printf.sprintf
-      "diff -au --label %s --label %s %s output"
+      "diff -au --label %s --label %s %s output 2> /dev/null"
       preserve_as "'actual output'" reference_actual
   in
 
@@ -195,7 +206,11 @@ let diff ?preserve_as reference =
     let delta = read_file "delta" in
     Printf.sprintf "Difference against '%s':\n\n%s" preserve_as delta
     |> assert_failure
-  | _ -> command_failed command ~status
+  | 2 ->
+    preserve "output" preserve_as;
+    command_failed command ~status
+  | _ ->
+    command_failed command ~status
 
 let normalize_source source normalized =
   let source = read_file source in

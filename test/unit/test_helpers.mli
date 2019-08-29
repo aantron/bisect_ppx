@@ -80,9 +80,13 @@ val dune_build_directory : string
 
 
 
-val report : ?f:string -> ?r:string -> string -> unit
+val report :
+  ?env:(string * string) list -> ?f:string -> ?r:string -> string -> unit
 (** [report flags] runs [bisect-ppx-report] built by [make all] in the root
     directory of the project working tree with the given flags.
+
+    If [~env] is supplied, the environment is extended with the given
+    environment variables.
 
     If [~r] is supplied, that string is appended to the end of the command
     invocation. This is intended for redirections.

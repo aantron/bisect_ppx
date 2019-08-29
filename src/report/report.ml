@@ -370,7 +370,7 @@ struct
     | None -> None
     | Some "Codecov" -> Some `Codecov
     | Some "Coveralls" -> Some `Coveralls
-    | Some other -> error "--send-to: unknown coverage service '%s'" other
+    | Some other -> error "send-to: unknown coverage service '%s'" other
 
   let pretty_name = function
     | `Codecov -> "Codecov"
