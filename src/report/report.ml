@@ -563,8 +563,10 @@ let main () =
     if not !Arguments.dry_run then begin
       let exit_code = Sys.command command in
       let report = Coverage_service.report_filename coverage_service in
-      if Sys.file_exists report then
-        Sys.remove report;
+      if Sys.file_exists report then begin
+        info "deleting '%s'" report;
+        Sys.remove report
+      end;
       exit exit_code
     end
 
