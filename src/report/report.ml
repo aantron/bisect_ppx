@@ -396,8 +396,6 @@ end
 
 
 
-open Arguments
-
 let main () =
   quiet := Arguments.is_report_being_written_to_stdout ();
 
@@ -484,10 +482,10 @@ let main () =
 
       total_counts, points
   in
-  let verbose = if !verbose then print_endline else ignore in
+  let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_file l f =
     let fail () =
-      if !ignore_missing_files then None
+      if !Arguments.ignore_missing_files then None
       else
         raise (Sys_error (f ^ ": No such file or directory")) in
     let rec search = function
@@ -501,26 +499,29 @@ let main () =
       Some f
     else
       fail () in
-  let search_in_path = search_file !search_path in
+  let search_in_path = search_file !Arguments.search_path in
   let generic_output file conv =
     Report_generic.output verbose file conv data points in
   let write_output = function
     | `Html, dir ->
         Report_utils.mkdirs dir;
         Report_html.output verbose dir
-          !tab_size !report_title
+          !Arguments.tab_size !Arguments.report_title
           search_in_path data points
     | `Csv, file ->
-        generic_output file (Report_csv.make !csv_separator)
+        generic_output file (Report_csv.make !Arguments.csv_separator)
     | `Text, file ->
-        generic_output file (Report_text.make !summary_only)
+        generic_output file (Report_text.make !Arguments.summary_only)
     | `Dump, file ->
         generic_output file (Report_dump.make ())
     | `Coveralls, file ->
         Report_coveralls.output verbose file
-          !service_name !service_job_id !repo_token !Arguments.git
+          !Arguments.service_name
+          !Arguments.service_job_id
+          !Arguments.repo_token
+          !Arguments.git
           search_in_path data points in
-  List.iter write_output (List.rev !report_outputs);
+  List.iter write_output (List.rev !Arguments.report_outputs);
 
   match coverage_service with
   | None ->
