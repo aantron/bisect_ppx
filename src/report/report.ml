@@ -23,6 +23,7 @@ sig
   val repo_token : string ref
   val git : bool ref
   val send_to : string option ref
+  val dry_run : bool ref
 
   val parse_args : unit -> unit
   val print_usage : unit -> unit
@@ -66,6 +67,8 @@ struct
   let git = ref false
 
   let send_to = ref None
+
+  let dry_run = ref false
 
   let options = [
     ("--html",
@@ -405,7 +408,7 @@ let main () =
     ()
   | Some service ->
     let report_file = Coverage_service.report_filename service in
-    info "writing coverage report to '%s'" report_file;
+    info "will write coverage report to '%s'" report_file;
     Arguments.report_outputs :=
       !Arguments.report_outputs @ [`Coveralls, report_file];
 
@@ -527,7 +530,8 @@ let main () =
     let command = Coverage_service.send_command coverage_service in
     info "sending to %s with command:" name;
     info "%s" command;
-    Sys.command command |> exit
+    if not !Arguments.dry_run then
+      Sys.command command |> exit
 
 
 
@@ -654,6 +658,11 @@ struct
         info [] ~docv:"SERVICE" ~doc:"'Coveralls' or 'Codecov'.")
       --> fun s -> Arguments.send_to := Some s
     in
+    let dry_run =
+      Arg.(value @@ flag @@
+        info ["dry-run"] ~doc:"Don't issue the final upload command.")
+      --> (:=) Arguments.dry_run
+    in
     service &&&
     coverage_files 1 &&&
     search_directories &&&
@@ -661,7 +670,8 @@ struct
     service_name &&&
     service_job_id &&&
     repo_token &&&
-    git
+    git &&&
+    dry_run
     |> main',
     term_info "send-to" ~doc:"Send report to a supported web service."
       ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
