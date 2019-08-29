@@ -322,9 +322,6 @@ sig
   val pretty_name : ci -> string
   val name_in_report : ci -> string
   val job_id_variable : ci -> string
-  val needs_pull_request_number : ci -> string option
-  val needs_repo_token : ci -> bool
-  val needs_git_info : ci -> bool
 end =
 struct
   let environment_variable name value result k =
@@ -349,18 +346,6 @@ struct
   let job_id_variable = function
     | `CircleCI -> "CIRCLE_BUILD_NUM"
     | `Travis -> "TRAVIS_JOB_ID"
-
-  let needs_pull_request_number = function
-    | `CircleCI -> Some "CIRCLE_PULL_REQUEST"
-    | `Travis -> None
-
-  let needs_repo_token = function
-    | `CircleCI -> true
-    | `Travis -> false
-
-  let needs_git_info = function
-    | `CircleCI -> true
-    | `Travis -> false
 end
 
 
@@ -376,7 +361,10 @@ sig
   val pretty_name : coverage_service -> string
   val report_filename : coverage_service -> string
   val send_command : coverage_service -> string
+  val needs_pull_request_number : ci -> coverage_service -> string option
+  val needs_repo_token : ci -> coverage_service -> bool
   val repo_token_variables : coverage_service -> string list
+  val needs_git_info : ci -> coverage_service -> bool
 end =
 struct
   let from_argument () =
@@ -390,19 +378,33 @@ struct
     | `Codecov -> "Codecov"
     | `Coveralls -> "Coveralls"
 
-  let report_filename = function
-    | `Codecov -> "excoveralls.json"
-    | `Coveralls -> "coverage.json"
+  let report_filename _ =
+    "coverage.json"
 
   let send_command = function
     | `Codecov ->
-      "curl -s https://codecov.io/bash | bash -s -- -Z"
+      "curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json"
     | `Coveralls ->
       "curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs"
+
+  let needs_pull_request_number ci service =
+    match ci, service with
+    | `CircleCI, `Coveralls -> Some "CIRCLE_PULL_REQUEST"
+    | _ -> None
+
+  let needs_repo_token ci service =
+    match ci, service with
+    | `CircleCI, `Coveralls -> true
+    | _ -> false
 
   let repo_token_variables = function
     | `Codecov -> ["CODECOV_TOKEN"]
     | `Coveralls -> ["COVERALLS_REPO_TOKEN"]
+
+  let needs_git_info ci service =
+    match ci, service with
+    | `CircleCI, `Coveralls -> true
+    | _ -> false
 end
 
 
@@ -449,7 +451,9 @@ let main () =
     end;
 
     if !Arguments.service_pull_request = "" then begin
-      match CI.needs_pull_request_number (Lazy.force ci) with
+      let needs =
+        Coverage_service.needs_pull_request_number (Lazy.force ci) service in
+      match needs with
       | None ->
         ()
       | Some pr_variable ->
@@ -462,7 +466,7 @@ let main () =
     end;
 
     if !Arguments.repo_token = "" then
-      if CI.needs_repo_token (Lazy.force ci) then begin
+      if Coverage_service.needs_repo_token (Lazy.force ci) service then begin
         let repo_token_variables =
           Coverage_service.repo_token_variables service in
         let rec try_variables = function
@@ -481,7 +485,7 @@ let main () =
       end;
 
     if not !Arguments.git then
-      if CI.needs_git_info (Lazy.force ci) then begin
+      if Coverage_service.needs_git_info (Lazy.force ci) service then begin
         info "including git info";
         Arguments.git := true
       end

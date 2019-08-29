@@ -124,4 +124,7 @@ let tests = "send-to" >::: [
 
   test "circleci-pr-override"
     "Coveralls --service-pull-request 3" circleci_pr;
+
+  test "circleci-codecov"
+    "Codecov" circleci_no_repo_token;
 ]
