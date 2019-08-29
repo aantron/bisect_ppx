@@ -3,6 +3,7 @@ Info: will write coverage report to 'coverage.json'
 Info: detected CI: CircleCI
 Info: using service name 'circleci'
 Info: using job ID variable $CIRCLE_BUILD_NUM
+Info: $CIRCLE_PULL_REQUEST not set
 Info: using repo token variable $REPO_TOKEN
 Info: including git info
 Info: sending to Coveralls with command:

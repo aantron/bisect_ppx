@@ -322,6 +322,7 @@ sig
   val pretty_name : ci -> string
   val name_in_report : ci -> string
   val job_id_variable : ci -> string
+  val needs_pull_request_number : ci -> string option
   val needs_repo_token : ci -> bool
   val needs_git_info : ci -> bool
 end =
@@ -348,6 +349,10 @@ struct
   let job_id_variable = function
     | `CircleCI -> "CIRCLE_BUILD_NUM"
     | `Travis -> "TRAVIS_JOB_ID"
+
+  let needs_pull_request_number = function
+    | `CircleCI -> Some "CIRCLE_PULL_REQUEST"
+    | `Travis -> None
 
   let needs_repo_token = function
     | `CircleCI -> true
@@ -444,6 +449,19 @@ let main () =
         Arguments.service_job_id := value
       | exception Not_found ->
         error "expected job id in $%s" job_id_variable
+    end;
+
+    if !Arguments.service_pull_request = "" then begin
+      match CI.needs_pull_request_number (Lazy.force ci) with
+      | None ->
+        ()
+      | Some pr_variable ->
+        match Sys.getenv pr_variable with
+        | value ->
+          info "using PR number variable $%s" pr_variable;
+          Arguments.service_pull_request := value
+        | exception Not_found ->
+          info "$%s not set" pr_variable
     end;
 
     if !Arguments.repo_token = "" then

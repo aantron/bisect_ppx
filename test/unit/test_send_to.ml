@@ -53,6 +53,13 @@ let circleci = [
   "COVERALLS_REPO_TOKEN", "abcxyz";
 ]
 
+let circleci_pr = [
+  "CIRCLECI", "true";
+  "CIRCLE_BUILD_NUM", "43";
+  "CIRCLE_PULL_REQUEST", "2";
+  "COVERALLS_REPO_TOKEN", "abcxyz";
+]
+
 let circleci_repo_token_fallback_1 = [
   "CIRCLECI", "true";
   "CIRCLE_BUILD_NUM", "43";
@@ -126,4 +133,13 @@ let tests = "send-to" >::: [
 
   test "circleci-repo-token-override"
     "Coveralls --repo-token uvwdef" circleci;
+
+  test "circleci-pr-option"
+    "Coveralls --service-pull-request 1" circleci;
+
+  test "circleci-pr"
+    "Coveralls" circleci_pr;
+
+  test "circleci-pr-override"
+    "Coveralls --service-pull-request 3" circleci_pr;
 ]
