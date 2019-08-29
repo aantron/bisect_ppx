@@ -531,6 +531,25 @@ let main () =
 
 
 
+let main () =
+  try
+    main ()
+  with
+  | Sys_error s ->
+    Printf.eprintf " *** system error: %s\n" s;
+    exit 1
+  | Unix.Unix_error (e, _, _) ->
+    Printf.eprintf " *** system error: %s\n" (Unix.error_message e);
+    exit 1
+  | Common.Invalid_file (f, reason) ->
+    Printf.eprintf " *** invalid file: '%s' error: \"%s\"\n" f reason;
+    exit 1
+  | e ->
+    Printf.eprintf " *** error: %s\n" (Printexc.to_string e);
+    exit 1
+
+
+
 module Command_line :
 sig
   val eval : unit -> unit
@@ -608,7 +627,8 @@ struct
     in
     let tab_size =
       Arg.(value @@ opt int 2 @@
-        info ["tab-size"] ~docv:"N" ~doc:"Set TAB width in HTML pages.")
+        info ["tab-size"] ~docv:"N" ~doc:
+          "Set TAB width for replacing TAB characters in HTML pages.")
       --> (:=) Arguments.tab_size
     in
     output_directory &&&
@@ -699,14 +719,15 @@ struct
   let all_subcommands =
     ordinary_subcommands @ debug_subcommands
 
-  let is_legacy_command_line =
-    let subcommand_names =
-      List.map (fun (_, info) -> Term.name info) all_subcommands in
-    match List.mem Sys.argv.(1) ("--help"::"--version"::subcommand_names) with
-    | result -> not result
-    | exception Invalid_argument _ -> false
-
   let eval () =
+    let is_legacy_command_line =
+      let subcommand_names =
+        List.map (fun (_, info) -> Term.name info) all_subcommands in
+      match List.mem Sys.argv.(1) ("--help"::"--version"::subcommand_names) with
+      | result -> not result
+      | exception Invalid_argument _ -> false
+    in
+
     if is_legacy_command_line then begin
       warning
         "you are using the old command-line syntax. %s"
@@ -740,18 +761,4 @@ end
 
 
 let () =
-  try
-    Command_line.eval ()
-  with
-  | Sys_error s ->
-      Printf.eprintf " *** system error: %s\n" s;
-      exit 1
-  | Unix.Unix_error (e, _, _) ->
-      Printf.eprintf " *** system error: %s\n" (Unix.error_message e);
-      exit 1
-  | Common.Invalid_file (f, reason) ->
-      Printf.eprintf " *** invalid file: '%s' error: \"%s\"\n" f reason;
-      exit 1
-  | e ->
-      Printf.eprintf " *** error: %s\n" (Printexc.to_string e);
-      exit 1
+  Command_line.eval ()
