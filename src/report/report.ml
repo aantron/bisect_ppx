@@ -793,6 +793,24 @@ struct
   let all_subcommands =
     ordinary_subcommands @ debug_subcommands
 
+  let reporter =
+    Term.(eval_choice
+      (ret (const (`Help (`Auto, None))),
+      term_info
+        "bisect-ppx-report"
+        ~version:Report_utils.version
+        ~doc:"Generate coverage reports for OCaml and Reason."
+        ~man:[
+          `S "USAGE EXAMPLE";
+          `Pre
+            ("bisect-ppx-report html\nbisect-ppx-report send-to Coveralls\n" ^
+            "bisect-ppx-report summary");
+          `P
+            ("See bisect-ppx-report $(i,COMMAND) --help for further " ^
+            "information on each command, including options.")
+        ]))
+      ordinary_subcommands
+
   let eval () =
     let is_legacy_command_line =
       let subcommand_names =
@@ -814,22 +832,7 @@ struct
       main ()
     end
     else
-      Term.exit @@ Term.eval_choice Term.(
-        ret (const (`Help (`Auto, None))),
-        term_info
-          "bisect-ppx-report"
-          ~version:Report_utils.version
-          ~doc:"Generate coverage reports for OCaml and Reason."
-          ~man:[
-            `S "USAGE EXAMPLE";
-            `Pre
-              ("bisect-ppx-report html\nbisect-ppx-report send-to Coveralls\n" ^
-              "bisect-ppx-report summary");
-            `P
-              ("See bisect-ppx-report $(i,COMMAND) --help for further " ^
-              "information on each command, including options.")
-          ])
-        ordinary_subcommands
+      Term.exit reporter
 end
 
 
