@@ -60,18 +60,6 @@ let circleci_pr = [
   "COVERALLS_REPO_TOKEN", "abcxyz";
 ]
 
-let circleci_repo_token_fallback_1 = [
-  "CIRCLECI", "true";
-  "CIRCLE_BUILD_NUM", "43";
-  "COVERAGE_REPO_TOKEN", "abcxyz";
-]
-
-let circleci_repo_token_fallback_2 = [
-  "CIRCLECI", "true";
-  "CIRCLE_BUILD_NUM", "43";
-  "REPO_TOKEN", "abcxyz";
-]
-
 let circleci_repo_token_precedence = [
   "CIRCLECI", "true";
   "CIRCLE_BUILD_NUM", "43";
@@ -118,12 +106,6 @@ let tests = "send-to" >::: [
 
   test "circleci-coveralls"
     "Coveralls" circleci;
-
-  test "circleci-repo-token-1"
-    "Coveralls" circleci_repo_token_fallback_1;
-
-  test "circleci-repo-token-2"
-    "Coveralls" circleci_repo_token_fallback_2;
 
   test "circleci-repo-token-precedence"
     "Coveralls" circleci_repo_token_precedence;

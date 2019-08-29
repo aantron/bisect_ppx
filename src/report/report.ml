@@ -400,12 +400,9 @@ struct
     | `Coveralls ->
       "curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs"
 
-  let common_repo_token_variables =
-    ["COVERAGE_REPO_TOKEN"; "REPO_TOKEN"]
-
   let repo_token_variables = function
-    | `Codecov -> "CODECOV_TOKEN"::common_repo_token_variables
-    | `Coveralls -> "COVERALLS_REPO_TOKEN"::common_repo_token_variables
+    | `Codecov -> ["CODECOV_TOKEN"]
+    | `Coveralls -> ["COVERALLS_REPO_TOKEN"]
 end
 
 
