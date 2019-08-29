@@ -19,9 +19,12 @@ sig
   val summary_only : bool ref
   val ignore_missing_files : bool ref
   val service_name : string ref
+  val service_number : string ref
   val service_job_id : string ref
+  val service_pull_request : string ref
   val repo_token : string ref
   val git : bool ref
+  val parallel : bool ref
   val send_to : string option ref
   val dry_run : bool ref
 
@@ -60,11 +63,17 @@ struct
 
   let service_name = ref ""
 
+  let service_number = ref ""
+
   let service_job_id = ref ""
+
+  let service_pull_request = ref ""
 
   let repo_token = ref ""
 
   let git = ref false
+
+  let parallel = ref false
 
   let send_to = ref None
 
@@ -517,9 +526,12 @@ let main () =
     | `Coveralls, file ->
         Report_coveralls.output verbose file
           !Arguments.service_name
+          !Arguments.service_number
           !Arguments.service_job_id
+          !Arguments.service_pull_request
           !Arguments.repo_token
           !Arguments.git
+          !Arguments.parallel
           search_in_path data points in
   List.iter write_output (List.rev !Arguments.report_outputs);
 
@@ -601,11 +613,24 @@ struct
         "Include \"service_name\": \"$(i,STRING)\" in the generated report.")
     --> (:=) Arguments.service_name
 
+  let service_number =
+    Arg.(value @@ opt string "" @@
+      info ["service-number"] ~docv:"STRING" ~doc:
+        "Include \"service_number\": \"$(i,STRING)\" in the generated report.")
+    --> (:=) Arguments.service_number
+
   let service_job_id =
     Arg.(value @@ opt string "" @@
       info ["service-job-id"] ~docv:"STRING" ~doc:
         "Include \"service_job_id\": \"$(i,STRING)\" in the generated report.")
     --> (:=) Arguments.service_job_id
+
+  let service_pull_request =
+    Arg.(value @@ opt string "" @@
+      info ["service-pull-request"] ~docv:"STRING" ~doc:
+        ("Include \"service_pull_request\": \"$(i,STRING)\" in the generated " ^
+        "report."))
+    --> (:=) Arguments.service_pull_request
 
   let repo_token =
     Arg.(value @@ opt string "" @@
@@ -617,6 +642,12 @@ struct
     Arg.(value @@ flag @@
       info ["git"] ~doc:"Include git commit info in the generated report.")
     --> (:=) Arguments.git
+
+  let parallel =
+    Arg.(value @@ flag @@
+      info ["parallel"] ~doc:
+        "Include \"parallel\": true in the generated report.")
+    --> (:=) Arguments.parallel
 
   let html =
     let output_directory =
@@ -669,9 +700,12 @@ struct
     search_directories &&&
     ignore_missing_files &&&
     service_name &&&
+    service_number &&&
     service_job_id &&&
+    service_pull_request &&&
     repo_token &&&
     git &&&
+    parallel &&&
     dry_run
     |> main',
     term_info "send-to" ~doc:"Send report to a supported web service."
@@ -695,9 +729,12 @@ struct
     search_directories &&&
     ignore_missing_files &&&
     service_name &&&
+    service_number &&&
     service_job_id &&&
+    service_pull_request &&&
     repo_token &&&
-    git
+    git &&&
+    parallel
     |> main',
     term_info "coveralls" ~doc:
       ("Generate Coveralls JSON report (for manual integration with web " ^

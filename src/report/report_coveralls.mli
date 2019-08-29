@@ -9,7 +9,7 @@
 
 val output :
   (string -> unit) ->
-  string -> string -> string -> string -> bool ->
+  string -> string -> string -> string -> string -> string -> bool -> bool ->
   (string -> string option) ->
   (string, int array) Hashtbl.t ->
   (string, string) Hashtbl.t ->

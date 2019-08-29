@@ -94,6 +94,9 @@ let tests = "send-to" >::: [
   test "overrides-basic"
     "Coveralls --service-name foo --service-job-id bar" travis;
 
+  test "extras"
+    "Coveralls --service-number 1 --service-pull-request 2 --parallel" travis;
+
   test "git"
     "Coveralls --git" travis;
 

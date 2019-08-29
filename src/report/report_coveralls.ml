@@ -91,9 +91,12 @@ let output
     verbose
     file
     service_name
+    service_number
     service_job_id
+    service_pull_request
     repo_token
     git
+    parallel
     resolver
     data
     points =
@@ -131,18 +134,27 @@ let output
   in
   let repo_params =
     [ "service_name", (String.trim service_name) ;
+      "service_number", (String.trim service_number);
       "service_job_id", (String.trim service_job_id) ;
+      "service_pull_request", (String.trim service_pull_request);
       "repo_token", (String.trim repo_token) ; ]
     |> List.filter (fun (_, v) -> (String.length v) > 0)
     |> List.map (fun (n, v) ->
       Printf.sprintf "    \"%s\": \"%s\"," n v)
     |> String.concat "\n"
   in
+  let parallel =
+    if parallel then
+      "    \"parallel\": true,"
+    else
+      ""
+  in
   let write ch =
     Report_utils.output_strings
       [ "{" ;
         repo_params ;
         git ;
+        parallel;
         "    \"source_files\": [" ;
         (String.concat ",\n" file_jsons) ;
         "    ]" ;
