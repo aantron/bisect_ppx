@@ -28,8 +28,11 @@ let conditional_exclude_file filename =
 
 let switches = [
   ("--exclude",
-   Arg.String Exclusions.add,
-   "<pattern>  Exclude functions matching pattern");
+   Arg.String (fun s ->
+    prerr_endline "bisect_ppx argument '--exclude' is deprecated.";
+    prerr_endline "Use '--exclusions' instead.";
+    Exclusions.add s),
+   " Deprecated");
 
   ("--exclude-file",
    Arg.String conditional_exclude_file,

@@ -13,7 +13,6 @@ let tests = "bisect_ppx" >::: [
   Test_attributes.tests;
   Test_warnings.tests;
   Test_line_number_directive.tests;
-  Test_exclude.tests;
   Test_exclude_file.tests;
   Test_ppx_integration.tests;
   Test_thread_safety.tests;
