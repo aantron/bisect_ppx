@@ -56,6 +56,9 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     depends: [
       "bisect_ppx" {dev & >= "2.0.0"}
     ]
+    pin-depends: [
+      ["bisect_ppx.git" "git+https://github.com/aantron/bisect_ppx.git"]
+    ]
     ```
 
 2. [Preprocess the code under test with `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/master/dune#L4)
@@ -64,7 +67,7 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     ```scheme
     (library
      (public_name my_lib)
-     (preprocess (pps bisect_ppx --conditional --no-comment-parsing)))
+     (preprocess (pps bisect_ppx --conditional)))
     ```
 
 3. Run your test binary. In addition to testing your code, when exiting, it will
@@ -73,7 +76,7 @@ generate the [coverage report][dune-report] in `_coverage/index.html`:
 
     ```
     BISECT_ENABLE=yes dune runtest --force
-    bisect-ppx-report --html _coverage/
+    bisect-ppx-report html
     ```
 
 4. During release, you have to manually remove `(preprocess (pps bisect_ppx))`
@@ -98,8 +101,8 @@ and install it:
 
     ```json
     "dependencies": {
-      "@aantron/bisect_ppx": "*",
-      "bs-platform": "^6.0.0"
+      "@aantron/bisect_ppx": "git+https://github.com/aantron/bisect_ppx.git",
+      "bs-platform": "&"
     }
     ```
 
@@ -148,7 +151,7 @@ somewhere in your tester, which will have Node write a file like
     ```
     BISECT_ENABLE=yes npm run build
     npm run test
-    ./node_modules/.bin/bisect-ppx-report.exe --html _coverage/
+    ./node_modules/.bin/bisect-ppx-report.exe html
     ```
 
 [bsb-repo]: https://github.com/aantron/bisect-starter-bsb#readme
@@ -196,7 +199,7 @@ test, then run the reporter to generate the [coverage report][jsoo-report] in
 
     ```
     BISECT_ENABLE=yes dune build my_tester.bc.js
-    bisect-ppx-report --html _coverage/
+    bisect-ppx-report html
     ```
 
 [jsoo-repo]: https://github.com/aantron/bisect-starter-jsoo#readme
@@ -232,6 +235,11 @@ instrument the code under test, but not the tester:
 
 <a id="Coveralls"></a>
 ## Sending to [Coveralls](https://coveralls.io)
+
+*Bisect_ppx `master` has much nicer integration with Coveralls; see
+[bisect-ci-integration-megatest](https://github.com/aantron/bisect-ci-integration-megatest#readme).
+These instructions describe the older method, and will be updated soon. The old
+method is retained for development, and as a fallback.*
 
 You can generate a Coveralls JSON report using the `bisect-ppx-report` tool
 with the `--coveralls` flag. Note that Bisect_ppx reports are more precise than
