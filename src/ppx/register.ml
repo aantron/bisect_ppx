@@ -34,9 +34,16 @@ let switches = [
     Exclusions.add s),
    " Deprecated");
 
-  ("--exclude-file",
+  ("--exclusions",
    Arg.String conditional_exclude_file,
    "<filename>  Exclude functions listed in given file");
+
+  ("--exclude-file",
+   Arg.String (fun s ->
+    prerr_endline "bisect_ppx argument '--exclude-file' is deprecated.";
+    prerr_endline "It has been renamed to '--exclusions'.";
+    conditional_exclude_file s),
+   " Deprecated");
 
   ("--conditional",
   Arg.Set conditional,
