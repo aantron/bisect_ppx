@@ -583,6 +583,8 @@ let main () =
           search_in_path data points
     | `Csv, file ->
         generic_output file (Report_csv.make !Arguments.csv_separator)
+    | `Text, "-" ->
+      Report_text.output ~per_file:(not !Arguments.summary_only) data
     | `Text, file ->
         generic_output file (Report_text.make !Arguments.summary_only)
     | `Dump, file ->
