@@ -9,18 +9,18 @@ date
 
 if [ "$TRAVIS_BRANCH" != binaries ]
 then
-WD=`pwd`
-if [ ! -f node_modules/.bin/esy ]
-then
-    npm install --no-save esy
-    export PATH="$WD/node_modules/.bin:$PATH"
-else
-    mkdir -p _wrapped_esy
-    ln -s $WD/node_modules/.bin/esy-solve-cudf _wrapped_esy/esy-solve-cudf
-    cp test/ci/travis-wrapped-esy.sh _wrapped_esy/esy
-    chmod a+x _wrapped_esy/esy
-    export PATH="$WD/_wrapped_esy:$PATH"
-fi
+    WD=`pwd`
+    if [ ! -f node_modules/.bin/esy ]
+    then
+        npm install --no-save esy
+        export PATH="$WD/node_modules/.bin:$PATH"
+    else
+        mkdir -p _wrapped_esy
+        ln -s $WD/node_modules/.bin/esy-solve-cudf _wrapped_esy/esy-solve-cudf
+        cp test/ci/travis-wrapped-esy.sh _wrapped_esy/esy
+        chmod a+x _wrapped_esy/esy
+        export PATH="$WD/_wrapped_esy:$PATH"
+    fi
 fi
 
 date
