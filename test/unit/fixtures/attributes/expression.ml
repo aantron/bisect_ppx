@@ -3,15 +3,15 @@ let f _ =
 
 let () =
   if true then
-    ignore 1 [@coverage off]
+    f 1 [@coverage off]
   else
-    ignore 2;;
+    f 2;;
 
-ignore 3;;
+f 3;;
 
-ignore 4 [@coverage off];;
+f 4 [@coverage off];;
 
-(ignore (if true then 5 else 6)) [@coverage off];;
+(f (if true then 5 else 6)) [@coverage off];;
 
 let () =
   f (); ()
