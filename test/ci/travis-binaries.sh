@@ -33,7 +33,13 @@ try_to_commit() {
     cp test/bucklescript/node_modules/.bin/bisect-ppx-report bin/$OS/
     cp test/bucklescript/node_modules/bisect_ppx/ppx bin/$OS/
     git add bin/
-    git commit --m "Binaries for '$OS'"
+    echo "Binaries for '$OS'" > commit-message
+    if [ `ls bin | wc -l` != 2 ]
+    then
+        echo >> commit-message
+        echo "[skip ci]" >> commit-message
+    fi
+    git commit -F commit-message
     git push --force-with-lease -u origin binaries
     RESULT=$?
     git checkout $TRAVIS_BRANCH

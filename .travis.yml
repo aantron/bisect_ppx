@@ -42,10 +42,6 @@ matrix:
 
 script: bash -e ./test/ci/travis.sh
 
-branches:
-  except:
-    - binaries
-
 cache:
   directories:
     - $HOME/.opam
