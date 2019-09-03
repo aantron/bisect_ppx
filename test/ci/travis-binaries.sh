@@ -24,7 +24,6 @@ esac
 try_to_commit() {
     git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
     git fetch --unshallow origin
-    git remote show origin
     git checkout -b binaries origin/binaries || git checkout -b binaries
     if ! git merge-base --is-ancestor $TRAVIS_COMMIT binaries
     then
@@ -34,7 +33,7 @@ try_to_commit() {
     cp test/bucklescript/node_modules/.bin/bisect-ppx-report bin/$OS/
     cp test/bucklescript/node_modules/bisect_ppx/ppx bin/$OS/
     git add bin/
-    git commit --m "$OS binaries"
+    git commit --m "Binaries for '$OS'"
     git push --force-with-lease -u origin binaries
     RESULT=$?
     git checkout $TRAVIS_BRANCH
