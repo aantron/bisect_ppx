@@ -30,8 +30,10 @@ try_to_commit() {
         git reset --hard $TRAVIS_COMMIT
     fi
     mkdir -p bin/$OS
-    cp test/bucklescript/node_modules/.bin/bisect-ppx-report bin/$OS/
     cp test/bucklescript/node_modules/bisect_ppx/ppx bin/$OS/
+    cp test/bucklescript/node_modules/.bin/bisect-ppx-report bin/$OS/
+    strip bin/$OS/ppx
+    strip bin/$OS/bisect-ppx-report
     git add bin/
     echo "Binaries for '$OS'" > commit-message
     if [ `ls bin | wc -l` != 2 ]
