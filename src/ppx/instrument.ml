@@ -129,6 +129,7 @@ sig
   val instrument_expr :
     points ->
     ?override_loc:Location.t ->
+    ?use_loc_of:Parsetree.expression ->
     ?at_end:bool ->
     ?post:bool ->
     Parsetree.expression ->
@@ -148,10 +149,12 @@ struct
   (* Given an AST for an expression [e], replaces it by the sequence expression
      [instrumentation; e], where [instrumentation] is some code that tells
      Bisect_ppx, at runtime, that [e] has been visited. *)
-  let instrument_expr points ?override_loc ?(at_end = false) ?(post = false) e =
+  let instrument_expr
+      points ?override_loc ?use_loc_of ?(at_end = false) ?(post = false) e =
+
     let rec outline () =
-      let point_loc = choose_location_of_point ~override_loc e in
-      if expression_should_not_be_instrumented ~point_loc then
+      let point_loc = choose_location_of_point ~override_loc ~use_loc_of e in
+      if expression_should_not_be_instrumented ~point_loc ~use_loc_of then
         e
       else
         let point_index = get_index_of_point_at_location ~point_loc in
@@ -167,12 +170,20 @@ struct
             ___bisect_result___]
             [@metaloc point_loc]
 
-    and choose_location_of_point ~override_loc e =
-      match override_loc with
-      | Some override_loc -> override_loc
-      | _ -> Parsetree.(e.pexp_loc)
+    and choose_location_of_point ~override_loc ~use_loc_of e =
+      match use_loc_of with
+      | Some e -> Parsetree.(e.pexp_loc)
+      | None ->
+        match override_loc with
+        | Some override_loc -> override_loc
+        | _ -> Parsetree.(e.pexp_loc)
 
-    and expression_should_not_be_instrumented ~point_loc:loc =
+    and expression_should_not_be_instrumented ~point_loc:loc ~use_loc_of =
+      let e =
+        match use_loc_of with
+        | Some e -> e
+        | None -> e
+      in
       Location.(loc.loc_ghost) ||
       Coverage_attributes.has_off_attribute e.pexp_attributes
 
@@ -853,25 +864,22 @@ class instrumenter =
                   | _ -> e'
                 in
                 instrument_expr
-                  ~override_loc:(fn e').pexp_loc ~at_end:true ~post:true apply
+                  ~use_loc_of:(fn e') ~at_end:true ~post:true apply
               | `Redundant ->
                 apply
               | `Expression e ->
-                instrument_expr ~override_loc:e.pexp_loc ~post:true apply
+                instrument_expr ~use_loc_of:e ~post:true apply
               end
 
           | Pexp_apply (([%expr (||)] | [%expr (or)]), [(_l, e); (_l', e')]) ->
             let e_mark =
-              instrument_expr
-                ~override_loc:e.pexp_loc ~at_end:true [%expr true]
-            in
+              instrument_expr ~use_loc_of:e ~at_end:true [%expr true] in
             let e'_mark =
               match e'.pexp_desc with
               | Pexp_apply ([%expr (||)], _) ->
                 [%expr true]
               | _ ->
-                instrument_expr
-                  ~override_loc:e'.pexp_loc ~at_end:true [%expr true]
+                instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]
             in
             [%expr
               if [%e traverse ~is_in_tail_position:false e] then
@@ -975,26 +983,18 @@ class instrumenter =
               | _ ->
                 match successor with
                 | `None ->
-                  let override_loc =
+                  let use_loc_of =
                     match e, arguments with
                     | [%expr (@@)], [(_, e'); _] ->
-                      e'.pexp_loc
+                      e'
                     | _ ->
-                      e.pexp_loc
+                      e
                   in
-                  instrument_expr
-                    ~override_loc
-                    ~at_end:true
-                    ~post:true
-                    apply
+                  instrument_expr ~use_loc_of ~at_end:true ~post:true apply
                 | `Redundant ->
                   apply
                 | `Expression e' ->
-                  instrument_expr
-                    ~override_loc:e'.Parsetree.pexp_loc
-                    ~at_end:false
-                    ~post:true
-                    apply
+                  instrument_expr ~use_loc_of:e' ~at_end:false ~post:true apply
               end
 
           | Pexp_send (e, m) ->
@@ -1009,8 +1009,7 @@ class instrumenter =
               | `Redundant ->
                 apply
               | `Expression e' ->
-                instrument_expr
-                  ~override_loc:e'.Parsetree.pexp_loc ~post:true apply
+                instrument_expr ~use_loc_of:e' ~post:true apply
               end
 
           | Pexp_new _ ->
@@ -1023,7 +1022,7 @@ class instrumenter =
               | `Redundant ->
                 e
               | `Expression e' ->
-                instrument_expr ~override_loc:e'.Parsetree.pexp_loc ~post:true e
+                instrument_expr ~use_loc_of:e' ~post:true e
               end
 
           | Pexp_assert e ->
