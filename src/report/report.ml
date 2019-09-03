@@ -881,7 +881,7 @@ struct
   let all_subcommands =
     ordinary_subcommands @ debug_subcommands
 
-  let reporter =
+  let reporter () =
     Term.(eval_choice
       (ret (const (`Help (`Auto, None))),
       term_info
@@ -920,7 +920,7 @@ struct
       main ()
     end
     else
-      Term.exit reporter
+      Term.exit (reporter ())
 end
 
 
