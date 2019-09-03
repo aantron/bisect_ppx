@@ -1,21 +1,3 @@
 (executable
  (name wrapper)
- (modules path wrapper)
- (libraries unix))
-
-(rule
- (targets path.ml)
- (deps (:exe cwd.exe))
- (action
-  (with-stdout-to %{targets}
-   (progn
-    (echo "let build_dir = {|")
-    (run %{exe})
-    (echo "|}")
-    (echo "let to_root = {|")
-    (echo %{project_root})
-    (echo "|}")))))
-
-(executable
- (name cwd)
- (modules cwd))
+ (libraries bisect_ppx ocaml-migrate-parsetree))

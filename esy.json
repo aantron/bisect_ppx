@@ -29,7 +29,7 @@
     "@opam/ppx_tools_versioned": "^5.2.3"
   },
   "resolutions": {
-    "@opam/ocaml-migrate-parsetree": "aantron/ocaml-migrate-parsetree:ocaml-migrate-parsetree.opam#448a18c93b7b01686e39aba74fe47e53110949b8"
+    "@opam/ocaml-migrate-parsetree": "aantron/ocaml-migrate-parsetree:ocaml-migrate-parsetree.opam#ceb9491ec7914e29b6d27c3682436becfaeab15e"
   },
   "esy": {
     "build": "dune build -p bisect_ppx",
