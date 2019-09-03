@@ -4,7 +4,7 @@
     "@aantron/bisect_ppx"
   ],
   "ppx-flags": [
-    "@aantron/bisect_ppx/ppx.exe"
+    "@aantron/bisect_ppx/ppx"
   ],
   "refmt": 3,
   "sources": ["."]

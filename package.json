@@ -25,10 +25,10 @@
     "bs-platform": "*"
   },
   "scripts": {
-    "preinstall": "esy install && esy build && esy dune build -p bisect_ppx src/ppx/bucklescript/ppx.exe && cp _build/default/src/ppx/bucklescript/ppx.exe ./ppx.exe"
+    "preinstall": "esy install && esy build && esy dune build -p bisect_ppx src/ppx/bucklescript/ppx.exe && cp _build/default/src/ppx/bucklescript/ppx.exe ./ppx"
   },
   "bin": {
-    "bisect-ppx-report.exe": "_build/install/default/bin/bisect-ppx-report"
+    "bisect-ppx-report": "_build/install/default/bin/bisect-ppx-report"
   },
   "files": [
     "bisect_ppx.opam",
