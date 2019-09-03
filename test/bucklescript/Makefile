@@ -22,5 +22,5 @@ clean :
 
 .PHONY : clean-for-caching
 clean-for-caching :
-	npm uninstall --no-save @aantron/bisect_ppx
-	rm -rf node_modules/@aantron
+	npm uninstall --no-save bisect_ppx
+	rm -rf node_modules/bisect_ppx

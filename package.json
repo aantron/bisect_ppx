@@ -1,5 +1,5 @@
 {
-  "name": "@aantron/bisect_ppx",
+  "name": "bisect_ppx",
   "description": "Code coverage for OCaml and Reason",
   "version": "2.0.0-dev.0",
   "license": "MIT",

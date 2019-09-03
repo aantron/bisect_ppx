@@ -1,10 +1,10 @@
 {
   "name": "bisect_ppx-test",
   "bs-dependencies": [
-    "@aantron/bisect_ppx"
+    "bisect_ppx"
   ],
   "ppx-flags": [
-    "@aantron/bisect_ppx/ppx"
+    "bisect_ppx/ppx"
   ],
   "refmt": 3,
   "sources": ["."]
