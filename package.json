@@ -25,16 +25,17 @@
     "bs-platform": "*"
   },
   "scripts": {
-    "preinstall": "esy install && esy build && esy dune build -p bisect_ppx src/ppx/bucklescript/ppx.exe && cp _build/default/src/ppx/bucklescript/ppx.exe ./ppx"
+    "preinstall": "bash src/npm-install.sh"
   },
   "bin": {
-    "bisect-ppx-report": "_build/install/default/bin/bisect-ppx-report"
+    "bisect-ppx-report": "bisect-ppx-report"
   },
   "files": [
     "bisect_ppx.opam",
     "bsconfig.json",
     "dune-project",
     "esy.json",
-    "src"
+    "src",
+    "bin"
   ]
 }
