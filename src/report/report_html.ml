@@ -246,9 +246,16 @@ let output_html
         if unvisited then begin
           let offset =
             (float_of_int number) /. (float_of_int line_count) *. 100. in
+          let origin, offset =
+            if offset <= 50. then
+              "top", offset
+            else
+              "bottom", (100. -. offset)
+          in
           Report_utils.output_strings
-            ["      <span $(visited) style=\"top:$(offset)%\"></span>"]
+            ["      <span $(visited) style=\"$(origin):$(offset)%\"></span>"]
             ["visited", class_of_visited (visited, unvisited);
+             "origin", origin;
              "offset", Printf.sprintf "%.02f" offset;
              "n", string_of_int number]
             out_channel
