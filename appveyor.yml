@@ -22,5 +22,9 @@ install:
 build_script:
   - '%CYGSH% "cd /cygdrive/c/projects/bisect-ppx && eval `opam config env` && make"'
 
+branches:
+  except:
+    - binaries
+
 cache:
   - C:\Cygwin64\home\appveyor\.opam -> bisect_ppx.opam, appveyor.yml

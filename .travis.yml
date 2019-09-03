@@ -5,9 +5,9 @@ language: generic
 matrix:
   include:
     - os: osx
-      env: BUCKLESCRIPT=YES
+      env: BUCKLESCRIPT=YES SAVE_BINARIES=YES
     - os: linux
-      env: BUCKLESCRIPT=YES
+      env: BUCKLESCRIPT=YES SAVE_BINARIES=YES
     - os: osx
       env: COMPILER=4.08.1
     - os: linux
@@ -41,6 +41,10 @@ matrix:
   fast_finish: true
 
 script: bash -e ./test/ci/travis.sh
+
+branches:
+  except:
+    - binaries
 
 cache:
   directories:

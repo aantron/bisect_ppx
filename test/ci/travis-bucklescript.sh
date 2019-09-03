@@ -22,6 +22,10 @@ fi
 
 date
 
+make -C test/bucklescript clean-for-caching
+
+date
+
 make -C test/bucklescript install
 
 date
@@ -30,6 +34,15 @@ make -C test/bucklescript test
 
 date
 
-make -C test/bucklescript clean-for-caching
+if [ "$SAVE_BINARIES" == YES ]
+then
+    if [ "$TRAVIS_BRANCH" == master ]
+    then
+        if [ "$TRAVIS_PULL_REQUEST" == false ]
+        then
+            bash ./test/ci/travis-binaries.sh
+        fi
+    fi
+fi
 
 date

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
 set -x
 
 if [ "$TRAVIS_EVENT_TYPE" == cron ]
@@ -16,6 +15,12 @@ fi
 if [ "$BUCKLESCRIPT" = YES ]
 then
     bash ./test/ci/travis-bucklescript.sh
+    RESULT=$?
+    make -C test/bucklescript clean-for-caching
+    exit $RESULT
 else
     bash ./test/ci/travis-opam.sh
+    RESULT=$?
+    opam clean
+    exit $RESULT
 fi

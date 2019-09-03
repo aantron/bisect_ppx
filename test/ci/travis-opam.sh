@@ -88,5 +88,3 @@ then
         _build/install/default/bin/meta-bisect-ppx-report \
             send-to Coveralls bisect*.meta)
 fi
-
-opam clean
