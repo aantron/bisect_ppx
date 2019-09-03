@@ -99,7 +99,7 @@ self-coverage-diff :
 
 EXPECTED_FILES := \
   --expect bisect_ppx/src/ \
-  --do-not-expect bisect_ppx/src/ppx/wrapper/ \
+  --do-not-expect bisect_ppx/src/ppx/bucklescript/ \
   --do-not-expect bisect_ppx/src/runtime/bucklescript/
 
 .PHONY : self-coverage-test
