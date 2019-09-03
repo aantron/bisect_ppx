@@ -860,7 +860,12 @@ class instrumenter =
               | `None ->
                 let rec fn e' =
                   match e'.Parsetree.pexp_desc with
-                  | Pexp_apply (e', _) -> fn e'
+                  | Pexp_apply (e'', _) ->
+                    let attributes = e'.pexp_attributes in
+                    if Coverage_attributes.has_off_attribute attributes then
+                      e'
+                    else
+                      fn e''
                   | _ -> e'
                 in
                 instrument_expr

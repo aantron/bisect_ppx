@@ -2,9 +2,9 @@ module Bisect_visit___expression___ml =
   struct
     let ___bisect_visit___ =
       let point_definitions =
-        "\132\149\166\190\000\000\000}\000\000\000\026\000\000\000e\000\000\000e\b\000\000d\000\160M@\160\000MB\160\000NA\160\000VC\160\001\001\tD\160\001\001EE\160\001\001}F\160\001\001\191G\160\001\001\249H\160\001\002\016I\160\001\002*J\160\001\002\129K\160\001\002\189L\160\001\002\198M\160\001\002\239N\160\001\002\255O\160\001\003(P\160\001\0030Q\160\001\003XR\160\001\003xS\160\001\003\167T\160\001\003\209U\160\001\004+W\160\001\0042V\160\001\004VX" in
+        "\132\149\166\190\000\000\000x\000\000\000\025\000\000\000a\000\000\000a\b\000\000`\000\160M@\160\000MB\160\000NA\160\000VC\160\001\001\tD\160\001\001EE\160\001\001}F\160\001\001\191G\160\001\001\249H\160\001\002\016I\160\001\002\129J\160\001\002\189K\160\001\002\198L\160\001\002\239M\160\001\002\255N\160\001\003(O\160\001\0030P\160\001\003XQ\160\001\003xR\160\001\003\167S\160\001\003\209T\160\001\004+V\160\001\0042U\160\001\004VW" in
       let `Staged cb =
-        Bisect.Runtime.register_file "expression.ml" ~point_count:25
+        Bisect.Runtime.register_file "expression.ml" ~point_count:24
           ~point_definitions in
       cb
   end
@@ -41,63 +41,61 @@ let fn' _ _ = ___bisect_visit___ 8; ()
 let () =
   let ___bisect_result___ = () |> (fn' ()) in
   ___bisect_visit___ 9; ___bisect_result___
-let () =
-  let ___bisect_result___ = () |> ((fn' ())[@coverage off]) in
-  ___bisect_visit___ 10; ___bisect_result___
+let () = () |> ((fn' ())[@coverage off])
 let () = () |> (((fn')[@coverage off]) ())
 let () =
   (let ___bisect_result___ = () |> fn in
-   ___bisect_visit___ 11; ___bisect_result___);
+   ___bisect_visit___ 10; ___bisect_result___);
   ()
 let () = () |> fn; ((())[@coverage off])
 let _ =
   if true
-  then (___bisect_visit___ 12; true)
-  else if false then (___bisect_visit___ 13; true) else false
+  then (___bisect_visit___ 11; true)
+  else if false then (___bisect_visit___ 12; true) else false
 let _ =
   if ((true)[@coverage off])
   then true
-  else if false then (___bisect_visit___ 14; true) else false
+  else if false then (___bisect_visit___ 13; true) else false
 let _ =
   if true
-  then (___bisect_visit___ 15; true)
+  then (___bisect_visit___ 14; true)
   else if ((false)[@coverage off]) then true else false
 let _ =
   if true
-  then (___bisect_visit___ 16; true)
+  then (___bisect_visit___ 15; true)
   else
     if
       (if true
-       then (___bisect_visit___ 17; true)
+       then (___bisect_visit___ 16; true)
        else if ((true)[@coverage off]) then true else false)
     then true
     else false
 let _ =
   if true
-  then (___bisect_visit___ 18; true)
+  then (___bisect_visit___ 17; true)
   else
     if
       (if ((true)[@coverage off])
        then true
-       else if true then (___bisect_visit___ 19; true) else false)
+       else if true then (___bisect_visit___ 18; true) else false)
     then true
     else false
-class foo = object method bar = ___bisect_visit___ 20; () end
+class foo = object method bar = ___bisect_visit___ 19; () end
 let () =
   let _ =
     let ___bisect_result___ = new foo in
-    ___bisect_visit___ 21; ___bisect_result___ in
+    ___bisect_visit___ 20; ___bisect_result___ in
   ()
 let () = let _ = new foo in ((())[@coverage off])
 let () =
   let o =
     let ___bisect_result___ = new foo in
-    ___bisect_visit___ 23; ___bisect_result___ in
+    ___bisect_visit___ 22; ___bisect_result___ in
   (let ___bisect_result___ = o#bar in
-   ___bisect_visit___ 22; ___bisect_result___);
+   ___bisect_visit___ 21; ___bisect_result___);
   ()
 let () =
   let o =
     let ___bisect_result___ = new foo in
-    ___bisect_visit___ 24; ___bisect_result___ in
+    ___bisect_visit___ 23; ___bisect_result___ in
   o#bar; ((())[@coverage off])
