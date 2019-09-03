@@ -1,14 +1,14 @@
 let () =
   let argv =
-    match Array.to_list Sys.argv with
-    | [program; input_file; output_file] ->
-      Array.of_list [
+    match Sys.argv with
+    | [|program; input_file; output_file|] ->
+      [|
         program;
         input_file;
         "-o"; output_file;
         "--dump-ast";
         "--conditional";
-      ]
+      |]
     | _ ->
       Sys.argv
   in
