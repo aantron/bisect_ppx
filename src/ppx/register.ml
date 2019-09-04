@@ -60,7 +60,7 @@ let switches = [
   " Deprecated") ;
 ]
 
-let deprecated = Common.deprecated
+let deprecated = Common.deprecated "bisect_ppx"
 
 let switches =
   switches

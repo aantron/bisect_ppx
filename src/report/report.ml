@@ -164,7 +164,7 @@ struct
     "<string>  Coveralls or Codecov")
 ]
 
-  let deprecated = Common.deprecated
+  let deprecated = Common.deprecated "bisect-ppx-report"
 
   let options =
     options

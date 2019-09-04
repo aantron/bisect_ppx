@@ -92,5 +92,5 @@ val register_file :
 
 type options = (Arg.key * Arg.spec * Arg.doc) list
 
-val deprecated : string -> options -> options
+val deprecated : string -> string -> options -> options
 (** Appends a specification for a deprecated command-line argument. *)

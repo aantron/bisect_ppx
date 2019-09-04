@@ -218,12 +218,11 @@ let register_file file ~point_count ~point_definitions =
 
 type options = (Arg.key * Arg.spec * Arg.doc) list
 
-let deprecated basename options =
+let deprecated binary basename options =
   let make make_spec fn =
     (basename,
     make_spec (fun v ->
-      Printf.eprintf
-        "bisect-ppx-report argument '%s' is deprecated.\n" basename;
+      Printf.eprintf "%s argument '%s' is deprecated.\n" binary basename;
       Printf.eprintf "Use '-%s' instead.\n" basename;
       Printf.eprintf "This requires Bisect_ppx >= 2.0.0.\n";
       fn v),
