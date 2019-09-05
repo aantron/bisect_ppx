@@ -4,6 +4,8 @@ test :
 	npm run instrument
 	npm run execute
 	./node_modules/.bin/bisect-ppx-report html
+	./node_modules/.bin/bisect-ppx-report summary | diff expected -
+	./node_modules/.bin/bisect-ppx-report summary
 	@echo "See _coverage/index.html."
 
 .PHONY : full-test
