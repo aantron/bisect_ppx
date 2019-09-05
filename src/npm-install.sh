@@ -45,5 +45,6 @@ then
     esy_build
 fi
 
+echo "Using pre-built binaries for system '$OS'."
 cp bin/$OS/ppx ./ppx
 cp bin/$OS/bisect-ppx-report ./bisect-ppx-report
