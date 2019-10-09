@@ -35,8 +35,8 @@
 
 
 (* From ocaml-migrate-parsetree. *)
-module Ast = Migrate_parsetree.Ast_408
-module Ast_408 = Ast
+module Ast = Migrate_parsetree.Ast_409
+module Ast_409 = Ast
 (* Workaround for
   https://travis-ci.org/aantron/bisect_ppx/jobs/538321848#L588 *)
 
@@ -49,8 +49,8 @@ module Str = Ast.Ast_helper.Str
 module Cf = Ast.Ast_helper.Cf
 
 (* From ppx_tools_versioned. *)
-module Ast_convenience = Ast_convenience_408
-module Ast_mapper_class = Ast_mapper_class_408
+module Ast_convenience = Ast_convenience_409
+module Ast_mapper_class = Ast_mapper_class_409
 
 
 

@@ -7,5 +7,5 @@
  (kind ppx_rewriter)
  (synopsis "Code coverage for OCaml")
  (ppx_runtime_libraries bisect_ppx.runtime)
- (preprocess (pps ppx_tools_versioned.metaquot_408))
+ (preprocess (pps ppx_tools_versioned.metaquot_409))
  (libraries bisect_ppx.runtime ocaml-migrate-parsetree ppx_tools_versioned str))
