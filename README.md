@@ -96,33 +96,41 @@ from your `dune` files. This is a limitation of Dune that we hope to address in
 Refer to [**aantron/bisect-starter-bsb**][bsb-repo], which produces
 [this report][bsb-report].
 
-1. [Depend on Bisect_ppx in `package.json`](https://github.com/aantron/bisect-starter-bsb/blob/597b9f901d0782b1f8c56b3a6bdf04c6c67ae56b/package.json#L3-L6),
+1. [Depend on Bisect_ppx in `package.json`](https://github.com/aantron/bisect-starter-bsb/blob/master/package.json#L3-L6),
 and install it:
 
     ```json
     "dependencies": {
-      "@aantron/bisect_ppx": "git+https://github.com/aantron/bisect_ppx.git",
-      "bs-platform": "&"
+      "bisect_ppx": "git+https://github.com/aantron/bisect_ppx.git#binaries",
+      "bs-platform": "*"
     }
     ```
+
+    ```
+    npm install
+    ```
+
+    This points `bisect_ppx` to the `binaries` branch, so the installation
+    should be quite fast.
+
+    If pre-built binaries aren't available for your system, the build will
+    automatically fall back to building Bisect_ppx from source using
+    [esy](https://esy.sh), which will take a few minutes the first time. If this
+    happens, you may need to install esy, if it is not already installed:
 
     ```
     npm install -g esy
     npm install
     ```
 
-    If you have not used [esy](https://esy.sh) before, the first install of
-    Bisect_ppx will take several minutes while esy builds an OCaml compiler.
-    Subsequent builds will be fast, because of esy's cache.
-
-2. [Add Bisect_ppx to your `bsconfig.json`](https://github.com/aantron/bisect-starter-bsb/blob/597b9f901d0782b1f8c56b3a6bdf04c6c67ae56b/bsconfig.json#L3-L8):
+2. [Add Bisect_ppx to your `bsconfig.json`](https://github.com/aantron/bisect-starter-bsb/blob/master/bsconfig.json#L3-L8):
 
     ```json
     "bs-dependencies": [
-      "@aantron/bisect_ppx"
+      "bisect_ppx"
     ],
     "ppx-flags": [
-      "@aantron/bisect_ppx/ppx.exe"
+      "bisect_ppx/ppx"
     ]
     ```
 
@@ -151,7 +159,7 @@ somewhere in your tester, which will have Node write a file like
     ```
     BISECT_ENABLE=yes npm run build
     npm run test
-    ./node_modules/.bin/bisect-ppx-report.exe html
+    npx bisect-ppx-report.exe html
     ```
 
 [bsb-repo]: https://github.com/aantron/bisect-starter-bsb#readme
