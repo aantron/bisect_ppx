@@ -4,4 +4,4 @@
 
 
 
-let value = "1.4.1"
+let value = "1.4.2"
