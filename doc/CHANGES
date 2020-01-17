@@ -1,3 +1,11 @@
+Version 1.4.2 (2020-01-17):
+---------------------------
+
+  Changes
+
+  - Use OCaml 4.09 ASTs during preprocessing (88d24c5, 02dfb10).
+
+
 Version 1.4.1 (2018-03-25):
 ---------------------------
 
