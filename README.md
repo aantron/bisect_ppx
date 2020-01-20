@@ -69,6 +69,9 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
      (public_name my_lib)
      (preprocess (pps bisect_ppx --conditional)))
     ```
+    ```sh
+    dune clean ; BISECT_ENABLE=yes dune build @all
+    ```
 
 3. Run your test binary. In addition to testing your code, when exiting, it will
 write one or more files with names like `bisect0123456789.coverage`. Then,
@@ -79,9 +82,12 @@ generate the [coverage report][dune-report] in `_coverage/index.html`:
     bisect-ppx-report html
     ```
 
-4. During release, you have to manually remove `(preprocess (pps bisect_ppx))`
-from your `dune` files. This is a limitation of Dune that we hope to address in
-[ocaml/dune#57][dune-57].
+4. During release, thanks to the `--conditional` flag, the preprocessing can be
+disabled by omitting the `BISECT_ENABLE` environment variable:
+
+    ```sh
+    dune clean ; dune build @all
+    ```
 
 [dune-repo]: https://github.com/aantron/bisect-starter-dune#readme
 [dune-report]: https://aantron.github.io/bisect-starter-dune/
