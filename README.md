@@ -61,8 +61,9 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     ]
     ```
 
-2. [Preprocess the code under test with `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/master/dune#L4)
-(but don't preprocess the tester itself):
+2. [Mark the code under test for preprocessing by
+   `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/master/dune#L4)
+   (but don't preprocess the tester itself):
 
     ```scheme
     (library
@@ -73,21 +74,43 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     dune clean ; BISECT_ENABLE=yes dune build @all
     ```
 
-3. Run your test binary. In addition to testing your code, when exiting, it will
-write one or more files with names like `bisect0123456789.coverage`. Then,
-generate the [coverage report][dune-report] in `_coverage/index.html`:
+3. Build and run your test binary. In addition to testing your code, when
+   exiting, it will write one or more files with names like
+   `bisect0123456789.coverage`.
 
     ```
     BISECT_ENABLE=yes dune runtest --force
+    ```
+
+    `BISECT_ENABLE=yes` turns on instrumentation. If you run `dune runtest` (or
+    any other build) without it, Bisect_ppx will pass the code through
+    unchanged (i.e., without adding instrumentation).
+
+    At the moment, if you switch between building with and without
+    instrumentation, you have to run `dune clean` in between the builds.
+
+4. Generate the [coverage report][dune-report] in `_coverage/index.html`:
+
+    ```
     bisect-ppx-report html
     ```
 
-4. During release, thanks to the `--conditional` flag, the preprocessing can be
-disabled by omitting the `BISECT_ENABLE` environment variable:
+4. For releasing, you have two options:
 
-    ```sh
-    dune clean ; dune build @all
-    ```
+    - If you don't want a dependency on package `bisect_ppx`, you have to
+      manually remove `(preprocess (pps bisect_ppx))` from your `dune` files.
+    - If a dependency on Bisect_ppx is okay, you don't have to do anything. A
+      regular build command, without `BISECT_ENABLE=yes` will produce
+      uninstrumented code:
+
+      ```
+      ["dune" "build" "-p" name "-j" $jobs]
+      ```
+
+    This choice is due to a limitation of Dune that we hope to address in
+    [ocaml/dune#57][dune-57]. After that, `BISECT_ENABLE=yes` won't be
+    necessary anymore, and you will be able to release without a dependency on
+    Bisect_ppx, without having to edit any files.
 
 [dune-repo]: https://github.com/aantron/bisect-starter-dune#readme
 [dune-report]: https://aantron.github.io/bisect-starter-dune/
