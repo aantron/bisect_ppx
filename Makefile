@@ -105,7 +105,7 @@ EXPECTED_FILES := \
 .PHONY : self-coverage-test
 self-coverage-test :
 	cd $(SELF_COVERAGE) && rm -f bisect*.meta
-	cd $(SELF_COVERAGE) && dune build
+	cd $(SELF_COVERAGE) && dune build @install
 	cd $(SELF_COVERAGE) && dune runtest --force --no-buffer -j 1
 	rm -rf _coverage
 	cd $(SELF_COVERAGE) && \
