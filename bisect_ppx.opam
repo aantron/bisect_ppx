@@ -26,8 +26,8 @@ depends: [
   "ocaml-migrate-parsetree" {>= "1.4.0"}
   "ppx_tools_versioned" {>= "5.2.3"}
 
-  "ocamlfind" {dev}
-  "ounit" {dev}
+  "ocamlfind" {with-test}
+  "ounit" {with-test}
 ]
 
 build: [
