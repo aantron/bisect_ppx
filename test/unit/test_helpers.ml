@@ -95,8 +95,7 @@ let with_directory context test_name f =
 
   let restore () =
     test_context := None;
-    Sys.chdir old_wd;
-    run ("rm -rf " ^ directory)
+    Sys.chdir old_wd
   in
 
   logf context `Info "In directory '%s'" new_wd;
