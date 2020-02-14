@@ -84,7 +84,6 @@ let with_directory context test_name f =
   in
   test_directory := directory;
 
-  if Sys.file_exists directory then run ("rm -rf " ^ directory);
   Unix.mkdir directory 0o755;
 
   let old_wd = Sys.getcwd () in
