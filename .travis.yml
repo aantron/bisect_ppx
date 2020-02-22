@@ -89,7 +89,7 @@ scripts:
       - |
         if [ "$OPAM_FROM_CACHE" == NO ]
         then
-          opam install -y --deps-only .
+          opam install -y --with-test --deps-only .
         fi
 
     script:
