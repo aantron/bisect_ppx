@@ -1,6 +1,6 @@
 (executable
  (name test_main)
- (libraries bisect_ppx.runtime compiler-libs.common oUnit))
+ (libraries bisect_ppx.runtime compiler-libs.common ounit2))
 
 (alias
  (name runtest)

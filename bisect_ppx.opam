@@ -27,7 +27,7 @@ depends: [
   "ppx_tools_versioned" {>= "5.2.3"}
 
   "ocamlfind" {with-test}
-  "ounit" {with-test}
+  "ounit2" {with-test}
 ]
 
 build: [
