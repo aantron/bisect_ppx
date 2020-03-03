@@ -4,6 +4,6 @@
 
 
 
-class instrumenter : Ppx_tools_409.Ast_mapper_class.mapper
+class instrumenter : Ppx_tools_410.Ast_mapper_class.mapper
 (**  This class implements an instrumenter to be used through the {i -ppx}
     command-line switch. *)

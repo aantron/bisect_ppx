@@ -35,8 +35,8 @@
 
 
 (* From ocaml-migrate-parsetree. *)
-module Ast = Migrate_parsetree.Ast_409
-module Ast_409 = Ast
+module Ast = Migrate_parsetree.Ast_410
+module Ast_410 = Ast
 (* Workaround for
   https://travis-ci.org/aantron/bisect_ppx/jobs/538321848#L588 *)
 
@@ -50,8 +50,8 @@ module Cl = Ast.Ast_helper.Cl
 module Cf = Ast.Ast_helper.Cf
 
 (* From ppx_tools_versioned. *)
-module Ast_convenience = Ast_convenience_409
-module Ast_mapper_class = Ast_mapper_class_409
+module Ast_convenience = Ast_convenience_410
+module Ast_mapper_class = Ast_mapper_class_410
 
 (* From Bisect_ppx. *)
 module Common = Bisect_common
@@ -772,7 +772,7 @@ struct
 
       Str.module_ ~loc @@
         Mb.mk ~loc
-          (Location.mkloc mangled_module_name loc)
+          (Location.mkloc (Some mangled_module_name) loc)
           (Mod.structure ~loc [bisect_visit_function])
     in
 

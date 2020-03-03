@@ -86,11 +86,8 @@ scripts:
       - ocaml -version
       - opam --version
 
-      - |
-        if [ "$OPAM_FROM_CACHE" == NO ]
-        then
-          opam install -y --with-test --deps-only .
-        fi
+      - opam install -y --with-test --deps-only .
+      - opam list
 
     script:
       - |
