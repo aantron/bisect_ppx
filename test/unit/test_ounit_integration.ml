@@ -8,7 +8,7 @@ open Test_helpers
 
 let tests =
   test "ounit-integration" begin fun () ->
-    compile ((with_bisect ()) ^ " -package oUnit")
+    compile ((with_bisect ()) ^ " -package ounit2")
       "fixtures/ounit-integration/test.ml";
     run "./a.out > /dev/null";
     report "--csv output" ~r:"2> /dev/null";
