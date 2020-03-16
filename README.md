@@ -439,9 +439,11 @@ to submit coverage reports to Coveralls. At the end of `make coverage`, the
 <a id="Other"></a>
 ## Other topics
 
-See [advanced usage][advanced] for how to exclude generated files from coverage,
-and supported environment variables. Use of these features is discouraged. They
-are meant for working around build system issues and for build debugging.
+See [advanced usage][advanced] for:
+
+- Exhaustiveness checking.
+- Excluding generated files from coverage.
+- Environment variables.
 
 [advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#readme
 

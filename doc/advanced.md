@@ -4,10 +4,49 @@
 
 #### Table of contents
 
+- [Exhaustiveness checking](#Exhaustiveness)
 - [Excluding generated files from coverage](#Excluding)
 - [Environment variables](#EnvironmentVariables)
   - [Naming the output files](#OutFiles)
   - [Logging](#Logging)
+
+
+
+<br>
+
+<a id="Exhaustiveness"></a>
+## Exhaustiveness checking
+
+It is easy to accidentally fail to preprocess part of your project, by leaving
+out `(preprocess (pps bisect_ppx))` in one of its subdirectories. If this
+happens, and goes unnoticed, you may see misleading coverage statistics, because
+Bisect_ppx will simply not be aware of the missing files at all. It will not
+report them as either covered or not covered &mdash; they will just not be
+present in the report.
+
+To sanity-check this, you can pass the `--expect` option to `bisect-ppx-report`.
+For example,
+
+```
+bisect-ppx-report html --expect src/
+```
+
+`bisect-ppx-report` will then recursively scan `src/` for any `.ml` and `.re`
+files, and check that all of them were included in the report.
+
+You may have a subdirectory of `src/` that should not be included. You can
+exclude it from the recursive scan with `--do-not-expect`:
+
+```
+bisect-ppx-report html --expect src/ --do-not-expect src/build_tool/
+```
+
+You can also specify individual files with `--expect` and `--do-not-expect` by
+omitting the trailing path separator:
+
+```
+bisect-ppx-report html --expect src/ --do-not-expect src/build_tool.ml
+```
 
 
 
