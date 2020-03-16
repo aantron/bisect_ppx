@@ -55,7 +55,7 @@ bisect-ppx-report html --expect src/ --do-not-expect src/build_tool.ml
 <a id="Excluding"></a>
 ## Excluding generated files from coverage
 
-Whole files can be excluded by placing `[@@@coverage exclude file]` anywhere in
+Whole files can be excluded by placing `[@@@coverage exclude_file]` anywhere in
 their top-level module.
 
 If you have generated code that you cannot easily place an attribute into, nor
