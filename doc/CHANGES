@@ -1,6 +1,52 @@
+Version 2.0.0 (2020-03-17):
+---------------------------
+  Additions
+
+  - BuckleScript support and NPM packaging (#206, #249).
+  - Js_of_ocaml support (#212).
+  - Automated sending of reports from Travis and CircleCI to Coveralls and
+    Codecov (#241).
+  - Better integration with Dune (#235).
+  - Better integration with esy (#263, #270).
+  - [@coverage off] attribute and its variants for excluding expressions and
+    module items from coverage (#198).
+  - [@@@coverage exclude file] for excluding entire files (#130, #219).
+  - Cmdliner-based command line (#145).
+  - Reporter automatically searches for .coverage files (#236).
+  - New, more disciplined instrumentation strategy (#82, #128, #205).
+  - Syntax highlighting in the generated reports (#135).
+  - Sanity-checking the set of source files included in the coverage report
+    (a7a4ca0).
+  - Use 4.10 ASTs internally for the transformation (#274).
+  - MIT license (#199).
+
+  Deprecations
+
+  These features will be removed in 2.1.0.
+
+  - PPX -mode option (#200).
+  - PPX -no-comment-parsing option (#202).
+  - PPX -exclude option (#244).
+  - PPX -exclude-file in favor of --exclusions (#245).
+  - Reporter --html, --text, --coveralls are deprecated in favor of the html,
+    summary, coveralls sub-commands, respectively (#145).
+  - All other reporter multi-character options with a single dash (-) prefix are
+    deprecated in favor of double-dashed (--) versions (#145).
+  - .out files are now .coverage files (#110).
+
+  Removed
+
+  - BISECT-IGNORE comments, in favor of [@coverage off] (#202).
+
+  Bugs fixed
+
+  - Randomize intermediate filenames to avoid collisions upon their creation
+    (#194, Mindy Preston).
+  - Left margin indicators in the HTML report could be invisible, if they were
+    located at the bottom of the margin (#254).
+
 Version 1.4.2 (2020-01-17):
 ---------------------------
-
   Changes
 
   - Use OCaml 4.09 ASTs during preprocessing (88d24c5, 02dfb10).
@@ -8,7 +54,6 @@ Version 1.4.2 (2020-01-17):
 
 Version 1.4.1 (2018-03-25):
 ---------------------------
-
   Additions
 
   - PPX -no-comment-parsing option, to work around Bisect_ppx trying to parse
@@ -34,7 +79,6 @@ Version 1.4.0 (2018-11-28):
 
 Version 1.3.4 (2018-07-23):
 ---------------------------
-
   - Remove manual call to PPX driver (#173, Rudi Grinberg).
 
 Version 1.3.3 (2018-04-29):
