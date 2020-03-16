@@ -300,7 +300,13 @@ struct
         else
           []
       in
-      let all_coverage_files = in_current_directory @ in_build_directory in
+      let in_esy_sandbox =
+        match Sys.getenv "cur__target_dir" with
+        | exception Not_found -> []
+        | directory -> list_recursively directory filename_filter
+      in
+      let all_coverage_files =
+        in_current_directory @ in_build_directory @ in_esy_sandbox in
 
       (* Display feedback about where coverage files were found. *)
       all_coverage_files
@@ -657,7 +663,7 @@ struct
       info [] ~docv:"COVERAGE_FILES" ~doc:
         ("Optional list of *.coverage files produced during testing. If not " ^
         "specified, bisect-ppx-report will search for *.coverage files in ./ " ^
-        "and ./_build"))
+        "and ./_build, and, if run under esy, inside the esy sandbox."))
     --> (:=) Arguments.raw_coverage_files
 
   let output_file kind =
