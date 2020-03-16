@@ -20,11 +20,11 @@ Whole files can be excluded by placing `[@@@coverage exclude file]` anywhere in
 their top-level module.
 
 If you have generated code that you cannot easily place an attribute into, nor
-is it easy to avoid preprocessing it, you can pass the `--exclude-file` option
-to the Bisect_ppx preprocessor:
+is it easy to avoid preprocessing it, you can pass the `--exclusions` option to
+the Bisect_ppx preprocessor:
 
 ```
-(preprocess (pps bisect_ppx --exclude-file bisect.exclude))
+(preprocess (pps bisect_ppx --exclusions bisect.exclude))
 (preprocessor_deps (file bisect.exclude))
 ```
 
