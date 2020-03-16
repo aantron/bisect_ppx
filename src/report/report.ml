@@ -651,6 +651,11 @@ sig
   val eval : unit -> unit
 end =
 struct
+  let esy_source_dir =
+    match Sys.getenv "cur__target_dir" with
+    | exception Not_found -> []
+    | directory -> [Filename.concat directory "default"]
+
   open Cmdliner
 
   let (-->) a f = Term.(const f $ a)
@@ -672,12 +677,13 @@ struct
     --> fun f -> Arguments.report_outputs := [kind, f]
 
   let search_directories =
-    Arg.(value @@ opt_all string ["."; "./_build/default"] @@
+    Arg.(value @@ opt_all string (["."; "./_build/default"] @ esy_source_dir) @@
       info ["I"] ~docv:"DIRECTORY" ~doc:
         ("Directory in which to look for source files. This option can be " ^
         "specified multiple times. File paths are concatenated with each " ^
         "$(b,-I) directory when looking for files. The default directories " ^
-        "are ./ and ./_build/default/"))
+        "are ./ and ./_build/default/. If running inside an esy sandbox, the " ^
+        "default/ directory in the sandbox is also included."))
     --> (:=) Arguments.search_path
 
   let ignore_missing_files =
