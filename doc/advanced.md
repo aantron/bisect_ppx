@@ -20,14 +20,20 @@ Whole files can be excluded by placing `[@@@coverage exclude file]` anywhere in
 their top-level module.
 
 If you have generated code that you cannot easily place an attribute into, nor
-is it easy to avoid preprocessing it, you can pass the `-exclude-file` option
+is it easy to avoid preprocessing it, you can pass the `--exclude-file` option
 to the Bisect_ppx preprocessor:
 
 ```
-(preprocess (pps bisect_ppx --exclude-file .exclude))
+(preprocess (pps bisect_ppx --exclude-file bisect.exclude))
+(preprocessor_deps (file bisect.exclude))
 ```
 
-Here is what the `.exclude` file can look like:
+Note that the paths to `bisect.exclude` might be different between the
+`preprocess` and `preprocessor_deps` stanzas, because `pps bisect_ppx` looks for
+the file relative to the root directory of your project, while
+`preprocessor_deps` looks in the same directory that the `dune` file is in.
+
+Here is what the `bisect.exclude` file can look like:
 
 ```
 (* OCaml-style comments are okay. *)
