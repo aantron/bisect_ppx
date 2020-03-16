@@ -27,6 +27,7 @@ details of how it is generated are in the [worked example](#Example).
 
 - [**Usage**](#Usage)
   - [**Dune**](#Dune) &nbsp; ([starter repo][dune-repo], [report][dune-report])
+  - [**esy**](#esy) &nbsp; ([starter repo][esy-repo], [report][esy-report])
   - [**BuckleScript**](#BuckleScript) &nbsp; ([starter repo][bsb-repo], [report][bsb-report])
   - [**Js_of_ocaml**](#Js_of_ocaml) &nbsp; ([starter repo][jsoo-repo], [report][jsoo-report])
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
@@ -111,6 +112,38 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
 
 [dune-repo]: https://github.com/aantron/bisect-starter-dune#readme
 [dune-report]: https://aantron.github.io/bisect-starter-dune/
+
+
+
+<br>
+
+<a id="esy"></a>
+### esy
+
+Refer to [**aantron/bisect-starter-esy**][esy-repo], which produces [this
+report][esy-report].
+
+The instructions are the same as for regular [Dune](#Dune) usage, but...
+
+1. [Depend on Bisect_ppx in `package.json`](https://github.com/aantron/bisect-starter-esy/blob/master/package.json#L5),
+instead of in an `opam` file:
+
+    ```json
+    "dependencies": {
+      "@opam/bisect_ppx": "aantron/bisect_ppx:bisect_ppx.opam",
+    }
+    ```
+
+2. Use the `esy` command for the build and for running binaries:
+
+    ```
+    esy install
+    BISECT_ENABLE=yes esy dune runtest --force
+    esy dune exec bisect-ppx-report -- html
+    ```
+
+[esy-repo]: https://github.com/aantron/bisect-starter-esy
+[esy-report]: https://aantron.github.io/bisect-starter-esy/
 
 
 
