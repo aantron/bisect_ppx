@@ -126,7 +126,7 @@ The instructions are the same as for regular [Dune](#Dune) usage, but...
 instead of in an `opam` file:
 
     ```json
-    "dependencies": {
+    "devDependencies": {
       "@opam/bisect_ppx": "^2.0.0",
     }
     ```
@@ -156,8 +156,10 @@ Refer to [**aantron/bisect-starter-bsb**][bsb-repo], which produces
 and install it:
 
     ```json
+    "devDependencies": {
+      "bisect_ppx": "^2.0.0"
+    },
     "dependencies": {
-      "bisect_ppx": "^2.0.0",
       "bs-platform": "*"
     }
     ```
