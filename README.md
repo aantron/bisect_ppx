@@ -57,9 +57,6 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     depends: [
       "bisect_ppx" {dev & >= "2.0.0"}
     ]
-    pin-depends: [
-      ["bisect_ppx.git" "git+https://github.com/aantron/bisect_ppx.git"]
-    ]
     ```
 
 2. [Mark the code under test for preprocessing by
@@ -130,7 +127,7 @@ instead of in an `opam` file:
 
     ```json
     "dependencies": {
-      "@opam/bisect_ppx": "aantron/bisect_ppx:bisect_ppx.opam",
+      "@opam/bisect_ppx": "^2.0.0",
     }
     ```
 
@@ -160,7 +157,7 @@ and install it:
 
     ```json
     "dependencies": {
-      "bisect_ppx": "git+https://github.com/aantron/bisect_ppx.git#binaries",
+      "bisect_ppx": "^2.0.0",
       "bs-platform": "*"
     }
     ```
