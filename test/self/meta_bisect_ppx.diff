@@ -35,14 +35,14 @@ diff -ru src/ppx/dune _self/meta_bisect_ppx/src/ppx/dune
   (synopsis "Code coverage for OCaml")
 - (ppx_runtime_libraries bisect_ppx.runtime)
 + (ppx_runtime_libraries meta_bisect_ppx.runtime)
-  (preprocess (pps ppx_tools_versioned.metaquot_409))
+  (preprocess (pps ppx_tools_versioned.metaquot_410))
 - (libraries bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
 + (libraries meta_bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
 diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
 --- src/ppx/instrument.ml
 +++ _self/meta_bisect_ppx/src/ppx/instrument.ml
 @@ -54,7 +54,7 @@
- module Ast_mapper_class = Ast_mapper_class_409
+ module Ast_mapper_class = Ast_mapper_class_410
  
  (* From Bisect_ppx. *)
 -module Common = Bisect_common
@@ -50,7 +50,7 @@ diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
  
  
  
-@@ -749,7 +749,7 @@
+@@ -760,7 +760,7 @@
            let ___bisect_visit___ =
              let point_definitions = [%e points_data] in
              let `Staged cb =
@@ -134,18 +134,6 @@ diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
  
  module Arguments :
  sig
-diff -ru src/report/report_utils.ml _self/meta_bisect_ppx/src/report/report_utils.ml
---- src/report/report_utils.ml
-+++ _self/meta_bisect_ppx/src/report/report_utils.ml
-@@ -107,7 +107,7 @@
-     lines
- 
- let output_bytes data filename =
--  Bisect_common.try_out_channel
-+  Meta_bisect_common.try_out_channel
-     true
-     filename
-     (fun channel -> Array.iter (output_byte channel) data)
 diff -ru src/runtime/native/dune _self/meta_bisect_ppx/src/runtime/native/dune
 --- src/runtime/native/dune
 +++ _self/meta_bisect_ppx/src/runtime/native/dune

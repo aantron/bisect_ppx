@@ -14,8 +14,8 @@ diff -ru src/ppx/dune _self/bisect_ppx/src/ppx/dune
   (kind ppx_rewriter)
   (synopsis "Code coverage for OCaml")
   (ppx_runtime_libraries bisect_ppx.runtime)
-- (preprocess (pps ppx_tools_versioned.metaquot_409))
-+ (preprocess (pps meta_bisect_ppx ppx_tools_versioned.metaquot_409))
+- (preprocess (pps ppx_tools_versioned.metaquot_410))
++ (preprocess (pps meta_bisect_ppx ppx_tools_versioned.metaquot_410))
   (libraries bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
 diff -ru src/report/dune _self/bisect_ppx/src/report/dune
 --- src/report/dune
@@ -26,7 +26,7 @@ diff -ru src/report/dune _self/bisect_ppx/src/report/dune
   (package bisect_ppx)
 + (preprocess (pps meta_bisect_ppx))
   (libraries bisect_ppx.common cmdliner unix))
-
+ 
  (rule
 diff -ru src/runtime/native/dune _self/bisect_ppx/src/runtime/native/dune
 --- src/runtime/native/dune
