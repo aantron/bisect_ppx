@@ -362,7 +362,7 @@ end
 type ci = [
   | `CircleCI
   | `Travis
-  | `Github
+  | `GitHub
 ]
 
 module CI :
@@ -382,23 +382,23 @@ struct
   let detect () =
     environment_variable "CIRCLECI" "true" `CircleCI @@ fun () ->
     environment_variable "TRAVIS" "true" `Travis @@ fun () ->
-    environment_variable "GITHUB_ACTIONS" "true" `Github @@ fun () ->
+    environment_variable "GITHUB_ACTIONS" "true" `GitHub @@ fun () ->
     None
 
   let pretty_name = function
     | `CircleCI -> "CircleCI"
     | `Travis -> "Travis"
-    | `Github -> "Github Actions"
+    | `GitHub -> "GitHub Actions"
 
   let name_in_report = function
     | `CircleCI -> "circleci"
     | `Travis -> "travis-ci"
-    | `Github -> "github"
+    | `GitHub -> "github"
 
   let job_id_variable = function
     | `CircleCI -> "CIRCLE_BUILD_NUM"
     | `Travis -> "TRAVIS_JOB_ID"
-    | `Github -> "GITHUB_RUN_ID"
+    | `GitHub -> "GITHUB_RUN_ID"
 end
 
 
