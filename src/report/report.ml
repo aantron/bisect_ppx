@@ -448,6 +448,7 @@ struct
   let needs_repo_token ci service =
     match ci, service with
     | `CircleCI, `Coveralls -> true
+    | `GitHub, `Coveralls -> true
     | _ -> false
 
   let repo_token_variables = function
