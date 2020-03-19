@@ -398,7 +398,7 @@ struct
   let job_id_variable = function
     | `CircleCI -> "CIRCLE_BUILD_NUM"
     | `Travis -> "TRAVIS_JOB_ID"
-    | `GitHub -> "GITHUB_RUN_ID"
+    | `GitHub -> "GITHUB_RUN_NUMBER"
 end
 
 
