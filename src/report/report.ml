@@ -289,23 +289,23 @@ struct
     let all_coverage_files =
       match files_on_command_line, !Arguments.coverage_search_path with
       | [], [] ->
-      let in_current_directory =
-        Sys.readdir Filename.current_dir_name
-        |> Array.to_list
-        |> List.filter (fun entry ->
-          filename_filter (Filename.(concat current_dir_name) entry) entry)
-      in
-      let in_build_directory =
-        if Sys.file_exists "_build" && Sys.is_directory "_build" then
-          list_recursively "./_build" filename_filter
-        else
-          []
-      in
-      let in_esy_sandbox =
-        match Sys.getenv "cur__target_dir" with
-        | exception Not_found -> []
-        | directory -> list_recursively directory filename_filter
-      in
+        let in_current_directory =
+          Sys.readdir Filename.current_dir_name
+          |> Array.to_list
+          |> List.filter (fun entry ->
+            filename_filter (Filename.(concat current_dir_name) entry) entry)
+        in
+        let in_build_directory =
+          if Sys.file_exists "_build" && Sys.is_directory "_build" then
+            list_recursively "./_build" filename_filter
+          else
+            []
+        in
+        let in_esy_sandbox =
+          match Sys.getenv "cur__target_dir" with
+          | exception Not_found -> []
+          | directory -> list_recursively directory filename_filter
+        in
         in_current_directory @ in_build_directory @ in_esy_sandbox
 
       | _ ->
@@ -325,15 +325,15 @@ struct
       |> List.map Filename.dirname
       |> List.sort_uniq String.compare
       |> List.map (fun directory -> directory ^ Filename.dir_sep)
-      |> List.iter (info "found coverage files in '%s'");
+      |> List.iter (info "found coverage files in '%s'")
     | _ ->
       ()
     end;
 
-      if all_coverage_files = [] then
-        error "no coverage files given on command line or found"
-      else
-        all_coverage_files
+    if all_coverage_files = [] then
+      error "no coverage files given on command line or found"
+    else
+      all_coverage_files
 
   let strip_extensions filename =
     let dirname, basename = Filename.(dirname filename, basename filename) in
