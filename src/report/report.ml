@@ -458,6 +458,7 @@ struct
   let needs_git_info ci service =
     match ci, service with
     | `CircleCI, `Coveralls -> true
+    | `GitHub, `Coveralls -> true
     | _ -> false
 end
 
