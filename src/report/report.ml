@@ -94,8 +94,12 @@ struct
     "<dir>  Output HTML report to <dir> (HTML only)");
 
     ("-I",
-    Arg.String add_search_path,
-    "<dir>  Look for .ml/.re files in <dir> (HTML/Coveralls only)");
+    Arg.String (fun s ->
+      prerr_endline "bisect-ppx-report argument '-I' is deprecated.";
+      prerr_endline "Use '--source-path' and the new command line instead.";
+      prerr_endline "This requires Bisect_ppx >= 2.1.0.";
+      add_search_path s),
+    "<dir>  Look for .ml/.re files in <dir> (HTML/Coveralls only; deprecated)");
 
     ("--ignore-missing-files",
     Arg.Set ignore_missing_files,
@@ -710,12 +714,12 @@ struct
 
   let search_directories =
     Arg.(value @@ opt_all string (["."; "./_build/default"] @ esy_source_dir) @@
-      info ["I"] ~docv:"DIRECTORY" ~doc:
+      info ["source-path"] ~docv:"DIRECTORY" ~doc:
         ("Directory in which to look for source files. This option can be " ^
         "specified multiple times. File paths are concatenated with each " ^
-        "$(b,-I) directory when looking for files. The default directories " ^
-        "are ./ and ./_build/default/. If running inside an esy sandbox, the " ^
-        "default/ directory in the sandbox is also included."))
+        "$(b,--source-path) directory when looking for files. The default " ^
+        "directories are ./ and ./_build/default/. If running inside an esy " ^
+        "sandbox, the default/ directory in the sandbox is also included."))
     --> (:=) Arguments.search_path
 
   let ignore_missing_files =
