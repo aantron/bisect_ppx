@@ -16,6 +16,7 @@ sig
   val csv_separator : string ref
   val search_path : string list ref
   val raw_coverage_files : string list ref
+  val coverage_search_path : string list ref
   val summary_only : bool ref
   val ignore_missing_files : bool ref
   val service_name : string ref
@@ -55,6 +56,8 @@ struct
     search_path := sp :: !search_path
 
   let raw_coverage_files = ref []
+
+  let coverage_search_path = ref []
 
   let summary_only = ref false
 
@@ -246,6 +249,25 @@ struct
     in
     traverse directory []
 
+  let filename_filter path filename =
+    if has_extension ".coverage" filename then
+      true
+    else
+      if has_extension ".out" filename then
+        let prefix = "bisect" in
+        match String.sub filename 0 (String.length prefix) with
+        | prefix' when prefix' = prefix ->
+          warning
+            "found file '%s': Bisect_ppx 2.x uses extension '.coverage'"
+            path;
+          true
+        | _ ->
+          false
+        | exception Invalid_argument _ ->
+          false
+      else
+        false
+
   let list () =
     let files_on_command_line = !Arguments.raw_coverage_files in
 
@@ -260,34 +282,13 @@ struct
         filename
     end;
 
-    (* If there are files on the command line, use those. Otherwise, search for
-       files in ./ and ./_build. During the search, we look for files with
-       extension .coverage. If we find any files bisect*.out, we display a
-       warning. *)
-    match files_on_command_line with
-    | _::_ ->
-      files_on_command_line
-    | _ ->
-      let filename_filter path filename =
-        if has_extension ".coverage" filename then
-          true
-        else
-          if has_extension ".out" filename then
-            let prefix = "bisect" in
-            match String.sub filename 0 (String.length prefix) with
-            | prefix' when prefix' = prefix ->
-              warning
-                "found file '%s': Bisect_ppx 2.x uses extension '.coverage'"
-                path;
-              true
-            | _ ->
-              false
-            | exception Invalid_argument _ ->
-              false
-          else
-            false
-      in
-
+    (* If there are files on the command line, or coverage search directories
+       specified, use those. Otherwise, search for files in ./ and ./_build.
+       During the search, we look for files with extension .coverage. If we find
+       any files bisect*.out, we display a warning. *)
+    let all_coverage_files =
+      match files_on_command_line, !Arguments.coverage_search_path with
+      | [], [] ->
       let in_current_directory =
         Sys.readdir Filename.current_dir_name
         |> Array.to_list
@@ -305,19 +306,32 @@ struct
         | exception Not_found -> []
         | directory -> list_recursively directory filename_filter
       in
-      let all_coverage_files =
-        in_current_directory @ in_build_directory @ in_esy_sandbox in
+        in_current_directory @ in_build_directory @ in_esy_sandbox
 
+      | _ ->
+        !Arguments.coverage_search_path
+        |> List.filter Sys.file_exists
+        |> List.filter Sys.is_directory
+        |> List.map (fun dir -> list_recursively dir filename_filter)
+        |> List.flatten
+        |> (@) files_on_command_line
+    in
+
+    begin
+      match files_on_command_line, !Arguments.coverage_search_path with
+    | [], [] | _, _::_ ->
       (* Display feedback about where coverage files were found. *)
       all_coverage_files
       |> List.map Filename.dirname
       |> List.sort_uniq String.compare
       |> List.map (fun directory -> directory ^ Filename.dir_sep)
       |> List.iter (info "found coverage files in '%s'");
+    | _ ->
+      ()
+    end;
 
       if all_coverage_files = [] then
-        error
-      "no coverage files given on command line, or found in '.' or in '_build'"
+        error "no coverage files given on command line or found"
       else
         all_coverage_files
 
@@ -676,9 +690,18 @@ struct
     Arg.(value @@ pos_right (from_position - 1) string [] @@
       info [] ~docv:"COVERAGE_FILES" ~doc:
         ("Optional list of *.coverage files produced during testing. If not " ^
-        "specified, bisect-ppx-report will search for *.coverage files in ./ " ^
-        "and ./_build, and, if run under esy, inside the esy sandbox."))
+        "specified, and $(b,--coverage-path) is also not specified, " ^
+        "bisect-ppx-report will search for *.coverage files non-recursively " ^
+        "in ./ and recursively in ./_build, and, if run under esy, inside " ^
+        "the esy sandbox."))
     --> (:=) Arguments.raw_coverage_files
+
+  let coverage_search_directories =
+    Arg.(value @@ opt_all string [] @@
+      info ["coverage-path"] ~docv:"DIRECTORY" ~doc:
+        ("Directory in which to look for .coverage files. This option can be " ^
+        "specified multiple times. The search is recursive in each directory."))
+    --> (:=) Arguments.coverage_search_path
 
   let output_file kind =
     Arg.(required @@ pos 0 (some string) None @@
@@ -790,6 +813,7 @@ struct
     in
     output_directory &&&
     coverage_files 0 &&&
+    coverage_search_directories &&&
     search_directories &&&
     ignore_missing_files &&&
     title &&&
@@ -822,6 +846,7 @@ struct
     in
     service &&&
     coverage_files 1 &&&
+    coverage_search_directories &&&
     search_directories &&&
     ignore_missing_files &&&
     service_name &&&
@@ -846,6 +871,7 @@ struct
     in
     Term.const () --> (fun () -> Arguments.report_outputs := [`Text, "-"]) &&&
     coverage_files 0 &&&
+    coverage_search_directories &&&
     per_file &&&
     expect &&&
     do_not_expect
@@ -855,6 +881,7 @@ struct
   let coveralls =
     output_file `Coveralls &&&
     coverage_files 1 &&&
+    coverage_search_directories &&&
     search_directories &&&
     ignore_missing_files &&&
     service_name &&&
@@ -879,6 +906,7 @@ struct
     in
     output_file `Csv &&&
     coverage_files 1 &&&
+    coverage_search_directories &&&
     separator &&&
     expect &&&
     do_not_expect
@@ -888,6 +916,7 @@ struct
   let dump =
     output_file `Dump &&&
     coverage_files 1 &&&
+    coverage_search_directories &&&
     expect &&&
     do_not_expect
     |> main',
