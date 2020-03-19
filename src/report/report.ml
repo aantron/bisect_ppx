@@ -443,6 +443,7 @@ struct
   let needs_pull_request_number ci service =
     match ci, service with
     | `CircleCI, `Coveralls -> Some "CIRCLE_PULL_REQUEST"
+    | `GitHub, `Coveralls -> Some "PULL_REQUEST_NUMBER"
     | _ -> None
 
   let needs_repo_token ci service =
