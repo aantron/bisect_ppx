@@ -155,6 +155,8 @@ let compile ?(r = "") arguments source =
 let report
     ?(env = []) ?(f = "bisect*.coverage") ?(r = "> /dev/null") arguments =
 
+  let clear_env = "unset TRAVIS_JOB_ID && export TRAVIS_JOB_ID" in
+
   let env =
     env
     |> List.map (fun (variable, value) ->
@@ -164,7 +166,8 @@ let report
   in
 
   Printf.sprintf
-    "%s%s %s %s %s"
+    "%s && %s%s %s %s %s"
+    clear_env
     env
     (Filename.concat
       dune_build_directory "install/default/bin/bisect-ppx-report")
