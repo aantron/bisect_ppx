@@ -162,7 +162,7 @@ struct
     ("--send-to",
     Arg.String (fun s -> send_to := Some s),
     "<string>  Coveralls or Codecov")
-]
+  ]
 
   let deprecated = Common.deprecated "bisect-ppx-report"
 
@@ -548,21 +548,21 @@ let main () =
   end;
 
   let data, points =
-      let total_counts = Hashtbl.create 17 in
-      let points = Hashtbl.create 17 in
+    let total_counts = Hashtbl.create 17 in
+    let points = Hashtbl.create 17 in
 
-      Coverage_input_files.list () |> List.iter (fun out_file ->
-        Common.read_runtime_data out_file
-        |> List.iter (fun (source_file, (file_counts, file_points)) ->
-          let file_counts =
-            let open Report_utils.Infix in
-            try (Hashtbl.find total_counts source_file) +| file_counts
-            with Not_found -> file_counts
-          in
-          Hashtbl.replace total_counts source_file file_counts;
-          Hashtbl.replace points source_file file_points));
+    Coverage_input_files.list () |> List.iter (fun out_file ->
+      Common.read_runtime_data out_file
+      |> List.iter (fun (source_file, (file_counts, file_points)) ->
+        let file_counts =
+          let open Report_utils.Infix in
+          try (Hashtbl.find total_counts source_file) +| file_counts
+          with Not_found -> file_counts
+        in
+        Hashtbl.replace total_counts source_file file_counts;
+        Hashtbl.replace points source_file file_points));
 
-      total_counts, points
+    total_counts, points
   in
 
   let present_files =
@@ -591,28 +591,29 @@ let main () =
     Report_generic.output verbose file conv data points in
   let write_output = function
     | `Html, dir ->
-        Report_utils.mkdirs dir;
-        Report_html.output verbose dir
-          !Arguments.tab_size !Arguments.report_title
+      Report_utils.mkdirs dir;
+      Report_html.output verbose dir
+        !Arguments.tab_size !Arguments.report_title
           search_in_path data points
     | `Csv, file ->
-        generic_output file (Report_csv.make !Arguments.csv_separator)
+      generic_output file (Report_csv.make !Arguments.csv_separator)
     | `Text, "-" ->
       Report_text.output ~per_file:(not !Arguments.summary_only) data
     | `Text, file ->
-        generic_output file (Report_text.make !Arguments.summary_only)
+      generic_output file (Report_text.make !Arguments.summary_only)
     | `Dump, file ->
-        generic_output file (Report_dump.make ())
+      generic_output file (Report_dump.make ())
     | `Coveralls, file ->
-        Report_coveralls.output verbose file
-          !Arguments.service_name
-          !Arguments.service_number
-          !Arguments.service_job_id
-          !Arguments.service_pull_request
-          !Arguments.repo_token
-          !Arguments.git
-          !Arguments.parallel
-          search_in_path data points in
+      Report_coveralls.output verbose file
+        !Arguments.service_name
+        !Arguments.service_number
+        !Arguments.service_job_id
+        !Arguments.service_pull_request
+        !Arguments.repo_token
+        !Arguments.git
+        !Arguments.parallel
+        search_in_path data points
+  in
   List.iter write_output (List.rev !Arguments.report_outputs);
 
   match coverage_service with
