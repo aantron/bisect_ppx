@@ -67,6 +67,24 @@ let circleci_repo_token_precedence = [
   "COVERAGE_REPO_TOKEN", "abcxyz";
 ]
 
+let github_actions_no_repo_token = [
+  "GITHUB_ACTIONS", "true";
+  "GITHUB_RUN_NUMBER", "43";
+]
+
+let github_actions = [
+  "GITHUB_ACTIONS", "true";
+  "GITHUB_RUN_NUMBER", "43";
+  "COVERALLS_REPO_TOKEN", "abcxyz";
+]
+
+let github_actions_pr = [
+  "GITHUB_ACTIONS", "true";
+  "GITHUB_RUN_NUMBER", "43";
+  "COVERALLS_REPO_TOKEN", "abcxyz";
+  "PULL_REQUEST_NUMBER", "2";
+]
+
 let tests = "send-to" >::: [
   test "bad-service"
     "bad-service" none;
@@ -127,4 +145,28 @@ let tests = "send-to" >::: [
 
   test "circleci-codecov"
     "Codecov" circleci_no_repo_token;
+
+  test "github-actions-no-repo-token"
+    "Coveralls" github_actions_no_repo_token;
+
+  test "github-actions-coveralls"
+    "Coveralls" github_actions;
+
+  test "github-actions-repo-token-argument"
+    "Coveralls --repo-token defuvw" github_actions_no_repo_token;
+
+  test "github-actions-repo-token-override"
+    "Coveralls --repo-token uvwdef" github_actions;
+
+  test "github-actions-pr-option"
+    "Coveralls --service-pull-request 1" github_actions;
+
+  test "github-actions-pr"
+    "Coveralls" github_actions_pr;
+
+  test "github-actions-pr-override"
+    "Coveralls --service-pull-request 3" github_actions_pr;
+
+  test "github-actions-codecov"
+    "Codecov" github_actions_no_repo_token;
 ]
