@@ -16,16 +16,6 @@ struct
     else
       x + y
 
-  let (--) x y =
-    if y > min_int then
-      (++) x (-y)
-    else
-      let res = (++) x max_int in
-      if res < max_int then
-        succ res
-      else
-        res
-
   let rec zip op x y =
     let lx = Array.length x in
     let ly = Array.length y in
@@ -39,8 +29,6 @@ struct
       zip op y x
 
   let (+|) x y = zip (++) x y
-
-  let (-|) x y = zip (--) x y
 end
 
 let mkdirs ?(perm=0o755) dir =
@@ -61,17 +49,6 @@ let split p l =
           (List.rev acc), l
     | [] -> (List.rev acc), [] in
   spl [] l
-
-let split_after n l =
-  let rec spl n acc l =
-    match l with
-    | hd :: tl ->
-        if n > 0 then
-          spl (pred n) (hd :: acc) tl
-        else
-          (List.rev acc), l
-    | [] -> (List.rev acc), [] in
-  spl n [] l
 
 let open_both in_file out_file =
   let in_channel = open_in in_file in
@@ -106,12 +83,6 @@ let output_strings lines mapping ch =
       output_char ch '\n')
     lines
 
-let output_bytes data filename =
-  Bisect_common.try_out_channel
-    true
-    filename
-    (fun channel -> Array.iter (output_byte channel) data)
-
 type counts = { mutable visited : int; mutable total : int }
 
 let make () = { visited = 0; total = 0 }
@@ -125,5 +96,3 @@ let add counts_1 counts_2 =
   let open Infix in
   {visited = counts_1.visited ++ counts_2.visited;
    total = counts_1.total ++ counts_2.total}
-
-let sum = List.fold_left add (make ())

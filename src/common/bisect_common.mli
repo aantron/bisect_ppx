@@ -17,26 +17,11 @@ type point_definition = {
 
 (** {6 Utility functions} *)
 
-val try_finally : 'a -> ('a -> 'b) -> ('a -> unit) -> 'b
-(** [try_finally x f h] implements the try/finally logic.
-    [f] is the body of the try clause, while [h] is the finally handler.
-    Errors raised by handler are silently ignored. *)
-
-val try_in_channel : bool -> string -> (in_channel -> 'a) -> 'a
-(** [try_in_channel bin filename f] is equivalent to [try_finally x f h]
-    where:
-    - [x] is an input channel for file [filename] (opened in binary mode
-      iff [bin] is [true]);
-    - [h] just closes the input channel.
-    Raises an exception if any error occurs. *)
-
 val try_out_channel : bool -> string -> (out_channel -> 'a) -> 'a
-(** [try_out_channel bin filename f] is equivalent to [try_finally x f h]
-    where:
-    - [x] is an output channel for file [filename] (opened in binary mode
-      iff [bin] is [true]);
-    - [h] just closes the output channel.
-    Raises an exception if any error occurs. *)
+(** [try_out_channel bin filename f] opens an output channel for the file given
+    at [filename], and then runs [f]. When [f] returns or raises an exception,
+    the channel is closed. If [bin] is [true], the channel is opened in binary
+    mode. Otherwise, it is opened in text mode. *)
 
 
 (** {6 I/O functions} *)
