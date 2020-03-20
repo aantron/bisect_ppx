@@ -54,7 +54,8 @@ let output_html_index verbose title filename l =
     filename
     (fun channel ->
       Report_utils.output_strings
-        [  "<html>" ;
+        [  "<!DOCTYPE html>" ;
+           "<html lang=\"en\">" ;
            "  <head>" ;
            "    <title>$(title)</title>" ;
            "    <link rel=\"stylesheet\" type=\"text/css\" href=\"coverage.css\" />" ;
@@ -214,7 +215,8 @@ let output_html
 
       (* Head and header. *)
       Report_utils.output_strings
-        [  "<html>" ;
+        [  "<!DOCTYPE html>" ;
+           "<html lang=\"en\">" ;
            "  <head>" ;
            "    <title>$(title)</title>" ;
            "    <link rel=\"stylesheet\" href=\"$(style_css)\" />" ;
