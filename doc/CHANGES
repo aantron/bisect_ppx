@@ -1,3 +1,17 @@
+Version 2.1.0 (2020-03-20):
+---------------------------
+  Additions
+
+  - GitHub Actions integration (#280, Ulrik Strid).
+  - Reporter --coverage-path option to specify search paths for .coverage files
+    (#269).
+  - Reporter --source-path option to specify search paths for source files
+    (#283).
+
+  Deprecations
+
+  - -I in favor of --search-path (#283).
+
 Version 2.0.0 (2020-03-17):
 ---------------------------
   Additions
