@@ -35,6 +35,11 @@ build: [
   ["dune" "runtest" "-p" name] {with-test}
 ]
 
+post-messages: [
+  "Bisect_ppx 2.0.0 has deprecated some command-line options. See
+  https://github.com/aantron/bisect_ppx/releases/tag/2.0.0"
+]
+
 description: "Bisect_ppx helps you test thoroughly. It is a small preprocessor
 that inserts instrumentation at places in your code, such as if-then-else and
 match expressions. After you run tests, Bisect_ppx gives a nice HTML report
