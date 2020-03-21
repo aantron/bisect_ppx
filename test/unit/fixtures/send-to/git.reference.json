@@ -9,7 +9,7 @@ Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
 {
     "service_name": "travis-ci",
     "service_job_id": "42",
-    "git":{"head":{"id":"5689966cc697646c10975ff9355863bc12744ea0","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"master","remotes":{}},
+    "git":{"head":{"id":"65fdde1c24207f298c762b0ba24461a7faa06ccc","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"master","remotes":{}},
 
     "source_files": [
         {
