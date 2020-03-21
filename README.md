@@ -495,6 +495,7 @@ A small sample of projects using Bisect_ppx:
   - [Lambda Soup][soup] &nbsp; ([report](https://coveralls.io/github/aantron/lambdasoup))
   - [Trie](https://github.com/brendanlong/ocaml-trie) &nbsp; ([report](https://coveralls.io/github/brendanlong/ocaml-trie?branch=master))
   - [ocaml-ooxml](https://github.com/brendanlong/ocaml-ooxml) &nbsp; ([report](https://coveralls.io/github/brendanlong/ocaml-ooxml?branch=master))
+  - [routes](https://github.com/anuragsoni/routes) &nbsp; ([report](https://codecov.io/gh/anuragsoni/routes))
 
 - Applications
 
