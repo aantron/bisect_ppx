@@ -15,7 +15,7 @@ type point_definition = {
 (** The type of point definitions, that is places of interest in the
     source code. *)
 
-(** {6 Utility functions} *)
+(** {1 Utility functions} *)
 
 val try_out_channel : bool -> string -> (out_channel -> 'a) -> 'a
 (** [try_out_channel bin filename f] opens an output channel for the file given
@@ -24,7 +24,7 @@ val try_out_channel : bool -> string -> (out_channel -> 'a) -> 'a
     mode. Otherwise, it is opened in text mode. *)
 
 
-(** {6 I/O functions} *)
+(** {1 I/O functions} *)
 
 exception Invalid_file of string * string
 (** Exception to be raised when a read file does not conform to the
