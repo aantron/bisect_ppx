@@ -155,7 +155,10 @@ let compile ?(r = "") arguments source =
 let report
     ?(env = []) ?(f = "bisect*.coverage") ?(r = "> /dev/null") arguments =
 
-  let clear_env = "unset TRAVIS_JOB_ID && export TRAVIS_JOB_ID" in
+  let clear_env =
+    "unset TRAVIS && export TRAVIS && " ^
+    "unset TRAVIS_JOB_ID && export TRAVIS_JOB_ID"
+  in
 
   let env =
     env
