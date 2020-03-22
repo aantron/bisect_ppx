@@ -225,6 +225,15 @@ somewhere in your tester, which will have Node write a file like
     npx bisect-ppx-report.exe html
     ```
 
+5. If your project uses both BuckleScript and native Dune, native Dune will
+   start picking up OCaml files that are part of the BuckleScript `bisect_ppx`
+   package. To prevent this, add a `dune` with the following contents to the
+   root of your project:
+
+   ```
+   (data_only_dirs node_modules)
+   ```
+
 [bsb-repo]: https://github.com/aantron/bisect-starter-bsb#readme
 [bsb-report]: https://aantron.github.io/bisect-starter-bsb/
 
