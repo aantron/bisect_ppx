@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___source___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___source___ml =
       cb
   end
 open Bisect_visit___source___ml
+[@@@ocaml.text "/*"]
 let f1 x y = if x = y then x + y else x - y
 let g s =
   ___bisect_visit___ 2;

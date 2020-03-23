@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___let___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___let___ml =
       cb
   end
 open Bisect_visit___let___ml
+[@@@ocaml.text "/*"]
 let instrumented = ()
 let not_instrumented = ()[@@coverage off]
 let instrumented_again = ()

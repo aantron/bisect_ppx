@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___attributes___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___attributes___ml =
       cb
   end
 open Bisect_visit___attributes___ml
+[@@@ocaml.text "/*"]
 let () =
   (let ___bisect_result___ = ((let x = 1 in x)[@testing ]) |> ignore in
    ___bisect_visit___ 14; ___bisect_result___);

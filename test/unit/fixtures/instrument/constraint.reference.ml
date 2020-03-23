@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___constraint___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___constraint___ml =
       cb
   end
 open Bisect_visit___constraint___ml
+[@@@ocaml.text "/*"]
 let () =
   (let ___bisect_result___ = print_endline "foo" in
    ___bisect_visit___ 0; ___bisect_result___ :> unit)

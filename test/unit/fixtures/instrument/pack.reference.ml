@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___pack___ml =
   struct
     let ___bisect_visit___ =
@@ -9,5 +10,6 @@ module Bisect_visit___pack___ml =
       cb
   end
 open Bisect_visit___pack___ml
+[@@@ocaml.text "/*"]
 module type EMPTY  = sig  end
 let _ = ((module struct  end) : (module EMPTY))

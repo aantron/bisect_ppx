@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___function___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___function___ml =
       cb
   end
 open Bisect_visit___function___ml
+[@@@ocaml.text "/*"]
 let f =
   function
   | `A -> (___bisect_visit___ 0; ())

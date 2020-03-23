@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___letop_408___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___letop_408___ml =
       cb
   end
 open Bisect_visit___letop_408___ml
+[@@@ocaml.text "/*"]
 let ( let* ) x f = ___bisect_visit___ 0; f x
 let ( and* ) x y = ___bisect_visit___ 1; (x, y)
 let return x = ___bisect_visit___ 2; x

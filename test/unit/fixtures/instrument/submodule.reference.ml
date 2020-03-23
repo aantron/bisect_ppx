@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___submodule___ml =
   struct
     let ___bisect_visit___ =
@@ -9,4 +10,5 @@ module Bisect_visit___submodule___ml =
       cb
   end
 open Bisect_visit___submodule___ml
+[@@@ocaml.text "/*"]
 module Foo = struct let bar () = ___bisect_visit___ 0; () end

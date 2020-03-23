@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___field___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___field___ml =
       cb
   end
 open Bisect_visit___field___ml
+[@@@ocaml.text "/*"]
 type foo = {
   bar: unit }
 let baz = { bar = () }

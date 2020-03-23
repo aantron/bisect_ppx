@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___unreachable_403___ml =
   struct
     let ___bisect_visit___ =
@@ -9,4 +10,5 @@ module Bisect_visit___unreachable_403___ml =
       cb
   end
 open Bisect_visit___unreachable_403___ml
+[@@@ocaml.text "/*"]
 let test = function | () -> (___bisect_visit___ 0; ()) | () -> .

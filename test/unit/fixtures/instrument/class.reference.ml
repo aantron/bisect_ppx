@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___class___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___class___ml =
       cb
   end
 open Bisect_visit___class___ml
+[@@@ocaml.text "/*"]
 class default ?(foo= ___bisect_visit___ 0; ())  () = object  end
 class applied = ((default)
   ~foo:(let ___bisect_result___ = print_endline "foo" in

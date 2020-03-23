@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___cases___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___cases___ml =
       cb
   end
 open Bisect_visit___cases___ml
+[@@@ocaml.text "/*"]
 type ('a, 'b) record = {
   left: 'a ;
   right: 'b }

@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___attribute___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___attribute___ml =
       cb
   end
 open Bisect_visit___attribute___ml
+[@@@ocaml.text "/*"]
 [@@@foo print_endline "bar"; ()]
 let () = ()[@@foo print_endline "bar"; ()]
 let () = ((())[@foo print_endline "bar"; ()])

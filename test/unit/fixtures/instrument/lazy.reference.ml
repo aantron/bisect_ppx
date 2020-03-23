@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___lazy___ml =
   struct
     let ___bisect_visit___ =
@@ -9,4 +10,5 @@ module Bisect_visit___lazy___ml =
       cb
   end
 open Bisect_visit___lazy___ml
+[@@@ocaml.text "/*"]
 let _ = lazy (___bisect_visit___ 0; print_endline "foo")

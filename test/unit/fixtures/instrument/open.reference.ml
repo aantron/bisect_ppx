@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___open___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___open___ml =
       cb
   end
 open Bisect_visit___open___ml
+[@@@ocaml.text "/*"]
 let () =
   let open List in
     let ___bisect_result___ = print_endline "bar" in

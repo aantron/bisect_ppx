@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___while___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___while___ml =
       cb
   end
 open Bisect_visit___while___ml
+[@@@ocaml.text "/*"]
 let () =
   while not true do
     ___bisect_visit___ 1;

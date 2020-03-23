@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___ppat_open_404___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___ppat_open_404___ml =
       cb
   end
 open Bisect_visit___ppat_open_404___ml
+[@@@ocaml.text "/*"]
 let () =
   match `A with
   | List.((`A|`B))  as ___bisect_matched_value___ ->

@@ -786,7 +786,9 @@ struct
           Mod.ident ~loc (Ast_convenience.lid ~loc mangled_module_name)
     in
 
-    [generated_module; module_open]
+    let stop_comment = [%stri [@@@ocaml.text "/*"]] [@metaloc loc] in
+
+    [stop_comment; generated_module; module_open; stop_comment]
 end
 
 

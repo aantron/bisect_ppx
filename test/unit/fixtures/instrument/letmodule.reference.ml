@@ -1,3 +1,4 @@
+[@@@ocaml.text "/*"]
 module Bisect_visit___letmodule___ml =
   struct
     let ___bisect_visit___ =
@@ -9,6 +10,7 @@ module Bisect_visit___letmodule___ml =
       cb
   end
 open Bisect_visit___letmodule___ml
+[@@@ocaml.text "/*"]
 let () =
   let module M = struct  end in
     let ___bisect_result___ = print_endline "foo" in
