@@ -67,9 +67,11 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     (* -*- tuareg -*- *)
 
     let preprocess =
-      match Sys.getenv "BISECT_ENABLE" with
-      | "yes" -> "(preprocess (pps bisect_ppx))"
-      | _ | exception _ -> ""
+      try
+        match Sys.getenv "BISECT_ENABLE" with
+        | "yes" -> "(preprocess (pps bisect_ppx))"
+        | _ -> ""
+      with _ -> ""
 
     let () = Jbuild_plugin.V1.send @@ {|
 
