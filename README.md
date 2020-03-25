@@ -69,7 +69,8 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     let preprocess =
       match Sys.getenv "BISECT_ENABLE" with
       | "yes" -> "(preprocess (pps bisect_ppx))"
-      | _ | exception _ -> ""
+      | _ -> ""
+      | exception Not_found -> ""
 
     let () = Jbuild_plugin.V1.send @@ {|
 
