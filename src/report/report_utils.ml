@@ -4,8 +4,6 @@
 
 
 
-let version = "2.1.1"
-
 module Infix =
 struct
   let (++) x y =

@@ -8,9 +8,6 @@
 
 
 
-val version : string
-(** The current version of Bisect. *)
-
 module Infix :
 sig
   val (+|) : int array -> int array -> int array

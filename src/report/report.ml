@@ -142,10 +142,6 @@ struct
     Arg.Set verbose,
     " Set verbose mode");
 
-    ("--version",
-    Arg.Unit (fun () -> print_endline Report_utils.version; exit 0),
-    " Print version and exit");
-
     ("--coveralls",
     Arg.String (fun s -> add_output (`Coveralls, s)),
     "<file>  Output coveralls json report to <file>");
@@ -185,7 +181,6 @@ struct
     |> deprecated "-separator"
     |> deprecated "-dump"
     |> deprecated "-verbose"
-    |> deprecated "-version"
     |> deprecated "-coveralls"
     |> deprecated "-service-name"
     |> deprecated "-service-job-id"
@@ -940,7 +935,6 @@ struct
       (ret (const (`Help (`Auto, None))),
       term_info
         "bisect-ppx-report"
-        ~version:Report_utils.version
         ~doc:"Generate coverage reports for OCaml and Reason."
         ~man:[
           `S "USAGE EXAMPLE";
@@ -957,7 +951,7 @@ struct
     let is_legacy_command_line =
       let subcommand_names =
         List.map (fun (_, info) -> Term.name info) all_subcommands in
-      match List.mem Sys.argv.(1) ("--help"::"--version"::subcommand_names) with
+      match List.mem Sys.argv.(1) ("--help"::subcommand_names) with
       | result -> not result
       | exception Invalid_argument _ -> false
     in
