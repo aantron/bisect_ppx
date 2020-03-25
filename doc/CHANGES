@@ -1,3 +1,11 @@
+Version 2.1.0 (2020-03-25):
+---------------------------
+  Bugs fixed
+
+  - HTML: generate <!DOCTYPE html> and <html lang="en"> (#288, @zapashcanon).
+  - Invalid doc comment section heading levels (#291, reported Risto Stevcev).
+  - Hide generated code from odoc (#293, reported Risto Stevcev).
+
 Version 2.1.0 (2020-03-20):
 ---------------------------
   Additions
