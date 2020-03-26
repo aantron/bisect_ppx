@@ -388,11 +388,9 @@ struct
       else
         let entire_pattern = Parsetree.(case.pc_lhs) in
         let loc = Parsetree.(entire_pattern.ppat_loc) in
-        let non_exception_pattern, reassemble_exception_pattern_if_present =
-          go_into_exception_pattern_if_present ~entire_pattern in
 
         let rotated_cases : rotated_case list =   (* No or-patterns. *)
-          rotate_or_patterns_to_top loc ~non_exception_pattern in
+          rotate_or_patterns_to_top loc entire_pattern in
 
         match rotated_cases with
         | [] -> (* Should be unreachable. *)
@@ -406,31 +404,39 @@ struct
             (instrumentation_for_location_trace location_trace)
 
         | _::_::_ ->
-          let new_case_pattern_with_alias =
-            add_bisect_matched_value_alias loc ~non_exception_pattern
-            |> reassemble_exception_pattern_if_present
+          let exception_cases, value_cases =
+            List.partition
+              (fun (_, p) -> has_exception_pattern p) rotated_cases
           in
-          let nested_match = generate_nested_match loc rotated_cases in
-          insert_instrumentation
-            {case with pc_lhs = new_case_pattern_with_alias}
-            (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])
+          match exception_cases, value_cases with
+          | [], _ ->
+            let new_case_pattern_with_alias =
+              add_bisect_matched_value_alias loc entire_pattern in
+            let nested_match = generate_nested_match loc rotated_cases in
+            insert_instrumentation
+              {case with pc_lhs = new_case_pattern_with_alias}
+              (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])
+
+          | _, [] ->
+            let new_case_pattern_with_aliases =
+              alias_exceptions loc entire_pattern in
+            let nested_match =
+              rotated_cases
+              |> List.map (fun (trace, p) -> (trace, drop_exception_patterns p))
+              |> generate_nested_match loc
+            in
+            insert_instrumentation
+              {case with pc_lhs = new_case_pattern_with_aliases}
+              (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])
+
+          | _ ->
+            assert false
 
     and is_assert_false_or_refutation case =
       match case.pc_rhs with
       | [%expr assert false] -> true
       | {pexp_desc = Pexp_unreachable; _} -> true
       | _ -> false
-
-    and go_into_exception_pattern_if_present ~entire_pattern
-        : Parsetree.pattern * (Parsetree.pattern -> Parsetree.pattern) =
-      match entire_pattern with
-      | [%pat? exception [%p? nested_pattern]] ->
-        (nested_pattern,
-         (fun p ->
-          Parsetree.{entire_pattern with ppat_desc = Ppat_exception p}))
-      | _ ->
-        (entire_pattern,
-         (fun p -> p))
 
     and insert_instrumentation case f =
       match case.pc_guard with
@@ -452,9 +458,8 @@ struct
       |> List.fold_left (fun e l ->
         instrument_expr points ~override_loc:l e) e
 
-    and add_bisect_matched_value_alias loc ~non_exception_pattern =
-      [%pat? [%p non_exception_pattern] as ___bisect_matched_value___]
-        [@metaloc loc]
+    and add_bisect_matched_value_alias loc p =
+      [%pat? [%p p] as ___bisect_matched_value___] [@metaloc loc]
 
     and generate_nested_match loc rotated_cases =
       rotated_cases
@@ -495,8 +500,7 @@ struct
         During recursion, the invariant on the location is that it is the
         location of the nearest enclosing or-pattern, or the entire pattern, if
         there is no enclosing or-pattern. *)
-    and rotate_or_patterns_to_top loc ~non_exception_pattern
-        : rotated_case list =
+    and rotate_or_patterns_to_top loc p : rotated_case list =
 
       let rec recurse ~enclosing_loc p : rotated_case list =
         let loc = Parsetree.(p.ppat_loc) in
@@ -663,7 +667,74 @@ struct
           List.fold_left multiply initial more
       in
 
-      recurse ~enclosing_loc:loc non_exception_pattern
+      recurse ~enclosing_loc:loc p
+
+    and has_exception_pattern p =
+      match p.ppat_desc with
+      | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
+      | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
+      | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+      | Ppat_extension _ ->
+        false
+
+      | Ppat_or (p_1, p_2) ->
+        has_exception_pattern p_1 || has_exception_pattern p_2
+
+      | Ppat_constraint (p', _) ->
+        has_exception_pattern p'
+
+      | Ppat_exception _ ->
+        true
+
+      | Ppat_open (_, p') ->
+        has_exception_pattern p'
+
+    and alias_exceptions loc p =
+      match Parsetree.(p.ppat_desc) with
+      | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
+      | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
+      | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+      | Ppat_extension _ ->
+        p
+
+      | Ppat_or (p_1, p_2) ->
+        {p with ppat_desc =
+          Ppat_or (alias_exceptions loc p_1, alias_exceptions loc p_2)}
+
+      | Ppat_constraint (p', t) ->
+        {p with ppat_desc =
+          Ppat_constraint (alias_exceptions loc p', t)}
+
+      | Ppat_exception p' ->
+        {p with ppat_desc =
+          Ppat_exception (add_bisect_matched_value_alias loc p')}
+
+      | Ppat_open (m, p') ->
+        {p with ppat_desc =
+          Ppat_open (m, alias_exceptions loc p')}
+
+    and drop_exception_patterns p =
+      match Parsetree.(p.ppat_desc) with
+      | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
+      | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
+      | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+      | Ppat_extension _ ->
+        p (* Should be unreachable. *)
+
+      | Ppat_or _ ->
+        p (* Should be unreachable. *)
+
+      (* Dropping exception patterns will change the meaning of type constraints
+         on them, so drop the type constraints along the way. *)
+      | Ppat_constraint (p', _) ->
+        drop_exception_patterns p'
+
+      | Ppat_exception p' ->
+        p'
+
+      | Ppat_open (m, p') ->
+        {p with ppat_desc =
+          Ppat_open (m, drop_exception_patterns p')}
 
     in
 
