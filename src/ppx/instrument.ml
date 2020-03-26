@@ -566,6 +566,12 @@ struct
           |> List.map (fun (location_trace, p'') ->
             (location_trace, Pat.open_ ~loc ~attrs c p''))
 
+        (* Same logic as [Ppat_alias]. *)
+        | Ppat_exception p' ->
+          recurse ~enclosing_loc p'
+          |> List.map (fun (location_trace, p'') ->
+            (location_trace, Pat.exception_ ~loc ~attrs p''))
+
         (* Recursively rotate or-patterns in each pattern in [ps] to the top.
            Then, take a Cartesian product of the cases, and re-wrap each row in
            a replacement tuple pattern.
@@ -628,11 +634,6 @@ struct
           let ps_1 = recurse ~enclosing_loc:p_1.ppat_loc p_1 in
           let ps_2 = recurse ~enclosing_loc:p_2.ppat_loc p_2 in
           ps_1 @ ps_2
-
-        (* This should be unreachable in well-formed ASTs, because the caller
-           strips off the [exception] pattern, and [exception] patterns cannot
-           ordinarily be nested in other patterns. *)
-        | Ppat_exception _ -> []
 
       (* Performs the Cartesian product operation described at [Ppat_tuple]
          above, concatenating location traces along the way.
