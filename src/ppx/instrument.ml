@@ -136,7 +136,9 @@ sig
       Parsetree.expression
 
   val instrument_cases :
-    points -> Parsetree.case list -> Parsetree.case list
+    points -> Parsetree.case list ->
+      Parsetree.case list *
+      ((Parsetree.expression -> Parsetree.expression) list)
 
   val runtime_initialization :
     points -> string -> Parsetree.structure_item list
@@ -372,7 +374,7 @@ struct
       - We also don't instrument refutation cases ([| -> .]).
 
       So, without further ado, here is the function that does all this magic: *)
-  let instrument_pattern points case =
+  let instrument_pattern points index case =
     let module Helper_types =
       struct
         type location_trace = Location.t list
@@ -384,7 +386,7 @@ struct
 
     let rec outline () =
       if is_assert_false_or_refutation case then
-        case
+        [case], fun e -> e
       else
         let entire_pattern = Parsetree.(case.pc_lhs) in
         let loc = Parsetree.(entire_pattern.ppat_loc) in
@@ -394,14 +396,16 @@ struct
 
         match rotated_cases with
         | [] -> (* Should be unreachable. *)
-          insert_instrumentation
+          [insert_instrumentation
             case
-            (fun e -> instrument_expr points e)
+            (fun e -> instrument_expr points e)],
+          fun e -> e
 
         | [(location_trace, _)] ->
-          insert_instrumentation
+          [insert_instrumentation
             case
-            (instrumentation_for_location_trace location_trace)
+            (instrumentation_for_location_trace location_trace)],
+          fun e -> e
 
         | _::_::_ ->
           let exception_cases, value_cases =
@@ -413,9 +417,10 @@ struct
             let new_case_pattern_with_alias =
               add_bisect_matched_value_alias loc entire_pattern in
             let nested_match = generate_nested_match loc rotated_cases in
-            insert_instrumentation
+            [insert_instrumentation
               {case with pc_lhs = new_case_pattern_with_alias}
-              (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])
+              (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])],
+            fun e -> e
 
           | _, [] ->
             let new_case_pattern_with_aliases =
@@ -425,12 +430,40 @@ struct
               |> List.map (fun (trace, p) -> (trace, drop_exception_patterns p))
               |> generate_nested_match loc
             in
-            insert_instrumentation
+            [insert_instrumentation
               {case with pc_lhs = new_case_pattern_with_aliases}
-              (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])
+              (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])],
+            fun e -> e
 
           | _ ->
-            assert false
+            let variables = bound_variables (snd (List.hd rotated_cases)) in
+            let thunk_name = Printf.sprintf "___bisect_case_%i___" index in
+            let rec make_thunk = function
+              | [] ->
+                Exp.fun_ ~loc Nolabel None
+                  [%pat? ()] case.pc_rhs
+              | x::rest ->
+                Exp.fun_ ~loc Nolabel None (Pat.var ~loc x) (make_thunk rest)
+            in
+            let thunk = make_thunk variables in
+            let thunk_call =
+              Exp.apply ~loc
+                (Exp.ident ~loc (Ast_convenience.lid ~loc thunk_name))
+                (List.map (fun {Location.loc; txt} ->
+                  Ast_convenience.Label.Nolabel,
+                  Exp.ident ~loc (Ast_convenience.lid ~loc txt))
+                  variables
+                @ [Ast_convenience.Label.Nolabel, [%expr ()]])
+            in
+            rotated_cases
+            |> List.map (fun (trace, pattern) ->
+              {case with
+                pc_lhs = pattern;
+                pc_rhs = instrumentation_for_location_trace trace thunk_call}),
+            fun e ->
+              Exp.let_ ~loc Nonrecursive
+                [Ast.Ast_helper.Vb.mk ~loc
+                  (Pat.var ~loc {Location.loc; txt = thunk_name}) thunk] e
 
     and is_assert_false_or_refutation case =
       match case.pc_rhs with
@@ -736,12 +769,44 @@ struct
         {p with ppat_desc =
           Ppat_open (m, drop_exception_patterns p')}
 
+    and bound_variables p =
+      match Parsetree.(p.ppat_desc) with
+      | Ppat_any | Ppat_constant _ | Ppat_interval _ | Ppat_construct (_, None)
+      | Ppat_variant (_, None) | Ppat_type _ | Ppat_unpack _
+      | Ppat_extension _ ->
+        []
+
+      | Ppat_var x ->
+        [x]
+
+      | Ppat_alias (p', x) ->
+        x::(bound_variables p')
+
+      | Ppat_tuple ps | Ppat_array ps ->
+        List.map bound_variables ps
+        |> List.flatten
+
+      | Ppat_record (fields, _) ->
+        List.map (fun (_, p') -> bound_variables p') fields
+        |> List.flatten
+
+      | Ppat_construct (_, Some p') | Ppat_variant (_, Some p')
+      | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
+      | Ppat_open (_, p') ->
+        bound_variables p'
+
+      | Ppat_or (p_1, _) ->
+        bound_variables p_1 (* Should be unreachable. *)
+
     in
 
     outline ()
 
   let instrument_cases points cases =
-    List.map (instrument_pattern points) cases
+    List.mapi (instrument_pattern points) cases
+    |> List.split
+    |> fun (cases, thunks) ->
+      List.flatten cases, thunks
 
   let runtime_initialization points file =
     let loc = Location.in_file file in
@@ -1113,8 +1178,8 @@ class instrumenter =
 
           (* Expressions that have subexpressions that might not get visited. *)
           | Pexp_function cases ->
-            Exp.function_
-              ~loc ~attrs (traverse_cases ~is_in_tail_position:true cases)
+            Exp.function_ ~loc ~attrs
+              (fst @@ traverse_cases ~is_in_tail_position:true cases)
 
           | Pexp_fun (label, default_value, p, e) ->
             let default_value =
@@ -1133,14 +1198,18 @@ class instrumenter =
             Exp.fun_ ~loc ~attrs label default_value p e
 
           | Pexp_match (e, cases) ->
-            Exp.match_ ~loc ~attrs
-              (traverse ~successor:`Redundant ~is_in_tail_position:false e)
-              (traverse_cases ~is_in_tail_position cases)
+            let cases, thunks = traverse_cases ~is_in_tail_position cases in
+            let match_ =
+              Exp.match_ ~loc ~attrs
+                (traverse ~successor:`Redundant ~is_in_tail_position:false e)
+                cases
+            in
+            List.fold_left (fun e add_thunk -> add_thunk e) match_ thunks
 
           | Pexp_try (e, cases) ->
             Exp.try_ ~loc ~attrs
               (traverse ~is_in_tail_position:false e)
-              (traverse_cases ~is_in_tail_position cases)
+              (fst @@ traverse_cases ~is_in_tail_position cases)
 
           | Pexp_ifthenelse (if_, then_, else_) ->
             Exp.ifthenelse ~loc ~attrs
