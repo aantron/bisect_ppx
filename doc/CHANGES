@@ -1,5 +1,9 @@
-Version 2.1.0 (2020-03-25):
+Version 2.2.0 (2020-03-26):
 ---------------------------
+  Additions
+
+  - Support for exception pattern extensions added in OCaml 4.08 (#297).
+
   Bugs fixed
 
   - HTML: generate <!DOCTYPE html> and <html lang="en"> (#288, @zapashcanon).
