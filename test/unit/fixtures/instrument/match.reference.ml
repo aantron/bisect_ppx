@@ -3,7 +3,7 @@ module Bisect_visit___match___ml =
   struct
     let ___bisect_visit___ =
       let point_definitions =
-        "\132\149\166\190\000\000\000c\000\000\000\021\000\000\000Q\000\000\000Q\b\000\000P\000\160j@\160wB\160\000IA\160\000wE\160\001\000\137C\160\001\000\150D\160\001\000\242F\160\001\001\001G\160\001\001=H\160\001\001BI\160\001\001OJ\160\001\001\135K\160\001\001\148M\160\001\001\178L\160\001\001\244N\160\001\002\012O\160\001\002\019P\160\001\002TS\160\001\002fQ\160\001\002sR" in
+        "\132\149\166\190\000\000\000c\000\000\000\021\000\000\000Q\000\000\000Q\b\000\000P\000\160jA\160wB\160\000I@\160\000wE\160\001\000\137C\160\001\000\150D\160\001\000\242F\160\001\001\001G\160\001\001=H\160\001\001BI\160\001\001OJ\160\001\001\135L\160\001\001\148M\160\001\001\178K\160\001\001\244N\160\001\002\012O\160\001\002\019P\160\001\002TS\160\001\002fQ\160\001\002sR" in
       let `Staged cb =
         Bisect.Runtime.register_file "match.ml" ~point_count:20
           ~point_definitions in
@@ -13,11 +13,11 @@ open Bisect_visit___match___ml
 [@@@ocaml.text "/*"]
 let () =
   match `A with
-  | `A -> (___bisect_visit___ 0; ())
+  | `A -> (___bisect_visit___ 1; ())
   | `B ->
       (___bisect_visit___ 2;
        (let ___bisect_result___ = print_endline "foo" in
-        ___bisect_visit___ 1; ___bisect_result___))
+        ___bisect_visit___ 0; ___bisect_result___))
 let f () =
   ___bisect_visit___ 5;
   (match `A with
@@ -39,11 +39,11 @@ let () =
   | `C -> (___bisect_visit___ 10; ())
 let () =
   match `A with
-  | `A -> (___bisect_visit___ 11; ())
+  | `A -> (___bisect_visit___ 12; ())
   | exception Exit ->
       (___bisect_visit___ 13;
        (let ___bisect_result___ = print_endline "foo" in
-        ___bisect_visit___ 12; ___bisect_result___))
+        ___bisect_visit___ 11; ___bisect_result___))
 let () =
   match `A with
   | `A -> (___bisect_visit___ 14; ())

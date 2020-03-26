@@ -135,8 +135,8 @@ sig
     Parsetree.expression ->
       Parsetree.expression
 
-  val instrument_pattern :
-    points -> Parsetree.case -> Parsetree.case
+  val instrument_cases :
+    points -> Parsetree.case list -> Parsetree.case list
 
   val runtime_initialization :
     points -> string -> Parsetree.structure_item list
@@ -668,6 +668,9 @@ struct
 
     outline ()
 
+  let instrument_cases points cases =
+    List.map (instrument_pattern points) cases
+
   let runtime_initialization points file =
     let loc = Location.in_file file in
 
@@ -797,7 +800,7 @@ end
 class instrumenter =
   let points = Generated_code.init () in
   let instrument_expr = Generated_code.instrument_expr points in
-  let instrument_pattern = Generated_code.instrument_pattern points in
+  let instrument_cases = Generated_code.instrument_cases points in
 
   object (self)
     inherit Ast_mapper_class.mapper as super
@@ -1227,8 +1230,8 @@ class instrumenter =
                 (traverse ~is_in_tail_position:false) case.Parsetree.pc_guard;
             pc_rhs = traverse ~is_in_tail_position case.pc_rhs;
           }
-          |> instrument_pattern
-        end
+          end
+        |> instrument_cases
       in
 
       traverse ~is_in_tail_position:false e
