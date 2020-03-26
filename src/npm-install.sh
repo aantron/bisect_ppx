@@ -37,7 +37,7 @@ then
     esy_build
 fi
 
-bin/$OS/bisect-ppx-report --version > /dev/null
+bin/$OS/bisect-ppx-report --help plain > /dev/null
 RESULT=$?
 if [ "$RESULT" != 0 ]
 then
