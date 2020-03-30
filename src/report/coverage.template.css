@@ -12,6 +12,10 @@ pre {
     color: black;
 }
 
+code {
+    font-family: inherit;
+}
+
 a {
     text-decoration: none;
     color: inherit;
