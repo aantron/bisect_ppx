@@ -280,7 +280,7 @@ code span[data-count="0"] {
 .meter {
     display: inline-block;
     position: relative;
-    top: 2px;
+    top: 3px;
     width: 5em;
     height: 1em;
     background-color: #f9c3c3;
@@ -288,6 +288,7 @@ code span[data-count="0"] {
 
 .covered {
     display: inline-block;
+    position: absolute;
     width: 50%;
     height: 100%;
     background-color: #9ed09f;
