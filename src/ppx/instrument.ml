@@ -825,6 +825,13 @@ struct
     let points_data = Ast_convenience.str ~loc (Common.write_points !points) in
     let file = Ast_convenience.str ~loc file in
 
+    let ast_convenience_str_opt = function
+      | None -> Ast_convenience.constr ~loc "None" []
+      | Some v -> Ast_convenience.(constr ~loc "Some" [str ~loc v])
+    in
+    let default_bisect_file = ast_convenience_str_opt !Default.bisect_file in
+    let default_bisect_silent = ast_convenience_str_opt !Default.bisect_silent in
+
     (* ___bisect_visit___ is a function with a reference to a point count array.
        It is called every time a point is visited.
 
@@ -901,6 +908,8 @@ struct
             let point_definitions = [%e points_data] in
             let `Staged cb =
               Bisect.Runtime.register_file
+                ~default_bisect_file:[%e default_bisect_file]
+                ~default_bisect_silent:[%e default_bisect_silent]
                 [%e file] ~point_count:[%e point_count] ~point_definitions
             in
             cb
