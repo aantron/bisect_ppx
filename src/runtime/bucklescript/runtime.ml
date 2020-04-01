@@ -4,8 +4,9 @@
 
 
 
-let register_file =
-  Bisect_common.register_file
+let register_file ~default_bisect_file:_
+    ~default_bisect_silent:_ file ~point_count ~point_definitions =
+  Bisect_common.register_file file ~point_count ~point_definitions
 
 let get_coverage_data =
   Bisect_common.runtime_data_to_string

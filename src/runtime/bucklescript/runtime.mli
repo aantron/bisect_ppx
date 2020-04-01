@@ -5,6 +5,7 @@
 
 
 val register_file :
+  default_bisect_file:string option -> default_bisect_silent:string option ->
   string -> point_count:int -> point_definitions:string ->
     [`Staged of (int -> unit)]
 (** [register_file file ~point_count ~point_definitions] indicates that the file
