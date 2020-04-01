@@ -1,14 +1,26 @@
 :root {
+    --main-background: #fff;
+    --code-background: transparent;
+    --line-numbers-background: rgba(0, 0, 0, 0.025);
+    --navbar-background: #eee;
+
+    --meter-unvisited-color: #f9c3c3;
+    --meter-visited-color: #9ed09f;
+    --meter-separator-color: white;
+
     --color: #000;
+    --dirname-color: #bbb;
+    --underline-color: #ddd;
     --visited-color: $(visited_color);
     --visited-number-color: rgba(64, 192, 64, 0.2);
     --unvisited-color: $(unvisited_color);
     --unvisited-number-color: rgba(255, 128, 128, 0.3);
     --somevisited-color: $(some_visited_color);
-    --highlight-color: $(highlight_color);
+    --highlight-color: #a0fbff;
     --line-number-color: rgba(0, 0, 0, 0.4);
     --unvisited-margin-color: #d69e9e;
-    --code-background: #fff;
+    --border: #eee;
+    --navbar-border: #ddd;
     --code-color: #000;
     --hljs-link: #6a737d;
     --hljs-keyword: #d73a49;
@@ -21,24 +33,36 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --color: #5f7e97;
+        --main-background: #202020;
+        --code-background: #222;
+        --line-numbers-background: rgba(0, 0, 0, 0.125);
+        --navbar-background: #202020;
+
+        --meter-unvisited-color: #622;
+        --meter-visited-color: #252;
+        --meter-separator-color: black;
+
+        --color: #bebebe;
+        --dirname-color: #666;
+        --underline-color: #444;
         --visited-color: #002800;
-        --visited-number-color: rgba(0, 255, 0, 0.2);
+        --visited-number-color: #252;
         --unvisited-color: #380000;
-        --unvisited-number-color: #420a0a;
+        --unvisited-number-color: #622;
         --somevisited-color: #303000;
-        --highlight-color: $(highlight_color);
+        --highlight-color: #303e3f;
         --line-number-color: rgba(230, 230, 230, 0.3);
-        --unvisited-margin-color: #d69e9e;
-        --code-background: #011627;
+        --unvisited-margin-color: #622;
+        --border: #333;
+        --navbar-border: #333;
         --code-color: #ccc;
-        --hljs-link: #ff869a;
-        --hljs-keyword: #c792ea;
-        --hljs-regexp: #5ca7e4;
+        --hljs-link: #999;
+        --hljs-keyword: #cda869;
+        --hljs-regexp: #f9ee98;
         --hljs-title: #dcdcaa;
-        --hljs-type: #82aaff;
+        --hljs-type: #ac885b;
         --hljs-meta: #82aaff;
-        --hljs-variable: #addb67;
+        --hljs-variable: #cf6a4c;
     }
 }
 
@@ -47,7 +71,7 @@ body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 16px;
     line-height: 1.5em;
-    background-color: var(--code-background);
+    background-color: var(--main-background);
 }
 
 pre {
@@ -80,7 +104,7 @@ h1 {
 }
 
 .dirname {
-    color: #bbb;
+    color: var(--dirname-color);
 }
 
 h2 {
@@ -110,8 +134,8 @@ h2 {
     left: 0;
     width: 1em;
     height: 100%;
-    background-color: #eee;
-    border-right: 1px solid #ddd;
+    background-color: var(--navbar-background);
+    border-right: 1px solid var(--navbar-border);
     cursor: pointer;
 }
 
@@ -127,8 +151,8 @@ h2 {
 }
 
 #report {
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     overflow: hidden;
 }
 
@@ -136,6 +160,7 @@ h2 {
     position: absolute;
     z-index: -100;
     width: 100%;
+    background-color: var(--code-background);
 }
 
 #lines-layer span {
@@ -271,10 +296,10 @@ a[id]:target + .some-visited {
 
 #line-numbers {
     float: left;
-    border-right: 1px solid #eee;
+    border-right: 1px solid var(--border);
     margin-right: 1em;
     color: var(--line-number-color);
-    background-color: rgba(0, 0, 0, 0.0125);
+    background-color: var(--line-numbers-background);
     text-align: right;
 }
 
@@ -295,7 +320,7 @@ a[id]:target + .some-visited {
 }
 
 code span {
-    cursor: default;
+    cursor: text;
 }
 
 code span[data-count] {
@@ -322,8 +347,9 @@ code span[data-count="0"] {
 
 #files {
     padding: 1.5em 4em;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
+    background-color: var(--code-background);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
 .meter {
@@ -332,7 +358,7 @@ code span[data-count="0"] {
     top: 3px;
     width: 5em;
     height: 1em;
-    background-color: #f9c3c3;
+    background-color: var(--meter-unvisited-color);
 }
 
 .covered {
@@ -340,8 +366,8 @@ code span[data-count="0"] {
     position: absolute;
     width: 50%;
     height: 100%;
-    background-color: #9ed09f;
-    border-right: 1px solid white;
+    background-color: var(--meter-visited-color);
+    border-right: 1px solid var(--meter-separator-color);
 }
 
 .percentage {
@@ -353,7 +379,7 @@ code span[data-count="0"] {
 
 #files a {
     text-decoration: none;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--underline-color);
     color: var(--color);
 }
 
@@ -376,7 +402,7 @@ code span[data-count="0"] {
 .hljs-variable,
 .hljs-template-variable,
 .hljs-tag .hljs-attr {
-    color: var(--hljs-variale);
+    color: var(--hljs-variable);
 }
 
 .hljs-regexp,
