@@ -5,7 +5,8 @@ module Bisect_visit___letexception_404___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000\t\000\000\000\003\000\000\000\t\000\000\000\t\160\160\000E@\160\000pA" in
       let `Staged cb =
-        Bisect.Runtime.register_file "letexception_404.ml" ~point_count:2
+        Bisect.Runtime.register_file ~default_bisect_file:None
+          ~default_bisect_silent:None "letexception_404.ml" ~point_count:2
           ~point_definitions in
       cb
   end

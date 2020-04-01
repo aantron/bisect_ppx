@@ -5,7 +5,8 @@ module Bisect_visit___let___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000\018\000\000\000\005\000\000\000\017\000\000\000\017\192\160\000FA\160\000R@\160\000}C\160\001\000\159B" in
       let `Staged cb =
-        Bisect.Runtime.register_file "let.ml" ~point_count:4
+        Bisect.Runtime.register_file ~default_bisect_file:None
+          ~default_bisect_silent:None "let.ml" ~point_count:4
           ~point_definitions in
       cb
   end
