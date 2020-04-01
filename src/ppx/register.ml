@@ -58,6 +58,14 @@ let switches = [
   (Arg.Symbol (["safe"; "fast"; "faster"], fun _ ->
     prerr_endline "bisect_ppx argument '-mode' is deprecated.")),
   " Deprecated") ;
+
+  ("--default-bisect-file",
+  Arg.String (fun s -> Default.bisect_file := Some s),
+  " Default value for BISECT_FILE environment variable.");
+
+  ("--default-bisect-silent",
+  Arg.String (fun s -> Default.bisect_silent := Some s),
+  " Default value for BISECT_SILENT environment variable.");
 ]
 
 let deprecated = Common.deprecated "bisect_ppx"

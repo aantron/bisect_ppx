@@ -5,7 +5,8 @@ module Bisect_visit___sequence___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000\019\000\000\000\005\000\000\000\017\000\000\000\017\192\160\000XA\160\000d@\160\001\000\146C\160\001\000\169B" in
       let `Staged cb =
-        Bisect.Runtime.register_file "sequence.ml" ~point_count:4
+        Bisect.Runtime.register_file ~default_bisect_file:None
+          ~default_bisect_silent:None "sequence.ml" ~point_count:4
           ~point_definitions in
       cb
   end

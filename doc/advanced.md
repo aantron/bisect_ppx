@@ -135,6 +135,22 @@ message. By default, these messages go to a file `bisect.log`. `BISECT_SILENT`
 can be set to `YES` to turn off logging completely. Alternatively, it can be set
 to another filename, or to `ERR` in order to log to `STDERR`.
 
+<a id="CompileTimeDefaults"></a>
+#### Compile-time default values
+
+If your testing environment doesn't allow you to easily specify these
+environment variables at testing runtime, you can specify default values
+for them at compile time by passing the `--default-bisect-file` and
+`--default-bisect-silent` options to the Bisect_ppx preprocessor:
+
+```
+(preprocess (pps bisect_ppx -- --default-bisect-file /tmp/mycoverage/
+                               --default-bisect-silent /tmp/coverage.log))
+```
+
+If different values are specified in different files, one of them is chosen.
+Which one is unspecified.
+
 
 
 [Str]:               http://caml.inria.fr/pub/docs/manual-ocaml/libref/Str.html#VALregexp

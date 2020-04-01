@@ -6,6 +6,10 @@
 
 module Common = Bisect_common
 
+let default_bisect_file = ref "bisect"
+
+let default_bisect_silent = ref "bisect.log"
+
 type message =
   | Unable_to_create_file
   | Unable_to_write_file
@@ -25,11 +29,11 @@ let full_path fname =
   else
     fname
 
-let env_to_fname env default = try Sys.getenv env with Not_found -> default
+let env_to_fname env default = try Sys.getenv env with Not_found -> !default
 
 let verbose =
   lazy begin
-    let fname = env_to_fname "BISECT_SILENT" "bisect.log" in
+    let fname = env_to_fname "BISECT_SILENT" default_bisect_silent in
     match (String.uppercase [@ocaml.warning "-3"]) fname with
     | "YES" | "ON" -> fun _ -> ()
     | "ERR"        -> fun msg -> prerr_endline (string_of_message msg)
@@ -73,7 +77,7 @@ let write_coverage_data () =
     create_file 100
 
 let file_channel () =
-  let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
+  let base_name = full_path (env_to_fname "BISECT_FILE" default_bisect_file) in
   let rec create_file () =
     let filename = Common.random_filename base_name in
     try
@@ -113,6 +117,9 @@ let dump () =
 let register_dump : unit Lazy.t =
   lazy (at_exit dump)
 
-let register_file file ~point_count ~point_definitions =
+let register_file ~default_bisect_file:bisect_file
+    ~default_bisect_silent:bisect_silent file ~point_count ~point_definitions =
+  (match bisect_file with None -> () | Some v -> default_bisect_file := v);
+  (match bisect_silent with None -> () | Some v -> default_bisect_silent := v);
   let () = Lazy.force register_dump in
   Common.register_file file ~point_count ~point_definitions
