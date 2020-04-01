@@ -1,15 +1,15 @@
 :root {
     --color: #000;
     --visited-color: $(visited_color);
-    --visited-number-color: rgba(0, 255, 0, 0.2);
+    --visited-number-color: rgba(64, 192, 64, 0.2);
     --unvisited-color: $(unvisited_color);
-    --unvisted-number-color: rgba(255, 0, 0, 0.2);
+    --unvisited-number-color: rgba(255, 128, 128, 0.3);
     --somevisited-color: $(some_visited_color);
     --highlight-color: $(highlight_color);
     --line-number-color: rgba(0, 0, 0, 0.4);
+    --unvisited-margin-color: #d69e9e;
     --code-background: #fff;
     --code-color: #000;
-    /* Code highlighting */
     --hljs-link: #6a737d;
     --hljs-keyword: #d73a49;
     --hljs-regexp: #032f62;
@@ -25,13 +25,13 @@
         --visited-color: #002800;
         --visited-number-color: rgba(0, 255, 0, 0.2);
         --unvisited-color: #380000;
-        --unvisted-number-color: #420a0a;
+        --unvisited-number-color: #420a0a;
         --somevisited-color: #303000;
         --highlight-color: $(highlight_color);
         --line-number-color: rgba(230, 230, 230, 0.3);
+        --unvisited-margin-color: #d69e9e;
         --code-background: #011627;
         --code-color: #ccc;
-        /* Code highlighting */
         --hljs-link: #ff869a;
         --hljs-keyword: #c792ea;
         --hljs-regexp: #5ca7e4;
@@ -58,7 +58,7 @@ pre {
 }
 
 code {
-    line-height: normal;
+    font-family: inherit;
 }
 
 a {
@@ -123,7 +123,7 @@ h2 {
 }
 
 #navbar .unvisited, #navbar .some-visited {
-    background-color: var(--unvisted-color);
+    background-color: var(--unvisited-margin-color);
 }
 
 #report {
@@ -300,12 +300,12 @@ code span {
 
 code span[data-count] {
     display: inline-block;
-    background-color: var(--visited-color);
+    background-color: var(--visited-number-color);
 }
 
 code span[data-count="0"] {
     display: inline-block;
-    background-color: var(--unvisited-color);
+    background-color: var(--unvisited-number-color);
 }
 
 #tool-tip {
@@ -332,7 +332,7 @@ code span[data-count="0"] {
     top: 3px;
     width: 5em;
     height: 1em;
-    background-color: var(--unvisited-color);
+    background-color: #f9c3c3;
 }
 
 .covered {
@@ -340,7 +340,7 @@ code span[data-count="0"] {
     position: absolute;
     width: 50%;
     height: 100%;
-    background-color: var(--visited-color);
+    background-color: #9ed09f;
     border-right: 1px solid white;
 }
 
