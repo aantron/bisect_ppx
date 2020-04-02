@@ -6,6 +6,17 @@
 
 module Common = Bisect_common
 
+type theme = [
+  | `Light
+  | `Dark
+  | `Auto
+]
+
+let theme_class = function
+  | `Light -> " class=\"light\""
+  | `Dark -> " class=\"dark\""
+  | `Auto -> ""
+
 let css_variables =
   ["unvisited_color", "#ffecec";
    "visited_color", "#eaffea";
@@ -40,7 +51,7 @@ let percentage stats =
   let a, b = float_of_int a, float_of_int b in
   if b = 0. then 100. else (100. *. a) /. b
 
-let output_html_index verbose title filename l =
+let output_html_index verbose title theme filename l =
   verbose "Writing index file...";
 
   let stats =
@@ -55,7 +66,7 @@ let output_html_index verbose title filename l =
     (fun channel ->
       Report_utils.output_strings
         [  "<!DOCTYPE html>" ;
-           "<html lang=\"en\">" ;
+           "<html lang=\"en\"$(theme)>" ;
            "  <head>" ;
            "    <title>$(title)</title>" ;
            "    <link rel=\"stylesheet\" type=\"text/css\" href=\"coverage.css\" />" ;
@@ -68,6 +79,7 @@ let output_html_index verbose title filename l =
            "    </div>" ;
            "    <div id=\"files\">"]
         [ "title", title ;
+          "theme", theme_class theme;
           "percentage",
             Printf.sprintf "%.02f"
               (floor ((percentage stats) *. 100.) /. 100.) ]
@@ -134,7 +146,7 @@ let escape_line tab_size line offset points =
   Buffer.contents buff
 
 let output_html
-    verbose tab_size title in_file out_file resolver visited points =
+    verbose tab_size title theme in_file out_file resolver visited points =
 
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
   match resolver in_file with
@@ -216,7 +228,7 @@ let output_html
       (* Head and header. *)
       Report_utils.output_strings
         [  "<!DOCTYPE html>" ;
-           "<html lang=\"en\">" ;
+           "<html lang=\"en\"$(theme)>" ;
            "  <head>" ;
            "    <title>$(title)</title>" ;
            "    <link rel=\"stylesheet\" href=\"$(style_css)\" />" ;
@@ -237,6 +249,7 @@ let output_html
         [ "dir", dirname ;
           "name", basename ;
           "title", title ;
+          "theme", theme_class theme;
           "percentage", Printf.sprintf "%.02f" (percentage stats);
           "style_css", style_css;
           "highlight_js", highlight_js;
@@ -335,13 +348,13 @@ let output_html
     close_out_noerr out_channel;
     Some stats
 
-let output verbose dir tab_size title resolver data points =
+let output verbose dir tab_size title theme resolver data points =
   let files =
     Hashtbl.fold
       (fun in_file visited acc ->
         let out_file = (Filename.concat dir in_file) ^ ".html" in
         let maybe_stats =
-          output_html verbose tab_size title in_file out_file resolver
+          output_html verbose tab_size title theme in_file out_file resolver
             visited points
         in
         match maybe_stats with
@@ -349,7 +362,9 @@ let output verbose dir tab_size title resolver data points =
         | Some stats -> (in_file, (in_file ^ ".html"), stats) :: acc)
       data
       [] in
-  output_html_index verbose title (Filename.concat dir "index.html") (List.sort compare files);
+  output_html_index
+    verbose title theme
+    (Filename.concat dir "index.html") (List.sort compare files);
   output_file Assets.js (Filename.concat dir "coverage.js");
   output_file Assets.highlight_js (Filename.concat dir "highlight.pack.js");
   output_templated_css (Filename.concat dir "coverage.css")

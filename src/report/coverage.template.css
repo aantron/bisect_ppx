@@ -1,4 +1,4 @@
-:root {
+:root, .light:root {
     --main-background: #fff;
     --code-background: transparent;
     --line-numbers-background: rgba(0, 0, 0, 0.025);
@@ -29,6 +29,39 @@
     --hljs-type: #6f42c1;
     --hljs-meta: #22863a;
     --hljs-variable: #005cc5;
+}
+
+.dark:root {
+    --main-background: #202020;
+    --code-background: #222;
+    --line-numbers-background: rgba(0, 0, 0, 0.125);
+    --navbar-background: #202020;
+
+    --meter-unvisited-color: #622;
+    --meter-visited-color: #252;
+    --meter-separator-color: black;
+
+    --color: #bebebe;
+    --dirname-color: #666;
+    --underline-color: #444;
+    --visited-color: #002800;
+    --visited-number-color: #252;
+    --unvisited-color: #380000;
+    --unvisited-number-color: #622;
+    --somevisited-color: #303000;
+    --highlight-color: #303e3f;
+    --line-number-color: rgba(230, 230, 230, 0.3);
+    --unvisited-margin-color: #622;
+    --border: #333;
+    --navbar-border: #333;
+    --code-color: #ccc;
+    --hljs-link: #999;
+    --hljs-keyword: #cda869;
+    --hljs-regexp: #f9ee98;
+    --hljs-title: #dcdcaa;
+    --hljs-type: #ac885b;
+    --hljs-meta: #82aaff;
+    --hljs-variable: #cf6a4c;
 }
 
 @media (prefers-color-scheme: dark) {

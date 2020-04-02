@@ -30,6 +30,7 @@ sig
   val dry_run : bool ref
   val expect : string list ref
   val do_not_expect : string list ref
+  val theme : Report_html.theme ref
 
   val parse_args : unit -> unit
   val print_usage : unit -> unit
@@ -87,6 +88,8 @@ struct
   let expect = ref []
 
   let do_not_expect = ref []
+
+  let theme = ref `Auto
 
   let options = [
     ("--html",
@@ -606,7 +609,7 @@ let main () =
     | `Html, dir ->
       Report_utils.mkdirs dir;
       Report_html.output verbose dir
-        !Arguments.tab_size !Arguments.report_title
+        !Arguments.tab_size !Arguments.report_title !Arguments.theme
           search_in_path data points
     | `Csv, file ->
       generic_output file (Report_csv.make !Arguments.csv_separator)
@@ -810,6 +813,14 @@ struct
           "Set TAB width for replacing TAB characters in HTML pages.")
       --> (:=) Arguments.tab_size
     in
+    let theme =
+      Arg.(value @@
+        opt (enum ["light", `Light; "dark", `Dark; "auto", `Auto]) `Auto @@
+        info ["theme"] ~docv:"THEME" ~doc:
+          ("$(i,light) or $(i,dark). The default value, $(i,auto), causes " ^
+          "the report's theme to adapt to system or browser preferences."))
+      --> (:=) Arguments.theme
+    in
     output_directory &&&
     coverage_files 0 &&&
     coverage_search_directories &&&
@@ -817,6 +828,7 @@ struct
     ignore_missing_files &&&
     title &&&
     tab_size &&&
+    theme &&&
     expect &&&
     do_not_expect
     |> main',
