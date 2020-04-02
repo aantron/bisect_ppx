@@ -17,10 +17,10 @@ function attach_tool_tip()
     document.querySelector("body").onmousemove = function (event)
     {
         var element = event.target;
-        if (event.target.dataset.count === undefined)
+        if (element.dataset.count === undefined)
             element = event.target.parentNode;
 
-        if (element.dataset.count) {
+        if (element.dataset.count && element.dataset.count !== "0") {
             tool_tip.textContent = element.dataset.count;
             tool_tip.classList.add("visible");
             tool_tip.style.top = event.clientY + 7 + "px";
