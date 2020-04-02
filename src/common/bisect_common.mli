@@ -75,6 +75,12 @@ val register_file :
 
 
 
+val bisect_file : string option ref
+(** Default value for [BISECT_FILE]. *)
+
+val bisect_silent : string option ref
+(** Default value for [BISECT_SILENT]. *)
+
 type options = (Arg.key * Arg.spec * Arg.doc) list
 
 val deprecated : string -> string -> options -> options

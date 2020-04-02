@@ -216,6 +216,9 @@ let register_file file ~point_count ~point_definitions =
 
 
 
+let bisect_file = ref None
+let bisect_silent = ref None
+
 type options = (Arg.key * Arg.spec * Arg.doc) list
 
 let deprecated binary basename options =

@@ -829,8 +829,8 @@ struct
       | None -> Ast_convenience.constr ~loc "None" []
       | Some v -> Ast_convenience.(constr ~loc "Some" [str ~loc v])
     in
-    let default_bisect_file = ast_convenience_str_opt !Default.bisect_file in
-    let default_bisect_silent = ast_convenience_str_opt !Default.bisect_silent in
+    let default_bisect_file = ast_convenience_str_opt !Common.bisect_file in
+    let default_bisect_silent = ast_convenience_str_opt !Common.bisect_silent in
 
     (* ___bisect_visit___ is a function with a reference to a point count array.
        It is called every time a point is visited.
