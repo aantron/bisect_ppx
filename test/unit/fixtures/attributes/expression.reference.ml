@@ -5,9 +5,8 @@ module Bisect_visit___expression___ml =
       let point_definitions =
         "\132\149\166\190\000\000\000x\000\000\000\025\000\000\000a\000\000\000a\b\000\000`\000\160M@\160\000MB\160\000NA\160\000VC\160\001\001\tD\160\001\001EE\160\001\001}F\160\001\001\191G\160\001\001\249H\160\001\002\016I\160\001\002\129J\160\001\002\189K\160\001\002\198L\160\001\002\239M\160\001\002\255N\160\001\003(O\160\001\0030P\160\001\003XQ\160\001\003xR\160\001\003\167S\160\001\003\209T\160\001\004+V\160\001\0042U\160\001\004VW" in
       let `Staged cb =
-        Bisect.Runtime.register_file ~default_bisect_file:None
-          ~default_bisect_silent:None "expression.ml" ~point_count:24
-          ~point_definitions in
+        Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
+          "expression.ml" ~point_count:24 ~point_definitions in
       cb
   end
 open Bisect_visit___expression___ml

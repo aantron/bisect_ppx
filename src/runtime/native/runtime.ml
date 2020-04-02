@@ -117,8 +117,8 @@ let dump () =
 let register_dump : unit Lazy.t =
   lazy (at_exit dump)
 
-let register_file ~default_bisect_file:bisect_file
-    ~default_bisect_silent:bisect_silent file ~point_count ~point_definitions =
+let register_file
+    ~bisect_file ~bisect_silent file ~point_count ~point_definitions =
   (match bisect_file with None -> () | Some v -> default_bisect_file := v);
   (match bisect_silent with None -> () | Some v -> default_bisect_silent := v);
   let () = Lazy.force register_dump in

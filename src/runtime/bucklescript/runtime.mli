@@ -5,14 +5,19 @@
 
 
 val register_file :
-  default_bisect_file:string option -> default_bisect_silent:string option ->
-  string -> point_count:int -> point_definitions:string ->
+  bisect_file:string option ->
+  bisect_silent:string option ->
+  string ->
+  point_count:int ->
+  point_definitions:string ->
     [`Staged of (int -> unit)]
-(** [register_file file ~point_count ~point_definitions] indicates that the file
-    [file] is part of the application that has been instrumented.
-    [point_definitions] is a serialized [Common.point_definition list] giving
-    the locations of all points in the file. The returned callback is used to
-    increment visitation counts. *)
+(** [register_file file ~bisect_file ~bisect_silent ~point_count
+    ~point_definitions] indicates that the file [file] is part of the
+    application that has been instrumented. [point_definitions] is a serialized
+    [Common.point_definition list] giving the locations of all points in the
+    file. The returned callback is used to increment visitation counts.
+
+    [~bisect_file] and [~bisect_silent] are ignored. *)
 
 val get_coverage_data : unit -> string option
 (** Returns the binary coverage data accumulated by the program so far. This

@@ -5,9 +5,8 @@ module Bisect_visit___ppat_open_404___ml =
       let point_definitions =
         "\132\149\166\190\000\000\0005\000\000\000\012\000\000\000-\000\000\000-\b\000\000,\000\160p@\160uA\160\000kB\160\000qC\160\000vD\160\001\000\132E\160\001\000\194F\160\001\000\199G\160\001\000\214H\160\001\001(I\160\001\001-J" in
       let `Staged cb =
-        Bisect.Runtime.register_file ~default_bisect_file:None
-          ~default_bisect_silent:None "ppat_open_404.ml" ~point_count:11
-          ~point_definitions in
+        Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
+          "ppat_open_404.ml" ~point_count:11 ~point_definitions in
       cb
   end
 open Bisect_visit___ppat_open_404___ml
