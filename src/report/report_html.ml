@@ -17,19 +17,6 @@ let theme_class = function
   | `Dark -> " class=\"dark\""
   | `Auto -> ""
 
-let css_variables =
-  ["unvisited_color", "#ffecec";
-   "visited_color", "#eaffea";
-   "some_visited_color", "#ffd";
-   "highlight_color", "#a0fbff"]
-
-let output_templated_css filename =
-  Common.try_out_channel
-    false
-    filename
-    (fun channel ->
-      Report_utils.output_strings [Assets.css] css_variables channel)
-
 let output_file content filename =
   Common.try_out_channel
     false
@@ -367,4 +354,4 @@ let output verbose dir tab_size title theme resolver data points =
     (Filename.concat dir "index.html") (List.sort compare files);
   output_file Assets.js (Filename.concat dir "coverage.js");
   output_file Assets.highlight_js (Filename.concat dir "highlight.pack.js");
-  output_templated_css (Filename.concat dir "coverage.css")
+  output_file Assets.css (Filename.concat dir "coverage.css")

@@ -11,11 +11,11 @@
     --color: #000;
     --dirname-color: #bbb;
     --underline-color: #ddd;
-    --visited-color: $(visited_color);
+    --visited-color: #eaffea;
     --visited-number-color: rgba(64, 192, 64, 0.2);
-    --unvisited-color: $(unvisited_color);
+    --unvisited-color: #ffecec;
     --unvisited-number-color: rgba(255, 128, 128, 0.3);
-    --somevisited-color: $(some_visited_color);
+    --somevisited-color: #ffd;
     --highlight-color: #a0fbff;
     --line-number-color: rgba(0, 0, 0, 0.4);
     --unvisited-margin-color: #d69e9e;
