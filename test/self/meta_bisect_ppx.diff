@@ -50,15 +50,15 @@ diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
  
  
  
-@@ -760,7 +760,7 @@
+@@ -907,7 +907,7 @@
            let ___bisect_visit___ =
              let point_definitions = [%e points_data] in
              let `Staged cb =
 -              Bisect.Runtime.register_file
 +              Meta_bisect.Runtime.register_file
+                 ~bisect_file:[%e bisect_file] ~bisect_silent:[%e bisect_silent]
                  [%e file] ~point_count:[%e point_count] ~point_definitions
              in
-             cb
 diff -ru src/ppx/register.ml _self/meta_bisect_ppx/src/ppx/register.ml
 --- src/ppx/register.ml
 +++ _self/meta_bisect_ppx/src/ppx/register.ml
@@ -156,9 +156,9 @@ diff -ru src/runtime/native/runtime.ml _self/meta_bisect_ppx/src/runtime/native/
 -module Common = Bisect_common
 +module Common = Meta_bisect_common
  
- type message =
-   | Unable_to_create_file
-@@ -72,8 +72,17 @@
+ let default_bisect_file = ref "bisect"
+ 
+@@ -76,8 +76,17 @@
      in
      create_file 100
  
@@ -172,7 +172,7 @@ diff -ru src/runtime/native/runtime.ml _self/meta_bisect_ppx/src/runtime/native/
 +  scan (Sys.getcwd ())
 +
  let file_channel () =
--  let base_name = full_path (env_to_fname "BISECT_FILE" "bisect") in
+-  let base_name = full_path (env_to_fname "BISECT_FILE" default_bisect_file) in
 +  let base_name = base_name () in
    let rec create_file () =
      let filename = Common.random_filename base_name in
