@@ -1044,7 +1044,7 @@ class instrumenter =
                   [%e e'_mark]
                 else
                   false]
-              [@mealoc loc]
+              [@metaloc loc]
 
           | Pexp_apply (e, arguments) ->
             let arguments =
