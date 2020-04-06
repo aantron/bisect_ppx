@@ -1,3 +1,18 @@
+Version 2.3.0 (2020-04-06):
+---------------------------
+  Additions
+
+  - Dark theme support (#301, Ulrik Strid).
+  - Dark theme based on GitHub-Dark (#260).
+  - PPX options --bisect-file and --bisect-silent as alternatives to BISECT_FILE
+    and BISECT_SILENT environment variables (#303, Mehdi Bouaziz).
+
+  Bugs fixed
+
+  - HTML: coverage meters displayed incorrectly (b61f46a, reported Ulrik Strid).
+  - HTML: Firefox would use the default font in pre > code (#300, Ulrik Strid).
+  - HTML: don't show tooltip over unvisited points (#304).
+
 Version 2.2.0 (2020-03-26):
 ---------------------------
   Additions
