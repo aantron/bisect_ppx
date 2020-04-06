@@ -47,7 +47,7 @@ let switches = [
 
   ("--conditional",
   Arg.Set conditional,
-  " Do not instrument unless environment variable BISECT_ENABLE is YES");
+  " Instrument only when BISECT_ENABLE is YES");
 
   ("--no-comment-parsing",
   Arg.Unit (fun () ->
@@ -61,11 +61,11 @@ let switches = [
 
   ("--bisect-file",
   Arg.String (fun s -> Common.bisect_file := Some s),
-  " Default value for BISECT_FILE environment variable.");
+  " Default value for BISECT_FILE environment variable");
 
   ("--bisect-silent",
   Arg.String (fun s -> Common.bisect_silent := Some s),
-  " Default value for BISECT_SILENT environment variable.");
+  " Default value for BISECT_SILENT environment variable");
 ]
 
 let deprecated = Common.deprecated "bisect_ppx"
