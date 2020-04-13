@@ -94,15 +94,11 @@ let file_channel () =
   in
   create_file ()
 
+let reset_counters =
+  Common.reset_counters
+
 let dump_counters_exn =
   Common.write_runtime_data
-
-let reset_counters () =
-  Hashtbl.iter (fun _ (point_state, _) ->
-      match Array.length point_state with
-      | 0 -> ()
-      | n -> Array.(fill point_state 0 (n - 1) 0)
-    ) (Lazy.force Common.table)
 
 let dump () =
   match file_channel () with

@@ -145,6 +145,14 @@ end
 let table : (string, int array * string) Hashtbl.t Lazy.t =
   lazy (Hashtbl.create 17)
 
+let reset_counters () =
+  Lazy.force table
+  |> Hashtbl.iter begin fun _ (point_state, _) ->
+    match Array.length point_state with
+    | 0 -> ()
+    | n -> Array.fill point_state 0 (n - 1) 0
+  end
+
 let runtime_data_to_string () =
   let data = Hashtbl.fold (fun k v acc -> (k, v)::acc) (Lazy.force table) [] in
   match data with

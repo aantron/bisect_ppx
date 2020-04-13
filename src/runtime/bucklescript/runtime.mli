@@ -32,3 +32,6 @@ val write_coverage_data : unit -> unit
 val write_coverage_data_on_exit : unit -> unit
 (** Registers {!write_coverage_data} to be called automatically on process
     exit. *)
+
+val reset_coverage_data : unit -> unit
+(** [reset_coverage_data ()] clears accumulated coverage statistics. *)

@@ -37,3 +37,6 @@ let node_at_exit = [%bs.raw {|
 
 let write_coverage_data_on_exit () =
   node_at_exit write_coverage_data
+
+let reset_coverage_data =
+  Bisect_common.reset_counters

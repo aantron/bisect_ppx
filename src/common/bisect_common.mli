@@ -61,8 +61,8 @@ val read_runtime_data : string -> (string * (int array * string)) list
 val read_points : string -> point_definition list
 (** [read_points s] reads point definitions from the string [s]. *)
 
-val table : (string, int array * string) Hashtbl.t Lazy.t
-(** Coverage statistics table used by the runtime. *)
+val reset_counters : unit -> unit
+(** Clears accumulated coverage statistics. *)
 
 val register_file :
   string -> point_count:int -> point_definitions:string ->
