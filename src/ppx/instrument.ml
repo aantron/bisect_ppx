@@ -1133,6 +1133,7 @@ class instrumenter =
               | [%expr ignore]
               | [%expr Sys.opaque_identity]
               | [%expr Obj.magic]
+              | [%expr (##)]
                 ->
                 apply
               | _ ->
