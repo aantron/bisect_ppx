@@ -225,6 +225,12 @@ somewhere in your tester, which will have Node write a file like
     Bisect.Runtime.write_coverage_data_on_exit();
     ```
 
+    If you are using Jest, try
+
+    ```reason
+    afterAll(Bisect.Runtime.write_coverage_data);
+    ```
+
     If the tests will be running in the browser, at the end of testing, call
 
     ```reason
@@ -242,6 +248,12 @@ somewhere in your tester, which will have Node write a file like
     BISECT_ENABLE=yes npm run build
     npm run test
     npx bisect-ppx-report.exe html
+    ```
+
+    To exclude your test files from the report, add this to each test file:
+
+    ```reason
+    [@coverage exclude_file];
     ```
 
 5. If your project uses both BuckleScript and native Dune, native Dune will
