@@ -17,8 +17,7 @@ let add s =
   let patterns = List.map (fun x -> Regular_expression (Str.regexp x)) patterns in
   excluded := patterns @ !excluded
 
-let add_file filename =
-  let ch = open_in filename in
+let add_from_channel filename ch =
   let lexbuf = Lexing.from_channel ch in
   try
     let res = Exclude_parser.file Exclude_lexer.token lexbuf in
@@ -34,6 +33,21 @@ let add_file filename =
   | e ->
       close_in_noerr ch;
       raise e
+
+let add_file filename =
+  (* BuckleScript runs the PPX from PROJECT_ROOT/lib/bs. *)
+  let cwd = Sys.getcwd () in
+  let parent = Filename.basename cwd in
+  let grandparent = Filename.(basename (dirname cwd)) in
+
+  let channel =
+    if grandparent = "lib" && parent = "bs" then
+      try open_in (Filename.(concat (dirname (dirname cwd))) filename)
+      with Sys_error _ -> open_in filename
+    else
+      open_in filename
+  in
+  add_from_channel filename channel
 
 let match_pattern pattern name =
   Str.string_match pattern name 0 && Str.match_end () = String.length name
