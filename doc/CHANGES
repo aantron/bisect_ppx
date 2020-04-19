@@ -1,3 +1,10 @@
+Version 2.3.2 (2020-04-19):
+---------------------------
+  Bugs fixed
+
+  - Support taking PPX options from BuckleScript (#310).
+  - Find exclusions file when run from ./lib/bs by BuckleScript (#311).
+
 Version 2.3.1 (2020-04-13):
 ---------------------------
   Bugs fixed

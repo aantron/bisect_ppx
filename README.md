@@ -10,7 +10,7 @@ details of how it is generated are in the [worked example](#Example).
 
 [self]: https://github.com/aantron/bisect_ppx
 [releases]: https://github.com/aantron/bisect_ppx/releases
-[version]: https://img.shields.io/badge/version-2.3.1-blue.svg
+[version]: https://img.shields.io/badge/version-2.3.2-blue.svg
 [travis]: https://travis-ci.org/aantron/bisect_ppx
 [travis-img]: https://img.shields.io/travis/aantron/bisect_ppx/master.svg?label=travis
 [appveyor]: https://ci.appveyor.com/project/aantron/bisect-ppx/branch/master
