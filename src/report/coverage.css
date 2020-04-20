@@ -112,6 +112,7 @@ pre {
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
     font-size: 13px;
     color: var(--code-color);
+    cursor: text;
 }
 
 code {
@@ -350,10 +351,6 @@ a[id]:target + .some-visited {
 
 #line-numbers .visited {
     background-color: var(--visted-number-color);
-}
-
-code span {
-    cursor: text;
 }
 
 code span[data-count] {
