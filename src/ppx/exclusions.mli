@@ -12,6 +12,9 @@ val add : string -> unit
 (** Adds a list of comma-separated elements to excluded list. *)
 
 val add_file : string -> unit
+(** Adds a filename pattern to the list of files to exclude. *)
+
+val add_from_file : string -> unit
 (** Adds exclusions from the passed file to excluded list.
 
     Raises [Sys_error] if an i/o error occurs, [Exclude.Exception] if

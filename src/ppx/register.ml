@@ -23,7 +23,7 @@ let enabled () =
 
 let conditional_exclude_file filename =
   match enabled () with
-  | `Enabled -> Exclusions.add_file filename
+  | `Enabled -> Exclusions.add_from_file filename
   | `Disabled -> ()
 
 let switches = [
@@ -33,6 +33,10 @@ let switches = [
     prerr_endline "Use '--exclusions' instead.";
     Exclusions.add s),
    " Deprecated");
+
+  ("--exclude-files",
+   Arg.String Exclusions.add_file,
+   "<regexp>  Exclude files matching <regexp>");
 
   ("--exclusions",
    Arg.String conditional_exclude_file,

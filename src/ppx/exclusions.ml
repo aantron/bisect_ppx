@@ -17,6 +17,10 @@ let add s =
   let patterns = List.map (fun x -> Regular_expression (Str.regexp x)) patterns in
   excluded := patterns @ !excluded
 
+let add_file s =
+  let pattern = Exclude.{path = Regexp (Str.regexp s); exclusions = None} in
+  excluded := (Exclude_file pattern)::!excluded
+
 let add_from_channel filename ch =
   let lexbuf = Lexing.from_channel ch in
   try
@@ -34,7 +38,7 @@ let add_from_channel filename ch =
       close_in_noerr ch;
       raise e
 
-let add_file filename =
+let add_from_file filename =
   (* BuckleScript runs the PPX from PROJECT_ROOT/lib/bs. *)
   let cwd = Sys.getcwd () in
   let parent = Filename.basename cwd in
