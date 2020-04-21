@@ -219,9 +219,7 @@ and install it:
 3. If you are using Jest, add this to your `package.json`:
 
     ```json
-    "setupFilesAfterEnv": [
-      "./node_modules/bisect_ppx/src/runtime/bucklescript/jest.js"
-    ]
+    "setupFilesAfterEnv": ["bisect_ppx/src/runtime/bucklescript/jest.js"]
     ```
 
     If the tests will be running in the browser, at the end of testing, call
