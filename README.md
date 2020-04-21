@@ -216,16 +216,10 @@ and install it:
     ]
     ```
 
-3. If your tests will be running on Node,
-[call this function](https://github.com/aantron/bisect-starter-bsb/blob/master/hello.re#L2)
+3. If you are using Jest, [call this
+function](https://github.com/aantron/bisect-starter-bsb/blob/master/hello.re#L2)
 somewhere in your tester, which will have Node write a file like
 `bisect0123456789.coverage` when the tester exits:
-
-    ```reason
-    Bisect.Runtime.write_coverage_data_on_exit();
-    ```
-
-    If you are using Jest, try
 
     ```reason
     afterAll(Bisect.Runtime.write_coverage_data);
@@ -238,7 +232,7 @@ somewhere in your tester, which will have Node write a file like
     ```
 
     This returns binary coverage data in a `string option`, which you should
-    upload or otherwise get out of the browser, and write into an `.coverage`
+    upload or otherwise get out of the browser, and write into a `.coverage`
     file yourself.
 
 4. Build in development with `BISECT_ENABLE=yes`, run tests, and generate the
