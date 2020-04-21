@@ -1,3 +1,15 @@
+Version 2.4.0 (2020-04-21):
+---------------------------
+  Additions
+
+  - PPX --exclude-files command-line option (#313).
+  - Jest integration (#314, @jihchi).
+  - Register exit hook automatically on Node (3471d2a).
+
+  Bugs fixed
+
+  - CSS: display text cursor over entire code view (#315).
+
 Version 2.3.2 (2020-04-19):
 ---------------------------
   Bugs fixed
