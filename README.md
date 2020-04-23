@@ -241,11 +241,21 @@ and install it:
     npx bisect-ppx-report.exe html
     ```
 
-    To exclude your test files from the report, add this to each test file:
+    To exclude your test files from the report, change your PPX flags like so:
 
-    ```reason
-    [@coverage exclude_file];
+    ```json
+    "ppx-flags": [
+      ["bisect_ppx/ppx", "--exclude-files", ".*test\\.re"]
+    ]
     ```
+
+    The last argument is a regular expression in the syntax of OCaml's [`Str`
+    module](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Str.html). Note
+    that backslashes need to be escaped both inside the regular expression, and
+    again because they are inside a JSON string.
+
+    Multiple `--exclude-files` option can be specified if you want to provide
+    multiple patterns.
 
 5. If your project uses both BuckleScript and native Dune, native Dune will
    start picking up OCaml files that are part of the BuckleScript `bisect_ppx`
