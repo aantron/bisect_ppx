@@ -4,7 +4,7 @@
       // ... snip ...
     }));
   ```
-  this will cause timeout error in Jest because Jest will wait until you manully call `done` from `param`. *)
+  this will cause timeout error in Jest because Jest will wait until you manually invoke `param.done()` within afterAll. *)
 external afterAll : ((unit -> unit)[@bs ]) -> unit = "afterAll"[@@bs.val ]
 
 let () =
