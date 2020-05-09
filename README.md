@@ -219,6 +219,8 @@ and install it:
 3. If you are using Jest, add this to your `package.json`:
 
     ```json
+    "setupFilesAfterEnv": ["bisect_ppx/lib/js/src/runtime/bucklescript/jest.js"]
+    // or if you enable "package-specs.in-source" flag in bsconfig.json
     "setupFilesAfterEnv": ["bisect_ppx/src/runtime/bucklescript/jest.js"]
     ```
 
