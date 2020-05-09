@@ -8,6 +8,8 @@ module Bisect_visit___setinstvar___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "setinstvar.ml" ~point_count:2 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___setinstvar___ml
 [@@@ocaml.text "/*"]
@@ -16,7 +18,5 @@ let _ =
     val mutable foo = ()
     method bar =
       ___bisect_visit___ 1;
-      foo <-
-        (let ___bisect_result___ = print_endline "foo" in
-         ___bisect_visit___ 0; ___bisect_result___)
+      foo <- ___bisect_post_visit___ 0 (print_endline "foo")
   end

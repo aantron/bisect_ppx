@@ -8,33 +8,28 @@ module Bisect_visit___attributes___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "attributes.ml" ~point_count:15 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___attributes___ml
 [@@@ocaml.text "/*"]
 let () =
-  (let ___bisect_result___ = ((let x = 1 in x)[@testing ]) |> ignore in
-   ___bisect_visit___ 14; ___bisect_result___);
-  (let ___bisect_result___ =
-     ((fun x -> ___bisect_visit___ 12; x)[@testing ]) |> ignore in
-   ___bisect_visit___ 13; ___bisect_result___);
-  (let ___bisect_result___ =
-     (let ___bisect_result___ = ((string_of_int 0)[@testing ]) in
-      ___bisect_visit___ 10; ___bisect_result___) |> ignore in
-   ___bisect_visit___ 11; ___bisect_result___);
+  ___bisect_post_visit___ 14 (((let x = 1 in x)[@testing ]) |> ignore);
+  ___bisect_post_visit___ 13
+    (((fun x -> ___bisect_visit___ 12; x)[@testing ]) |> ignore);
+  ___bisect_post_visit___ 11
+    ((___bisect_post_visit___ 10 ((string_of_int 0)[@testing ])) |> ignore);
   (((match 0 with
      | 0 -> (___bisect_visit___ 8; ())
      | _ -> (___bisect_visit___ 9; ())))
   [@testing ]);
-  (let ___bisect_result___ =
-     ((function
+  ___bisect_post_visit___ 7
+    (((function
        | 0 -> (___bisect_visit___ 5; 0)
-       | x -> (___bisect_visit___ 6; x))[@testing ]) |> ignore in
-   ___bisect_visit___ 7; ___bisect_result___);
+       | x -> (___bisect_visit___ 6; x))[@testing ]) |> ignore);
   (((try
-       let ___bisect_result___ =
-         (let ___bisect_result___ = string_of_int 0 in
-          ___bisect_visit___ 3; ___bisect_result___) |> ignore in
-       ___bisect_visit___ 4; ___bisect_result___
+       ___bisect_post_visit___ 4
+         ((___bisect_post_visit___ 3 (string_of_int 0)) |> ignore)
      with | _ -> (___bisect_visit___ 2; ())))
   [@testing ]);
   ((if true then (___bisect_visit___ 1; ()) else (___bisect_visit___ 0; ()))

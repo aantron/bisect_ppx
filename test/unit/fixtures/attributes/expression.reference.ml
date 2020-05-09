@@ -8,6 +8,8 @@ module Bisect_visit___expression___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "expression.ml" ~point_count:24 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___expression___ml
 [@@@ocaml.text "/*"]
@@ -15,40 +17,23 @@ let fn _ = ___bisect_visit___ 0; ()
 let () =
   if true
   then ((fn 1)[@coverage off])
-  else
-    (___bisect_visit___ 2;
-     (let ___bisect_result___ = fn 2 in
-      ___bisect_visit___ 1; ___bisect_result___))
-;;let ___bisect_result___ = fn 3 in ___bisect_visit___ 3; ___bisect_result___
+  else (___bisect_visit___ 2; ___bisect_post_visit___ 1 (fn 2))
+;;___bisect_post_visit___ 3 (fn 3)
 ;;((fn 4)[@coverage off])
 ;;((fn (if true then 5 else 6))[@coverage off])
-let () =
-  let ___bisect_result___ = fn () in
-  ___bisect_visit___ 4; ___bisect_result___
+let () = ___bisect_post_visit___ 4 (fn ())
 let () = ((fn)[@coverage off]) ()
-let () =
-  (let ___bisect_result___ = fn () in
-   ___bisect_visit___ 5; ___bisect_result___);
-  ()
+let () = ___bisect_post_visit___ 5 (fn ()); ()
 let () = fn (); ((())[@coverage off])
-let () =
-  let ___bisect_result___ = fn @@ () in
-  ___bisect_visit___ 6; ___bisect_result___
+let () = ___bisect_post_visit___ 6 (fn @@ ())
 let () = ((fn)[@coverage off]) @@ ()
-let () =
-  let ___bisect_result___ = () |> fn in
-  ___bisect_visit___ 7; ___bisect_result___
+let () = ___bisect_post_visit___ 7 (() |> fn)
 let () = () |> ((fn)[@coverage off])
 let fn' _ _ = ___bisect_visit___ 8; ()
-let () =
-  let ___bisect_result___ = () |> (fn' ()) in
-  ___bisect_visit___ 9; ___bisect_result___
+let () = ___bisect_post_visit___ 9 (() |> (fn' ()))
 let () = () |> ((fn' ())[@coverage off])
 let () = () |> (((fn')[@coverage off]) ())
-let () =
-  (let ___bisect_result___ = () |> fn in
-   ___bisect_visit___ 10; ___bisect_result___);
-  ()
+let () = ___bisect_post_visit___ 10 (() |> fn); ()
 let () = () |> fn; ((())[@coverage off])
 let _ =
   if true
@@ -83,21 +68,11 @@ let _ =
     then true
     else false
 class foo = object method bar = ___bisect_visit___ 19; () end
-let () =
-  let _ =
-    let ___bisect_result___ = new foo in
-    ___bisect_visit___ 20; ___bisect_result___ in
-  ()
+let () = let _ = ___bisect_post_visit___ 20 (new foo) in ()
 let () = let _ = new foo in ((())[@coverage off])
 let () =
-  let o =
-    let ___bisect_result___ = new foo in
-    ___bisect_visit___ 22; ___bisect_result___ in
-  (let ___bisect_result___ = o#bar in
-   ___bisect_visit___ 21; ___bisect_result___);
-  ()
+  let o = ___bisect_post_visit___ 22 (new foo) in
+  ___bisect_post_visit___ 21 o#bar; ()
 let () =
-  let o =
-    let ___bisect_result___ = new foo in
-    ___bisect_visit___ 23; ___bisect_result___ in
+  let o = ___bisect_post_visit___ 23 (new foo) in
   o#bar; ((())[@coverage off])

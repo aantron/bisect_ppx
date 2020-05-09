@@ -8,26 +8,19 @@ module Bisect_visit___class___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "class.ml" ~point_count:11 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___class___ml
 [@@@ocaml.text "/*"]
 class default ?(foo= ___bisect_visit___ 0; ())  () = object  end
 class applied = ((default)
-  ~foo:(let ___bisect_result___ = print_endline "foo" in
-        ___bisect_visit___ 1; ___bisect_result___)
-  (let ___bisect_result___ = print_endline "bar" in
-   ___bisect_visit___ 2; ___bisect_result___))
-class let_ =
-  let foo =
-    let ___bisect_result___ = print_endline "foo" in
-    ___bisect_visit___ 3; ___bisect_result___
-  in ((default) foo)
+  ~foo:(___bisect_post_visit___ 1 (print_endline "foo"))
+  (___bisect_post_visit___ 2 (print_endline "bar")))
+class let_ = let foo = ___bisect_post_visit___ 3 (print_endline "foo") in
+  ((default) foo)
 class val_ =
-  object
-    val foo =
-      let ___bisect_result___ = print_endline "foo" in
-      ___bisect_visit___ 4; ___bisect_result___
-  end
+  object val foo = ___bisect_post_visit___ 4 (print_endline "foo") end
 class method_1 =
   object method foo = ___bisect_visit___ 5; print_endline "foo" end
 class method_2 =
@@ -40,7 +33,5 @@ class method_4 =
 class initializer_ =
   object
     initializer
-      ___bisect_visit___ 10;
-      (let ___bisect_result___ = print_endline "foo" in
-       ___bisect_visit___ 9; ___bisect_result___)
+      ___bisect_visit___ 10; ___bisect_post_visit___ 9 (print_endline "foo")
   end

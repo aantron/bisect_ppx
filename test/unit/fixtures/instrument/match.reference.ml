@@ -8,6 +8,8 @@ module Bisect_visit___match___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "match.ml" ~point_count:20 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___match___ml
 [@@@ocaml.text "/*"]
@@ -15,9 +17,7 @@ let () =
   match `A with
   | `A -> (___bisect_visit___ 1; ())
   | `B ->
-      (___bisect_visit___ 2;
-       (let ___bisect_result___ = print_endline "foo" in
-        ___bisect_visit___ 0; ___bisect_result___))
+      (___bisect_visit___ 2; ___bisect_post_visit___ 0 (print_endline "foo"))
 let f () =
   ___bisect_visit___ 5;
   (match `A with
@@ -42,8 +42,7 @@ let () =
   | `A -> (___bisect_visit___ 12; ())
   | exception Exit ->
       (___bisect_visit___ 13;
-       (let ___bisect_result___ = print_endline "foo" in
-        ___bisect_visit___ 11; ___bisect_result___))
+       ___bisect_post_visit___ 11 (print_endline "foo"))
 let () =
   match `A with
   | `A -> (___bisect_visit___ 14; ())

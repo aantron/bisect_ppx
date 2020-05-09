@@ -8,16 +8,13 @@ module Bisect_visit___for___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "for.ml" ~point_count:4 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___for___ml
 [@@@ocaml.text "/*"]
 let () =
-  for i =
-    let ___bisect_result___ = succ 0 in
-    ___bisect_visit___ 3; ___bisect_result___ to
-    let ___bisect_result___ = succ 1 in
-    ___bisect_visit___ 2; ___bisect_result___ do
-    ___bisect_visit___ 1;
-    (let ___bisect_result___ = print_endline "foo" in
-     ___bisect_visit___ 0; ___bisect_result___)
+  for i = ___bisect_post_visit___ 3 (succ 0) to
+    ___bisect_post_visit___ 2 (succ 1) do
+    ___bisect_visit___ 1; ___bisect_post_visit___ 0 (print_endline "foo")
   done

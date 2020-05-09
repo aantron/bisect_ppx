@@ -8,10 +8,10 @@ module Bisect_visit___coerce___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "coerce.ml" ~point_count:1 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___coerce___ml
 [@@@ocaml.text "/*"]
-let () =
-  (let ___bisect_result___ = print_endline "foo" in
-   ___bisect_visit___ 0; ___bisect_result___ : unit  :> unit)
+let () = (___bisect_post_visit___ 0 (print_endline "foo") : unit  :> unit)
 let f () = (print_endline "foo" : unit  :> unit)

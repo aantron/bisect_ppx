@@ -8,6 +8,8 @@ module Bisect_visit___record___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "record.ml" ~point_count:4 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___record___ml
 [@@@ocaml.text "/*"]
@@ -15,18 +17,10 @@ type foo = {
   bar: unit ;
   baz: unit }
 let initial =
-  {
-    bar =
-      (let ___bisect_result___ = print_endline "foo" in
-       ___bisect_visit___ 0; ___bisect_result___);
-    baz = ()
-  }
+  { bar = (___bisect_post_visit___ 0 (print_endline "foo")); baz = () }
 let helper () = ___bisect_visit___ 1; initial
 let final =
   {
-    (let ___bisect_result___ = helper () in
-     ___bisect_visit___ 2; ___bisect_result___) with
-    bar =
-      (let ___bisect_result___ = print_endline "bar" in
-       ___bisect_visit___ 3; ___bisect_result___)
+    (___bisect_post_visit___ 2 (helper ())) with
+    bar = (___bisect_post_visit___ 3 (print_endline "bar"))
   }

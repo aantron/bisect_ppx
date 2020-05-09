@@ -8,33 +8,23 @@ module Bisect_visit___apply___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "apply.ml" ~point_count:20 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___apply___ml
 [@@@ocaml.text "/*"]
-let () =
-  let ___bisect_result___ = print_endline "foo" in
-  ___bisect_visit___ 0; ___bisect_result___
+let () = ___bisect_post_visit___ 0 (print_endline "foo")
 let f () = ___bisect_visit___ 1; print_endline "foo"
 let helper () = ___bisect_visit___ 2; print_endline
 let () =
-  let ___bisect_result___ =
-    (let ___bisect_result___ = helper () in
-     ___bisect_visit___ 3; ___bisect_result___) "foo" in
-  ___bisect_visit___ 3; ___bisect_result___
-let () =
-  let ___bisect_result___ = helper () "foo" in
-  ___bisect_visit___ 4; ___bisect_result___
+  ___bisect_post_visit___ 3 ((___bisect_post_visit___ 3 (helper ())) "foo")
+let () = ___bisect_post_visit___ 4 (helper () "foo")
 let helper () = ___bisect_visit___ 5; "foo"
 let () =
-  let ___bisect_result___ =
-    print_endline
-      (let ___bisect_result___ = helper () in
-       ___bisect_visit___ 6; ___bisect_result___) in
-  ___bisect_visit___ 7; ___bisect_result___
+  ___bisect_post_visit___ 7
+    (print_endline (___bisect_post_visit___ 6 (helper ())))
 let helper ?foo  ~bar  () = ___bisect_visit___ 8; ()
-let () =
-  let ___bisect_result___ = (helper ~bar:()) @@ () in
-  ___bisect_visit___ 9; ___bisect_result___
+let () = ___bisect_post_visit___ 9 ((helper ~bar:()) @@ ())
 let f : unit -> unit = helper ~bar:()
 let _ =
   if false
@@ -47,15 +37,9 @@ let _ =
 let _ = true && (___bisect_visit___ 14; true)
 let _ = true & (___bisect_visit___ 15; true)
 let _ =
-  if
-    ((let ___bisect_result___ = print_endline "foo" in
-      ___bisect_visit___ 19; ___bisect_result___);
-     false)
+  if (___bisect_post_visit___ 19 (print_endline "foo"); false)
   then (___bisect_visit___ 16; true)
   else
-    if
-      ((let ___bisect_result___ = print_endline "bar" in
-        ___bisect_visit___ 18; ___bisect_result___);
-       true)
+    if (___bisect_post_visit___ 18 (print_endline "bar"); true)
     then (___bisect_visit___ 17; true)
     else false

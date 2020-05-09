@@ -8,6 +8,8 @@ module Bisect_visit___function___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "function.ml" ~point_count:7 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___function___ml
 [@@@ocaml.text "/*"]

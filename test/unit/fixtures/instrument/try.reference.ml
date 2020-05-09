@@ -8,23 +8,19 @@ module Bisect_visit___try___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "try.ml" ~point_count:11 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___try___ml
 [@@@ocaml.text "/*"]
 let () =
-  try
-    let ___bisect_result___ = print_endline "foo" in
-    ___bisect_visit___ 3; ___bisect_result___
+  try ___bisect_post_visit___ 3 (print_endline "foo")
   with | Exit -> (___bisect_visit___ 1; ())
   | Not_found ->
-      (___bisect_visit___ 2;
-       (let ___bisect_result___ = print_endline "bar" in
-        ___bisect_visit___ 0; ___bisect_result___))
+      (___bisect_visit___ 2; ___bisect_post_visit___ 0 (print_endline "bar"))
 let f () =
   ___bisect_visit___ 7;
-  (try
-     let ___bisect_result___ = print_endline "foo" in
-     ___bisect_visit___ 6; ___bisect_result___
+  (try ___bisect_post_visit___ 6 (print_endline "foo")
    with | Exit -> (___bisect_visit___ 4; ())
    | Not_found -> (___bisect_visit___ 5; print_endline "bar"))
 let () =
@@ -36,5 +32,4 @@ let () =
           | Not_found -> (___bisect_visit___ 10; ())
           | _ -> ()))
        [@ocaml.warning "-4-8-9-11-26-27-28"]);
-       (let ___bisect_result___ = print_endline "bar" in
-        ___bisect_visit___ 8; ___bisect_result___))
+       ___bisect_post_visit___ 8 (print_endline "bar"))

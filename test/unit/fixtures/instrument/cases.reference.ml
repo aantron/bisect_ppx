@@ -8,6 +8,8 @@ module Bisect_visit___cases___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "cases.ml" ~point_count:54 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___cases___ml
 [@@@ocaml.text "/*"]
@@ -17,15 +19,12 @@ type ('a, 'b) record = {
 let () =
   match `A with
   | `A ->
-      (___bisect_visit___ 1;
-       (let ___bisect_result___ = print_endline "foo" in
-        ___bisect_visit___ 0; ___bisect_result___))
+      (___bisect_visit___ 1; ___bisect_post_visit___ 0 (print_endline "foo"))
 let () =
   match `A with
   | `A when
       ___bisect_visit___ 4;
-      (let ___bisect_result___ = print_endline "foo" in
-       ___bisect_visit___ 2; ___bisect_result___);
+      ___bisect_post_visit___ 2 (print_endline "foo");
       true -> (___bisect_visit___ 3; ())
   | _ -> (___bisect_visit___ 5; ())
 let () = match `A with | `A -> assert false
@@ -157,8 +156,7 @@ let () =
          | `B -> (___bisect_visit___ 41; ())
          | _ -> ()))
       [@ocaml.warning "-4-8-9-11-26-27-28"]);
-      (let ___bisect_result___ = print_endline "foo" in
-       ___bisect_visit___ 39; ___bisect_result___);
+      ___bisect_post_visit___ 39 (print_endline "foo");
       true -> (___bisect_visit___ 42; ())
   | _ -> (___bisect_visit___ 43; ())
 let () =
@@ -166,15 +164,13 @@ let () =
   | `A -> (___bisect_visit___ 45; ())
   | exception Exit ->
       (___bisect_visit___ 46;
-       (let ___bisect_result___ = print_endline "foo" in
-        ___bisect_visit___ 44; ___bisect_result___))
+       ___bisect_post_visit___ 44 (print_endline "foo"))
 let () =
   match `A with
   | `A -> (___bisect_visit___ 48; ())
   | exception Exit when
       ___bisect_visit___ 50;
-      (let ___bisect_result___ = print_endline "foo" in
-       ___bisect_visit___ 47; ___bisect_result___);
+      ___bisect_post_visit___ 47 (print_endline "foo");
       true -> (___bisect_visit___ 49; ())
 let () =
   match `A with

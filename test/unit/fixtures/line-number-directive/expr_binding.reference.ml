@@ -8,6 +8,8 @@ module Bisect_visit___expr_binding___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "expr_binding.ml" ~point_count:6 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___expr_binding___ml
 [@@@ocaml.text "/*"]
@@ -17,13 +19,10 @@ let z = [|1;2;3|]
 let f x = ___bisect_visit___ 0; print_endline x
 let f' x =
   ___bisect_visit___ 2;
-  (let x' =
-     let ___bisect_result___ = String.uppercase x in
-     ___bisect_visit___ 1; ___bisect_result___ in
+  (let x' = ___bisect_post_visit___ 1 (String.uppercase x) in
    print_endline x')
 let g x y z = ___bisect_visit___ 3; (x + y) * z
 let g' x y =
   ___bisect_visit___ 5;
-  (let ___bisect_result___ = print_endline x in
-   ___bisect_visit___ 4; ___bisect_result___);
+  ___bisect_post_visit___ 4 (print_endline x);
   print_endline y

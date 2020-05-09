@@ -8,19 +8,17 @@ module Bisect_visit___ifthenelse___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "ifthenelse.ml" ~point_count:14 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___ifthenelse___ml
 [@@@ocaml.text "/*"]
 let () =
   if true
   then
-    (___bisect_visit___ 3;
-     (let ___bisect_result___ = print_endline "foo" in
-      ___bisect_visit___ 2; ___bisect_result___))
+    (___bisect_visit___ 3; ___bisect_post_visit___ 2 (print_endline "foo"))
   else
-    (___bisect_visit___ 1;
-     (let ___bisect_result___ = print_endline "bar" in
-      ___bisect_visit___ 0; ___bisect_result___))
+    (___bisect_visit___ 1; ___bisect_post_visit___ 0 (print_endline "bar"))
 let f () =
   ___bisect_visit___ 6;
   if true
@@ -31,9 +29,7 @@ let () =
 let () =
   if true
   then
-    (___bisect_visit___ 10;
-     (let ___bisect_result___ = print_endline "foo" in
-      ___bisect_visit___ 9; ___bisect_result___))
+    (___bisect_visit___ 10; ___bisect_post_visit___ 9 (print_endline "foo"))
 let f () =
   ___bisect_visit___ 12;
   if true then (___bisect_visit___ 11; print_endline "foo")

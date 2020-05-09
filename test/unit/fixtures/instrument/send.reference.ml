@@ -8,6 +8,8 @@ module Bisect_visit___send___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "send.ml" ~point_count:9 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___send___ml
 [@@@ocaml.text "/*"]
@@ -16,17 +18,10 @@ let foo =
     method bar = ___bisect_visit___ 0; ()
     method baz () () = ___bisect_visit___ 1; ()
   end
-let () =
-  let ___bisect_result___ = foo#bar in
-  ___bisect_visit___ 2; ___bisect_result___
-let () =
-  let ___bisect_result___ = foo#baz () () in
-  ___bisect_visit___ 3; ___bisect_result___
+let () = ___bisect_post_visit___ 2 foo#bar
+let () = ___bisect_post_visit___ 3 (foo#baz () ())
 let f () = ___bisect_visit___ 4; foo#bar
 let f () = ___bisect_visit___ 5; foo#baz () ()
 let helper () = ___bisect_visit___ 6; foo
 let () =
-  let ___bisect_result___ =
-    (let ___bisect_result___ = helper () in
-     ___bisect_visit___ 7; ___bisect_result___)#bar in
-  ___bisect_visit___ 8; ___bisect_result___
+  ___bisect_post_visit___ 8 (___bisect_post_visit___ 7 (helper ()))#bar

@@ -22,3 +22,10 @@ let f = fun ?foo () ->
 (* Optional argument with default value. *)
 let f = fun ?(foo = "foo") () ->
   print_endline foo
+
+(* Optional argument elimination. *)
+let f () ?x () =
+  x
+
+let () =
+  ignore (List.map (f ()) [])

@@ -8,11 +8,11 @@ module Bisect_visit___array___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "array.ml" ~point_count:2 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___array___ml
 [@@@ocaml.text "/*"]
 let _ =
-  [|(((let ___bisect_result___ = print_endline "foo" in
-       ___bisect_visit___ 0; ___bisect_result___)),
-      ((let ___bisect_result___ = print_endline "bar" in
-        ___bisect_visit___ 1; ___bisect_result___)))|]
+  [|((___bisect_post_visit___ 0 (print_endline "foo")),
+      (___bisect_post_visit___ 1 (print_endline "bar")))|]

@@ -8,19 +8,16 @@ module Bisect_visit___setfield___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "setfield.ml" ~point_count:4 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___setfield___ml
 [@@@ocaml.text "/*"]
 type foo = {
   mutable bar: unit }
 let baz = { bar = () }
-let () =
-  baz.bar <-
-    (let ___bisect_result___ = print_endline "foo" in
-     ___bisect_visit___ 0; ___bisect_result___)
+let () = baz.bar <- (___bisect_post_visit___ 0 (print_endline "foo"))
 let helper () = ___bisect_visit___ 1; baz
 let () =
-  (let ___bisect_result___ = helper () in
-   ___bisect_visit___ 3; ___bisect_result___).bar <-
-    (let ___bisect_result___ = print_endline "foo" in
-     ___bisect_visit___ 2; ___bisect_result___)
+  (___bisect_post_visit___ 3 (helper ())).bar <-
+    (___bisect_post_visit___ 2 (print_endline "foo"))

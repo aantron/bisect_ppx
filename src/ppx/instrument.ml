@@ -167,9 +167,7 @@ struct
             [@metaloc point_loc]
         else
           [%expr
-            let ___bisect_result___ = [%e e] in
-            ___bisect_visit___ [%e point_index];
-            ___bisect_result___]
+            ___bisect_post_visit___ [%e point_index] [%e e]]
             [@metaloc point_loc]
 
     and choose_location_of_point ~override_loc ~use_loc_of e =
@@ -916,12 +914,24 @@ struct
           [@metaloc loc]
       in
 
+      let bisect_post_visit =
+        [%stri
+          let ___bisect_post_visit___ point_index result =
+            ___bisect_visit___ point_index;
+            result
+        ]
+          [@metaloc loc]
+      in
+
       let open Ast.Ast_helper in
 
       Str.module_ ~loc @@
         Mb.mk ~loc
           (Location.mkloc (Some mangled_module_name) loc)
-          (Mod.structure ~loc [bisect_visit_function])
+          (Mod.structure ~loc [
+            bisect_visit_function;
+            bisect_post_visit;
+          ])
     in
 
     let module_open =

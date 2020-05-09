@@ -8,19 +8,16 @@ module Bisect_visit___letmodule___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "letmodule.ml" ~point_count:3 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___letmodule___ml
 [@@@ocaml.text "/*"]
 let () =
   let module M = struct  end in
-    let ___bisect_result___ = print_endline "foo" in
-    ___bisect_visit___ 0; ___bisect_result___
+    ___bisect_post_visit___ 0 (print_endline "foo")
 let f () =
   ___bisect_visit___ 1; (let module M = struct  end in print_endline "foo")
 let () =
   let module M =
-    struct
-      let () =
-        let ___bisect_result___ = print_endline "foo" in
-        ___bisect_visit___ 2; ___bisect_result___
-    end in ()
+    struct let () = ___bisect_post_visit___ 2 (print_endline "foo") end in ()

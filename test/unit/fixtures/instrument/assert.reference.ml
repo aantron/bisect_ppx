@@ -8,16 +8,14 @@ module Bisect_visit___assert___ml =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           "assert.ml" ~point_count:1 ~point_definitions in
       cb
+    let ___bisect_post_visit___ point_index result =
+      ___bisect_visit___ point_index; result
   end
 open Bisect_visit___assert___ml
 [@@@ocaml.text "/*"]
 let () = assert true
 let f () = assert true
-let () =
-  assert
-    ((let ___bisect_result___ = print_endline "foo" in
-      ___bisect_visit___ 0; ___bisect_result___);
-     true)
+let () = assert (___bisect_post_visit___ 0 (print_endline "foo"); true)
 let () = assert false
 let f = function | `A -> assert false
 let () = match `A with | `A -> assert false
