@@ -1,3 +1,14 @@
+Version 2.4.1 (2020-05-10):
+---------------------------
+  Bugs fixed
+
+  - Support Jest with in-source builds (#322, Jihchi Lee).
+  - Make application expression instrumentation less invasive (#319).
+
+  Changes
+
+  - Use OCaml 4.11 AST (#321).
+
 Version 2.4.0 (2020-04-21):
 ---------------------------
   Additions
