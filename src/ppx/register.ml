@@ -74,23 +74,22 @@ let switches = [
 
 let deprecated = Common.deprecated "bisect_ppx"
 
-let switches =
-  switches
+let () = switches
   |> deprecated "-exclude"
   |> deprecated "-exclude-file"
   |> deprecated "-conditional"
   |> deprecated "-no-comment-parsing"
-  |> Arg.align
-
+  |> Arg.align  
+  |> List.iter (fun (key, spec, doc) -> Ppxlib.Driver.add_arg key spec ~doc)
 
 
 let () =
-  Migrate_parsetree.Driver.register
-    ~name:"bisect_ppx" ~args:switches ~position:100
-    Migrate_parsetree.Versions.ocaml_411 begin fun _config _cookies ->
-      match enabled () with
+  let impl = 
+    match enabled () with
       | `Enabled ->
-        Ppx_tools_411.Ast_mapper_class.to_mapper (new Instrument.instrumenter)
+        new Instrument.instrumenter#transform_impl_file
       | `Disabled ->
-        Migrate_parsetree.Ast_411.shallow_identity
-    end
+        new Ppxlib.Ast_traverse.map#structure
+  in
+  let instrument = Ppxlib.Driver.Instrument.make impl ~position:After in
+  Ppxlib.Driver.register_transformation ~instrument "bisect_ppx"

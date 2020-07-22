@@ -32,26 +32,14 @@
    point is in [bisect_ppx.ml]. It's basically a PPX driver that registers only
    this instrumenter with itself, using [register.ml], and then runs it. *)
 
+open Ppxlib
 
+module Pat = Ppxlib.Ast_helper.Pat
+module Exp = Ppxlib.Ast_helper.Exp
+module Str = Ppxlib.Ast_helper.Str
+module Cl = Ppxlib.Ast_helper.Cl
+module Cf = Ppxlib.Ast_helper.Cf
 
-(* From ocaml-migrate-parsetree. *)
-module Ast = Migrate_parsetree.Ast_411
-module Ast_411 = Ast
-(* Workaround for
-  https://travis-ci.org/aantron/bisect_ppx/jobs/538321848#L588 *)
-
-module Location = Ast.Location
-module Parsetree = Ast.Parsetree
-
-module Pat = Ast.Ast_helper.Pat
-module Exp = Ast.Ast_helper.Exp
-module Str = Ast.Ast_helper.Str
-module Cl = Ast.Ast_helper.Cl
-module Cf = Ast.Ast_helper.Cf
-
-(* From ppx_tools_versioned. *)
-module Ast_convenience = Ast_convenience_411
-module Ast_mapper_class = Ast_mapper_class_411
 
 (* From Bisect_ppx. *)
 module Common = Bisect_common
@@ -155,20 +143,18 @@ struct
       points ?override_loc ?use_loc_of ?(at_end = false) ?(post = false) e =
 
     let rec outline () =
-      let point_loc = choose_location_of_point ~override_loc ~use_loc_of e in
-      if expression_should_not_be_instrumented ~point_loc ~use_loc_of then
+      let loc = choose_location_of_point ~override_loc ~use_loc_of e in
+      if expression_should_not_be_instrumented ~point_loc:loc ~use_loc_of then
         e
       else
-        let point_index = get_index_of_point_at_location ~point_loc in
+        let point_index = get_index_of_point_at_location ~point_loc:loc in
         if not post then
           [%expr
             ___bisect_visit___ [%e point_index];
             [%e e]]
-            [@metaloc point_loc]
         else
           [%expr
             ___bisect_post_visit___ [%e point_index] [%e e]]
-            [@metaloc point_loc]
 
     and choose_location_of_point ~override_loc ~use_loc_of e =
       match use_loc_of with
@@ -206,7 +192,7 @@ struct
           points := new_point::!points;
           new_point
       in
-      Ast_convenience.int point.identifier
+      Ast_builder.Default.eint ~loc point.identifier
 
     in
 
@@ -446,12 +432,12 @@ struct
             let thunk = make_thunk variables in
             let thunk_call =
               Exp.apply ~loc
-                (Exp.ident ~loc (Ast_convenience.lid ~loc thunk_name))
+                (Exp.ident ~loc { txt = Longident.parse thunk_name; loc })
                 (List.map (fun {Location.loc; txt} ->
-                  Ast_convenience.Label.Nolabel,
-                  Exp.ident ~loc (Ast_convenience.lid ~loc txt))
+                  Nolabel,
+                  Exp.ident ~loc { txt = Longident.parse txt; loc })
                   variables
-                @ [Ast_convenience.Label.Nolabel, [%expr ()]])
+                @ [Nolabel, [%expr ()]])
             in
             rotated_cases
             |> List.map (fun (trace, pattern) ->
@@ -460,7 +446,7 @@ struct
                 pc_rhs = instrumentation_for_location_trace trace thunk_call}),
             fun e ->
               Exp.let_ ~loc Nonrecursive
-                [Ast.Ast_helper.Vb.mk ~loc
+                [Ppxlib.Ast_helper.Vb.mk ~loc
                   (Pat.var ~loc {Location.loc; txt = thunk_name}) thunk] e
 
     and is_assert_false_or_refutation case =
@@ -504,7 +490,7 @@ struct
       |> fun nested_match ->
         Exp.attr
           nested_match
-          {attr_name = Location.mkloc "ocaml.warning" loc;
+          {attr_name = { txt = "ocaml.warning"; loc };
            attr_payload = PStr [[%stri "-4-8-9-11-26-27-28"]];
            attr_loc = loc}
 
@@ -819,13 +805,16 @@ struct
       "Bisect_visit___" ^ (Buffer.contents buffer)
     in
 
-    let point_count = Ast_convenience.int ~loc (List.length !points) in
-    let points_data = Ast_convenience.str ~loc (Common.write_points !points) in
-    let file = Ast_convenience.str ~loc file in
+    let point_count = Ast_builder.Default.eint ~loc (List.length !points) in
+    let points_data = Ast_builder.Default.estring ~loc (Common.write_points !points) in
+    let file = Ast_builder.Default.estring ~loc file in
 
     let ast_convenience_str_opt = function
-      | None -> Ast_convenience.constr ~loc "None" []
-      | Some v -> Ast_convenience.(constr ~loc "Some" [str ~loc v])
+      | None -> 
+        Exp.construct ~loc {txt = Longident.parse "None"; loc } None
+      | Some v -> 
+        Some (Ast_builder.Default.estring ~loc v) 
+        |> Exp.construct ~loc {txt = Longident.parse "Some"; loc }
     in
     let bisect_file = ast_convenience_str_opt !Common.bisect_file in
     let bisect_silent = ast_convenience_str_opt !Common.bisect_silent in
@@ -923,11 +912,10 @@ struct
           [@metaloc loc]
       in
 
-      let open Ast.Ast_helper in
-
+      let open Ppxlib.Ast_helper in
       Str.module_ ~loc @@
         Mb.mk ~loc
-          (Location.mkloc (Some mangled_module_name) loc)
+          { txt = Some mangled_module_name; loc}
           (Mod.structure ~loc [
             bisect_visit_function;
             bisect_post_visit;
@@ -935,13 +923,13 @@ struct
     in
 
     let module_open =
-      let open Ast.Ast_helper in
+      let open Ppxlib.Ast_helper in
 
       (* This requires the assumption that the mangled module name doesn't have
          any periods. *)
       Str.open_ ~loc @@
         Opn.mk ~loc @@
-          Mod.ident ~loc (Ast_convenience.lid ~loc mangled_module_name)
+          Mod.ident ~loc { txt = Longident.parse mangled_module_name; loc }
     in
 
     let stop_comment = [%stri [@@@ocaml.text "/*"]] [@metaloc loc] in
@@ -958,7 +946,7 @@ class instrumenter =
   let instrument_cases = Generated_code.instrument_cases points in
 
   object (self)
-    inherit Ast_mapper_class.mapper as super
+    inherit Ppxlib.Ast_traverse.map as super
 
     method! class_expr ce =
       let loc = ce.pcl_loc in
@@ -992,7 +980,7 @@ class instrumenter =
       | _ ->
         cf
 
-    method! expr e =
+    method! expression e =
       let rec traverse ?(successor = `None) ~is_in_tail_position e =
         let attrs = e.Parsetree.pexp_attributes in
         if Coverage_attributes.has_off_attribute attrs then
@@ -1100,7 +1088,7 @@ class instrumenter =
             let apply = Exp.apply ~loc ~attrs e arguments in
             let all_arguments_labeled =
               arguments
-              |> List.for_all (fun (label, _) -> label <> Ast.Asttypes.Nolabel)
+              |> List.for_all (fun (label, _) -> label <> Nolabel)
             in
             if is_in_tail_position || all_arguments_labeled then
               apply
@@ -1438,7 +1426,7 @@ class instrumenter =
               if do_not_instrument then
                 binding
               else
-                {binding with pvb_expr = self#expr binding.pvb_expr}
+                {binding with pvb_expr = self#expression binding.pvb_expr}
             end
           in
           Str.value ~loc rec_flag bindings
@@ -1447,7 +1435,7 @@ class instrumenter =
         if structure_instrumentation_suppressed then
           si
         else
-          Str.eval ~loc ~attrs:a (self#expr e)
+          Str.eval ~loc ~attrs:a (self#expression e)
 
       | Pstr_attribute attribute ->
         let kind = Coverage_attributes.recognize attribute in
@@ -1482,75 +1470,58 @@ class instrumenter =
     method! attribute a =
       a
 
-    (* This is set to [true] when the [structure] or [signature] method is
-       called the first time. It is used to determine whether Bisect_ppx is
-       looking at the top-level structure (module) in the file, or a nested
-       structure (module).
-
-       For [.mli] and [.rei] files, the [signature] method will be called first.
-       That method will set this variable to [true], and do nothing else.
-
-       The more interesting case is [.ml] and [.re] files. For those, the
-       [structure] method will be called first. That method will set this
-       variable to [true]. However, if the variable started out [false],
-       [structure] will insert Bisect_ppx initialization code into the
-       structure. *)
-    val mutable saw_top_level_structure_or_signature = false
-
-    method! signature ast =
-      if not saw_top_level_structure_or_signature then
-        saw_top_level_structure_or_signature <- true;
-      super#signature ast
-
     method! structure ast =
       let saved_structure_instrumentation_suppressed =
         structure_instrumentation_suppressed in
 
-      let result =
-        if saw_top_level_structure_or_signature then
-          super#structure ast
+      let result = super#structure ast in
           (* This is *not* the first structure we see, or we are inside an
              interface file, so the structure is nested within the file, either
              inside [struct]..[end] or in an attribute or extension point.
              Traverse the structure recursively as normal. *)
+      structure_instrumentation_suppressed <-
+        saved_structure_instrumentation_suppressed;
 
-        else begin
-          (* This is the first structure we see in te file, and we are not in an
-             interface file, so Bisect_ppx is beginning to (potentially)
-             instrument the current file. We need to check whether this file is
-             excluded from instrumentation before proceeding. *)
-          saw_top_level_structure_or_signature <- true;
+      result
 
-          let path = !Location.input_name in
+    method transform_impl_file ast =
+      let saved_structure_instrumentation_suppressed =
+        structure_instrumentation_suppressed in
 
-          let file_should_not_be_instrumented =
-            (* Bisect_ppx is hardcoded to ignore files with certain names. If we
-               have one of these, return the AST uninstrumented. In particular,
-               do not recurse into it. *)
-            let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
-            let always_ignore_basenames = [".ocamlinit"; "topfind"] in
+      let result =
+        let file_should_not_be_instrumented path =
+          (* Bisect_ppx is hardcoded to ignore files with certain names. If we
+            have one of these, return the AST uninstrumented. In particular,
+            do not recurse into it. *)
+          let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
+          let always_ignore_basenames = [".ocamlinit"; "topfind"] in
 
-            List.mem path always_ignore_paths ||
-            List.mem (Filename.basename path) always_ignore_basenames ||
-            Exclusions.contains_file path ||
-            Coverage_attributes.has_exclude_file_attribute ast
-          in
+          List.mem path always_ignore_paths ||
+          List.mem (Filename.basename path) always_ignore_basenames ||
+          Exclusions.contains_file path ||
+          Coverage_attributes.has_exclude_file_attribute ast
+        in
 
-          if file_should_not_be_instrumented then
-            ast
+        let get_path = function
+          | [] -> None
+          | hd :: _ -> Some hd.pstr_loc.loc_start.pos_fname
+        in
 
-          else begin
-            (* This file should be instrumented. Traverse the AST recursively,
-               then prepend some generated code for initializing the Bisect_ppx
-               runtime and telling it about the instrumentation points in this
-               file. *)
-            let instrumented_ast = super#structure ast in
-            let runtime_initialization =
-              Generated_code.runtime_initialization points path
-            in
-            runtime_initialization @ instrumented_ast
-          end
-        end
+        match get_path ast with
+          | None -> ast
+          | Some path when file_should_not_be_instrumented path -> ast
+          | Some path ->
+            begin
+              (* This file should be instrumented. Traverse the AST recursively,
+                then prepend some generated code for initializing the Bisect_ppx
+                runtime and telling it about the instrumentation points in this
+                file. *)
+              let instrumented_ast = super#structure ast in
+              let runtime_initialization =
+                Generated_code.runtime_initialization points path
+              in
+              runtime_initialization @ instrumented_ast
+            end
       in
 
       structure_instrumentation_suppressed <-
