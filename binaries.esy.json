@@ -2,7 +2,7 @@
   "dependencies": {
     "ocaml": ">= 4.2.0",
     "@opam/cmdliner": "^1.0.0",
-    "@opam/dune": "*",
+    "@opam/dune": "^2.7.0",
     "@opam/ocaml-migrate-parsetree": "^1.7.0",
     "@opam/ppx_tools_versioned": "^5.4.0"
   },
