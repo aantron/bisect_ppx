@@ -20,7 +20,7 @@ scripts:
           WD=`pwd`
           if [ ! -f node_modules/.bin/esy ]
           then
-            npm install --no-save esy
+            npm install --no-save esy@0.6.6
             export PATH="$WD/node_modules/.bin:$PATH"
           else
             mkdir -p _wrapped_esy
