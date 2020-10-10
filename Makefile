@@ -105,8 +105,9 @@ EXPECTED_FILES := \
 .PHONY : self-coverage-test
 self-coverage-test :
 	cd $(SELF_COVERAGE) && rm -f bisect*.meta
-	cd $(SELF_COVERAGE) && dune build -p bisect_ppx @install
-	cd $(SELF_COVERAGE) && dune runtest -p bisect_ppx --force --no-buffer -j 1
+	cd $(SELF_COVERAGE) && dune build @install --instrument-with meta_bisect_ppx
+	cd $(SELF_COVERAGE) && \
+	  dune runtest --force --no-buffer -j 1 --instrument-with meta_bisect_ppx
 	rm -rf _coverage
 	cd $(SELF_COVERAGE) && \
 	  _build/install/default/bin/meta-bisect-ppx-report \
