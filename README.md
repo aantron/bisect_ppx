@@ -56,53 +56,26 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
 
     ```
     depends: [
-      "bisect_ppx" {dev & >= "2.0.0"}
+      "bisect_ppx" {dev & >= "2.5.0"}
+      "dune" {>= "2.7.0"}
     ]
     ```
 
 2. [Mark the code under test for preprocessing by
-   `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/master/dune#L4) in your `dune` file:
+   `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/master/dune) in your `dune` file:
 
     ```ocaml
-    (* -*- tuareg -*- *)
-
-    let preprocess =
-      match Sys.getenv "BISECT_ENABLE" with
-      | "yes" -> "(preprocess (pps bisect_ppx))"
-      | _ -> ""
-      | exception Not_found -> ""
-
-    let () = Jbuild_plugin.V1.send @@ {|
-
     (library
      (public_name my_lib)
-     |} ^ preprocess ^ {|)
-
-    |}
+     (instrumentation (backend bisect_ppx)))
     ```
-
-    This uses Dune's
-    [OCaml syntax](https://dune.readthedocs.io/en/stable/advanced-topics.html#ocaml-syntax)
-    to completely take `bisect_ppx` out as a dependency, except when the
-    environment variable `BISECT_ENABLE` is set to `yes`. This is so that you
-    can release your project without it depending on `bisect_ppx` for non-`dev`
-    builds.
-
-    After [ocaml/dune#57][dune-57], Dune will have a lighter-weight built-in
-    syntax for conditional preprocessing.
-
-    For now, the OCaml syntax can be understood as prepending a few lines of
-    OCaml code to a regular `dune` file, and then replacing the `preprocess`
-    stanza with `|} ^ preprocess ^ {|`. See
-    [here](https://github.com/aantron/bisect-starter-dune/commit/24ffb2153d3c42ff166c78a9f55095bd12f10f4e#diff-cabdb1014252d39ac018f447e7d5fbc2)
-    for a neat summary of the patch.
 
 3. Build and run your test binary. In addition to testing your code, when
    exiting, it will write one or more files with names like
    `bisect0123456789.coverage`:
 
     ```
-    BISECT_ENABLE=yes dune runtest --force
+    dune runtest --instrument-with bisect_ppx --force
     ```
 
     The `--force` flag forces all your tests to run, which is needed for an
