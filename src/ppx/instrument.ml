@@ -810,10 +810,10 @@ struct
     let file = Ast_builder.Default.estring ~loc file in
 
     let ast_convenience_str_opt = function
-      | None -> 
+      | None ->
         Exp.construct ~loc {txt = Longident.parse "None"; loc } None
-      | Some v -> 
-        Some (Ast_builder.Default.estring ~loc v) 
+      | Some v ->
+        Some (Ast_builder.Default.estring ~loc v)
         |> Exp.construct ~loc {txt = Longident.parse "Some"; loc }
     in
     let bisect_file = ast_convenience_str_opt !Common.bisect_file in
@@ -1489,7 +1489,8 @@ class instrumenter =
         structure_instrumentation_suppressed in
 
       let result =
-        let file_should_not_be_instrumented path =
+        let path = !Ocaml_common.Location.input_name in
+        let file_should_not_be_instrumented =
           (* Bisect_ppx is hardcoded to ignore files with certain names. If we
             have one of these, return the AST uninstrumented. In particular,
             do not recurse into it. *)
@@ -1502,26 +1503,20 @@ class instrumenter =
           Coverage_attributes.has_exclude_file_attribute ast
         in
 
-        let get_path = function
-          | [] -> None
-          | hd :: _ -> Some hd.pstr_loc.loc_start.pos_fname
-        in
+        if file_should_not_be_instrumented then
+          ast
 
-        match get_path ast with
-          | None -> ast
-          | Some path when file_should_not_be_instrumented path -> ast
-          | Some path ->
-            begin
-              (* This file should be instrumented. Traverse the AST recursively,
-                then prepend some generated code for initializing the Bisect_ppx
-                runtime and telling it about the instrumentation points in this
-                file. *)
-              let instrumented_ast = super#structure ast in
-              let runtime_initialization =
-                Generated_code.runtime_initialization points path
-              in
-              runtime_initialization @ instrumented_ast
-            end
+        else begin
+          (* This file should be instrumented. Traverse the AST recursively,
+              then prepend some generated code for initializing the Bisect_ppx
+              runtime and telling it about the instrumentation points in this
+              file. *)
+          let instrumented_ast = super#structure ast in
+          let runtime_initialization =
+            Generated_code.runtime_initialization points path
+          in
+          runtime_initialization @ instrumented_ast
+        end
       in
 
       structure_instrumentation_suppressed <-
