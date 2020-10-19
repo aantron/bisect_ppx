@@ -240,13 +240,16 @@ struct
       Sys.readdir directory
       |> Array.fold_left begin fun files entry ->
         let entry_path = Filename.concat directory entry in
-        if Sys.is_directory entry_path then
+        match Sys.is_directory entry_path with
+        | true ->
           traverse entry_path files
-        else
+        | false ->
           if filename_filter entry_path entry then
             entry_path::files
           else
             files
+        | exception Sys_error _ ->
+          files
       end files
     in
     traverse directory []
