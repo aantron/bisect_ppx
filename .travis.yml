@@ -133,10 +133,13 @@ matrix:
       env: BUCKLESCRIPT=YES SAVE_BINARIES=YES
     - <<: *opam
       os: osx
-      env: COMPILER=4.10.0
+      env: COMPILER=4.11.1
     - <<: *opam
       os: linux
-      env: COMPILER=4.10.0
+      env: COMPILER=4.11.1
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.10.1
     - <<: *opam
       os: linux
       env: COMPILER=4.09.0
@@ -163,6 +166,7 @@ matrix:
       env: COMPILER=4.02.3
 
   allow_failures:
+    - env: COMPILER=4.10.1
     - env: COMPILER=4.09.0
     - env: COMPILER=4.08.1 SELF_COVERAGE=YES
     - env: COMPILER=4.07.1 USAGE_TEST=YES
