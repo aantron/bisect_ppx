@@ -185,8 +185,3 @@ cache:
     - ./test/bucklescript/node_modules
     - ./node_modules
     - ./_cache
-
-notifications:
-  email:
-    on_success: always
-    on_failure: always
