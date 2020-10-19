@@ -1058,31 +1058,21 @@ class instrumenter =
 
           | Pexp_apply (e, arguments) ->
             let arguments =
-              match e with
-              | [%expr (&&)]
-              | [%expr (&)] ->
-                begin match arguments with
-                | [(ll, el); (lr, er)] ->
+              match e, arguments with
+              | ([%expr (&&)] | [%expr (&)]),
+                [(ll, el); (lr, er)] ->
                   [(ll,
                     traverse ~is_in_tail_position:false el);
                    (lr,
                     instrument_expr (traverse ~is_in_tail_position:false er))]
-                | _ ->
-                  assert false
-                end
 
-              | [%expr (@@)] ->
-                begin match arguments with
-                | [(ll, ({pexp_desc = Pexp_apply _; _} as el)); (lr, er)] ->
+              | [%expr (@@)],
+                [(ll, ({pexp_desc = Pexp_apply _; _} as el)); (lr, er)] ->
                   [(ll,
                     traverse
                       ~successor:`Redundant ~is_in_tail_position:false el);
                    (lr,
                     traverse ~is_in_tail_position:false er)]
-                | _ ->
-                  List.map (fun (label, e) ->
-                    (label, traverse ~is_in_tail_position:false e)) arguments
-                end
 
               | _ ->
                 List.map (fun (label, e) ->

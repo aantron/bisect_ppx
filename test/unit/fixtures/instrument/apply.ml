@@ -51,3 +51,10 @@ let _ =
 (* Short-circuiting operators with subexpressions. *)
 let _ =
   (print_endline "foo"; false) || (print_endline "bar"; true)
+
+(* Short-circuiting operators applied partially. *)
+let _ =
+  (&&) true
+
+let _ =
+  (&&) (print_endline "foo"; true)
