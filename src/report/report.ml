@@ -306,7 +306,11 @@ struct
         let in_esy_sandbox =
           match Sys.getenv "cur__target_dir" with
           | exception Not_found -> []
-          | directory -> list_recursively directory filename_filter
+          | directory ->
+            if Sys.file_exists directory && Sys.is_directory directory then
+              list_recursively directory filename_filter
+            else
+              []
         in
         in_current_directory @ in_build_directory @ in_esy_sandbox
 
