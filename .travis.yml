@@ -135,6 +135,9 @@ matrix:
       os: osx
       env: COMPILER=4.11.1
     - <<: *opam
+      os: freebsd
+      env: COMPILER=4.11.1
+    - <<: *opam
       os: linux
       env: COMPILER=4.11.1
     - <<: *opam
