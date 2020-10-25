@@ -88,6 +88,7 @@ FILTER := 's/^\(\(---\|+++\) [^ \t]*\).*$$/\1/g'
 
 .PHONY : self-coverage-diff
 self-coverage-diff :
+	find . -name .merlin | xargs rm -f
 	diff -ru src _self/meta_bisect_ppx/src | \
 	  sed $(FILTER) > \
 	  test/self/meta_bisect_ppx.diff || \

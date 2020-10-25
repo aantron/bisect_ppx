@@ -76,9 +76,8 @@ diff -ru src/ppx/register.ml _self/meta_bisect_ppx/src/ppx/register.ml
 diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
 --- src/report/dune
 +++ _self/meta_bisect_ppx/src/report/dune
-@@ -1,9 +1,9 @@
+@@ -1,8 +1,8 @@
  (executable
-  (modes byte exe)
   (name report)
 - (public_name bisect-ppx-report)
 - (package bisect_ppx)
@@ -89,6 +88,18 @@ diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
  
  (rule
   (targets assets.ml)
+diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
+--- src/report/report.ml
++++ _self/meta_bisect_ppx/src/report/report.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ module Arguments :
+ sig
 diff -ru src/report/report_coveralls.ml _self/meta_bisect_ppx/src/report/report_coveralls.ml
 --- src/report/report_coveralls.ml
 +++ _self/meta_bisect_ppx/src/report/report_coveralls.ml
@@ -125,18 +136,6 @@ diff -ru src/report/report_html.ml _self/meta_bisect_ppx/src/report/report_html.
  
  type theme = [
    | `Light
-diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
---- src/report/report.ml
-+++ _self/meta_bisect_ppx/src/report/report.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- module Arguments :
- sig
 diff -ru src/runtime/native/dune _self/meta_bisect_ppx/src/runtime/native/dune
 --- src/runtime/native/dune
 +++ _self/meta_bisect_ppx/src/runtime/native/dune

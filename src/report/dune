@@ -1,5 +1,4 @@
 (executable
- (modes byte exe)
  (name report)
  (public_name bisect-ppx-report)
  (package bisect_ppx)
