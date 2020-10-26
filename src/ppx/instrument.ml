@@ -528,9 +528,9 @@ struct
          (C B, D E), [loc B, loc E]
          (C B, D F), [loc B, loc F]
 
-        During recursion, the invariant on the location is that it is the
-        location of the nearest enclosing or-pattern, or the entire pattern, if
-        there is no enclosing or-pattern. *)
+       During recursion, the invariant on the location is that it is the
+       location of the nearest enclosing or-pattern, or the entire pattern, if
+       there is no enclosing or-pattern. *)
     and rotate_or_patterns_to_top loc p : rotated_case list =
 
       let rec recurse ~enclosing_loc p : rotated_case list =
@@ -636,7 +636,7 @@ struct
            pattern lists (on the left side) into tuples.
 
            This is typical of "and-patterns", i.e. those that match various
-           product types (though that carry multiple pieces of data
+           product types (those that carry multiple pieces of data
            simultaneously). *)
         | Ppat_tuple ps ->
           ps
@@ -710,6 +710,8 @@ struct
 
       | Ppat_or (p_1, p_2) ->
         has_exception_pattern p_1 || has_exception_pattern p_2
+        (* Should be unreachable, because or-patterns will have been rotated out
+           of all patterns by the time this is called. *)
 
       | Ppat_constraint (p', _) ->
         has_exception_pattern p'
@@ -1356,17 +1358,20 @@ class instrumenter =
           | Pexp_letexception (c, e) ->
             Exp.letexception ~loc ~attrs c (traverse ~is_in_tail_position e)
 
+          | Pexp_open (m, e) ->
+            Exp.open_ ~loc ~attrs
+              (self#open_declaration m)
+              (traverse ~is_in_tail_position e)
+
+          (* Expressions that don't need instrumentation, and where AST
+             traversal leaves the expression language. *)
           | Pexp_object c ->
             Exp.object_ ~loc ~attrs (self#class_structure c)
 
           | Pexp_pack m ->
             Exp.pack ~loc ~attrs (self#module_expr m)
 
-          | Pexp_open (m, e) ->
-            Exp.open_ ~loc ~attrs
-              (self#open_declaration m)
-              (traverse ~is_in_tail_position e)
-
+          (* Expressions that are not recursively traversed at all. *)
           | Pexp_extension _ | Pexp_unreachable ->
             e
         end

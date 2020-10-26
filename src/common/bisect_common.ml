@@ -172,7 +172,7 @@ let write_runtime_data channel =
   output_string channel data
 
 let () =
-  Random.self_init ()
+  Random.self_init () [@coverage off]
 
 let random_filename base_name =
   Printf.sprintf "%s%09d.coverage" base_name (abs (Random.int 1000000000))
@@ -229,6 +229,7 @@ let bisect_silent = ref None
 
 type options = (Arg.key * Arg.spec * Arg.doc) list
 
+[@@@coverage off]
 let deprecated binary basename options =
   let make make_spec fn =
     (basename,

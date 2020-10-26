@@ -1,5 +1,6 @@
 sudo: required
 language: generic
+dist: focal
 
 scripts:
   - &bucklescript
@@ -83,10 +84,30 @@ scripts:
           opam switch create . $COMPILER $REPOSITORIES --no-install
         fi
       - eval `opam config env`
-      - ocaml -version
+      - ocamlc -version
       - opam --version
 
-      - opam install -y --with-test --deps-only .
+      - |
+        case `ocamlc -version` in
+          "4.02.3") OCAMLFORMAT_BINARY=YES;;
+          "4.03.0") OCAMLFORMAT_BINARY=YES;;
+          "4.04.2") OCAMLFORMAT_BINARY=YES;;
+          "4.05.0") OCAMLFORMAT_BINARY=YES;;
+        esac
+      - |
+        if [ "$OCAMLFORMAT_BINARY" == YES ]
+        then
+          opam install -y --deps-only .
+          opam install -y --unset-root ocamlfind ounit2
+          wget https://github.com/aantron/ocamlformat-binary/releases/download/0.15.0/ocamlformat
+          sudo mv ocamlformat /usr/local/bin/ocamlformat
+          sudo chmod a+x /usr/local/bin/ocamlformat
+        else
+          opam install -y --deps-only . --with-test
+        fi
+      - which ocamlformat
+      - ocamlformat --version
+
       - opam list
 
     script:
@@ -96,7 +117,17 @@ scripts:
           cp -r _cache/_build .
         fi
       - make build
-      - (unset TRAVIS && unset TRAVIS_JOB_ID && make test)
+      - |
+        case `ocamlc -version` in
+          "4.02.3") TEST_ALIAS=@compatible;;
+          "4.03.0") TEST_ALIAS=@compatible;;
+          "4.04.2") TEST_ALIAS=@compatible;;
+          "4.05.0") TEST_ALIAS=@compatible;;
+          "4.06.1") TEST_ALIAS=@compatible;;
+          "4.07.1") TEST_ALIAS=@compatible;;
+          *) TEST_ALIAS=@runtest;;
+        esac
+      - (unset TRAVIS && unset TRAVIS_JOB_ID && make test TEST=$TEST_ALIAS)
       - |
         if [ ! -d _cache/_build ]
         then

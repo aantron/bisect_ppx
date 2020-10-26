@@ -72,7 +72,7 @@ let switches = [
   " Default value for BISECT_SILENT environment variable");
 ]
 
-let deprecated = Common.deprecated "bisect_ppx"
+let deprecated = Common.deprecated "bisect_ppx" [@coverage off]
 
 let switches =
   switches

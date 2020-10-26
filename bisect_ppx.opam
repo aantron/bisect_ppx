@@ -27,7 +27,15 @@ depends: [
   "ppx_tools_versioned" {>= "5.4.0"}
 
   "ocamlfind" {with-test}
+  "ocamlformat" {with-test & = "git.1bf68a7"}
   "ounit2" {with-test}
+]
+
+pin-depends: [
+  # This is the last commit before ocamlformat's ppxlib conversion. A newer
+  # commit, or no pin at all, can be used once Bisect_ppx is also converted to
+  # ppxlib.
+  ["ocamlformat.git.1bf68a7" "git+https://github.com/ocaml-ppx/ocamlformat.git#1bf68a70f1480df80a8ab0bd20a799b8e1df0081"]
 ]
 
 build: [

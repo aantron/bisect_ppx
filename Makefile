@@ -2,9 +2,15 @@
 build :
 	dune build -p bisect_ppx
 
+TEST := @runtest
+
 .PHONY : test
 test : build
-	dune runtest -p bisect_ppx --force --no-buffer -j 1
+	dune build -p bisect_ppx $(TEST)
+
+.PHONY : promote
+promote :
+	dune promote
 
 SELF_COVERAGE := _self
 
@@ -67,6 +73,7 @@ self-coverage-workspace :
 	cp -r $(SOURCES) $(SELF_COVERAGE)/bisect_ppx/
 	mkdir -p $(SELF_COVERAGE)/bisect_ppx/test
 	cp -r test/unit $(SELF_COVERAGE)/bisect_ppx/test/
+	cp -r test/instrument $(SELF_COVERAGE)/bisect_ppx/test/
 	cd $(SELF_COVERAGE)/meta_bisect_ppx && \
 	  patch --no-backup-if-mismatch -p2 < ../../test/self/meta_bisect_ppx.diff
 	cd $(SELF_COVERAGE)/bisect_ppx && \
@@ -108,7 +115,7 @@ self-coverage-test :
 	cd $(SELF_COVERAGE) && rm -f bisect*.meta
 	cd $(SELF_COVERAGE) && dune build @install --instrument-with meta_bisect_ppx
 	cd $(SELF_COVERAGE) && \
-	  dune runtest --force --no-buffer -j 1 --instrument-with meta_bisect_ppx
+	  dune build --force --instrument-with meta_bisect_ppx $(TEST)
 	rm -rf _coverage
 	cd $(SELF_COVERAGE) && \
 	  _build/install/default/bin/meta-bisect-ppx-report \
