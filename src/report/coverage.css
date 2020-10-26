@@ -109,7 +109,7 @@ body {
 
 pre {
     margin: 0;
-    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-family: "Fira Code", "Cascadia Code", Consolas, "Liberation Mono", Menlo, Courier, monospace;
     font-size: 13px;
     color: var(--code-color);
     cursor: text;
