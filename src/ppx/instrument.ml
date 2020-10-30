@@ -1043,7 +1043,7 @@ class instrumenter =
               instrument_expr ~use_loc_of:e ~at_end:true [%expr true] in
             let e'_mark =
               match e'.pexp_desc with
-              | Pexp_apply ([%expr (||)], _) ->
+              | Pexp_apply (([%expr (||)] | [%expr (or)]), _) ->
                 [%expr true]
               | _ ->
                 instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]

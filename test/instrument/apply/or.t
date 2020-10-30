@@ -51,15 +51,13 @@ rather than nested.
       true)
     else if
       if true then (
-        ___bisect_visit___ 5;
-        true)
-      else if false then (
         ___bisect_visit___ 4;
         true)
+      else if false then (
+        ___bisect_visit___ 5;
+        true)
       else false
-    then (
-      ___bisect_visit___ 4;
-      true)
+    then true
     else false
 
 
