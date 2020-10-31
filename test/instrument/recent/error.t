@@ -40,12 +40,11 @@ constructor) is suppressed. One instance is still displayed for the user's code.
   >   match A with
   >   | A _ | B | C -> ()
   > EOF
-  $ dune build --instrument-with bisect_ppx --display quiet
+  $ dune build --instrument-with bisect_ppx --display quiet 2>&1 | sed -e 's/ \[[^]]*\]//g'
   File "test.ml", line 15, characters 6-7:
   15 |   | A _ | B | C -> ()
              ^
   Error (warning 28): wildcard pattern given as argument to a constant constructor
-  [1]
 
 
 Missing record labels warning (9) is suppressed from inserted documentation. It
@@ -57,7 +56,7 @@ is still emitted for the user's code.
   >   match {a = 0; b = 1} with
   >   | {a} | {a} -> a
   > EOF
-  $ dune build --instrument-with bisect_ppx --display quiet
+  $ dune build --instrument-with bisect_ppx --display quiet 2>&1 | sed -e 's/ \[[^]]*\]//g'
   File "test.ml", line 4, characters 4-7:
   4 |   | {a} | {a} -> a
           ^^^
@@ -74,4 +73,3 @@ is still emitted for the user's code.
   4 |   | {a} | {a} -> a
                 ^^^
   Error (warning 12): this sub-pattern is unused.
-  [1]
