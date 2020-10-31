@@ -16,7 +16,6 @@ let tests = "bisect_ppx" >::: [
   Test_thread_safety.tests;
   Test_top_level.tests;
   Test_missing_files.tests;
-  Test_mli.tests;
 ]
 
 let () =
