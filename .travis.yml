@@ -63,7 +63,7 @@ scripts:
           "linux") OPAM_OS=linux;;
           "osx") OPAM_OS=macos;;
         esac
-      - OPAM_VERSION=2.0.6
+      - OPAM_VERSION=2.0.7
       - OPAM_PKG=opam-${OPAM_VERSION}-x86_64-${OPAM_OS}
       - |
         if [ ! -f _cache/opam ]
