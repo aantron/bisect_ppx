@@ -41,13 +41,6 @@ clean-usage :
 		make -wC $$TEST clean ; \
 	done
 
-PRESERVE := _build/default/test/unit/_preserve
-
-.PHONY : save-test-output
-save-test-output :
-	(cd $(PRESERVE) && find ./fixtures -name '*reference.*') \
-	  | xargs -I FILE cp $(PRESERVE)/FILE test/unit/FILE
-
 GH_PAGES := gh-pages
 
 .PHONY : gh-pages
@@ -72,8 +65,7 @@ self-coverage-workspace :
 	cp -r $(SOURCES) $(SELF_COVERAGE)/meta_bisect_ppx/
 	cp -r $(SOURCES) $(SELF_COVERAGE)/bisect_ppx/
 	mkdir -p $(SELF_COVERAGE)/bisect_ppx/test
-	cp -r test/unit $(SELF_COVERAGE)/bisect_ppx/test/
-	cp -r test/instrument $(SELF_COVERAGE)/bisect_ppx/test/
+	cp -r test $(SELF_COVERAGE)/bisect_ppx/test/
 	cd $(SELF_COVERAGE)/meta_bisect_ppx && \
 	  patch --no-backup-if-mismatch -p2 < ../../test/self/meta_bisect_ppx.diff
 	cd $(SELF_COVERAGE)/bisect_ppx && \

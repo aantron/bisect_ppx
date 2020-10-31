@@ -26,9 +26,7 @@ depends: [
   "ocaml-migrate-parsetree" {>= "1.7.0" & < "2.0.0"}
   "ppx_tools_versioned" {>= "5.4.0"}
 
-  "ocamlfind" {with-test}
   "ocamlformat" {with-test & = "git.1bf68a7"}
-  "ounit2" {with-test}
 ]
 
 pin-depends: [
@@ -40,7 +38,7 @@ pin-depends: [
 
 build: [
   ["dune" "build" "-p" name "-j" jobs]
-  ["dune" "runtest" "-p" name] {with-test}
+  ["dune" "build" "-p" name "-j" jobs "@compatible"] {with-test}
 ]
 
 description: "Bisect_ppx helps you test thoroughly. It is a small preprocessor
