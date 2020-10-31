@@ -17,7 +17,6 @@ let tests = "bisect_ppx" >::: [
   Test_ounit_integration.tests;
   Test_top_level.tests;
   Test_missing_files.tests;
-  Test_open.tests;
   Test_mli.tests;
 ]
 
