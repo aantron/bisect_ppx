@@ -28,3 +28,11 @@ Instrumentation suppressed in tail position.
    fun () ->
     ___bisect_visit___ 0;
     "" |> String.trim
+
+
+Right argument is not in tail position.
+
+  $ bash ../test.sh <<'EOF'
+  > let _ = [] |> List.mem 0
+  > EOF
+  let _ = ___bisect_post_visit___ 0 ([] |> List.mem 0)

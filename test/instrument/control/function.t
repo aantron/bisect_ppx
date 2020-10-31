@@ -39,3 +39,14 @@ Instrumentation suppressed "between arguments."
     | () ->
         ___bisect_visit___ 0;
         ()
+
+
+Expressions in cases are in tail position.
+
+  $ bash ../test.sh <<'EOF'
+  > let _ = function () -> print_endline "foo"
+  > EOF
+  let _ = function
+    | () ->
+        ___bisect_visit___ 0;
+        print_endline "foo"

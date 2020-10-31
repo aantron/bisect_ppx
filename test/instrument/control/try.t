@@ -38,3 +38,27 @@ Recursive instrumentation of subexpressions.
       with _ ->
         ___bisect_visit___ 0;
         ())
+
+
+Main subexpression is not in tail position. Handler is in tail position iff the
+whole expression is in tail position.
+
+  $ bash ../test.sh <<'EOF'
+  > let _ =
+  >   try print_endline "foo" with _ -> print_endline "bar"
+  > let _ = fun () ->
+  >   try print_endline "foo" with _ -> print_endline "bar"
+  > EOF
+  let _ =
+    try ___bisect_post_visit___ 2 (print_endline "foo")
+    with _ ->
+      ___bisect_visit___ 1;
+      ___bisect_post_visit___ 0 (print_endline "bar")
+  
+  let _ =
+   fun () ->
+    ___bisect_visit___ 5;
+    try ___bisect_post_visit___ 4 (print_endline "foo")
+    with _ ->
+      ___bisect_visit___ 3;
+      print_endline "bar"

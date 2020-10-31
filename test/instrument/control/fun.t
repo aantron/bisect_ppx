@@ -88,3 +88,21 @@ https://github.com/aantron/bisect_ppx/issues/319.
   let () =
     ignore
       (___bisect_post_visit___ 2 (List.map (___bisect_post_visit___ 1 (f ())) []))
+
+
+Expressions in default value are not in tail position; expressions in main
+subexpression are.
+
+  $ bash ../test.sh <<'EOF'
+  > [@@@ocaml.warning "-27"]
+  > let _ =
+  >   fun ?(l = print_endline "foo") () -> print_endline "bar"
+  > EOF
+  [@@@ocaml.warning "-27"]
+  
+  let _ =
+   fun ?(l =
+         ___bisect_visit___ 1;
+         ___bisect_post_visit___ 0 (print_endline "foo")) () ->
+    ___bisect_visit___ 2;
+    print_endline "bar"

@@ -20,3 +20,14 @@ Recursive instrumentation of subexpression.
        lazy
          (___bisect_visit___ 0;
           ()))
+
+
+Subexpression in tail position.
+
+  $ bash ../test.sh <<'EOF'
+  > let _ = lazy (print_endline "foo")
+  > EOF
+  let _ =
+    lazy
+      (___bisect_visit___ 0;
+       print_endline "foo")

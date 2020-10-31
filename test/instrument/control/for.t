@@ -58,3 +58,21 @@ Recursive instrumentation of subexpressions.
         ()
       done
     done
+
+
+Subexpressions not in tail position.
+
+  $ bash ../test.sh <<'EOF'
+  > let _ =
+  >   for _index = int_of_string "0" to int_of_string "1" do
+  >     print_endline "foo"
+  >   done
+  > EOF
+  let _ =
+    for
+      _index = ___bisect_post_visit___ 3 (int_of_string "0")
+      to ___bisect_post_visit___ 2 (int_of_string "1")
+    do
+      ___bisect_visit___ 1;
+      ___bisect_post_visit___ 0 (print_endline "foo")
+    done

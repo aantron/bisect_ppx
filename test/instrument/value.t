@@ -16,6 +16,7 @@ No instrumentation is inserted into expressions that are (syntactic) values.
   $ bash test.sh <<'EOF'
   > let _ = let x = 0 in x
   > let _ = let _x = print_endline "foo" in print_endline "bar"
+  > let _ = fun () -> let _x = print_endline "foo" in print_endline "bar"
   > EOF
   let _ =
     let x = 0 in
@@ -24,6 +25,12 @@ No instrumentation is inserted into expressions that are (syntactic) values.
   let _ =
     let _x = ___bisect_post_visit___ 1 (print_endline "foo") in
     ___bisect_post_visit___ 0 (print_endline "bar")
+  
+  let _ =
+   fun () ->
+    ___bisect_visit___ 3;
+    let _x = ___bisect_post_visit___ 2 (print_endline "foo") in
+    print_endline "bar"
 
 
   $ bash test.sh <<'EOF'
@@ -141,6 +148,7 @@ No instrumentation is inserted into expressions that are (syntactic) values.
   $ bash test.sh <<'EOF'
   > let _ = (); 0
   > let _ = print_endline "foo"; print_endline "bar"
+  > let _ = fun () -> print_endline "foo"; print_endline "bar"
   > EOF
   let _ =
     ();
@@ -149,31 +157,52 @@ No instrumentation is inserted into expressions that are (syntactic) values.
   let _ =
     ___bisect_post_visit___ 1 (print_endline "foo");
     ___bisect_post_visit___ 0 (print_endline "bar")
+  
+  let _ =
+   fun () ->
+    ___bisect_visit___ 3;
+    ___bisect_post_visit___ 2 (print_endline "foo");
+    print_endline "bar"
 
 
   $ bash test.sh <<'EOF'
   > let _ = (0 : int)
   > let _ = (print_endline "foo" : unit)
+  > let _ = fun () -> (print_endline "foo" : unit)
   > EOF
   let _ = (0 : int)
   
   let _ = (___bisect_post_visit___ 0 (print_endline "foo") : unit)
+  
+  let _ =
+   fun () : unit ->
+    ___bisect_visit___ 1;
+    print_endline "foo"
 
 
   $ bash test.sh <<'EOF'
   > let _ = (`Foo :> [ `Foo | `Bar ])
-  > let _ = (`Foo (print_endline "foo") :> [ `Foo of unit | `Bar ])
+  > let f () = `Foo
+  > let _ = (f () :> [ `Foo | `Bar ])
+  > let _ = fun () -> (f () :> [ `Foo | `Bar ])
   > EOF
   let _ = (`Foo :> [ `Foo | `Bar ])
   
-  let _ =
-    (`Foo (___bisect_post_visit___ 0 (print_endline "foo"))
-      :> [ `Foo of unit | `Bar ])
+  let f () =
+    ___bisect_visit___ 0;
+    `Foo
+  
+  let _ = (___bisect_post_visit___ 1 (f ()) :> [ `Foo | `Bar ])
+  
+  let _ = fun () -> (f () :> [ `Foo | `Bar ])
 
 
   $ bash test.sh <<'EOF'
   > let _ = let module Foo = struct end in 0
   > let _ =
+  >   let module Foo = struct let () = print_endline "foo" end in
+  >   print_endline "bar"
+  > let _ = fun () ->
   >   let module Foo = struct let () = print_endline "foo" end in
   >   print_endline "bar"
   > EOF
@@ -186,6 +215,14 @@ No instrumentation is inserted into expressions that are (syntactic) values.
       let () = ___bisect_post_visit___ 1 (print_endline "foo")
     end in
     ___bisect_post_visit___ 0 (print_endline "bar")
+  
+  let _ =
+   fun () ->
+    ___bisect_visit___ 3;
+    let module Foo = struct
+      let () = ___bisect_post_visit___ 2 (print_endline "foo")
+    end in
+    print_endline "bar"
 
 
   $ bash test.sh <<'EOF'
@@ -212,6 +249,7 @@ No instrumentation is inserted into expressions that are (syntactic) values.
   > [@@@ocaml.warning "-33"]
   > let _ = let open List in ignore
   > let _ = let open List in print_endline "foo"
+  > let _ = fun () -> let open List in print_endline "foo"
   > EOF
   [@@@ocaml.warning "-33"]
   
@@ -222,3 +260,9 @@ No instrumentation is inserted into expressions that are (syntactic) values.
   let _ =
     let open List in
     ___bisect_post_visit___ 0 (print_endline "foo")
+  
+  let _ =
+   fun () ->
+    ___bisect_visit___ 1;
+    let open List in
+    print_endline "foo"

@@ -10,8 +10,9 @@ suppressed.
 Subexpressions instrumented recursively.
 
   $ bash ../test.sh <<'EOF'
-  > let _ = String.concat (String.trim "") @@ [];;
-  > let _ = (fun () -> ()) @@ ();;
+  > let _ = String.concat (String.trim "") @@ []
+  > let _ = (fun () -> ()) @@ ()
+  > let _ = String.concat "" @@ List.append [] []
   > EOF
   let _ =
     ___bisect_post_visit___ 1
@@ -23,3 +24,7 @@ Subexpressions instrumented recursively.
          ___bisect_visit___ 2;
          ())
       @@ ())
+  
+  let _ =
+    ___bisect_post_visit___ 5
+      (String.concat "" @@ ___bisect_post_visit___ 4 (List.append [] []))

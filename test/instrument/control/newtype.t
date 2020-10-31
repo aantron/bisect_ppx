@@ -15,3 +15,19 @@ Recursive instrumentation of subexpression.
     fun (type _t) x ->
      ___bisect_visit___ 0;
      x
+
+
+Subexpression in tail position iff whole expression is in tail position.
+
+  $ bash ../test.sh <<'EOF'
+  > let _ =
+  >   fun (type _t) -> print_endline "foo"
+  > let _ = fun () ->
+  >   fun (type _t) -> print_endline "foo"
+  > EOF
+  let _ = fun (type _t) -> print_endline "foo"
+  
+  let _ =
+   fun () ->
+    ___bisect_visit___ 0;
+    fun (type _t) -> print_endline "foo"

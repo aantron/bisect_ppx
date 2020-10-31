@@ -41,3 +41,27 @@ Recursive instrumentation of cases.
         | () ->
             ___bisect_visit___ 0;
             ())
+
+
+Expressions in selector don't need their out-edge instrumented. Expressions in
+cases are in tail position iff the match expression is in tail position.
+
+  $ bash ../test.sh <<'EOF'
+  > let _ =
+  >   match print_endline "foo" with () -> print_endline "bar"
+  > let _ = fun () ->
+  >   match print_endline "foo" with () -> print_endline "bar"
+  > EOF
+  let _ =
+    match print_endline "foo" with
+    | () ->
+        ___bisect_visit___ 1;
+        ___bisect_post_visit___ 0 (print_endline "bar")
+  
+  let _ =
+   fun () ->
+    ___bisect_visit___ 3;
+    match print_endline "foo" with
+    | () ->
+        ___bisect_visit___ 2;
+        print_endline "bar"
