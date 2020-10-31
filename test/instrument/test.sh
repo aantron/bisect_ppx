@@ -4,6 +4,8 @@ echo "(lang dune 2.7)" > dune-project
 
 echo "(executable" > dune
 echo " (name test)" >> dune
+echo " (modes byte)" >> dune
+echo " (ocamlc_flags -dsource)" >> dune
 echo " (instrumentation (backend bisect_ppx)))" >> dune
 
 echo > .ocamlformat
@@ -41,8 +43,6 @@ then
   DELIMITERS=1
 fi
 
-dune build ./test.exe --instrument-with bisect_ppx
-ocamlfind c \
-  -package bisect_ppx.runtime -dsource -c _build/default/test.pp.ml 2>&1 \
+dune build ./test.bc --instrument-with bisect_ppx 2>&1 \
 | sanitize $DELIMITERS \
 | ocamlformat --name test.ml -
