@@ -11,7 +11,7 @@ the guard, rather than the pattern.
   let _ =
     match `A `B with
     | `A (`B | `C) as ___bisect_matched_value___
-      when (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+      when (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
               ___bisect_matched_value___
             with
            | `A `B ->
@@ -41,7 +41,7 @@ the guard, rather than the pattern.
         ___bisect_visit___ 1;
         ()
     | exception ((Exit | Failure _) as ___bisect_matched_value___)
-      when (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+      when (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
               ___bisect_matched_value___
             with
            | Exit ->

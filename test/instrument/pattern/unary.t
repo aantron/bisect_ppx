@@ -8,7 +8,7 @@ Alias.
   let _ =
     match `A with
     | (`A | `B) as _x as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | `A as _x ->
@@ -32,7 +32,7 @@ Constructor.
   let _ =
     match Some `A with
     | Some (`A | `B) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | Some `A ->
@@ -58,7 +58,7 @@ Polymorphic variant constructor.
   let _ =
     match `A `B with
     | `A (`B | `C) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | `A `B ->
@@ -81,7 +81,7 @@ Type constraint.
   let _ =
     match `A with
     | (`A | `B : _) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | (`A : _) ->
@@ -108,7 +108,7 @@ Lazy.
          `A)
     with
     | (lazy (`A | `B)) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | (lazy `A) ->

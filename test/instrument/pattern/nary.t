@@ -8,7 +8,7 @@ Tuple.
   let _ =
     match (`A, `C) with
     | ((`A | `B), (`C | `D)) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | `A, `C ->
@@ -44,7 +44,7 @@ Record.
   let _ =
     match { a = true; b = false } with
     | { a = true | false; b = true | false } as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | { a = true; b = true } ->
@@ -78,7 +78,7 @@ Array.
   let _ =
     match [| `A; `C |] with
     | [| `A | `B; `C | `D |] as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | [| `A; `C |] ->

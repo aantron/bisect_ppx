@@ -505,7 +505,7 @@ struct
         Exp.attr
           nested_match
           {attr_name = Location.mkloc "ocaml.warning" loc;
-           attr_payload = PStr [[%stri "-4-8-9-11-26-27-28"]];
+           attr_payload = PStr [[%stri "-4-8-9-11-26-27-28-33"]];
            attr_loc = loc}
 
     (* This function works recursively. It should be called with a pattern [p]

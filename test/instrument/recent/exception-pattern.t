@@ -13,7 +13,7 @@ Exception patterns under or-pattern.
         ()
     | (exception (Exit as ___bisect_matched_value___))
     | (exception (Failure _ as ___bisect_matched_value___)) ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | Exit ->
@@ -40,7 +40,7 @@ Exception pattern under type constraint.
         ___bisect_visit___ 0;
         ()
     | ((exception ((Exit | Failure _) as ___bisect_matched_value___)) : unit) ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | Exit ->

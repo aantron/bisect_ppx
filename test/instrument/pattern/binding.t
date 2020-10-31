@@ -8,7 +8,7 @@ Bindings made under or-patterns remain consistent after instrumentation.
   let _ =
     match `A with
     | ((`A as x) | `B) as x as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | `A as x ->
@@ -29,7 +29,7 @@ Bindings made under or-patterns remain consistent after instrumentation.
   let _ =
     match `A () with
     | (`A x | `B x) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | `A x ->

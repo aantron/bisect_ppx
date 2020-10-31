@@ -10,7 +10,7 @@ compiler.
   let _ =
     match `A with
     | (`A | `B) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28"]
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
         | `A ->
