@@ -1255,9 +1255,6 @@ class instrumenter =
             in
             Exp.poly ~loc ~attrs e t
 
-          | Pexp_newtype (t, e) ->
-            Exp.newtype ~loc ~attrs t (traverse ~is_in_tail_position:true e)
-
           | Pexp_letop {let_; ands; body} ->
             let traverse_binding_op binding_op =
               {binding_op with
@@ -1362,6 +1359,9 @@ class instrumenter =
             Exp.open_ ~loc ~attrs
               (self#open_declaration m)
               (traverse ~is_in_tail_position e)
+
+          | Pexp_newtype (t, e) ->
+            Exp.newtype ~loc ~attrs t (traverse ~is_in_tail_position e)
 
           (* Expressions that don't need instrumentation, and where AST
              traversal leaves the expression language. *)

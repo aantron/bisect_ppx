@@ -25,9 +25,9 @@ Subexpression in tail position iff whole expression is in tail position.
   > let _ = fun () ->
   >   fun (type _t) -> print_endline "foo"
   > EOF
-  let _ = fun (type _t) -> print_endline "foo"
+  let _ = fun (type _t) -> ___bisect_post_visit___ 0 (print_endline "foo")
   
   let _ =
    fun () ->
-    ___bisect_visit___ 0;
+    ___bisect_visit___ 1;
     fun (type _t) -> print_endline "foo"
