@@ -1185,7 +1185,7 @@ class instrumenter =
 
           | Pexp_assert e ->
             Exp.assert_ (traverse ~is_in_tail_position:false e)
-            |> instrument_expr ~at_end:true
+            |> instrument_expr ~use_loc_of:e ~post:true
 
           (* Expressions that have subexpressions that might not get visited. *)
           | Pexp_function cases ->
