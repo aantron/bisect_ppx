@@ -58,9 +58,13 @@ module Common = Bisect_common
 
 
 
-let option_map f = function
-  | Some v -> Some (f v)
-  | None -> None
+(* Can be removed once Bisect_ppx requires OCaml >= 4.08. *)
+module Option =
+struct
+  let map f = function
+    | Some v -> Some (f v)
+    | None -> None
+end
 
 
 
@@ -969,7 +973,7 @@ class instrumenter =
 
       match ce.pcl_desc with
       | Pcl_fun (l, e, p, ce) ->
-        Cl.fun_ ~loc ~attrs l (option_map instrument_expr e) p ce
+        Cl.fun_ ~loc ~attrs l (Option.map instrument_expr e) p ce
 
       | _ ->
         ce
@@ -1194,7 +1198,7 @@ class instrumenter =
 
           | Pexp_fun (label, default_value, p, e) ->
             let default_value =
-              option_map (fun e ->
+              Option.map (fun e ->
                 instrument_expr
                   (traverse ~is_in_tail_position:false e)) default_value
             in
@@ -1226,7 +1230,7 @@ class instrumenter =
             Exp.ifthenelse ~loc ~attrs
               (traverse ~successor:`Redundant ~is_in_tail_position:false if_)
               (instrument_expr (traverse ~is_in_tail_position then_))
-              (option_map (fun e ->
+              (Option.map (fun e ->
                 instrument_expr (traverse ~is_in_tail_position e)) else_)
 
           | Pexp_while (while_, do_) ->
@@ -1293,18 +1297,18 @@ class instrumenter =
 
           | Pexp_construct (c, e) ->
             Exp.construct ~loc ~attrs
-              c (option_map (traverse ~is_in_tail_position:false) e)
+              c (Option.map (traverse ~is_in_tail_position:false) e)
 
           | Pexp_variant (c, e) ->
             Exp.variant ~loc ~attrs
-              c (option_map (traverse ~is_in_tail_position:false) e)
+              c (Option.map (traverse ~is_in_tail_position:false) e)
 
           | Pexp_record (fields, e) ->
             Exp.record ~loc ~attrs
               (fields
               |> List.map (fun (f, e) ->
                 (f, traverse ~is_in_tail_position:false e)))
-              (option_map (traverse ~is_in_tail_position:false) e)
+              (Option.map (traverse ~is_in_tail_position:false) e)
 
           | Pexp_field (e, f) ->
             Exp.field ~loc ~attrs (traverse ~is_in_tail_position:false e) f
@@ -1381,7 +1385,7 @@ class instrumenter =
         |> List.map begin fun case ->
           {case with
             Parsetree.pc_guard =
-              option_map
+              Option.map
                 (traverse ~is_in_tail_position:false) case.Parsetree.pc_guard;
             pc_rhs = traverse ~is_in_tail_position case.pc_rhs;
           }
