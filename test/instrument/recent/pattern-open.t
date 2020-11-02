@@ -13,9 +13,6 @@ Or-pattern under local open.
   
   let _ =
     match () with
-    | () ->
-        ___bisect_visit___ 0;
-        ()
     | M.((exception ((E | Exit) as ___bisect_matched_value___))) ->
         (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
@@ -27,4 +24,7 @@ Or-pattern under local open.
             ___bisect_visit___ 2;
             ()
         | _ -> ());
+        ()
+    | () ->
+        ___bisect_visit___ 0;
         ()

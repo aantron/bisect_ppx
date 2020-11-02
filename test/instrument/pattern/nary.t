@@ -43,28 +43,30 @@ Record.
   
   let _ =
     match { a = true; b = false } with
-    | { a = true | false; b = true | false } as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
-           ___bisect_matched_value___
-         with
-        | { a = true; b = true } ->
-            ___bisect_visit___ 2;
-            ___bisect_visit___ 1;
-            ()
-        | { a = true; b = false } ->
-            ___bisect_visit___ 3;
-            ___bisect_visit___ 1;
-            ()
-        | { a = false; b = true } ->
-            ___bisect_visit___ 2;
-            ___bisect_visit___ 4;
-            ()
-        | { a = false; b = false } ->
-            ___bisect_visit___ 3;
-            ___bisect_visit___ 4;
-            ()
-        | _ -> ());
-        ___bisect_post_visit___ 0 (print_endline "foo")
+    | ___bisect_matched_value___ -> (
+        match ___bisect_matched_value___ with
+        | { a = true | false; b = true | false } ->
+            (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
+               ___bisect_matched_value___
+             with
+            | { a = true; b = true } ->
+                ___bisect_visit___ 2;
+                ___bisect_visit___ 1;
+                ()
+            | { a = true; b = false } ->
+                ___bisect_visit___ 3;
+                ___bisect_visit___ 1;
+                ()
+            | { a = false; b = true } ->
+                ___bisect_visit___ 2;
+                ___bisect_visit___ 4;
+                ()
+            | { a = false; b = false } ->
+                ___bisect_visit___ 3;
+                ___bisect_visit___ 4;
+                ()
+            | _ -> ());
+            ___bisect_post_visit___ 0 (print_endline "foo"))
 
 
 Array.
