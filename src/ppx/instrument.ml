@@ -379,245 +379,238 @@ struct
 
       So, without further ado, here is the function that does all this magic: *)
 
-    let is_assert_false_or_refutation (case : Parsetree.case) =
-      match case.pc_rhs with
-      | [%expr assert false] -> true
-      | {pexp_desc = Pexp_unreachable; _} -> true
-      | _ -> false
+  let is_assert_false_or_refutation (case : Parsetree.case) =
+    match case.pc_rhs with
+    | [%expr assert false] -> true
+    | {pexp_desc = Pexp_unreachable; _} -> true
+    | _ -> false
 
-    let insert_instrumentation points (case : Parsetree.case) f =
-      match case.pc_guard with
-      | None ->
-        {case with
-          pc_rhs = f case.pc_rhs;
+  let insert_instrumentation points (case : Parsetree.case) f =
+    match case.pc_guard with
+    | None ->
+      {case with
+        pc_rhs = f case.pc_rhs;
+      }
+    | Some guard ->
+      {case with
+        pc_guard = Some (f guard);
+        pc_rhs = instrument_expr points case.pc_rhs;
+      }
+
+  let instrumentation_for_location_trace points location_trace e =
+    location_trace
+    |> List.sort_uniq (fun l l' ->
+      l.Location.loc_start.Lexing.pos_cnum -
+      l'.Location.loc_start.Lexing.pos_cnum)
+    |> List.fold_left (fun e l ->
+      instrument_expr points ~override_loc:l e) e
+
+  let add_bisect_matched_value_alias loc p =
+    [%pat? [%p p] as ___bisect_matched_value___] [@metaloc loc]
+
+  let generate_nested_match points loc rotated_cases =
+    rotated_cases
+    |> List.map (fun (location_trace, rotated_pattern) ->
+      Exp.case
+        rotated_pattern
+        (instrumentation_for_location_trace points location_trace [%expr ()]))
+    |> fun nested_match_cases ->
+      nested_match_cases @ [Exp.case [%pat? _] [%expr ()]]
+    |> Exp.match_ ~loc ([%expr ___bisect_matched_value___])
+    |> fun nested_match ->
+      Exp.attr
+        nested_match
+        {
+          attr_name = Location.mkloc "ocaml.warning" loc;
+          attr_payload = PStr [[%stri "-4-8-9-11-26-27-28-33"]];
+          attr_loc = loc
         }
-      | Some guard ->
-        {case with
-          pc_guard = Some (f guard);
-          pc_rhs = instrument_expr points case.pc_rhs;
-        }
 
-    let instrumentation_for_location_trace points location_trace e =
-      location_trace
-      |> List.sort_uniq (fun l l' ->
-        l.Location.loc_start.Lexing.pos_cnum -
-        l'.Location.loc_start.Lexing.pos_cnum)
-      |> List.fold_left (fun e l ->
-        instrument_expr points ~override_loc:l e) e
+  (* This function works recursively. It should be called with a pattern [p]
+     (second argument) and its location (first argument).
 
-    let add_bisect_matched_value_alias loc p =
-      [%pat? [%p p] as ___bisect_matched_value___] [@metaloc loc]
+     It evaluates to a list of patterns. Each of these resulting patterns
+     contains no nested or-patterns. Joining the resulting patterns in a single
+     or-pattern would create a pattern equivalent to [p].
 
-    let generate_nested_match points loc rotated_cases =
-      rotated_cases
-      |> List.map (fun (location_trace, rotated_pattern) ->
-        Exp.case
-          rotated_pattern
-          (instrumentation_for_location_trace points location_trace [%expr ()]))
-      |> fun nested_match_cases ->
-        nested_match_cases @ [Exp.case [%pat? _] [%expr ()]]
-      |> Exp.match_ ~loc ([%expr ___bisect_matched_value___])
-      |> fun nested_match ->
-        Exp.attr
-          nested_match
-          {attr_name = Location.mkloc "ocaml.warning" loc;
-           attr_payload = PStr [[%stri "-4-8-9-11-26-27-28-33"]];
-           attr_loc = loc}
+     Each pattern in the list is paired with a list of locations. These are the
+     locations of the original cases of or-patterns in [p] that were chosen for
+     the corresponding result pattern. For example:
 
-    (* This function works recursively. It should be called with a pattern [p]
-       (second argument) and its location (first argument).
+       C (A | B), D (E | F)
 
-       It evaluates to a list of patterns. Each of these resulting patterns
-       contains no nested or-patterns. Joining the resulting patterns in a
-       single or-pattern would create a pattern equivalent to [p].
+     becomes the list of pairs
 
-       Each pattern in the list is paired with a list of locations. These are
-       the locations of the original cases of or-patterns in [p] that were
-       chosen for the corresponding result pattern. For example:
+       (C A, D E), [loc A, loc E]
+       (C A, D F), [loc A, loc F]
+       (C B, D E), [loc B, loc E]
+       (C B, D F), [loc B, loc F]
 
-         C (A | B), D (E | F)
+     During recursion, the invariant on the location is that it is the location
+     of the nearest enclosing or-pattern, or the entire pattern, if there is no
+     enclosing or-pattern. *)
+  let rotate_or_patterns_to_top loc p =
+    let rec recur ~enclosing_loc p =
+      let loc = Parsetree.(p.ppat_loc) in
+      let attrs = Parsetree.(p.ppat_attributes) in
 
-       becomes the list of pairs
+      match p.ppat_desc with
 
-         (C A, D E), [loc A, loc E]
-         (C A, D F), [loc A, loc F]
-         (C B, D E), [loc B, loc E]
-         (C B, D F), [loc B, loc F]
+      (* If the pattern ends with something trivial, that is not an or-pattern,
+         and has no nested patterns (so can't have a nested or-pattern), then
+         that pattern is the only top-level case. The location trace is just the
+         location of the overall pattern.
 
-       During recursion, the invariant on the location is that it is the
-       location of the nearest enclosing or-pattern, or the entire pattern, if
-       there is no enclosing or-pattern. *)
-    let rotate_or_patterns_to_top loc p =
+         Here are some examples of how this plays out. Let's say the entire
+         pattern was "x". Then the case list will be just "x", with its own
+         location for the trace.
 
-      let rec recurse ~enclosing_loc p =
-        let loc = Parsetree.(p.ppat_loc) in
-        let attrs = Parsetree.(p.ppat_attributes) in
+         If the entire pattern was "x as y", this recursive call will return
+         just "x" with the location of "x as y" for the trace. The wrapping
+         recursive call will turn the "x" back into "x as y".
 
-        match p.ppat_desc with
+         If the entire pattern was "A x | B", this recursive call will return
+         just "x" with the location of "A" (not the whole pattern!). The
+         wrapping recursive call, for constructor "A", will turn the "x" into
+         "A x". A yet-higher wrapping recursive call, for the actual or-pattern,
+         will concatenate this with a second top-level case, corresponding to
+         "B". *)
+      | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
+      | Ppat_construct (_, None) | Ppat_variant (_, None) | Ppat_type _
+      | Ppat_unpack _ | Ppat_extension _ ->
+        [([enclosing_loc], p)]
 
-        (* If the pattern ends with something trivial, that is not an
-           or-pattern, and has no nested patterns (so can't have a nested
-           or-pattern), then that pattern is the only top-level case. The
-           location trace is just the location of the overall pattern.
+      (* Recursively rotate or-patterns in [p'] to the top. Then, for each one,
+         re-wrap it in an alias pattern. The location traces are not
+         affected. *)
+      | Ppat_alias (p', x) ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.alias ~loc ~attrs p'' x))
 
-           Here are some examples of how this plays out. Let's say the entire
-           pattern was "x". Then the case list will be just "x", with its own
-           location for the trace.
+      | Ppat_construct (c, Some p') ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.construct ~loc ~attrs c (Some p'')))
 
-           If the entire pattern was "x as y", this recursive call will return
-           just "x" with the location of "x as y" for the trace. The wrapping
-           recursive call will turn the "x" back into "x as y".
+      | Ppat_variant (c, Some p') ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.variant ~loc ~attrs c (Some p'')))
 
-           If the entire pattern was "A x | B", this recursive call will return
-           just "x" with the location of "A" (not the whole pattern!). The
-           wrapping recursive call, for constructor "A", will turn the "x" into
-           "A x". A yet-higher wrapping recursive call, for the actual
-           or-pattern, will concatenate this with a second top-level case,
-           corresponding to "B". *)
-        | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
-        | Ppat_construct (_, None) | Ppat_variant (_, None) | Ppat_type _
-        | Ppat_unpack _ | Ppat_extension _ ->
-          [([enclosing_loc], p)]
+      | Ppat_constraint (p', t) ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.constraint_ ~loc ~attrs p'' t))
 
-        (* Recursively rotate or-patterns in [p'] to the top. Then, for each
-           one, re-wrap it in an alias pattern. The location traces are not
-           affected. *)
-        | Ppat_alias (p', x) ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.alias ~loc ~attrs p'' x))
+      | Ppat_lazy p' ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.lazy_ ~loc ~attrs p''))
 
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_construct (c, Some p') ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.construct ~loc ~attrs c (Some p'')))
+      | Ppat_open (c, p') ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.open_ ~loc ~attrs c p''))
 
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_variant (c, Some p') ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.variant ~loc ~attrs c (Some p'')))
+      | Ppat_exception p' ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.exception_ ~loc ~attrs p''))
 
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_constraint (p', t) ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.constraint_ ~loc ~attrs p'' t))
+      (* Recursively rotate or-patterns in each pattern in [ps] to the top.
+         Then, take a Cartesian product of the cases, and re-wrap each row in a
+         replacement tuple pattern.
 
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_lazy p' ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.lazy_ ~loc ~attrs p''))
+         For example, suppose we have the pair pattern
 
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_open (c, p') ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.open_ ~loc ~attrs c p''))
+           (A | B, C | D)
 
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_exception p' ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.exception_ ~loc ~attrs p''))
+         The recursive calls will produce lists of rotated cases for each
+         component pattern:
 
-        (* Recursively rotate or-patterns in each pattern in [ps] to the top.
-           Then, take a Cartesian product of the cases, and re-wrap each row in
-           a replacement tuple pattern.
+           A | B   =>   [A, loc A]; [B, loc B]
+           C | D   =>   [C, loc C]; [D, loc D]
 
-           For example, suppose we have the pair pattern
+         We now need every possible combination of one case from the first
+         component, one case from the second, and so on, and to concatenate all
+         the location traces accordingly:
 
-             (A | B, C | D)
+           [A; C, loc A; loc C]
+           [A; D, loc A; loc D]
+           [B; C, loc B; loc C]
+           [B; D, loc B; loc D]
 
-           The recursive calls will produce lists of rotated cases for each
-           component pattern:
+         This is performed by [all_combinations].
 
-             A | B   =>   [A, loc A]; [B, loc B]
-             C | D   =>   [C, loc C]; [D, loc D]
+         Finally, we need to take each one of these rows, and re-wrap the
+         pattern lists (on the left side) into tuples.
 
-           We now need every possible combination of one case from the first
-           component, one case from the second, and so on, and to concatenate
-           all the location traces accordingly:
+         This is typical of "and-patterns", i.e. those that match various
+         product types (those that carry multiple pieces of data
+         simultaneously). *)
+      | Ppat_tuple ps ->
+        ps
+        |> List.map (recur ~enclosing_loc)
+        |> all_combinations
+        |> List.map (fun (location_trace, ps') ->
+          (location_trace, Pat.tuple ~loc ~attrs ps'))
 
-             [A; C, loc A; loc C]
-             [A; D, loc A; loc D]
-             [B; C, loc B; loc C]
-             [B; D, loc B; loc D]
+      | Ppat_record (entries, closed) ->
+        let labels, ps = List.split entries in
+        ps
+        |> List.map (recur ~enclosing_loc)
+        |> all_combinations
+        |> List.map (fun (location_trace, ps') ->
+          (location_trace,
+            Pat.record ~loc ~attrs (List.combine labels ps') closed))
 
-           This is performed by [all_combinations].
+      | Ppat_array ps ->
+        ps
+        |> List.map (recur ~enclosing_loc)
+        |> all_combinations
+        |> List.map (fun (location_trace, ps') ->
+          location_trace, Pat.array ~loc ~attrs ps')
 
-           Finally, we need to take each one of these rows, and re-wrap the
-           pattern lists (on the left side) into tuples.
+      (* For or-patterns, recur into each branch. Then, concatenate the
+          resulting case lists. Don't reassemble an or-pattern. *)
+      | Ppat_or (p_1, p_2) ->
+        let ps_1 = recur ~enclosing_loc:p_1.ppat_loc p_1 in
+        let ps_2 = recur ~enclosing_loc:p_2.ppat_loc p_2 in
+        ps_1 @ ps_2
 
-           This is typical of "and-patterns", i.e. those that match various
-           product types (those that carry multiple pieces of data
-           simultaneously). *)
-        | Ppat_tuple ps ->
-          ps
-          |> List.map (recurse ~enclosing_loc)
-          |> all_combinations
-          |> List.map (fun (location_trace, ps') ->
-            (location_trace, Pat.tuple ~loc ~attrs ps'))
+    (* Performs the Cartesian product operation described at [Ppat_tuple] above,
+       concatenating location traces along the way.
 
-        (* Same logic as for [Ppat_tuple]. *)
-        | Ppat_record (entries, closed) ->
-          let labels, ps = List.split entries in
-          ps
-          |> List.map (recurse ~enclosing_loc)
-          |> all_combinations
-          |> List.map (fun (location_trace, ps') ->
-            (location_trace,
-             Pat.record ~loc ~attrs (List.combine labels ps') closed))
+       The argument is rows of top-level case lists (so a list of lists), each
+       case list resulting from rotating some nested pattern. Since tuples,
+       arrays, etc., have lists of nested patterns, we have a list of case
+       lists. *)
+    and all_combinations = function
+      | [] -> []
+      | cases::more ->
+        let multiply product cases =
+          product |> List.map (fun (location_trace_1, ps) ->
+            cases |> List.map (fun (location_trace_2, p) ->
+              location_trace_1 @ location_trace_2, ps @ [p]))
+          |> List.flatten
+        in
 
-        (* Same logic as for [Ppat_tuple]. *)
-        | Ppat_array ps ->
-          ps
-          |> List.map (recurse ~enclosing_loc)
-          |> all_combinations
-          |> List.map (fun (location_trace, ps') ->
-            location_trace, Pat.array ~loc ~attrs ps')
+        let initial =
+          cases
+          |> List.map (fun (location_trace, p) -> location_trace, [p])
+        in
 
-        (* For or-patterns, recurse into each branch. Then, concatenate the
-           resulting case lists. Don't reassemble an or-pattern. *)
-        | Ppat_or (p_1, p_2) ->
-          let ps_1 = recurse ~enclosing_loc:p_1.ppat_loc p_1 in
-          let ps_2 = recurse ~enclosing_loc:p_2.ppat_loc p_2 in
-          ps_1 @ ps_2
+        List.fold_left multiply initial more
+    in
 
-      (* Performs the Cartesian product operation described at [Ppat_tuple]
-         above, concatenating location traces along the way.
-
-         The argument is rows of top-level case lists (so a list of lists), each
-         case list resulting from rotating some nested pattern. Since tuples,
-         arrays, etc., have lists of nested patterns, we have a list of
-         case lists. *)
-      and all_combinations = function
-        | [] -> []
-        | cases::more ->
-          let multiply product cases =
-            product |> List.map (fun (location_trace_1, ps) ->
-              cases |> List.map (fun (location_trace_2, p) ->
-                location_trace_1 @ location_trace_2, ps @ [p]))
-            |> List.flatten
-          in
-
-          let initial =
-            cases
-            |> List.map (fun (location_trace, p) -> location_trace, [p])
-          in
-
-          List.fold_left multiply initial more
-      in
-
-      recurse ~enclosing_loc:loc p
+    recur ~enclosing_loc:loc p
 
   let rec partition_exceptions (p : Parsetree.pattern) =
     match p.ppat_desc with
-    | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
-    | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
-    | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+    | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _ | Ppat_interval _
+    | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _ | Ppat_record _
+    | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
     | Ppat_extension _ ->
       Some p, None
 
@@ -646,81 +639,80 @@ struct
       let p2_value, p2_exception = partition_exceptions p2 in
       reassemble p1_value p2_value, reassemble p1_exception p2_exception
 
-    let rec alias_exceptions loc p =
-      match Parsetree.(p.ppat_desc) with
-      | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
-      | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
-      | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
-      | Ppat_extension _ ->
-        p
+  let rec alias_exceptions loc p =
+    match Parsetree.(p.ppat_desc) with
+    | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _ | Ppat_interval _
+    | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _ | Ppat_record _
+    | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+    | Ppat_extension _ ->
+      p
 
-      | Ppat_or (p_1, p_2) ->
-        {p with ppat_desc =
-          Ppat_or (alias_exceptions loc p_1, alias_exceptions loc p_2)}
+    | Ppat_or (p_1, p_2) ->
+      {p with ppat_desc =
+        Ppat_or (alias_exceptions loc p_1, alias_exceptions loc p_2)}
 
-      | Ppat_constraint (p', t) ->
-        {p with ppat_desc =
-          Ppat_constraint (alias_exceptions loc p', t)}
+    | Ppat_constraint (p', t) ->
+      {p with ppat_desc =
+        Ppat_constraint (alias_exceptions loc p', t)}
 
-      | Ppat_exception p' ->
-        {p with ppat_desc =
-          Ppat_exception (add_bisect_matched_value_alias loc p')}
+    | Ppat_exception p' ->
+      {p with ppat_desc =
+        Ppat_exception (add_bisect_matched_value_alias loc p')}
 
-      | Ppat_open (m, p') ->
-        {p with ppat_desc =
-          Ppat_open (m, alias_exceptions loc p')}
+    | Ppat_open (m, p') ->
+      {p with ppat_desc =
+        Ppat_open (m, alias_exceptions loc p')}
 
-    let rec drop_exception_patterns p =
-      match Parsetree.(p.ppat_desc) with
-      | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
-      | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
-      | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
-      | Ppat_extension _ ->
-        p (* Should be unreachable. *)
+  let rec drop_exception_patterns p =
+    match Parsetree.(p.ppat_desc) with
+    | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _ | Ppat_interval _
+    | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _ | Ppat_record _
+    | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+    | Ppat_extension _ ->
+      p (* Should be unreachable. *)
 
-      | Ppat_or _ ->
-        p (* Should be unreachable. *)
+    | Ppat_or _ ->
+      p (* Should be unreachable. *)
 
-      (* Dropping exception patterns will change the meaning of type constraints
-         on them, so drop the type constraints along the way. *)
-      | Ppat_constraint (p', _) ->
-        drop_exception_patterns p'
+    (* Dropping exception patterns will change the meaning of type constraints
+       on them, so drop the type constraints along the way. *)
+    | Ppat_constraint (p', _) ->
+      drop_exception_patterns p'
 
-      | Ppat_exception p' ->
-        p'
+    | Ppat_exception p' ->
+      p'
 
-      | Ppat_open (m, p') ->
-        {p with ppat_desc =
-          Ppat_open (m, drop_exception_patterns p')}
+    | Ppat_open (m, p') ->
+      {p with ppat_desc =
+        Ppat_open (m, drop_exception_patterns p')}
 
-    let rec bound_variables p =
-      match Parsetree.(p.ppat_desc) with
-      | Ppat_any | Ppat_constant _ | Ppat_interval _ | Ppat_construct (_, None)
-      | Ppat_variant (_, None) | Ppat_type _ | Ppat_unpack _
-      | Ppat_extension _ ->
-        []
+  let rec bound_variables p =
+    match Parsetree.(p.ppat_desc) with
+    | Ppat_any | Ppat_constant _ | Ppat_interval _ | Ppat_construct (_, None)
+    | Ppat_variant (_, None) | Ppat_type _ | Ppat_unpack _ | Ppat_extension _ ->
+      []
 
-      | Ppat_var x ->
-        [x]
+    | Ppat_var x ->
+      [x]
 
-      | Ppat_alias (p', x) ->
-        x::(bound_variables p')
+    | Ppat_alias (p', x) ->
+      x::(bound_variables p')
 
-      | Ppat_tuple ps | Ppat_array ps ->
-        List.map bound_variables ps
-        |> List.flatten
+    | Ppat_tuple ps | Ppat_array ps ->
+      List.map bound_variables ps
+      |> List.flatten
 
-      | Ppat_record (fields, _) ->
-        List.map (fun (_, p') -> bound_variables p') fields
-        |> List.flatten
+    | Ppat_record (fields, _) ->
+      List.map (fun (_, p') -> bound_variables p') fields
+      |> List.flatten
 
-      | Ppat_construct (_, Some p') | Ppat_variant (_, Some p')
-      | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
-      | Ppat_open (_, p') ->
-        bound_variables p'
+    | Ppat_construct (_, Some p') | Ppat_variant (_, Some p')
+    | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
+    | Ppat_open (_, p') ->
+      bound_variables p'
 
-      | Ppat_or (p_1, _) ->
-        bound_variables p_1 (* Should be unreachable. *)
+    | Ppat_or (p_1, _) ->
+      bound_variables p_1 (* Should be unreachable. *)
 
   let rec has_polymorphic_variant p =
     match Parsetree.(p.ppat_desc) with
@@ -745,11 +737,9 @@ struct
     | Ppat_or (p1, p2) ->
       has_polymorphic_variant p1 || has_polymorphic_variant p2
 
-
   let rec make_function loc body = function
     | [] ->
-      Exp.fun_ ~loc Nolabel None
-        [%pat? ()] body
+      Exp.fun_ ~loc Nolabel None [%pat? ()] body
     | x::rest ->
       Exp.fun_ ~loc Nolabel None (Pat.var ~loc x) (make_function loc body rest)
 
