@@ -40,23 +40,12 @@ instrumented.
            ___bisect_matched_value___
          with
         | `A ->
-            ___bisect_visit___ 1;
+            ___bisect_visit___ 0;
             ()
         | `B ->
-            ___bisect_visit___ 2;
+            ___bisect_visit___ 1;
             ()
         | _ -> ());
         ()
-    | (`C | `D) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
-           ___bisect_matched_value___
-         with
-        | `C ->
-            ___bisect_visit___ 3;
-            ()
-        | `D ->
-            ___bisect_visit___ 4;
-            ()
-        | _ -> ());
-        ___bisect_post_visit___ 0 (assert false)
+    | `C | `D -> assert false
   $ dune build ./test.bc --instrument-with bisect_ppx

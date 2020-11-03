@@ -1249,6 +1249,9 @@ class instrumenter =
                 instrument_expr ~use_loc_of:e' ~post:true e
               end
 
+          | Pexp_assert [%expr false] ->
+            e
+
           | Pexp_assert e ->
             Exp.assert_ (traverse ~is_in_tail_position:false e)
             |> instrument_expr ~use_loc_of:e ~post:true
