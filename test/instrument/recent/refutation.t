@@ -48,4 +48,3 @@ instrumented.
         | _ -> ());
         ()
     | `C | `D -> assert false
-  $ dune build ./test.bc --instrument-with bisect_ppx

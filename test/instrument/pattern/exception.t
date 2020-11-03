@@ -70,4 +70,3 @@ patterns.
     | _ ->
         ___bisect_visit___ 8;
         ___bisect_post_visit___ 2 (print_endline "baz")
-  $ dune build ./test.bc --instrument-with bisect_ppx

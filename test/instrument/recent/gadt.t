@@ -26,7 +26,6 @@ GADT. See https://github.com/aantron/bisect_ppx/issues/325.
                 ()
             | _ -> ());
             ())
-  $ dune build ./test.bc --instrument-with bisect_ppx
 
 
 With function.

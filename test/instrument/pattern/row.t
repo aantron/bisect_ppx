@@ -30,4 +30,3 @@ Or-pattern instrumentation does not prevent row type generalization.
           | _ -> ());
           ()
   end
-  $ dune build ./test.bc --instrument-with bisect_ppx
