@@ -1,4 +1,4 @@
-# Bisect_ppx &nbsp; [![Version][version]][releases] [![Travis status][travis-img]][travis] [![AppVeyor status][appveyor-img]][appveyor] [![Coverage][coveralls-img]][coveralls]
+# Bisect_ppx &nbsp; [![Travis status][travis-img]][travis] [![AppVeyor status][appveyor-img]][appveyor] [![Coverage][coveralls-img]][coveralls]
 
 [Bisect_ppx][self] is a code coverage tool for OCaml and Reason. It helps you
 test thoroughly by showing what's **not** tested.
@@ -8,8 +8,6 @@ test thoroughly by showing what's **not** tested.
 You can browse the report seen above [online here][gh-pages-report].
 
 [self]: https://github.com/aantron/bisect_ppx
-[releases]: https://github.com/aantron/bisect_ppx/releases
-[version]: https://img.shields.io/badge/version-2.5.0-blue.svg
 [travis]: https://travis-ci.org/aantron/bisect_ppx
 [travis-img]: https://img.shields.io/travis/aantron/bisect_ppx/master.svg?label=travis
 [appveyor]: https://ci.appveyor.com/project/aantron/bisect-ppx/branch/master
