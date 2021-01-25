@@ -4,9 +4,13 @@
 
 
 
-class instrumenter : object 
-   inherit Ppxlib.Ast_traverse.map 
-   method transform_impl_file: Ppxlib.Parsetree.structure -> Ppxlib.Parsetree.structure 
-end 
+class instrumenter : object
+   inherit Ppxlib.Ast_traverse.map_with_expansion_context
+
+   method transform_impl_file:
+      Ppxlib.Expansion_context.Base.t ->
+      Ppxlib.Parsetree.structure ->
+         Ppxlib.Parsetree.structure
+end
 (**  This class implements an instrumenter to be used through the {i -ppx}
     command-line switch. *)

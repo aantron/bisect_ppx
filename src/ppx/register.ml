@@ -79,17 +79,17 @@ let () = switches
   |> deprecated "-exclude-file"
   |> deprecated "-conditional"
   |> deprecated "-no-comment-parsing"
-  |> Arg.align  
+  |> Arg.align
   |> List.iter (fun (key, spec, doc) -> Ppxlib.Driver.add_arg key spec ~doc)
 
 
 let () =
-  let impl = 
+  let impl =
     match enabled () with
       | `Enabled ->
         new Instrument.instrumenter#transform_impl_file
       | `Disabled ->
-        new Ppxlib.Ast_traverse.map#structure
+        new Ppxlib.Ast_traverse.map_with_expansion_context#structure
   in
-  let instrument = Ppxlib.Driver.Instrument.make impl ~position:After in
+  let instrument = Ppxlib.Driver.Instrument.V2.make impl ~position:After in
   Ppxlib.Driver.register_transformation ~instrument "bisect_ppx"

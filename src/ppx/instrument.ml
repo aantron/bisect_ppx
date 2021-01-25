@@ -946,12 +946,12 @@ class instrumenter =
   let instrument_cases = Generated_code.instrument_cases points in
 
   object (self)
-    inherit Ppxlib.Ast_traverse.map as super
+    inherit Ppxlib.Ast_traverse.map_with_expansion_context as super
 
-    method! class_expr ce =
+    method! class_expr ctxt ce =
       let loc = ce.pcl_loc in
       let attrs = ce.pcl_attributes in
-      let ce = super#class_expr ce in
+      let ce = super#class_expr ctxt ce in
 
       match ce.pcl_desc with
       | Pcl_fun (l, e, p, ce) ->
@@ -960,10 +960,10 @@ class instrumenter =
       | _ ->
         ce
 
-    method! class_field cf =
+    method! class_field ctxt cf =
       let loc = cf.pcf_loc in
       let attrs = cf.pcf_attributes in
-      let cf = super#class_field cf in
+      let cf = super#class_field ctxt cf in
 
       match cf.pcf_desc with
       | Pcf_method (name, private_, cf) ->
@@ -980,7 +980,7 @@ class instrumenter =
       | _ ->
         cf
 
-    method! expression e =
+    method! expression ctxt e =
       let rec traverse ?(successor = `None) ~is_in_tail_position e =
         let attrs = e.Parsetree.pexp_attributes in
         if Coverage_attributes.has_off_attribute attrs then
@@ -1348,21 +1348,21 @@ class instrumenter =
           | Pexp_letmodule (m, e, e') ->
             Exp.letmodule ~loc ~attrs
               m
-              (self#module_expr e)
+              (self#module_expr ctxt e)
               (traverse ~is_in_tail_position e')
 
           | Pexp_letexception (c, e) ->
             Exp.letexception ~loc ~attrs c (traverse ~is_in_tail_position e)
 
           | Pexp_object c ->
-            Exp.object_ ~loc ~attrs (self#class_structure c)
+            Exp.object_ ~loc ~attrs (self#class_structure ctxt c)
 
           | Pexp_pack m ->
-            Exp.pack ~loc ~attrs (self#module_expr m)
+            Exp.pack ~loc ~attrs (self#module_expr ctxt m)
 
           | Pexp_open (m, e) ->
             Exp.open_ ~loc ~attrs
-              (self#open_declaration m)
+              (self#open_declaration ctxt m)
               (traverse ~is_in_tail_position e)
 
           | Pexp_extension _ | Pexp_unreachable ->
@@ -1388,7 +1388,7 @@ class instrumenter =
        [false] again upon encountering [[@@@coverage.on]]. *)
     val mutable structure_instrumentation_suppressed = false
 
-    method! structure_item si =
+    method! structure_item ctxt si =
       let loc = si.pstr_loc in
 
       match si.pstr_desc with
@@ -1426,7 +1426,7 @@ class instrumenter =
               if do_not_instrument then
                 binding
               else
-                {binding with pvb_expr = self#expression binding.pvb_expr}
+                {binding with pvb_expr = self#expression ctxt binding.pvb_expr}
             end
           in
           Str.value ~loc rec_flag bindings
@@ -1435,7 +1435,7 @@ class instrumenter =
         if structure_instrumentation_suppressed then
           si
         else
-          Str.eval ~loc ~attrs:a (self#expression e)
+          Str.eval ~loc ~attrs:a (self#expression ctxt e)
 
       | Pstr_attribute attribute ->
         let kind = Coverage_attributes.recognize attribute in
@@ -1461,20 +1461,20 @@ class instrumenter =
         si
 
       | _ ->
-        super#structure_item si
+        super#structure_item ctxt si
 
     (* Don't instrument payloads of extensions and attributes. *)
-    method! extension e =
+    method! extension _ e =
       e
 
-    method! attribute a =
+    method! attribute _ a =
       a
 
-    method! structure ast =
+    method! structure ctxt ast =
       let saved_structure_instrumentation_suppressed =
         structure_instrumentation_suppressed in
 
-      let result = super#structure ast in
+      let result = super#structure ctxt ast in
           (* This is *not* the first structure we see, or we are inside an
              interface file, so the structure is nested within the file, either
              inside [struct]..[end] or in an attribute or extension point.
@@ -1484,12 +1484,12 @@ class instrumenter =
 
       result
 
-    method transform_impl_file ast =
+    method transform_impl_file ctxt ast =
       let saved_structure_instrumentation_suppressed =
         structure_instrumentation_suppressed in
 
       let result =
-        let path = !Ocaml_common.Location.input_name in
+        let path = Ppxlib.Expansion_context.Base.input_name ctxt in
         let file_should_not_be_instrumented =
           (* Bisect_ppx is hardcoded to ignore files with certain names. If we
             have one of these, return the AST uninstrumented. In particular,
@@ -1511,7 +1511,7 @@ class instrumenter =
               then prepend some generated code for initializing the Bisect_ppx
               runtime and telling it about the instrumentation points in this
               file. *)
-          let instrumented_ast = super#structure ast in
+          let instrumented_ast = super#structure ctxt ast in
           let runtime_initialization =
             Generated_code.runtime_initialization points path
           in
