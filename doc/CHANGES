@@ -1,3 +1,20 @@
+Version 2.5.0 (2020-10-19):
+---------------------------
+  Additions
+
+  - Support Dune's --instrument-with integration, introduced in Dune 2.7.0
+    (#331, Pau Ruiz Safont).
+
+  Bugs fixed
+
+  - runtime.unix_open is not a function in js_of_ocaml integration, occurring
+    since Dune 2.7.0 (#334).
+  - Don't assume that (&&) is always applied to two arguments (#333, reported
+    Vladimir Keleshev).
+  - esy sandbox directory specified in environment variable cur__target_dir
+    might not exist (#328, reported David Sancho).
+  - Reporter: don't crash on symlink cycles (#324, reported Rudi Grinberg).
+
 Version 2.4.1 (2020-05-10):
 ---------------------------
   Bugs fixed

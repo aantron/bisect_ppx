@@ -1,3 +1,2 @@
 (lang dune 2.7)
-
-(formatting disabled)
+(cram enable)

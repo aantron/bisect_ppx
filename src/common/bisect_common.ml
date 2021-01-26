@@ -171,11 +171,12 @@ let write_runtime_data channel =
   in
   output_string channel data
 
-let () =
-  Random.self_init ()
+let prng =
+  Random.State.make_self_init () [@coverage off]
 
 let random_filename base_name =
-  Printf.sprintf "%s%09d.coverage" base_name (abs (Random.int 1000000000))
+  Printf.sprintf "%s%09d.coverage"
+    base_name (abs (Random.State.int prng 1000000000))
 
 let write_points points =
   let points_array = Array.of_list points in
@@ -229,6 +230,7 @@ let bisect_silent = ref None
 
 type options = (Arg.key * Arg.spec * Arg.doc) list
 
+[@@@coverage off]
 let deprecated binary basename options =
   let make make_spec fn =
     (basename,

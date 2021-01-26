@@ -2,14 +2,14 @@ diff -ru src/common/bisect_common.ml _self/meta_bisect_ppx/src/common/bisect_com
 --- src/common/bisect_common.ml
 +++ _self/meta_bisect_ppx/src/common/bisect_common.ml
 @@ -175,7 +175,7 @@
-   Random.self_init ()
+   Random.State.make_self_init () [@coverage off]
  
  let random_filename base_name =
--  Printf.sprintf "%s%09d.coverage" base_name (abs (Random.int 1000000000))
-+  Printf.sprintf "%s%09d.meta" base_name (abs (Random.int 1000000000))
+-  Printf.sprintf "%s%09d.coverage"
++  Printf.sprintf "%s%09d.meta"
+     base_name (abs (Random.State.int prng 1000000000))
  
  let write_points points =
-   let points_array = Array.of_list points in
 diff -ru src/common/dune _self/meta_bisect_ppx/src/common/dune
 --- src/common/dune
 +++ _self/meta_bisect_ppx/src/common/dune
@@ -52,7 +52,7 @@ diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
  
  
  
-@@ -905,7 +905,7 @@
+@@ -907,7 +907,7 @@
            let ___bisect_visit___ =
              let point_definitions = [%e points_data] in
              let `Staged cb =
@@ -76,9 +76,8 @@ diff -ru src/ppx/register.ml _self/meta_bisect_ppx/src/ppx/register.ml
 diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
 --- src/report/dune
 +++ _self/meta_bisect_ppx/src/report/dune
-@@ -1,9 +1,9 @@
+@@ -1,8 +1,8 @@
  (executable
-  (modes byte exe)
   (name report)
 - (public_name bisect-ppx-report)
 - (package bisect_ppx)
@@ -89,6 +88,18 @@ diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
  
  (rule
   (targets assets.ml)
+diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
+--- src/report/report.ml
++++ _self/meta_bisect_ppx/src/report/report.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ module Arguments :
+ sig
 diff -ru src/report/report_coveralls.ml _self/meta_bisect_ppx/src/report/report_coveralls.ml
 --- src/report/report_coveralls.ml
 +++ _self/meta_bisect_ppx/src/report/report_coveralls.ml
@@ -125,18 +136,6 @@ diff -ru src/report/report_html.ml _self/meta_bisect_ppx/src/report/report_html.
  
  type theme = [
    | `Light
-diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
---- src/report/report.ml
-+++ _self/meta_bisect_ppx/src/report/report.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- module Arguments :
- sig
 diff -ru src/runtime/native/dune _self/meta_bisect_ppx/src/runtime/native/dune
 --- src/runtime/native/dune
 +++ _self/meta_bisect_ppx/src/runtime/native/dune

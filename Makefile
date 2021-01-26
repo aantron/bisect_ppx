@@ -2,9 +2,15 @@
 build :
 	dune build -p bisect_ppx
 
+TEST := @runtest
+
 .PHONY : test
 test : build
-	dune runtest -p bisect_ppx --force --no-buffer -j 1
+	dune build -p bisect_ppx $(TEST)
+
+.PHONY : promote
+promote :
+	dune promote
 
 SELF_COVERAGE := _self
 
@@ -35,13 +41,6 @@ clean-usage :
 		make -wC $$TEST clean ; \
 	done
 
-PRESERVE := _build/default/test/unit/_preserve
-
-.PHONY : save-test-output
-save-test-output :
-	(cd $(PRESERVE) && find ./fixtures -name '*reference.*') \
-	  | xargs -I FILE cp $(PRESERVE)/FILE test/unit/FILE
-
 GH_PAGES := gh-pages
 
 .PHONY : gh-pages
@@ -66,7 +65,7 @@ self-coverage-workspace :
 	cp -r $(SOURCES) $(SELF_COVERAGE)/meta_bisect_ppx/
 	cp -r $(SOURCES) $(SELF_COVERAGE)/bisect_ppx/
 	mkdir -p $(SELF_COVERAGE)/bisect_ppx/test
-	cp -r test/unit $(SELF_COVERAGE)/bisect_ppx/test/
+	cp -r test $(SELF_COVERAGE)/bisect_ppx/test/
 	cd $(SELF_COVERAGE)/meta_bisect_ppx && \
 	  patch --no-backup-if-mismatch -p2 < ../../test/self/meta_bisect_ppx.diff
 	cd $(SELF_COVERAGE)/bisect_ppx && \
@@ -88,6 +87,7 @@ FILTER := 's/^\(\(---\|+++\) [^ \t]*\).*$$/\1/g'
 
 .PHONY : self-coverage-diff
 self-coverage-diff :
+	find . -name .merlin | xargs rm -f
 	diff -ru src _self/meta_bisect_ppx/src | \
 	  sed $(FILTER) > \
 	  test/self/meta_bisect_ppx.diff || \
@@ -107,7 +107,7 @@ self-coverage-test :
 	cd $(SELF_COVERAGE) && rm -f bisect*.meta
 	cd $(SELF_COVERAGE) && dune build @install --instrument-with meta_bisect_ppx
 	cd $(SELF_COVERAGE) && \
-	  dune runtest --force --no-buffer -j 1 --instrument-with meta_bisect_ppx
+	  dune build --force --instrument-with meta_bisect_ppx $(TEST)
 	rm -rf _coverage
 	cd $(SELF_COVERAGE) && \
 	  _build/install/default/bin/meta-bisect-ppx-report \
