@@ -101,7 +101,7 @@ scripts:
         then
           opam install -y --deps-only .
           opam install -y --unset-root ocamlfind ounit2
-          wget https://github.com/aantron/ocamlformat-binary/releases/download/0.15.0/ocamlformat
+          wget https://github.com/aantron/ocamlformat-binary/releases/download/0.15.1/ocamlformat
           sudo mv ocamlformat /usr/local/bin/ocamlformat
           sudo chmod a+x /usr/local/bin/ocamlformat
         else
