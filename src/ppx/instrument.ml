@@ -1138,7 +1138,7 @@ class instrumenter =
                 [(ll,
                   traverse ~is_in_tail_position:false el);
                  (lr,
-                  instrument_expr (traverse ~is_in_tail_position:false er))]
+                  instrument_expr (traverse ~is_in_tail_position er))]
 
               | [%expr (@@)],
                 [(ll, ({pexp_desc = Pexp_apply _; _} as el)); (lr, er)] ->
