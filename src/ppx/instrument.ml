@@ -397,7 +397,7 @@ struct
 
   let add_bisect_matched_value_alias loc p =
     let open Parsetree in
-    [%pat? [%p p] as ___bisect_matched_value___] [@metaloc loc]
+    [%pat? [%p p] as ___bisect_matched_value___]
 
   let generate_nested_match points loc rotated_cases =
     rotated_cases
@@ -825,7 +825,7 @@ struct
                   generate_nested_match points loc rotated_cases in
                 insert_instrumentation points
                   case
-                  (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc]),
+                  (fun e -> [%expr [%e nested_match]; [%e e]]),
                 true
             in
             case::value_cases, need_binding
@@ -855,7 +855,7 @@ struct
               in
               insert_instrumentation points
                 {case with pc_lhs = alias_exceptions loc p}
-                (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])
+                (fun e -> [%expr [%e nested_match]; [%e e]])
           in
           case::exception_cases
       in
@@ -974,7 +974,6 @@ struct
             in
             cb
         ]
-          [@metaloc loc]
       in
 
       let bisect_post_visit =
@@ -984,7 +983,6 @@ struct
             ___bisect_visit___ point_index;
             result
         ]
-          [@metaloc loc]
       in
 
       let open Ppxlib.Ast_helper in
@@ -1008,7 +1006,7 @@ struct
     in
 
     let open Parsetree in
-    let stop_comment = [%stri [@@@ocaml.text "/*"]] [@metaloc loc] in
+    let stop_comment = [%stri [@@@ocaml.text "/*"]] in
 
     [stop_comment; generated_module; module_open; stop_comment]
 end
@@ -1119,7 +1117,6 @@ class instrumenter =
                   [%e e'_mark]
                 else
                   false]
-              [@metaloc loc]
 
           | Pexp_apply (e, arguments) ->
             let arguments =
@@ -1261,9 +1258,9 @@ class instrumenter =
             in
             if need_binding then
               Exp.fun_ ~loc ~attrs
-                Ppxlib.Nolabel None ([%pat? ___bisect_matched_value___] [@metaloc loc])
+                Ppxlib.Nolabel None ([%pat? ___bisect_matched_value___])
                 (Exp.match_ ~loc
-                  ([%expr ___bisect_matched_value___] [@metaloc loc]) cases)
+                  ([%expr ___bisect_matched_value___]) cases)
             else
               Exp.function_ ~loc ~attrs cases
 
@@ -1289,11 +1286,11 @@ class instrumenter =
             let top_level_cases =
               if need_binding then
                 let value_case = Parsetree.{
-                  pc_lhs = [%pat? ___bisect_matched_value___] [@metaloc loc];
+                  pc_lhs = [%pat? ___bisect_matched_value___];
                   pc_guard = None;
                   pc_rhs =
                     Exp.match_ ~loc ~attrs
-                      ([%expr ___bisect_matched_value___] [@metaloc loc])
+                      ([%expr ___bisect_matched_value___])
                       value_cases;
                 }
                 in
