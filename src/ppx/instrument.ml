@@ -1107,21 +1107,24 @@ class instrumenter =
           | Pexp_apply (([%expr (||)] | [%expr (or)]), [(_l, e); (_l', e')]) ->
             let e_mark =
               instrument_expr ~use_loc_of:e ~at_end:true [%expr true] in
-            let e'_mark =
+            let e'_new =
               match e'.pexp_desc with
               | Pexp_apply (([%expr (||)] | [%expr (or)]), _) ->
-                [%expr true]
+                traverse ~is_in_tail_position e'
               | _ ->
-                instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]
+                [%expr
+                  if [%e traverse ~is_in_tail_position:false e'] then
+                    [%e
+                      instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]]
+                  else
+                    false]
+                  [@metaloc loc]
             in
             [%expr
               if [%e traverse ~is_in_tail_position:false e] then
                 [%e e_mark]
               else
-                if [%e traverse ~is_in_tail_position:false e'] then
-                  [%e e'_mark]
-                else
-                  false]
+                [%e e'_new]]
               [@metaloc loc]
 
           | Pexp_apply (e, arguments) ->

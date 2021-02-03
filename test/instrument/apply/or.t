@@ -34,30 +34,24 @@ rather than nested.
     if true then (
       ___bisect_visit___ 0;
       true)
-    else if
-      if true then (
-        ___bisect_visit___ 1;
-        true)
-      else if false then (
-        ___bisect_visit___ 2;
-        true)
-      else false
-    then true
+    else if true then (
+      ___bisect_visit___ 1;
+      true)
+    else if false then (
+      ___bisect_visit___ 2;
+      true)
     else false
   
   let _ =
     if true then (
       ___bisect_visit___ 3;
       true)
-    else if
-      if true then (
-        ___bisect_visit___ 4;
-        true)
-      else if false then (
-        ___bisect_visit___ 5;
-        true)
-      else false
-    then true
+    else if true then (
+      ___bisect_visit___ 4;
+      true)
+    else if false then (
+      ___bisect_visit___ 5;
+      true)
     else false
 
 
