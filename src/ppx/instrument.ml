@@ -32,7 +32,10 @@
    point is in [bisect_ppx.ml]. It's basically a PPX driver that registers only
    this instrumenter with itself, using [register.ml], and then runs it. *)
 
-open Ppxlib
+module Parsetree = Ppxlib.Parsetree
+module Location = Ppxlib.Location
+module Ast_builder = Ppxlib.Ast_builder
+module Longident = Ppxlib.Longident
 
 module Pat = Ppxlib.Ast_helper.Pat
 module Exp = Ppxlib.Ast_helper.Exp
@@ -154,6 +157,7 @@ struct
         e
       else
         let point_index = get_index_of_point_at_location ~point_loc:loc in
+        let open Parsetree in
         if not post then
           [%expr
             ___bisect_visit___ [%e point_index];
@@ -392,6 +396,7 @@ struct
       instrument_expr points ~override_loc:l e) e
 
   let add_bisect_matched_value_alias loc p =
+    let open Parsetree in
     [%pat? [%p p] as ___bisect_matched_value___] [@metaloc loc]
 
   let generate_nested_match points loc rotated_cases =
@@ -725,9 +730,9 @@ struct
 
   let rec make_function loc body = function
     | [] ->
-      Exp.fun_ ~loc Nolabel None [%pat? ()] body
+      Exp.fun_ ~loc Ppxlib.Nolabel None [%pat? ()] body
     | x::rest ->
-      Exp.fun_ ~loc Nolabel None (Pat.var ~loc x) (make_function loc body rest)
+      Exp.fun_ ~loc Ppxlib.Nolabel None (Pat.var ~loc x) (make_function loc body rest)
 
   let instrument_cases
       points ?(use_aliases = false) (cases : Parsetree.case list) =
@@ -754,10 +759,10 @@ struct
             Exp.apply ~loc
               (Exp.ident ~loc { txt = Longident.parse name; loc })
               (List.map (fun {Location.loc; txt} ->
-                Nolabel,
+                Ppxlib.Nolabel,
                 Exp.ident ~loc { txt = Longident.parse txt; loc })
                 variables
-                @ [Nolabel, [%expr ()]])
+                @ [Ppxlib.Nolabel, [%expr ()]])
           in
 
           let case, functions =
@@ -958,6 +963,7 @@ struct
          https://github.com/aantron/bisect_ppx/issues/160 *)
     let generated_module =
       let bisect_visit_function =
+        let open Parsetree in
         [%stri
           let ___bisect_visit___ =
             let point_definitions = [%e points_data] in
@@ -972,6 +978,7 @@ struct
       in
 
       let bisect_post_visit =
+        let open Parsetree in
         [%stri
           let ___bisect_post_visit___ point_index result =
             ___bisect_visit___ point_index;
@@ -1000,6 +1007,7 @@ struct
           Mod.ident ~loc { txt = Longident.parse mangled_module_name; loc }
     in
 
+    let open Parsetree in
     let stop_comment = [%stri [@@@ocaml.text "/*"]] [@metaloc loc] in
 
     [stop_comment; generated_module; module_open; stop_comment]
@@ -1098,6 +1106,7 @@ class instrumenter =
             let e'_mark =
               match e'.pexp_desc with
               | Pexp_apply (([%expr (||)] | [%expr (or)]), _) ->
+                let open Parsetree in
                 [%expr true]
               | _ ->
                 instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]
@@ -1146,7 +1155,7 @@ class instrumenter =
             let apply = Exp.apply ~loc ~attrs e arguments in
             let all_arguments_labeled =
               arguments
-              |> List.for_all (fun (label, _) -> label <> Nolabel)
+              |> List.for_all (fun (label, _) -> label <> Ppxlib.Nolabel)
             in
             if is_in_tail_position || all_arguments_labeled then
               apply
@@ -1252,7 +1261,7 @@ class instrumenter =
             in
             if need_binding then
               Exp.fun_ ~loc ~attrs
-                Nolabel None ([%pat? ___bisect_matched_value___] [@metaloc loc])
+                Ppxlib.Nolabel None ([%pat? ___bisect_matched_value___] [@metaloc loc])
                 (Exp.match_ ~loc
                   ([%expr ___bisect_matched_value___] [@metaloc loc]) cases)
             else
