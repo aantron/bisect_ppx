@@ -78,3 +78,26 @@ Recursive instrumentation of subexpressions.
       ___bisect_visit___ 5;
       true)
     else false
+
+
+Function calls on the right in tail position remain in tail position. Any
+would-be surrounding instrumentation is suppressed.
+
+  $ bash ../test.sh <<'EOF'
+  > let f _ = (bool_of_string "true") || (bool_of_string "false")
+  > let g _ =
+  >   (bool_of_string "true") or ((bool_of_string [@ocaml.tailcall]) "false")
+  > EOF
+  let f _ =
+    ___bisect_visit___ 2;
+    if ___bisect_post_visit___ 1 (bool_of_string "true") then (
+      ___bisect_visit___ 0;
+      true)
+    else bool_of_string "false"
+  
+  let g _ =
+    ___bisect_visit___ 5;
+    if ___bisect_post_visit___ 4 (bool_of_string "true") then (
+      ___bisect_visit___ 3;
+      true)
+    else (bool_of_string [@ocaml.tailcall]) "false"

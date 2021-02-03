@@ -1111,6 +1111,9 @@ class instrumenter =
               match e'.pexp_desc with
               | Pexp_apply (([%expr (||)] | [%expr (or)]), _) ->
                 traverse ~is_in_tail_position e'
+              | Pexp_apply _ | Pexp_send _ | Pexp_new _
+                when is_in_tail_position ->
+                traverse ~is_in_tail_position:true e'
               | _ ->
                 [%expr
                   if [%e traverse ~is_in_tail_position:false e'] then
