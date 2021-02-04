@@ -84,12 +84,12 @@ let () = switches
 
 
 let () =
-  let impl =
+  let impl ctxt ast =
     match enabled () with
       | `Enabled ->
-        new Instrument.instrumenter#transform_impl_file
+        new Instrument.instrumenter#transform_impl_file ctxt ast
       | `Disabled ->
-        new Ppxlib.Ast_traverse.map_with_expansion_context#structure
+        new Ppxlib.Ast_traverse.map_with_expansion_context#structure ctxt ast
   in
   let instrument = Ppxlib.Driver.Instrument.V2.make impl ~position:After in
   Ppxlib.Driver.register_transformation ~instrument "bisect_ppx"
