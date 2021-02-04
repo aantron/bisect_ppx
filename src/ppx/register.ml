@@ -74,7 +74,8 @@ let switches = [
 
 let deprecated = Common.deprecated "bisect_ppx" [@coverage off]
 
-let () = switches
+let () =
+  switches
   |> deprecated "-exclude"
   |> deprecated "-exclude-file"
   |> deprecated "-conditional"

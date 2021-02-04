@@ -32,6 +32,8 @@
    point is in [bisect_ppx.ml]. It's basically a PPX driver that registers only
    this instrumenter with itself, using [register.ml], and then runs it. *)
 
+
+
 module Parsetree = Ppxlib.Parsetree
 module Location = Ppxlib.Location
 module Ast_builder = Ppxlib.Ast_builder
@@ -43,8 +45,6 @@ module Str = Ppxlib.Ast_helper.Str
 module Cl = Ppxlib.Ast_helper.Cl
 module Cf = Ppxlib.Ast_helper.Cf
 
-
-(* From Bisect_ppx. *)
 module Common = Bisect_common
 
 
@@ -412,7 +412,7 @@ struct
       Exp.attr
         nested_match
         {
-          attr_name = { txt = "ocaml.warning"; loc };
+          attr_name = {txt = "ocaml.warning"; loc};
           attr_payload = PStr [[%stri "-4-8-9-11-26-27-28-33"]];
           attr_loc = loc
         }
@@ -757,12 +757,12 @@ struct
           let variables = bound_variables p in
           let apply loc name =
             Exp.apply ~loc
-              (Exp.ident ~loc { txt = Longident.parse name; loc })
+              (Exp.ident ~loc {txt = Longident.parse name; loc})
               (List.map (fun {Location.loc; txt} ->
                 Ppxlib.Nolabel,
-                Exp.ident ~loc { txt = Longident.parse txt; loc })
+                Exp.ident ~loc {txt = Longident.parse txt; loc})
                 variables
-                @ [Ppxlib.Nolabel, [%expr ()]])
+              @ [Ppxlib.Nolabel, [%expr ()]])
           in
 
           let case, functions =
@@ -879,15 +879,16 @@ struct
     in
 
     let point_count = Ast_builder.Default.eint ~loc (List.length !points) in
-    let points_data = Ast_builder.Default.estring ~loc (Common.write_points !points) in
+    let points_data =
+      Ast_builder.Default.estring ~loc (Common.write_points !points) in
     let file = Ast_builder.Default.estring ~loc file in
 
     let ast_convenience_str_opt = function
       | None ->
-        Exp.construct ~loc {txt = Longident.parse "None"; loc } None
+        Exp.construct ~loc {txt = Longident.parse "None"; loc} None
       | Some v ->
         Some (Ast_builder.Default.estring ~loc v)
-        |> Exp.construct ~loc {txt = Longident.parse "Some"; loc }
+        |> Exp.construct ~loc {txt = Longident.parse "Some"; loc}
     in
     let bisect_file = ast_convenience_str_opt !Common.bisect_file in
     let bisect_silent = ast_convenience_str_opt !Common.bisect_silent in
@@ -988,7 +989,7 @@ struct
       let open Ppxlib.Ast_helper in
       Str.module_ ~loc @@
         Mb.mk ~loc
-          { txt = Some mangled_module_name; loc}
+          {txt = Some mangled_module_name; loc}
           (Mod.structure ~loc [
             bisect_visit_function;
             bisect_post_visit;
@@ -1002,7 +1003,7 @@ struct
          any periods. *)
       Str.open_ ~loc @@
         Opn.mk ~loc @@
-          Mod.ident ~loc { txt = Longident.parse mangled_module_name; loc }
+          Mod.ident ~loc {txt = Longident.parse mangled_module_name; loc}
     in
 
     let open Parsetree in
@@ -1055,6 +1056,48 @@ class instrumenter =
         cf
 
     method! expression ctxt e =
+      let is_trivial_function = Parsetree.(function
+        | [%expr (&&)]
+        | [%expr (&)]
+        | [%expr not]
+        | [%expr (=)]
+        | [%expr (<>)]
+        | [%expr (<)]
+        | [%expr (<=)]
+        | [%expr (>)]
+        | [%expr (>=)]
+        | [%expr (==)]
+        | [%expr (!=)]
+        | [%expr ref]
+        | [%expr (!)]
+        | [%expr (:=)]
+        | [%expr (@)]
+        | [%expr (^)]
+        | [%expr (+)]
+        | [%expr (-)]
+        | [%expr ( * )]
+        | [%expr (/)]
+        | [%expr (+.)]
+        | [%expr (-.)]
+        | [%expr ( *. )]
+        | [%expr (/.)]
+        | [%expr (mod)]
+        | [%expr (land)]
+        | [%expr (lor)]
+        | [%expr (lxor)]
+        | [%expr (lsl)]
+        | [%expr (lsr)]
+        | [%expr (asr)]
+        | [%expr raise]
+        | [%expr raise_notrace]
+        | [%expr failwith]
+        | [%expr ignore]
+        | [%expr Sys.opaque_identity]
+        | [%expr Obj.magic]
+        | [%expr (##)] -> true
+        | _ -> false)
+      in
+
       let rec traverse ?(successor = `None) ~is_in_tail_position e =
         let attrs = e.Parsetree.pexp_attributes in
         if Coverage_attributes.has_off_attribute attrs then
@@ -1101,22 +1144,30 @@ class instrumenter =
           | Pexp_apply (([%expr (||)] | [%expr (or)]), [(_l, e); (_l', e')]) ->
             let e_mark =
               instrument_expr ~use_loc_of:e ~at_end:true [%expr true] in
-            let e'_mark =
+            let e'_new =
               match e'.pexp_desc with
               | Pexp_apply (([%expr (||)] | [%expr (or)]), _) ->
-                let open Parsetree in
-                [%expr true]
+                traverse ~is_in_tail_position e'
+              | Pexp_apply (e'', _)
+                when is_in_tail_position && not (is_trivial_function e'') ->
+                traverse ~is_in_tail_position:true e'
+              | Pexp_send _ | Pexp_new _ when is_in_tail_position ->
+                traverse ~is_in_tail_position:true e'
               | _ ->
-                instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]
+                let open Parsetree in
+                [%expr
+                  if [%e traverse ~is_in_tail_position:false e'] then
+                    [%e
+                      instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]]
+                  else
+                    false]
             in
+            let open Parsetree in
             [%expr
               if [%e traverse ~is_in_tail_position:false e] then
                 [%e e_mark]
               else
-                if [%e traverse ~is_in_tail_position:false e'] then
-                  [%e e'_mark]
-                else
-                  false]
+                [%e e'_new]]
 
           | Pexp_apply (e, arguments) ->
             let arguments =
@@ -1126,7 +1177,7 @@ class instrumenter =
                 [(ll,
                   traverse ~is_in_tail_position:false el);
                  (lr,
-                  instrument_expr (traverse ~is_in_tail_position:false er))]
+                  instrument_expr (traverse ~is_in_tail_position er))]
 
               | [%expr (@@)],
                 [(ll, ({pexp_desc = Pexp_apply _; _} as el)); (lr, er)] ->
@@ -1157,49 +1208,10 @@ class instrumenter =
             if is_in_tail_position || all_arguments_labeled then
               apply
             else
-              begin match e with
-              | [%expr (&&)]
-              | [%expr (&)]
-              | [%expr not]
-              | [%expr (=)]
-              | [%expr (<>)]
-              | [%expr (<)]
-              | [%expr (<=)]
-              | [%expr (>)]
-              | [%expr (>=)]
-              | [%expr (==)]
-              | [%expr (!=)]
-              | [%expr ref]
-              | [%expr (!)]
-              | [%expr (:=)]
-              | [%expr (@)]
-              | [%expr (^)]
-              | [%expr (+)]
-              | [%expr (-)]
-              | [%expr ( * )]
-              | [%expr (/)]
-              | [%expr (+.)]
-              | [%expr (-.)]
-              | [%expr ( *. )]
-              | [%expr (/.)]
-              | [%expr (mod)]
-              | [%expr (land)]
-              | [%expr (lor)]
-              | [%expr (lxor)]
-              | [%expr (lsl)]
-              | [%expr (lsr)]
-              | [%expr (asr)]
-              | [%expr raise]
-              | [%expr raise_notrace]
-              | [%expr failwith]
-              | [%expr ignore]
-              | [%expr Sys.opaque_identity]
-              | [%expr Obj.magic]
-              | [%expr (##)]
-                ->
+              if is_trivial_function e then
                 apply
-              | _ ->
-                match successor with
+              else
+                begin match successor with
                 | `None ->
                   let use_loc_of =
                     match e, arguments with
@@ -1213,7 +1225,7 @@ class instrumenter =
                   apply
                 | `Expression e' ->
                   instrument_expr ~use_loc_of:e' ~at_end:false ~post:true apply
-              end
+                end
 
           | Pexp_send (e, m) ->
             let apply =
@@ -1464,6 +1476,7 @@ class instrumenter =
           | Pexp_pack m ->
             Exp.pack ~loc ~attrs (self#module_expr ctxt m)
 
+          (* Expressions that are not recursively traversed at all. *)
           | Pexp_extension _ | Pexp_unreachable ->
             e
         end
@@ -1572,49 +1585,39 @@ class instrumenter =
     method! structure ctxt ast =
       let saved_structure_instrumentation_suppressed =
         structure_instrumentation_suppressed in
-
       let result = super#structure ctxt ast in
-          (* This is *not* the first structure we see, or we are inside an
-             interface file, so the structure is nested within the file, either
-             inside [struct]..[end] or in an attribute or extension point.
-             Traverse the structure recursively as normal. *)
       structure_instrumentation_suppressed <-
         saved_structure_instrumentation_suppressed;
-
       result
 
     method transform_impl_file ctxt ast =
       let saved_structure_instrumentation_suppressed =
         structure_instrumentation_suppressed in
 
-      let result =
-        let path = Ppxlib.Expansion_context.Base.input_name ctxt in
-        let file_should_not_be_instrumented =
-          (* Bisect_ppx is hardcoded to ignore files with certain names. If we
-            have one of these, return the AST uninstrumented. In particular,
-            do not recurse into it. *)
-          let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
-          let always_ignore_basenames = [".ocamlinit"; "topfind"] in
+        let result =
+          let path = Ppxlib.Expansion_context.Base.input_name ctxt in
+          let file_should_not_be_instrumented =
+            (* Bisect_ppx is hardcoded to ignore files with certain names. If we
+               have one of these, return the AST uninstrumented. In particular,
+               do not recurse into it. *)
+            let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
+            let always_ignore_basenames = [".ocamlinit"; "topfind"] in
 
-          List.mem path always_ignore_paths ||
-          List.mem (Filename.basename path) always_ignore_basenames ||
-          Exclusions.contains_file path ||
-          Coverage_attributes.has_exclude_file_attribute ast
-        in
-
-        if file_should_not_be_instrumented then
-          ast
-
-        else begin
-          (* This file should be instrumented. Traverse the AST recursively,
-              then prepend some generated code for initializing the Bisect_ppx
-              runtime and telling it about the instrumentation points in this
-              file. *)
-          let instrumented_ast = super#structure ctxt ast in
-          let runtime_initialization =
-            Generated_code.runtime_initialization points path
+            List.mem path always_ignore_paths ||
+            List.mem (Filename.basename path) always_ignore_basenames ||
+            Exclusions.contains_file path ||
+            Coverage_attributes.has_exclude_file_attribute ast
           in
-          runtime_initialization @ instrumented_ast
+
+          if file_should_not_be_instrumented then
+            ast
+
+          else begin
+            let instrumented_ast = super#structure ctxt ast in
+            let runtime_initialization =
+              Generated_code.runtime_initialization points path
+            in
+            runtime_initialization @ instrumented_ast
         end
       in
 
