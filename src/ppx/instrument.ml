@@ -1061,6 +1061,48 @@ class instrumenter =
         cf
 
     method! expr e =
+      let is_trivial_function = function
+        | [%expr (&&)]
+        | [%expr (&)]
+        | [%expr not]
+        | [%expr (=)]
+        | [%expr (<>)]
+        | [%expr (<)]
+        | [%expr (<=)]
+        | [%expr (>)]
+        | [%expr (>=)]
+        | [%expr (==)]
+        | [%expr (!=)]
+        | [%expr ref]
+        | [%expr (!)]
+        | [%expr (:=)]
+        | [%expr (@)]
+        | [%expr (^)]
+        | [%expr (+)]
+        | [%expr (-)]
+        | [%expr ( * )]
+        | [%expr (/)]
+        | [%expr (+.)]
+        | [%expr (-.)]
+        | [%expr ( *. )]
+        | [%expr (/.)]
+        | [%expr (mod)]
+        | [%expr (land)]
+        | [%expr (lor)]
+        | [%expr (lxor)]
+        | [%expr (lsl)]
+        | [%expr (lsr)]
+        | [%expr (asr)]
+        | [%expr raise]
+        | [%expr raise_notrace]
+        | [%expr failwith]
+        | [%expr ignore]
+        | [%expr Sys.opaque_identity]
+        | [%expr Obj.magic]
+        | [%expr (##)] -> true
+        | _ -> false
+      in
+
       let rec traverse ?(successor = `None) ~is_in_tail_position e =
         let attrs = e.Parsetree.pexp_attributes in
         if Coverage_attributes.has_off_attribute attrs then
@@ -1111,8 +1153,10 @@ class instrumenter =
               match e'.pexp_desc with
               | Pexp_apply (([%expr (||)] | [%expr (or)]), _) ->
                 traverse ~is_in_tail_position e'
-              | Pexp_apply _ | Pexp_send _ | Pexp_new _
-                when is_in_tail_position ->
+              | Pexp_apply (e'', _)
+                when is_in_tail_position && not (is_trivial_function e'') ->
+                traverse ~is_in_tail_position:true e'
+              | Pexp_send _ | Pexp_new _ when is_in_tail_position ->
                 traverse ~is_in_tail_position:true e'
               | _ ->
                 [%expr
@@ -1169,49 +1213,10 @@ class instrumenter =
             if is_in_tail_position || all_arguments_labeled then
               apply
             else
-              begin match e with
-              | [%expr (&&)]
-              | [%expr (&)]
-              | [%expr not]
-              | [%expr (=)]
-              | [%expr (<>)]
-              | [%expr (<)]
-              | [%expr (<=)]
-              | [%expr (>)]
-              | [%expr (>=)]
-              | [%expr (==)]
-              | [%expr (!=)]
-              | [%expr ref]
-              | [%expr (!)]
-              | [%expr (:=)]
-              | [%expr (@)]
-              | [%expr (^)]
-              | [%expr (+)]
-              | [%expr (-)]
-              | [%expr ( * )]
-              | [%expr (/)]
-              | [%expr (+.)]
-              | [%expr (-.)]
-              | [%expr ( *. )]
-              | [%expr (/.)]
-              | [%expr (mod)]
-              | [%expr (land)]
-              | [%expr (lor)]
-              | [%expr (lxor)]
-              | [%expr (lsl)]
-              | [%expr (lsr)]
-              | [%expr (asr)]
-              | [%expr raise]
-              | [%expr raise_notrace]
-              | [%expr failwith]
-              | [%expr ignore]
-              | [%expr Sys.opaque_identity]
-              | [%expr Obj.magic]
-              | [%expr (##)]
-                ->
+              if is_trivial_function e then
                 apply
-              | _ ->
-                match successor with
+              else
+                begin match successor with
                 | `None ->
                   let use_loc_of =
                     match e, arguments with
@@ -1225,7 +1230,7 @@ class instrumenter =
                   apply
                 | `Expression e' ->
                   instrument_expr ~use_loc_of:e' ~at_end:false ~post:true apply
-              end
+                end
 
           | Pexp_send (e, m) ->
             let apply =

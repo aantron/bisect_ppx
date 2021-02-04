@@ -101,3 +101,20 @@ would-be surrounding instrumentation is suppressed.
       ___bisect_visit___ 3;
       true)
     else (bool_of_string [@ocaml.tailcall]) "false"
+
+
+Surrounding instrumentation is still generated when the second function is a
+well-known trivial function.
+
+  $ bash ../test.sh <<'EOF'
+  > let f _ = (bool_of_string "true") || (true <> false)
+  > EOF
+  let f _ =
+    ___bisect_visit___ 3;
+    if ___bisect_post_visit___ 2 (bool_of_string "true") then (
+      ___bisect_visit___ 0;
+      true)
+    else if true <> false then (
+      ___bisect_visit___ 1;
+      true)
+    else false
