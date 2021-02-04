@@ -56,9 +56,9 @@ Nested expressions and initializers instrumented.
   >   end
   > EOF
   class foo =
-    let () = ___bisect_post_visit___ 2 (print_endline "bar") in
+    let () = ___bisect_post_visit___ 0 (print_endline "bar") in
     object
       initializer
-      ___bisect_visit___ 1;
-      ___bisect_post_visit___ 0 (print_endline "baz")
+      ___bisect_visit___ 2;
+      ___bisect_post_visit___ 1 (print_endline "baz")
     end

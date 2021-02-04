@@ -23,17 +23,9 @@ depends: [
   "cmdliner" {>= "1.0.0"}
   "dune" {>= "2.7.0"}
   "ocaml" {>= "4.02.0"}
-  "ocaml-migrate-parsetree" {>= "1.7.0" & < "2.0.0"}
-  "ppx_tools_versioned" {>= "5.4.0"}
+  "ppxlib" {>= "0.21.0"}
 
-  "ocamlformat" {with-test & = "git.1bf68a7"}
-]
-
-pin-depends: [
-  # This is the last commit before ocamlformat's ppxlib conversion. A newer
-  # commit, or no pin at all, can be used once Bisect_ppx is also converted to
-  # ppxlib.
-  ["ocamlformat.git.1bf68a7" "git+https://github.com/ocaml-ppx/ocamlformat.git#1bf68a70f1480df80a8ab0bd20a799b8e1df0081"]
+  "ocamlformat" {with-test & = "0.16.0"}
 ]
 
 build: [

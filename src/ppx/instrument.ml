@@ -34,26 +34,17 @@
 
 
 
-(* From ocaml-migrate-parsetree. *)
-module Ast = Migrate_parsetree.Ast_411
-module Ast_411 = Ast
-(* Workaround for
-  https://travis-ci.org/aantron/bisect_ppx/jobs/538321848#L588 *)
+module Parsetree = Ppxlib.Parsetree
+module Location = Ppxlib.Location
+module Ast_builder = Ppxlib.Ast_builder
+module Longident = Ppxlib.Longident
 
-module Location = Ast.Location
-module Parsetree = Ast.Parsetree
+module Pat = Ppxlib.Ast_helper.Pat
+module Exp = Ppxlib.Ast_helper.Exp
+module Str = Ppxlib.Ast_helper.Str
+module Cl = Ppxlib.Ast_helper.Cl
+module Cf = Ppxlib.Ast_helper.Cf
 
-module Pat = Ast.Ast_helper.Pat
-module Exp = Ast.Ast_helper.Exp
-module Str = Ast.Ast_helper.Str
-module Cl = Ast.Ast_helper.Cl
-module Cf = Ast.Ast_helper.Cf
-
-(* From ppx_tools_versioned. *)
-module Ast_convenience = Ast_convenience_411
-module Ast_mapper_class = Ast_mapper_class_411
-
-(* From Bisect_ppx. *)
 module Common = Bisect_common
 
 
@@ -161,20 +152,19 @@ struct
       points ?override_loc ?use_loc_of ?(at_end = false) ?(post = false) e =
 
     let rec outline () =
-      let point_loc = choose_location_of_point ~override_loc ~use_loc_of e in
-      if expression_should_not_be_instrumented ~point_loc ~use_loc_of then
+      let loc = choose_location_of_point ~override_loc ~use_loc_of e in
+      if expression_should_not_be_instrumented ~point_loc:loc ~use_loc_of then
         e
       else
-        let point_index = get_index_of_point_at_location ~point_loc in
+        let point_index = get_index_of_point_at_location ~point_loc:loc in
+        let open Parsetree in
         if not post then
           [%expr
             ___bisect_visit___ [%e point_index];
             [%e e]]
-            [@metaloc point_loc]
         else
           [%expr
             ___bisect_post_visit___ [%e point_index] [%e e]]
-            [@metaloc point_loc]
 
     and choose_location_of_point ~override_loc ~use_loc_of e =
       match use_loc_of with
@@ -212,7 +202,7 @@ struct
           points := new_point::!points;
           new_point
       in
-      Ast_convenience.int point.identifier
+      Ast_builder.Default.eint ~loc point.identifier
 
     in
 
@@ -406,7 +396,8 @@ struct
       instrument_expr points ~override_loc:l e) e
 
   let add_bisect_matched_value_alias loc p =
-    [%pat? [%p p] as ___bisect_matched_value___] [@metaloc loc]
+    let open Parsetree in
+    [%pat? [%p p] as ___bisect_matched_value___]
 
   let generate_nested_match points loc rotated_cases =
     rotated_cases
@@ -421,7 +412,7 @@ struct
       Exp.attr
         nested_match
         {
-          attr_name = Location.mkloc "ocaml.warning" loc;
+          attr_name = {txt = "ocaml.warning"; loc};
           attr_payload = PStr [[%stri "-4-8-9-11-26-27-28-33"]];
           attr_loc = loc
         }
@@ -739,9 +730,9 @@ struct
 
   let rec make_function loc body = function
     | [] ->
-      Exp.fun_ ~loc Nolabel None [%pat? ()] body
+      Exp.fun_ ~loc Ppxlib.Nolabel None [%pat? ()] body
     | x::rest ->
-      Exp.fun_ ~loc Nolabel None (Pat.var ~loc x) (make_function loc body rest)
+      Exp.fun_ ~loc Ppxlib.Nolabel None (Pat.var ~loc x) (make_function loc body rest)
 
   let instrument_cases
       points ?(use_aliases = false) (cases : Parsetree.case list) =
@@ -766,12 +757,12 @@ struct
           let variables = bound_variables p in
           let apply loc name =
             Exp.apply ~loc
-              (Exp.ident ~loc (Ast_convenience.lid ~loc name))
+              (Exp.ident ~loc {txt = Longident.parse name; loc})
               (List.map (fun {Location.loc; txt} ->
-                Ast_convenience.Label.Nolabel,
-                Exp.ident ~loc (Ast_convenience.lid ~loc txt))
+                Ppxlib.Nolabel,
+                Exp.ident ~loc {txt = Longident.parse txt; loc})
                 variables
-              @ [Ast_convenience.Label.Nolabel, [%expr ()]])
+              @ [Ppxlib.Nolabel, [%expr ()]])
           in
 
           let case, functions =
@@ -781,7 +772,7 @@ struct
             | Some guard ->
               let guard_name = Printf.sprintf "___bisect_guard_%i___" index in
               let guard_function =
-                Ast.Ast_helper.Vb.mk ~loc
+                Ppxlib.Ast_helper.Vb.mk ~loc
                   (Pat.var ~loc {Location.loc; txt = guard_name})
                   (make_function loc guard variables)
               in
@@ -791,7 +782,7 @@ struct
 
           let case_name = Printf.sprintf "___bisect_case_%i___" index in
           let case_function =
-            Ast.Ast_helper.Vb.mk ~loc
+            Ppxlib.Ast_helper.Vb.mk ~loc
               (Pat.var ~loc {Location.loc; txt = case_name})
               (make_function loc case.pc_rhs variables)
           in
@@ -834,7 +825,7 @@ struct
                   generate_nested_match points loc rotated_cases in
                 insert_instrumentation points
                   case
-                  (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc]),
+                  (fun e -> [%expr [%e nested_match]; [%e e]]),
                 true
             in
             case::value_cases, need_binding
@@ -864,7 +855,7 @@ struct
               in
               insert_instrumentation points
                 {case with pc_lhs = alias_exceptions loc p}
-                (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])
+                (fun e -> [%expr [%e nested_match]; [%e e]])
           in
           case::exception_cases
       in
@@ -887,13 +878,17 @@ struct
       "Bisect_visit___" ^ (Buffer.contents buffer)
     in
 
-    let point_count = Ast_convenience.int ~loc (List.length !points) in
-    let points_data = Ast_convenience.str ~loc (Common.write_points !points) in
-    let file = Ast_convenience.str ~loc file in
+    let point_count = Ast_builder.Default.eint ~loc (List.length !points) in
+    let points_data =
+      Ast_builder.Default.estring ~loc (Common.write_points !points) in
+    let file = Ast_builder.Default.estring ~loc file in
 
     let ast_convenience_str_opt = function
-      | None -> Ast_convenience.constr ~loc "None" []
-      | Some v -> Ast_convenience.(constr ~loc "Some" [str ~loc v])
+      | None ->
+        Exp.construct ~loc {txt = Longident.parse "None"; loc} None
+      | Some v ->
+        Some (Ast_builder.Default.estring ~loc v)
+        |> Exp.construct ~loc {txt = Longident.parse "Some"; loc}
     in
     let bisect_file = ast_convenience_str_opt !Common.bisect_file in
     let bisect_silent = ast_convenience_str_opt !Common.bisect_silent in
@@ -969,6 +964,7 @@ struct
          https://github.com/aantron/bisect_ppx/issues/160 *)
     let generated_module =
       let bisect_visit_function =
+        let open Parsetree in
         [%stri
           let ___bisect_visit___ =
             let point_definitions = [%e points_data] in
@@ -979,23 +975,21 @@ struct
             in
             cb
         ]
-          [@metaloc loc]
       in
 
       let bisect_post_visit =
+        let open Parsetree in
         [%stri
           let ___bisect_post_visit___ point_index result =
             ___bisect_visit___ point_index;
             result
         ]
-          [@metaloc loc]
       in
 
-      let open Ast.Ast_helper in
-
+      let open Ppxlib.Ast_helper in
       Str.module_ ~loc @@
         Mb.mk ~loc
-          (Location.mkloc (Some mangled_module_name) loc)
+          {txt = Some mangled_module_name; loc}
           (Mod.structure ~loc [
             bisect_visit_function;
             bisect_post_visit;
@@ -1003,16 +997,17 @@ struct
     in
 
     let module_open =
-      let open Ast.Ast_helper in
+      let open Ppxlib.Ast_helper in
 
       (* This requires the assumption that the mangled module name doesn't have
          any periods. *)
       Str.open_ ~loc @@
         Opn.mk ~loc @@
-          Mod.ident ~loc (Ast_convenience.lid ~loc mangled_module_name)
+          Mod.ident ~loc {txt = Longident.parse mangled_module_name; loc}
     in
 
-    let stop_comment = [%stri [@@@ocaml.text "/*"]] [@metaloc loc] in
+    let open Parsetree in
+    let stop_comment = [%stri [@@@ocaml.text "/*"]] in
 
     [stop_comment; generated_module; module_open; stop_comment]
 end
@@ -1026,12 +1021,12 @@ class instrumenter =
   let instrument_cases = Generated_code.instrument_cases points in
 
   object (self)
-    inherit Ast_mapper_class.mapper as super
+    inherit Ppxlib.Ast_traverse.map_with_expansion_context as super
 
-    method! class_expr ce =
+    method! class_expr ctxt ce =
       let loc = ce.pcl_loc in
       let attrs = ce.pcl_attributes in
-      let ce = super#class_expr ce in
+      let ce = super#class_expr ctxt ce in
 
       match ce.pcl_desc with
       | Pcl_fun (l, e, p, ce) ->
@@ -1040,10 +1035,10 @@ class instrumenter =
       | _ ->
         ce
 
-    method! class_field cf =
+    method! class_field ctxt cf =
       let loc = cf.pcf_loc in
       let attrs = cf.pcf_attributes in
-      let cf = super#class_field cf in
+      let cf = super#class_field ctxt cf in
 
       match cf.pcf_desc with
       | Pcf_method (name, private_, cf) ->
@@ -1060,8 +1055,8 @@ class instrumenter =
       | _ ->
         cf
 
-    method! expr e =
-      let is_trivial_function = function
+    method! expression ctxt e =
+      let is_trivial_function = Parsetree.(function
         | [%expr (&&)]
         | [%expr (&)]
         | [%expr not]
@@ -1100,7 +1095,7 @@ class instrumenter =
         | [%expr Sys.opaque_identity]
         | [%expr Obj.magic]
         | [%expr (##)] -> true
-        | _ -> false
+        | _ -> false)
       in
 
       let rec traverse ?(successor = `None) ~is_in_tail_position e =
@@ -1159,20 +1154,20 @@ class instrumenter =
               | Pexp_send _ | Pexp_new _ when is_in_tail_position ->
                 traverse ~is_in_tail_position:true e'
               | _ ->
+                let open Parsetree in
                 [%expr
                   if [%e traverse ~is_in_tail_position:false e'] then
                     [%e
                       instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]]
                   else
                     false]
-                  [@metaloc loc]
             in
+            let open Parsetree in
             [%expr
               if [%e traverse ~is_in_tail_position:false e] then
                 [%e e_mark]
               else
                 [%e e'_new]]
-              [@metaloc loc]
 
           | Pexp_apply (e, arguments) ->
             let arguments =
@@ -1208,7 +1203,7 @@ class instrumenter =
             let apply = Exp.apply ~loc ~attrs e arguments in
             let all_arguments_labeled =
               arguments
-              |> List.for_all (fun (label, _) -> label <> Ast.Asttypes.Nolabel)
+              |> List.for_all (fun (label, _) -> label <> Ppxlib.Nolabel)
             in
             if is_in_tail_position || all_arguments_labeled then
               apply
@@ -1275,9 +1270,9 @@ class instrumenter =
             in
             if need_binding then
               Exp.fun_ ~loc ~attrs
-                Nolabel None ([%pat? ___bisect_matched_value___] [@metaloc loc])
+                Ppxlib.Nolabel None ([%pat? ___bisect_matched_value___])
                 (Exp.match_ ~loc
-                  ([%expr ___bisect_matched_value___] [@metaloc loc]) cases)
+                  ([%expr ___bisect_matched_value___]) cases)
             else
               Exp.function_ ~loc ~attrs cases
 
@@ -1303,11 +1298,11 @@ class instrumenter =
             let top_level_cases =
               if need_binding then
                 let value_case = Parsetree.{
-                  pc_lhs = [%pat? ___bisect_matched_value___] [@metaloc loc];
+                  pc_lhs = [%pat? ___bisect_matched_value___];
                   pc_guard = None;
                   pc_rhs =
                     Exp.match_ ~loc ~attrs
-                      ([%expr ___bisect_matched_value___] [@metaloc loc])
+                      ([%expr ___bisect_matched_value___])
                       value_cases;
                 }
                 in
@@ -1459,7 +1454,7 @@ class instrumenter =
           | Pexp_letmodule (m, e, e') ->
             Exp.letmodule ~loc ~attrs
               m
-              (self#module_expr e)
+              (self#module_expr ctxt e)
               (traverse ~is_in_tail_position e')
 
           | Pexp_letexception (c, e) ->
@@ -1467,7 +1462,7 @@ class instrumenter =
 
           | Pexp_open (m, e) ->
             Exp.open_ ~loc ~attrs
-              (self#open_declaration m)
+              (self#open_declaration ctxt m)
               (traverse ~is_in_tail_position e)
 
           | Pexp_newtype (t, e) ->
@@ -1476,10 +1471,10 @@ class instrumenter =
           (* Expressions that don't need instrumentation, and where AST
              traversal leaves the expression language. *)
           | Pexp_object c ->
-            Exp.object_ ~loc ~attrs (self#class_structure c)
+            Exp.object_ ~loc ~attrs (self#class_structure ctxt c)
 
           | Pexp_pack m ->
-            Exp.pack ~loc ~attrs (self#module_expr m)
+            Exp.pack ~loc ~attrs (self#module_expr ctxt m)
 
           (* Expressions that are not recursively traversed at all. *)
           | Pexp_extension _ | Pexp_unreachable ->
@@ -1505,7 +1500,7 @@ class instrumenter =
        [false] again upon encountering [[@@@coverage.on]]. *)
     val mutable structure_instrumentation_suppressed = false
 
-    method! structure_item si =
+    method! structure_item ctxt si =
       let loc = si.pstr_loc in
 
       match si.pstr_desc with
@@ -1543,7 +1538,7 @@ class instrumenter =
               if do_not_instrument then
                 binding
               else
-                {binding with pvb_expr = self#expr binding.pvb_expr}
+                {binding with pvb_expr = self#expression ctxt binding.pvb_expr}
             end
           in
           Str.value ~loc rec_flag bindings
@@ -1552,7 +1547,7 @@ class instrumenter =
         if structure_instrumentation_suppressed then
           si
         else
-          Str.eval ~loc ~attrs:a (self#expr e)
+          Str.eval ~loc ~attrs:a (self#expression ctxt e)
 
       | Pstr_attribute attribute ->
         let kind = Coverage_attributes.recognize attribute in
@@ -1578,56 +1573,29 @@ class instrumenter =
         si
 
       | _ ->
-        super#structure_item si
+        super#structure_item ctxt si
 
     (* Don't instrument payloads of extensions and attributes. *)
-    method! extension e =
+    method! extension _ e =
       e
 
-    method! attribute a =
+    method! attribute _ a =
       a
 
-    (* This is set to [true] when the [structure] or [signature] method is
-       called the first time. It is used to determine whether Bisect_ppx is
-       looking at the top-level structure (module) in the file, or a nested
-       structure (module).
+    method! structure ctxt ast =
+      let saved_structure_instrumentation_suppressed =
+        structure_instrumentation_suppressed in
+      let result = super#structure ctxt ast in
+      structure_instrumentation_suppressed <-
+        saved_structure_instrumentation_suppressed;
+      result
 
-       For [.mli] and [.rei] files, the [signature] method will be called first.
-       That method will set this variable to [true], and do nothing else.
-
-       The more interesting case is [.ml] and [.re] files. For those, the
-       [structure] method will be called first. That method will set this
-       variable to [true]. However, if the variable started out [false],
-       [structure] will insert Bisect_ppx initialization code into the
-       structure. *)
-    val mutable saw_top_level_structure_or_signature = false
-
-    method! signature ast =
-      if not saw_top_level_structure_or_signature then
-        saw_top_level_structure_or_signature <- true;
-      super#signature ast
-
-    method! structure ast =
+    method transform_impl_file ctxt ast =
       let saved_structure_instrumentation_suppressed =
         structure_instrumentation_suppressed in
 
-      let result =
-        if saw_top_level_structure_or_signature then
-          super#structure ast
-          (* This is *not* the first structure we see, or we are inside an
-             interface file, so the structure is nested within the file, either
-             inside [struct]..[end] or in an attribute or extension point.
-             Traverse the structure recursively as normal. *)
-
-        else begin
-          (* This is the first structure we see in te file, and we are not in an
-             interface file, so Bisect_ppx is beginning to (potentially)
-             instrument the current file. We need to check whether this file is
-             excluded from instrumentation before proceeding. *)
-          saw_top_level_structure_or_signature <- true;
-
-          let path = !Location.input_name in
-
+        let result =
+          let path = Ppxlib.Expansion_context.Base.input_name ctxt in
           let file_should_not_be_instrumented =
             (* Bisect_ppx is hardcoded to ignore files with certain names. If we
                have one of these, return the AST uninstrumented. In particular,
@@ -1645,16 +1613,11 @@ class instrumenter =
             ast
 
           else begin
-            (* This file should be instrumented. Traverse the AST recursively,
-               then prepend some generated code for initializing the Bisect_ppx
-               runtime and telling it about the instrumentation points in this
-               file. *)
-            let instrumented_ast = super#structure ast in
+            let instrumented_ast = super#structure ctxt ast in
             let runtime_initialization =
               Generated_code.runtime_initialization points path
             in
             runtime_initialization @ instrumented_ast
-          end
         end
       in
 
