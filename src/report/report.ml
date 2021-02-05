@@ -440,13 +440,7 @@ let send_to_start coverage_service =
 
 
 
-let main () =
-  quiet := Arguments.is_report_being_written_to_stdout ();
-
-  let coverage_service = Coverage_service.from_argument () in
-
-  send_to_start coverage_service;
-
+let load_coverage () =
   let data, points =
     let total_counts = Hashtbl.create 17 in
     let points = Hashtbl.create 17 in
@@ -468,6 +462,19 @@ let main () =
   let present_files =
     Hashtbl.fold (fun file _ acc -> file::acc) data [] in
   Coverage_input_files.expected_sources_are_present present_files;
+
+  data, points
+
+
+
+let main () =
+  quiet := Arguments.is_report_being_written_to_stdout ();
+
+  let coverage_service = Coverage_service.from_argument () in
+
+  send_to_start coverage_service;
+
+  let data, points = load_coverage () in
 
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_file l f =
