@@ -32,16 +32,10 @@ sig
   val do_not_expect : string list ref
   val theme : Report_html.theme ref
 
-  val parse_args : unit -> unit
-  val print_usage : unit -> unit
-
   val is_report_being_written_to_stdout : unit -> bool
 end =
 struct
   let report_outputs = ref []
-
-  let add_output o =
-    report_outputs := o :: !report_outputs
 
   let verbose = ref false
 
@@ -53,9 +47,6 @@ struct
 
   let search_path = ref ["_build/default"; ""]
 
-  let add_search_path sp =
-    search_path := sp :: !search_path
-
   let raw_coverage_files = ref []
 
   let coverage_search_path = ref []
@@ -63,9 +54,6 @@ struct
   let summary_only = ref false
 
   let ignore_missing_files = ref false
-
-  let add_file f =
-    raw_coverage_files := f :: !raw_coverage_files
 
   let service_name = ref ""
 
@@ -90,117 +78,6 @@ struct
   let do_not_expect = ref []
 
   let theme = ref `Auto
-
-  let options = [
-    ("--html",
-    Arg.String (fun s -> add_output (`Html, s)),
-    "<dir>  Output HTML report to <dir> (HTML only)");
-
-    ("-I",
-    Arg.String (fun s ->
-      prerr_endline "bisect-ppx-report argument '-I' is deprecated.";
-      prerr_endline "Use '--source-path' and the new command line instead.";
-      prerr_endline "This requires Bisect_ppx >= 2.1.0.";
-      add_search_path s),
-    "<dir>  Look for .ml/.re files in <dir> (HTML/Coveralls only; deprecated)");
-
-    ("--ignore-missing-files",
-    Arg.Set ignore_missing_files,
-    " Do not fail if an .ml/.re file can't be found (HTML/Coveralls only)");
-
-    ("--title",
-    Arg.Set_string report_title,
-    "<string>  Set title for report pages (HTML only)");
-
-    ("--tab-size",
-    Arg.Int
-      (fun x ->
-        if x < 0 then
-          (prerr_endline " *** error: tab size should be positive"; exit 1)
-        else
-          tab_size := x),
-    "<int>  Set tab width in report (HTML only)");
-
-    ("--text",
-    Arg.String (fun s -> add_output (`Text, s)),
-    "<file>  Output plain text report to <file>");
-
-    ("--summary-only",
-    Arg.Set summary_only,
-    " Output only a whole-project summary (text only)");
-
-    ("--csv",
-    Arg.String (fun s -> add_output (`Csv, s)),
-    "<file>  Output CSV report to <file>");
-
-    ("--separator",
-    Arg.Set_string csv_separator,
-    "<string>  Set column separator (CSV only)");
-
-    ("--dump",
-    Arg.String (fun s -> add_output (`Dump, s)),
-    "<file>  Output bare dump to <file>");
-
-    ("--verbose",
-    Arg.Set verbose,
-    " Set verbose mode");
-
-    ("--coveralls",
-    Arg.String (fun s -> add_output (`Coveralls, s)),
-    "<file>  Output coveralls json report to <file>");
-
-    ("--service-name",
-    Arg.Set_string service_name,
-    "<string>  Service name for Coveralls json (Coveralls only)");
-
-    ("--service-job-id",
-    Arg.Set_string service_job_id,
-    "<string>  Service job id for Coveralls json (Coveralls only)");
-
-    ("--repo-token",
-    Arg.Set_string repo_token,
-    "<string>  Repo token for Coveralls json (Coveralls only)");
-
-    ("--git",
-    Arg.Set git,
-    " Parse git HEAD info (Coveralls only)");
-
-    ("--send-to",
-    Arg.String (fun s -> send_to := Some s),
-    "<string>  Coveralls or Codecov")
-  ]
-
-  let deprecated = Common.deprecated "bisect-ppx-report"
-
-  let options =
-    options
-    |> deprecated "-html"
-    |> deprecated "-ignore-missing-files"
-    |> deprecated "-title"
-    |> deprecated "-tab-size"
-    |> deprecated "-text"
-    |> deprecated "-summary-only"
-    |> deprecated "-csv"
-    |> deprecated "-separator"
-    |> deprecated "-dump"
-    |> deprecated "-verbose"
-    |> deprecated "-coveralls"
-    |> deprecated "-service-name"
-    |> deprecated "-service-job-id"
-    |> deprecated "-repo-token"
-    |> Arg.align
-
-  let usage =
-{|This is the legacy command line. Please see
-
-  bisect-ppx-report --help
-
-Options are:
-|}
-
-  let parse_args () = Arg.parse options add_file usage
-
-  let print_usage () = Arg.usage options usage
 
   let is_report_being_written_to_stdout () =
     !report_outputs |> List.exists (fun (_, file) -> file = "-")
@@ -916,7 +793,7 @@ struct
       ("Generate Coveralls JSON report (for manual integration with web " ^
       "services).")
 
-  let csv =
+  let _csv =
     let separator =
       Arg.(value @@ opt string ";" @@
         info ["separator"] ~docv:"STRING" ~doc:"Field separator to use.")
@@ -931,7 +808,7 @@ struct
     |> main',
     term_info "csv" ~doc:"(Debug) Generate CSV report."
 
-  let dump =
+  let _dump =
     output_file `Dump &&&
     coverage_files 1 &&&
     coverage_search_directories &&&
@@ -940,16 +817,7 @@ struct
     |> main',
     term_info "dump" ~doc:"(Debug) Dump binary report."
 
-  let ordinary_subcommands =
-    [html; send_to; text; coveralls]
-
-  let debug_subcommands =
-    [csv; dump]
-
-  let all_subcommands =
-    ordinary_subcommands @ debug_subcommands
-
-  let reporter () =
+  let eval () =
     Term.(eval_choice
       (ret (const (`Help (`Auto, None))),
       term_info
@@ -964,30 +832,8 @@ struct
             ("See bisect-ppx-report $(i,COMMAND) --help for further " ^
             "information on each command, including options.")
         ]))
-      ordinary_subcommands
-
-  let eval () =
-    let is_legacy_command_line =
-      let subcommand_names =
-        List.map (fun (_, info) -> Term.name info) all_subcommands in
-      match List.mem Sys.argv.(1) ("--help"::subcommand_names) with
-      | result -> not result
-      | exception Invalid_argument _ -> false
-    in
-
-    if is_legacy_command_line then begin
-      warning
-        "you are using the old command-line syntax. %s"
-        "See bisect-ppx-report --help";
-      Arguments.parse_args ();
-      if !Arguments.report_outputs = [] && !Arguments.send_to = None then begin
-        Arguments.print_usage ();
-        exit 0
-      end;
-      main ()
-    end
-    else
-      Term.exit (reporter ())
+      [html; send_to; text; coveralls]
+    |> Term.exit
 end
 
 
