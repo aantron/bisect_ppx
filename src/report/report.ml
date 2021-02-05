@@ -361,12 +361,8 @@ end
 
 
 
-let main () =
-  quiet := Arguments.is_report_being_written_to_stdout ();
-
-  let coverage_service = Coverage_service.from_argument () in
-
-  begin match coverage_service with
+let send_to_start coverage_service =
+  match coverage_service with
   | None ->
     ()
   | Some service ->
@@ -441,7 +437,15 @@ let main () =
         info "including git info";
         Arguments.git := true
       end
-  end;
+
+
+
+let main () =
+  quiet := Arguments.is_report_being_written_to_stdout ();
+
+  let coverage_service = Coverage_service.from_argument () in
+
+  send_to_start coverage_service;
 
   let data, points =
     let total_counts = Hashtbl.create 17 in
