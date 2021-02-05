@@ -65,10 +65,6 @@ let info arguments =
     if not !quiet then
       Printf.printf "Info: %s\n%!" s) arguments
 
-let warning =
-  Printf.ksprintf (fun s ->
-    Printf.eprintf "Warning: %s\n%!" s)
-
 let error arguments =
   Printf.ksprintf (fun s ->
     Printf.eprintf "Error: %s\n%!" s; exit 1) arguments
@@ -104,40 +100,12 @@ struct
     traverse directory []
 
   let filename_filter path filename =
-    if has_extension ".coverage" filename then
-      true
-    else
-      if has_extension ".out" filename then
-        let prefix = "bisect" in
-        match String.sub filename 0 (String.length prefix) with
-        | prefix' when prefix' = prefix ->
-          warning
-            "found file '%s': Bisect_ppx 2.x uses extension '.coverage'"
-            path;
-          true
-        | _ ->
-          false
-        | exception Invalid_argument _ ->
-          false
-      else
-        false
+    has_extension ".coverage" filename
 
   let list files_on_command_line coverage_search_paths =
-    (* Check for .out files on the command line. If there is such a file, it is
-       most likely an unexpaned pattern bisect*.out, from a former user of
-       Bisect_ppx 1.x. *)
-    begin match List.find (has_extension ".out") files_on_command_line with
-    | exception Not_found -> ()
-    | filename ->
-      warning
-        "file '%s' on command line: Bisect_ppx 2.x uses extension '.coverage'"
-        filename
-    end;
-
     (* If there are files on the command line, or coverage search directories
        specified, use those. Otherwise, search for files in ./ and ./_build.
-       During the search, we look for files with extension .coverage. If we find
-       any files bisect*.out, we display a warning. *)
+       During the search, we look for files with extension .coverage. *)
     let all_coverage_files =
       match files_on_command_line, coverage_search_paths with
       | [], [] ->
