@@ -467,16 +467,6 @@ let load_coverage () =
 
 
 
-let main () =
-  quiet := Arguments.is_report_being_written_to_stdout ();
-
-  let coverage_service = Coverage_service.from_argument () in
-
-  send_to_start coverage_service;
-
-  let data, points = load_coverage () in
-
-  let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_file l f =
     let fail () =
       if !Arguments.ignore_missing_files then None
@@ -492,7 +482,20 @@ let main () =
     else if Sys.file_exists f then
       Some f
     else
-      fail () in
+      fail ()
+
+
+
+let main () =
+  quiet := Arguments.is_report_being_written_to_stdout ();
+
+  let coverage_service = Coverage_service.from_argument () in
+
+  send_to_start coverage_service;
+
+  let data, points = load_coverage () in
+
+  let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file !Arguments.search_path in
   let write_output = function
     | `Html, dir ->
