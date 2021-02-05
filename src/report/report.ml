@@ -8,12 +8,10 @@ module Common = Bisect_common
 
 module Arguments :
 sig
-  val report_outputs :
-    ([ `Html | `Csv | `Text | `Dump | `Coveralls ] * string) list ref
+  val report_outputs : ([ `Html | `Text | `Coveralls ] * string) list ref
   val verbose : bool ref
   val tab_size : int ref
   val report_title : string ref
-  val csv_separator : string ref
   val search_path : string list ref
   val raw_coverage_files : string list ref
   val coverage_search_path : string list ref
@@ -42,8 +40,6 @@ struct
   let tab_size = ref 8
 
   let report_title = ref "Coverage report"
-
-  let csv_separator = ref ";"
 
   let search_path = ref ["_build/default"; ""]
 
@@ -487,22 +483,14 @@ let main () =
     else
       fail () in
   let search_in_path = search_file !Arguments.search_path in
-  let generic_output file conv =
-    Report_generic.output verbose file conv data points in
   let write_output = function
     | `Html, dir ->
       Report_utils.mkdirs dir;
       Report_html.output verbose dir
         !Arguments.tab_size !Arguments.report_title !Arguments.theme
           search_in_path data points
-    | `Csv, file ->
-      generic_output file (Report_csv.make !Arguments.csv_separator)
-    | `Text, "-" ->
+    | `Text, _ ->
       Report_text.output ~per_file:(not !Arguments.summary_only) data
-    | `Text, file ->
-      generic_output file (Report_text.make !Arguments.summary_only)
-    | `Dump, file ->
-      generic_output file (Report_dump.make ())
     | `Coveralls, file ->
       Report_coveralls.output verbose file
         !Arguments.service_name
@@ -792,30 +780,6 @@ struct
     term_info "coveralls" ~doc:
       ("Generate Coveralls JSON report (for manual integration with web " ^
       "services).")
-
-  let _csv =
-    let separator =
-      Arg.(value @@ opt string ";" @@
-        info ["separator"] ~docv:"STRING" ~doc:"Field separator to use.")
-      --> (:=) Arguments.csv_separator
-    in
-    output_file `Csv &&&
-    coverage_files 1 &&&
-    coverage_search_directories &&&
-    separator &&&
-    expect &&&
-    do_not_expect
-    |> main',
-    term_info "csv" ~doc:"(Debug) Generate CSV report."
-
-  let _dump =
-    output_file `Dump &&&
-    coverage_files 1 &&&
-    coverage_search_directories &&&
-    expect &&&
-    do_not_expect
-    |> main',
-    term_info "dump" ~doc:"(Debug) Dump binary report."
 
   let eval () =
     Term.(eval_choice
