@@ -490,9 +490,7 @@ let text per_file () =
 
 
 
-let main () =
-  quiet := Arguments.is_report_being_written_to_stdout ();
-
+let coveralls () =
   let coverage_service = Coverage_service.from_argument () in
 
   send_to_start coverage_service;
@@ -501,8 +499,9 @@ let main () =
 
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file !Arguments.search_path in
-  let write_output = function
-    | `Coveralls, file ->
+
+  let file = snd (List.hd !Arguments.report_outputs) in
+
       Report_coveralls.output verbose file
         !Arguments.service_name
         !Arguments.service_number
@@ -511,10 +510,7 @@ let main () =
         !Arguments.repo_token
         !Arguments.git
         !Arguments.parallel
-        search_in_path data points
-    | _ -> assert false
-  in
-  List.iter write_output (List.rev !Arguments.report_outputs);
+        search_in_path data points;
 
   match coverage_service with
   | None ->
@@ -538,7 +534,7 @@ let main () =
 
 let main () =
   try
-    main ()
+    ignore ()
   with
   | Sys_error s ->
     Printf.eprintf " *** system error: %s\n" s;
@@ -569,7 +565,6 @@ struct
 
   let (-->) a f = Term.(const f $ a)
   let (&&&) a b = Term.(const (fun () () -> ()) $ a $ b)
-  let main' = Term.(app (const main))
   let term_info = Term.info ~sdocs:"COMMON OPTIONS"
 
   let coverage_files from_position =
@@ -746,7 +741,7 @@ struct
     dry_run &&&
     expect &&&
     do_not_expect
-    |> main',
+    |> Term.(app (const coveralls)),
     term_info "send-to" ~doc:"Send report to a supported web service."
       ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
 
@@ -778,7 +773,7 @@ struct
     parallel &&&
     expect &&&
     do_not_expect
-    |> main',
+    |> Term.(app (const coveralls)),
     term_info "coveralls" ~doc:
       ("Generate Coveralls JSON report (for manual integration with web " ^
       "services).")
