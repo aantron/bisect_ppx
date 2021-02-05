@@ -1594,30 +1594,29 @@ class instrumenter =
       let saved_structure_instrumentation_suppressed =
         structure_instrumentation_suppressed in
 
-        let result =
-          let path = Ppxlib.Expansion_context.Base.input_name ctxt in
-          let file_should_not_be_instrumented =
-            (* Bisect_ppx is hardcoded to ignore files with certain names. If we
-               have one of these, return the AST uninstrumented. In particular,
-               do not recurse into it. *)
-            let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
-            let always_ignore_basenames = [".ocamlinit"; "topfind"] in
+      let result =
+        let path = Ppxlib.Expansion_context.Base.input_name ctxt in
+        let file_should_not_be_instrumented =
+          (* Bisect_ppx is hardcoded to ignore files with certain names. If we
+             have one of these, return the AST uninstrumented. In particular,
+             do not recurse into it. *)
+          let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
+          let always_ignore_basenames = [".ocamlinit"; "topfind"] in
 
-            List.mem path always_ignore_paths ||
-            List.mem (Filename.basename path) always_ignore_basenames ||
-            Exclusions.contains_file path ||
-            Coverage_attributes.has_exclude_file_attribute ast
-          in
+          List.mem path always_ignore_paths ||
+          List.mem (Filename.basename path) always_ignore_basenames ||
+          Exclusions.contains_file path ||
+          Coverage_attributes.has_exclude_file_attribute ast
+        in
 
-          if file_should_not_be_instrumented then
-            ast
+        if file_should_not_be_instrumented then
+          ast
 
-          else begin
-            let instrumented_ast = super#structure ctxt ast in
-            let runtime_initialization =
-              Generated_code.runtime_initialization points path
-            in
-            runtime_initialization @ instrumented_ast
+        else begin
+          let instrumented_ast = super#structure ctxt ast in
+          let runtime_initialization =
+            Generated_code.runtime_initialization points path in
+          runtime_initialization @ instrumented_ast
         end
       in
 
