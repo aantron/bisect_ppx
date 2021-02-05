@@ -99,7 +99,7 @@ struct
     in
     traverse directory []
 
-  let filename_filter path filename =
+  let filename_filter _path filename =
     has_extension ".coverage" filename
 
   let list files_on_command_line coverage_search_paths =
@@ -303,87 +303,6 @@ end
 
 
 
-let send_to_start coverage_service =
-  match coverage_service with
-  | None ->
-    None
-  | Some service ->
-    let report_file = Coverage_service.report_filename service in
-    info "will write coverage report to '%s'" report_file;
-    Arguments.report_outputs :=
-      !Arguments.report_outputs @ [`Coveralls, report_file];
-
-    let ci =
-      lazy begin
-        match CI.detect () with
-        | Some ci ->
-          info "detected CI: %s" (CI.pretty_name ci);
-          ci
-        | None ->
-          error "unknown CI service or not in CI"
-      end
-    in
-
-    if !Arguments.service_name = "" then begin
-      let service_name = CI.name_in_report (Lazy.force ci) in
-      info "using service name '%s'" service_name;
-      Arguments.service_name := service_name;
-    end;
-
-    if !Arguments.service_job_id = "" then begin
-      let job_id_variable = CI.job_id_variable (Lazy.force ci) in
-      info "using job ID variable $%s" job_id_variable;
-      match Sys.getenv job_id_variable with
-      | value ->
-        Arguments.service_job_id := value
-      | exception Not_found ->
-        error "expected job id in $%s" job_id_variable
-    end;
-
-    if !Arguments.service_pull_request = "" then begin
-      let needs =
-        Coverage_service.needs_pull_request_number (Lazy.force ci) service in
-      match needs with
-      | None ->
-        ()
-      | Some pr_variable ->
-        match Sys.getenv pr_variable with
-        | value ->
-          info "using PR number variable $%s" pr_variable;
-          Arguments.service_pull_request := value
-        | exception Not_found ->
-          info "$%s not set" pr_variable
-    end;
-
-    if !Arguments.repo_token = "" then
-      if Coverage_service.needs_repo_token (Lazy.force ci) service then begin
-        let repo_token_variables =
-          Coverage_service.repo_token_variables service in
-        let rec try_variables = function
-          | variable::more ->
-            begin match Sys.getenv variable with
-            | exception Not_found ->
-              try_variables more
-            | value ->
-              info "using repo token variable $%s" variable;
-              Arguments.repo_token := value
-            end
-          | [] ->
-            error "expected repo token in $%s" (List.hd repo_token_variables)
-        in
-        try_variables repo_token_variables
-      end;
-
-    if not !Arguments.git then
-      if Coverage_service.needs_git_info (Lazy.force ci) service then begin
-        info "including git info";
-        Arguments.git := true
-      end;
-
-    Some report_file
-
-
-
 let load_coverage files search_paths =
   let data, points =
     let total_counts = Hashtbl.create 17 in
@@ -412,22 +331,22 @@ let load_coverage files search_paths =
 
 
 
-  let search_file l ignore_missing_files f =
-    let fail () =
-      if ignore_missing_files then None
-      else
-        raise (Sys_error (f ^ ": No such file or directory")) in
-    let rec search = function
-      | hd :: tl ->
-          let f' = Filename.concat hd f in
-          if Sys.file_exists f' then Some f' else search tl
-      | [] -> fail () in
-    if Filename.is_implicit f then
-      search l
-    else if Sys.file_exists f then
-      Some f
+let search_file l ignore_missing_files f =
+  let fail () =
+    if ignore_missing_files then None
     else
-      fail ()
+      raise (Sys_error (f ^ ": No such file or directory")) in
+  let rec search = function
+    | hd :: tl ->
+        let f' = Filename.concat hd f in
+        if Sys.file_exists f' then Some f' else search tl
+    | [] -> fail () in
+  if Filename.is_implicit f then
+    search l
+  else if Sys.file_exists f then
+    Some f
+  else
+    fail ()
 
 
 
@@ -456,9 +375,83 @@ let coveralls
   let coverage_service = Coverage_service.from_argument () in
 
   let file =
-    match send_to_start coverage_service with
-    | None -> file
-    | Some file -> file
+    match coverage_service with
+    | None ->
+      file
+    | Some service ->
+      let report_file = Coverage_service.report_filename service in
+      info "will write coverage report to '%s'" report_file;
+      Arguments.report_outputs :=
+        !Arguments.report_outputs @ [`Coveralls, report_file];
+
+      let ci =
+        lazy begin
+          match CI.detect () with
+          | Some ci ->
+            info "detected CI: %s" (CI.pretty_name ci);
+            ci
+          | None ->
+            error "unknown CI service or not in CI"
+        end
+      in
+
+      if !Arguments.service_name = "" then begin
+        let service_name = CI.name_in_report (Lazy.force ci) in
+        info "using service name '%s'" service_name;
+        Arguments.service_name := service_name;
+      end;
+
+      if !Arguments.service_job_id = "" then begin
+        let job_id_variable = CI.job_id_variable (Lazy.force ci) in
+        info "using job ID variable $%s" job_id_variable;
+        match Sys.getenv job_id_variable with
+        | value ->
+          Arguments.service_job_id := value
+        | exception Not_found ->
+          error "expected job id in $%s" job_id_variable
+      end;
+
+      if !Arguments.service_pull_request = "" then begin
+        let needs =
+          Coverage_service.needs_pull_request_number (Lazy.force ci) service in
+        match needs with
+        | None ->
+          ()
+        | Some pr_variable ->
+          match Sys.getenv pr_variable with
+          | value ->
+            info "using PR number variable $%s" pr_variable;
+            Arguments.service_pull_request := value
+          | exception Not_found ->
+            info "$%s not set" pr_variable
+      end;
+
+      if !Arguments.repo_token = "" then
+        if Coverage_service.needs_repo_token (Lazy.force ci) service then begin
+          let repo_token_variables =
+            Coverage_service.repo_token_variables service in
+          let rec try_variables = function
+            | variable::more ->
+              begin match Sys.getenv variable with
+              | exception Not_found ->
+                try_variables more
+              | value ->
+                info "using repo token variable $%s" variable;
+                Arguments.repo_token := value
+              end
+            | [] ->
+              error "expected repo token in $%s" (List.hd repo_token_variables)
+          in
+          try_variables repo_token_variables
+        end;
+
+      if not !Arguments.git then
+        if Coverage_service.needs_git_info (Lazy.force ci) service then begin
+          info "including git info";
+          Arguments.git := true
+        end;
+
+      report_file
   in
 
   let data, points = load_coverage coverage_files coverage_paths in
@@ -466,15 +459,15 @@ let coveralls
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file search_path ignore_missing_files in
 
-      Report_coveralls.output verbose file
-        !Arguments.service_name
-        !Arguments.service_number
-        !Arguments.service_job_id
-        !Arguments.service_pull_request
-        !Arguments.repo_token
-        !Arguments.git
-        !Arguments.parallel
-        search_in_path data points;
+  Report_coveralls.output verbose file
+    !Arguments.service_name
+    !Arguments.service_number
+    !Arguments.service_job_id
+    !Arguments.service_pull_request
+    !Arguments.repo_token
+    !Arguments.git
+    !Arguments.parallel
+    search_in_path data points;
 
   match coverage_service with
   | None ->
