@@ -10,8 +10,6 @@ module Arguments :
 sig
   val report_outputs : ([ `Html | `Text | `Coveralls ] * string) list ref
   val verbose : bool ref
-  val tab_size : int ref
-  val report_title : string ref
   val search_path : string list ref
   val raw_coverage_files : string list ref
   val coverage_search_path : string list ref
@@ -28,7 +26,6 @@ sig
   val dry_run : bool ref
   val expect : string list ref
   val do_not_expect : string list ref
-  val theme : Report_html.theme ref
 
   val is_report_being_written_to_stdout : unit -> bool
 end =
@@ -36,10 +33,6 @@ struct
   let report_outputs = ref []
 
   let verbose = ref false
-
-  let tab_size = ref 8
-
-  let report_title = ref "Coverage report"
 
   let search_path = ref ["_build/default"; ""]
 
@@ -72,8 +65,6 @@ struct
   let expect = ref []
 
   let do_not_expect = ref []
-
-  let theme = ref `Auto
 
   let is_report_being_written_to_stdout () =
     !report_outputs |> List.exists (fun (_, file) -> file = "-")
@@ -486,6 +477,15 @@ let load_coverage () =
 
 
 
+let html dir title tab_size theme () =
+  let data, points = load_coverage () in
+  let verbose = if !Arguments.verbose then print_endline else ignore in
+  let search_in_path = search_file !Arguments.search_path in
+  Report_utils.mkdirs dir;
+  Report_html.output verbose dir tab_size title theme search_in_path data points
+
+
+
 let main () =
   quiet := Arguments.is_report_being_written_to_stdout ();
 
@@ -498,11 +498,6 @@ let main () =
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file !Arguments.search_path in
   let write_output = function
-    | `Html, dir ->
-      Report_utils.mkdirs dir;
-      Report_html.output verbose dir
-        !Arguments.tab_size !Arguments.report_title !Arguments.theme
-          search_in_path data points
     | `Text, _ ->
       Report_text.output ~per_file:(not !Arguments.summary_only) data
     | `Coveralls, file ->
@@ -515,6 +510,7 @@ let main () =
         !Arguments.git
         !Arguments.parallel
         search_in_path data points
+    | _ -> assert false
   in
   List.iter write_output (List.rev !Arguments.report_outputs);
 
@@ -685,19 +681,16 @@ struct
     let output_directory =
       Arg.(value @@ opt string "./_coverage" @@
         info ["o"] ~docv:"DIRECTORY" ~doc:"Output directory.")
-      --> fun d -> Arguments.report_outputs := [`Html, d]
     in
     let title =
       Arg.(value @@ opt string "Coverage report" @@
         info ["title"] ~docv:"STRING" ~doc:
           "Report title for use in HTML pages.")
-      --> (:=) Arguments.report_title
     in
     let tab_size =
       Arg.(value @@ opt int 2 @@
         info ["tab-size"] ~docv:"N" ~doc:
           "Set TAB width for replacing TAB characters in HTML pages.")
-      --> (:=) Arguments.tab_size
     in
     let theme =
       Arg.(value @@
@@ -705,19 +698,14 @@ struct
         info ["theme"] ~docv:"THEME" ~doc:
           ("$(i,light) or $(i,dark). The default value, $(i,auto), causes " ^
           "the report's theme to adapt to system or browser preferences."))
-      --> (:=) Arguments.theme
     in
-    output_directory &&&
     coverage_files 0 &&&
     coverage_search_directories &&&
     search_directories &&&
     ignore_missing_files &&&
-    title &&&
-    tab_size &&&
-    theme &&&
     expect &&&
     do_not_expect
-    |> main',
+    |> Term.(app (const html $ output_directory $ title $ tab_size $ theme)),
     term_info "html" ~doc:"Generate HTML report locally."
       ~man:[
         `S "USAGE EXAMPLE";
