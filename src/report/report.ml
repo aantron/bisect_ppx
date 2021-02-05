@@ -10,10 +10,6 @@ module Arguments :
 sig
   val report_outputs : ([ `Html | `Text | `Coveralls ] * string) list ref
   val verbose : bool ref
-  val search_path : string list ref
-  val raw_coverage_files : string list ref
-  val coverage_search_path : string list ref
-  val ignore_missing_files : bool ref
   val service_name : string ref
   val service_number : string ref
   val service_job_id : string ref
@@ -32,14 +28,6 @@ struct
   let report_outputs = ref []
 
   let verbose = ref false
-
-  let search_path = ref ["_build/default"; ""]
-
-  let raw_coverage_files = ref []
-
-  let coverage_search_path = ref []
-
-  let ignore_missing_files = ref false
 
   let service_name = ref ""
 
@@ -89,7 +77,7 @@ let error arguments =
 
 module Coverage_input_files :
 sig
-  val list : unit -> string list
+  val list : string list -> string list -> string list
   val expected_sources_are_present : string list -> unit
 end =
 struct
@@ -134,9 +122,7 @@ struct
       else
         false
 
-  let list () =
-    let files_on_command_line = !Arguments.raw_coverage_files in
-
+  let list files_on_command_line coverage_search_paths =
     (* Check for .out files on the command line. If there is such a file, it is
        most likely an unexpaned pattern bisect*.out, from a former user of
        Bisect_ppx 1.x. *)
@@ -153,7 +139,7 @@ struct
        During the search, we look for files with extension .coverage. If we find
        any files bisect*.out, we display a warning. *)
     let all_coverage_files =
-      match files_on_command_line, !Arguments.coverage_search_path with
+      match files_on_command_line, coverage_search_paths with
       | [], [] ->
         let in_current_directory =
           Sys.readdir Filename.current_dir_name
@@ -179,7 +165,7 @@ struct
         in_current_directory @ in_build_directory @ in_esy_sandbox
 
       | _ ->
-        !Arguments.coverage_search_path
+        coverage_search_paths
         |> List.filter Sys.file_exists
         |> List.filter Sys.is_directory
         |> List.map (fun dir -> list_recursively dir filename_filter)
@@ -188,7 +174,7 @@ struct
     in
 
     begin
-      match files_on_command_line, !Arguments.coverage_search_path with
+      match files_on_command_line, coverage_search_paths with
     | [], [] | _, _::_ ->
       (* Display feedback about where coverage files were found. *)
       all_coverage_files
@@ -352,7 +338,7 @@ end
 let send_to_start coverage_service =
   match coverage_service with
   | None ->
-    ()
+    None
   | Some service ->
     let report_file = Coverage_service.report_filename service in
     info "will write coverage report to '%s'" report_file;
@@ -424,16 +410,19 @@ let send_to_start coverage_service =
       if Coverage_service.needs_git_info (Lazy.force ci) service then begin
         info "including git info";
         Arguments.git := true
-      end
+      end;
+
+    Some report_file
 
 
 
-let load_coverage () =
+let load_coverage files search_paths =
   let data, points =
     let total_counts = Hashtbl.create 17 in
     let points = Hashtbl.create 17 in
 
-    Coverage_input_files.list () |> List.iter (fun out_file ->
+    Coverage_input_files.list files search_paths
+    |> List.iter (fun out_file ->
       Common.read_runtime_data out_file
       |> List.iter (fun (source_file, (file_counts, file_points)) ->
         let file_counts =
@@ -455,9 +444,9 @@ let load_coverage () =
 
 
 
-  let search_file l f =
+  let search_file l ignore_missing_files f =
     let fail () =
-      if !Arguments.ignore_missing_files then None
+      if ignore_missing_files then None
       else
         raise (Sys_error (f ^ ": No such file or directory")) in
     let rec search = function
@@ -474,33 +463,40 @@ let load_coverage () =
 
 
 
-let html dir title tab_size theme () =
-  let data, points = load_coverage () in
+let html
+    dir title tab_size theme coverage_files coverage_paths source_paths
+    ignore_missing_files () =
+
+  let data, points = load_coverage coverage_files coverage_paths in
   let verbose = if !Arguments.verbose then print_endline else ignore in
-  let search_in_path = search_file !Arguments.search_path in
+  let search_in_path = search_file source_paths ignore_missing_files in
   Report_utils.mkdirs dir;
   Report_html.output verbose dir tab_size title theme search_in_path data points
 
 
 
-let text per_file () =
+let text per_file coverage_files coverage_paths () =
   quiet := true;
-  let data, _ = load_coverage () in
+  let data, _ = load_coverage coverage_files coverage_paths in
   Report_text.output ~per_file data
 
 
 
-let coveralls () =
+let coveralls
+    file coverage_files coverage_paths search_path ignore_missing_files () =
+
   let coverage_service = Coverage_service.from_argument () in
 
-  send_to_start coverage_service;
+  let file =
+    match send_to_start coverage_service with
+    | None -> file
+    | Some file -> file
+  in
 
-  let data, points = load_coverage () in
+  let data, points = load_coverage coverage_files coverage_paths in
 
   let verbose = if !Arguments.verbose then print_endline else ignore in
-  let search_in_path = search_file !Arguments.search_path in
-
-  let file = snd (List.hd !Arguments.report_outputs) in
+  let search_in_path = search_file search_path ignore_missing_files in
 
       Report_coveralls.output verbose file
         !Arguments.service_name
@@ -532,25 +528,6 @@ let coveralls () =
 
 
 
-let main () =
-  try
-    ignore ()
-  with
-  | Sys_error s ->
-    Printf.eprintf " *** system error: %s\n" s;
-    exit 1
-  | Unix.Unix_error (e, _, _) ->
-    Printf.eprintf " *** system error: %s\n" (Unix.error_message e);
-    exit 1
-  | Common.Invalid_file (f, reason) ->
-    Printf.eprintf " *** invalid file: '%s' error: \"%s\"\n" f reason;
-    exit 1
-  | e ->
-    Printf.eprintf " *** error: %s\n" (Printexc.to_string e);
-    exit 1
-
-
-
 module Command_line :
 sig
   val eval : unit -> unit
@@ -575,21 +552,18 @@ struct
         "bisect-ppx-report will search for *.coverage files non-recursively " ^
         "in ./ and recursively in ./_build, and, if run under esy, inside " ^
         "the esy sandbox."))
-    --> (:=) Arguments.raw_coverage_files
 
-  let coverage_search_directories =
+  let coverage_paths =
     Arg.(value @@ opt_all string [] @@
       info ["coverage-path"] ~docv:"DIRECTORY" ~doc:
         ("Directory in which to look for .coverage files. This option can be " ^
         "specified multiple times. The search is recursive in each directory."))
-    --> (:=) Arguments.coverage_search_path
 
-  let output_file kind =
+  let output_file =
     Arg.(required @@ pos 0 (some string) None @@
       info [] ~docv:"FILE" ~doc:"Output file name.")
-    --> fun f -> Arguments.report_outputs := [kind, f]
 
-  let search_directories =
+  let source_paths =
     Arg.(value @@ opt_all string (["."; "./_build/default"] @ esy_source_dir) @@
       info ["source-path"] ~docv:"DIRECTORY" ~doc:
         ("Directory in which to look for source files. This option can be " ^
@@ -597,13 +571,11 @@ struct
         "$(b,--source-path) directory when looking for files. The default " ^
         "directories are ./ and ./_build/default/. If running inside an esy " ^
         "sandbox, the default/ directory in the sandbox is also included."))
-    --> (:=) Arguments.search_path
 
   let ignore_missing_files =
     Arg.(value @@ flag @@
       info ["ignore-missing-files"] ~doc:
         "Do not fail if a particular .ml or .re file can't be found.")
-    --> (:=) Arguments.ignore_missing_files
 
   let service_name =
     Arg.(value @@ opt string "" @@
@@ -696,13 +668,11 @@ struct
           ("$(i,light) or $(i,dark). The default value, $(i,auto), causes " ^
           "the report's theme to adapt to system or browser preferences."))
     in
-    coverage_files 0 &&&
-    coverage_search_directories &&&
-    search_directories &&&
-    ignore_missing_files &&&
     expect &&&
     do_not_expect
-    |> Term.(app (const html $ output_directory $ title $ tab_size $ theme)),
+    |> Term.(app (const html
+      $ output_directory $ title $ tab_size $ theme $ coverage_files 0
+      $ coverage_paths $ source_paths $ ignore_missing_files)),
     term_info "html" ~doc:"Generate HTML report locally."
       ~man:[
         `S "USAGE EXAMPLE";
@@ -727,10 +697,6 @@ struct
       --> (:=) Arguments.dry_run
     in
     service &&&
-    coverage_files 1 &&&
-    coverage_search_directories &&&
-    search_directories &&&
-    ignore_missing_files &&&
     service_name &&&
     service_number &&&
     service_job_id &&&
@@ -741,7 +707,9 @@ struct
     dry_run &&&
     expect &&&
     do_not_expect
-    |> Term.(app (const coveralls)),
+    |> Term.(app (const coveralls
+      $ const "" $ coverage_files 1 $ coverage_paths $ source_paths
+      $ ignore_missing_files)),
     term_info "send-to" ~doc:"Send report to a supported web service."
       ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
 
@@ -750,20 +718,13 @@ struct
       Arg.(value @@ flag @@
         info ["per-file"] ~doc:"Include coverage per source file.")
     in
-    Term.const () --> (fun () -> Arguments.report_outputs := [`Text, "-"]) &&&
-    coverage_files 0 &&&
-    coverage_search_directories &&&
     expect &&&
     do_not_expect
-    |> Term.(app (const text $ per_file)),
+    |> Term.(app (const text
+      $ per_file $ coverage_files 0 $ coverage_paths)),
     term_info "summary" ~doc:"Write coverage summary to STDOUT."
 
   let coveralls =
-    output_file `Coveralls &&&
-    coverage_files 1 &&&
-    coverage_search_directories &&&
-    search_directories &&&
-    ignore_missing_files &&&
     service_name &&&
     service_number &&&
     service_job_id &&&
@@ -773,7 +734,9 @@ struct
     parallel &&&
     expect &&&
     do_not_expect
-    |> Term.(app (const coveralls)),
+    |> Term.(app (const coveralls
+      $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
+      $ ignore_missing_files)),
     term_info "coveralls" ~doc:
       ("Generate Coveralls JSON report (for manual integration with web " ^
       "services).")
