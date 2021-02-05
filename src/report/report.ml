@@ -13,7 +13,6 @@ sig
   val search_path : string list ref
   val raw_coverage_files : string list ref
   val coverage_search_path : string list ref
-  val summary_only : bool ref
   val ignore_missing_files : bool ref
   val service_name : string ref
   val service_number : string ref
@@ -39,8 +38,6 @@ struct
   let raw_coverage_files = ref []
 
   let coverage_search_path = ref []
-
-  let summary_only = ref false
 
   let ignore_missing_files = ref false
 
@@ -486,6 +483,13 @@ let html dir title tab_size theme () =
 
 
 
+let text per_file () =
+  quiet := true;
+  let data, _ = load_coverage () in
+  Report_text.output ~per_file data
+
+
+
 let main () =
   quiet := Arguments.is_report_being_written_to_stdout ();
 
@@ -498,8 +502,6 @@ let main () =
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file !Arguments.search_path in
   let write_output = function
-    | `Text, _ ->
-      Report_text.output ~per_file:(not !Arguments.summary_only) data
     | `Coveralls, file ->
       Report_coveralls.output verbose file
         !Arguments.service_name
@@ -752,15 +754,13 @@ struct
     let per_file =
       Arg.(value @@ flag @@
         info ["per-file"] ~doc:"Include coverage per source file.")
-      --> fun b -> Arguments.summary_only := not b
     in
     Term.const () --> (fun () -> Arguments.report_outputs := [`Text, "-"]) &&&
     coverage_files 0 &&&
     coverage_search_directories &&&
-    per_file &&&
     expect &&&
     do_not_expect
-    |> main',
+    |> Term.(app (const text $ per_file)),
     term_info "summary" ~doc:"Write coverage summary to STDOUT."
 
   let coveralls =
