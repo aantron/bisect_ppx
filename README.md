@@ -495,7 +495,7 @@ targets:
 
 - `make test` for unit tests.
 - `make usage` for build system integration tests, except BuckleScript.
-- `make -C test/bucklescript full-test` for BuckleScript. This requires NPM and
+- `make -C test/bucklescript full-test` for BuckleScript. This requires npm and
   esy.
 
 [issues]: https://github.com/aantron/bisect_ppx/issues
