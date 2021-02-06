@@ -193,15 +193,32 @@ and install it:
 3. If you are using Jest, add this to your `package.json`:
 
     ```json
-    "setupFilesAfterEnv": ["bisect_ppx/lib/js/src/runtime/bucklescript/jest.js"]
+    "jest": {
+      "setupFilesAfterEnv": [
+        "bisect_ppx/lib/js/src/runtime/bucklescript/jest.js"
+      ]
+    }
     ```
 
     Or, if you have enabled the `package-specs.in-source` flag in
-    `bsconfig.json`,
+    `bsconfig.json`, replace the path by
 
     ```json
-    "setupFilesAfterEnv": ["bisect_ppx/src/runtime/bucklescript/jest.js"]
+    "bisect_ppx/src/runtime/bucklescript/jest.js"
     ```
+
+    You can exclude your test cases from the coverage report by adding this to
+    `bsconfig.json`:
+
+    ```json
+    "ppx-flags": [
+      ["bisect_ppx/ppx", "--exclude-files", ".*_test\\.res$$"]
+    ]
+    ```
+
+    Usage with Jest requires Bisect_ppx version 2.4.0 or higher. See the
+    [**aantron/bisect-starter-jest**][jest-repo] for a complete minimal example
+    project. The repo produces [this report][jest-report].
 
     If the tests will be running in the browser, at the end of testing, call
 
@@ -249,6 +266,8 @@ and install it:
 
 [rescript-repo]: https://github.com/aantron/bisect-starter-rescript#readme
 [rescript-report]: https://aantron.github.io/bisect-starter-rescript/
+[jest-repo]: https://github.com/aantron/bisect-starter-jest#readme
+[jest-report]: https://aantron.github.io/bisect-starter-jest/
 
 
 
