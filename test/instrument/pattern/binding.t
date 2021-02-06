@@ -1,13 +1,10 @@
 Bindings made under or-patterns remain consistent after instrumentation.
 
-  $ bash ../test.sh <<'EOF'
+  $ (bash ../test.sh | tail -n +4) <<'EOF'
   > let _ =
   >   match `A with
   >   | (`A as x) | (`B as x) -> print_endline "foo"; x
   > EOF
-  let _ =
-    match `A with
-    | ((`A as x) | `B) as x as ___bisect_matched_value___ ->
         (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
            ___bisect_matched_value___
          with
