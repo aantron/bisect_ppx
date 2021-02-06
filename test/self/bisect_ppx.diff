@@ -10,12 +10,12 @@ diff -ru src/common/dune _self/bisect_ppx/src/common/dune
 diff -ru src/ppx/dune _self/bisect_ppx/src/ppx/dune
 --- src/ppx/dune
 +++ _self/bisect_ppx/src/ppx/dune
-@@ -9,4 +9,5 @@
-  (synopsis "Code coverage for OCaml")
+@@ -10,4 +10,5 @@
   (ppx_runtime_libraries bisect_ppx.runtime)
-  (preprocess (pps ppx_tools_versioned.metaquot_411))
+  (preprocess (pps ppxlib.metaquot))
+  (flags (:standard -open Ocaml_shadow))
 + (instrumentation (backend meta_bisect_ppx))
-  (libraries bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
+  (libraries bisect_ppx.common ppxlib str))
 diff -ru src/report/dune _self/bisect_ppx/src/report/dune
 --- src/report/dune
 +++ _self/bisect_ppx/src/report/dune
