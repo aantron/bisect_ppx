@@ -25,7 +25,7 @@ You can browse the report seen above [online here][gh-pages-report].
 - [**Usage**](#Usage)
   - [**Dune**](#Dune) &nbsp; ([starter repo][dune-repo], [report][dune-report])
   - [**esy**](#esy) &nbsp; ([starter repo][esy-repo], [report][esy-report])
-  - [**BuckleScript**](#BuckleScript) &nbsp; ([starter repo][bsb-repo], [report][bsb-report])
+  - [**ReScript**](#ReScript) &nbsp; ([starter repo][rescript-repo], [report][rescript-report])
   - [**Js_of_ocaml**](#Js_of_ocaml) &nbsp; ([starter repo][jsoo-repo], [report][jsoo-report])
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
 - [**Sending to Coveralls**](#Coveralls)
@@ -139,12 +139,13 @@ instead of in an `opam` file:
 <br>
 
 <a id="BuckleScript"></a>
-### BuckleScript
+<a id="ReScript"></a>
+### ReScript
 
-Refer to [**aantron/bisect-starter-bsb**][bsb-repo], which produces
-[this report][bsb-report].
+Refer to [**aantron/bisect-starter-bsb**][rescript-repo], which produces
+[this report][rescript-report].
 
-1. [Depend on Bisect_ppx in `package.json`](https://github.com/aantron/bisect-starter-bsb/blob/master/package.json#L3-L6),
+1. [Depend on Bisect_ppx in `package.json`](https://github.com/aantron/bisect-starter-rescript/blob/master/package.json#L3-L6),
 and install it:
 
     ```json
@@ -178,7 +179,7 @@ and install it:
     npm install
     ```
 
-2. [Add Bisect_ppx to your `bsconfig.json`](https://github.com/aantron/bisect-starter-bsb/blob/master/bsconfig.json#L3-L8):
+2. [Add Bisect_ppx to your `bsconfig.json`](https://github.com/aantron/bisect-starter-rescript/blob/master/bsconfig.json#L3-L8):
 
     ```json
     "bs-dependencies": [
@@ -213,7 +214,7 @@ and install it:
     file.
 
 4. Build in development with `BISECT_ENABLE=yes`, run tests, and generate the
-[coverage report][bsb-report] in `_coverage/index.html`:
+[coverage report][rescript-report] in `_coverage/index.html`:
 
     ```
     BISECT_ENABLE=yes npm run build
@@ -237,17 +238,17 @@ and install it:
     Multiple `--exclude-files` option can be specified if you want to provide
     multiple patterns.
 
-5. If your project uses both BuckleScript and native Dune, native Dune will
-   start picking up OCaml files that are part of the BuckleScript `bisect_ppx`
-   package. To prevent this, add a `dune` with the following contents to the
-   root of your project:
+5. If your project uses both ReScript and native Dune, native Dune will start
+   picking up OCaml files that are part of the ReScript `bisect_ppx` package.
+   To prevent this, add a `dune` with the following contents to the root of
+   your project:
 
    ```
    (data_only_dirs node_modules)
    ```
 
-[bsb-repo]: https://github.com/aantron/bisect-starter-bsb#readme
-[bsb-report]: https://aantron.github.io/bisect-starter-bsb/
+[rescript-repo]: https://github.com/aantron/bisect-starter-rescript#readme
+[rescript-report]: https://aantron.github.io/bisect-starter-rescript/
 
 
 
@@ -494,8 +495,7 @@ You will now have a `bisect_ppx` subdirectory to work in. Try these `Makefile`
 targets:
 
 - `make test` for unit tests.
-- `make usage` for build system integration tests, except BuckleScript.
-- `make -C test/bucklescript full-test` for BuckleScript. This requires npm and
-  esy.
+- `make usage` for build system integration tests, except ReScript.
+- `make -C test/bucklescript full-test` for ReScript. This requires npm and esy.
 
 [issues]: https://github.com/aantron/bisect_ppx/issues
