@@ -329,7 +329,7 @@ test, then run the reporter to generate the [coverage report][jsoo-report] in
 - [Ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-ocamlbuild)
 and [OASIS](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-oasis)
 instructions can be found at
-[aantron/bisect_ppx-ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#readme).
+[**aantron/bisect_ppx-ocamlbuild**](https://github.com/aantron/bisect_ppx-ocamlbuild#readme).
 
 - With Ocamlfind, you must have your build script issue the right commands, to
 instrument the code under test, but not the tester:
