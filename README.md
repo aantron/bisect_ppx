@@ -57,7 +57,7 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     ]
     ```
 
-2. [Mark the code under test for preprocessing by
+2. [Mark the code under test for instrumentation by
    `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/03cb827553d1264559eab19fdaa8c0056c9b2019/dune#L4) in your `dune` file:
 
     ```ocaml
@@ -257,7 +257,7 @@ and install it:
 
 5. If your project uses both ReScript and native Dune, native Dune will start
    picking up OCaml files that are part of the ReScript `bisect_ppx` package.
-   To prevent this, add a `dune` with the following contents to the root of
+   To prevent this, add a `dune` file with the following contents to the root of
    your project:
 
    ```
@@ -428,7 +428,7 @@ module with `[@@@coverage off]` and `[@@@coverage on]`.
 
 Finally, you can exclude an entire file by putting `[@@@coverage exclude_file]`
 into its top-level module. However, whenever possible, it is recommended to
-exclude files by not preprocessing with Bisect_ppx to begin with.
+exclude files by not instrumenting with Bisect_ppx to begin with.
 
 
 
