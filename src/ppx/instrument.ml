@@ -1094,7 +1094,9 @@ class instrumenter =
         | [%expr ignore]
         | [%expr Sys.opaque_identity]
         | [%expr Obj.magic]
-        | [%expr (##)] -> true
+        | [%expr (##)]
+        | [%expr React.forwardRef]
+        | [%expr React.memo] -> true
         | _ -> false)
       in
 
