@@ -21,7 +21,7 @@ scripts:
           WD=`pwd`
           if [ ! -f node_modules/.bin/esy ]
           then
-            npm install --no-save esy@0.6.4
+            npm install --no-save esy
             export PATH="$WD/node_modules/.bin:$PATH"
           else
             mkdir -p _wrapped_esy
@@ -156,6 +156,7 @@ matrix:
   include:
     - <<: *bucklescript
       os: osx
+      osx_image: xcode12.2
       env: BUCKLESCRIPT=YES SAVE_BINARIES=YES
     - <<: *bucklescript
       os: linux
