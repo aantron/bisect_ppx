@@ -1,3 +1,11 @@
+Version 2.6.1 (2021-05-04):
+---------------------------
+
+  Bugs fixed
+
+  - Do not instrument React.forwardRef and React.memo (#375, reported by Mathieu
+    Haton).
+
 Version 2.6.0 (2021-02-06):
 ---------------------------
 
