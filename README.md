@@ -153,7 +153,7 @@ and install it:
       "bisect_ppx": "^2.0.0"
     },
     "dependencies": {
-      "bs-platform": "*"
+      "rescript": "*"
     }
     ```
 

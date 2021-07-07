@@ -21,9 +21,6 @@
     "email": "antonbachin@yahoo.com",
     "url": "https://github.com/aantron"
   },
-  "peerDependencies": {
-    "bs-platform": "*"
-  },
   "scripts": {
     "preinstall": "bash src/npm-install.sh"
   },
