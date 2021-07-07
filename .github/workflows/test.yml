@@ -1,0 +1,17 @@
+name: test
+on: [push, pull_request]
+
+jobs:
+  bucklescript:
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+        - macos-latest
+
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v2
+    - run: npm install esy
+    - run: echo PATH=$(pwd)/node_modules/.bin:$PATH >> $GITHUB_ENV
+    - run: make -C test/bucklescript full-test
