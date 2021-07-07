@@ -178,11 +178,6 @@ let random_filename base_name =
   Printf.sprintf "%s%09d.coverage"
     base_name (abs (Random.State.int prng 1000000000))
 
-let write_points points =
-  let points_array = Array.of_list points in
-  Array.sort compare points_array;
-  Marshal.to_string points_array []
-
 let get_relative_path file =
   if Filename.is_relative file then
     file
@@ -204,11 +199,6 @@ let read_runtime_data filename =
   Reader.(read (array (pair string (pair (array int) string)))) ~filename
   |> Array.to_list
   |> List.map (fun (file, data) -> get_relative_path file, data)
-
-let read_points s =
-  let points_array : point_definition array = Marshal.from_string s 0 in
-  Array.sort compare points_array;
-  Array.to_list points_array
 
 let register_file file ~point_count ~point_definitions =
   let point_state = Array.make point_count 0 in

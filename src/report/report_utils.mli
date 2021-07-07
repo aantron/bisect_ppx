@@ -67,3 +67,6 @@ val update : counts -> bool -> unit
 
 val add : counts -> counts -> counts
 (** [add x y] returns the sum of counts [x] and [y]. *)
+
+val read_points : string -> Bisect_common.point_definition list
+(** [read_points s] reads point definitions from the string [s]. *)

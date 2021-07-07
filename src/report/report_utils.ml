@@ -94,3 +94,9 @@ let add counts_1 counts_2 =
   let open Infix in
   {visited = counts_1.visited ++ counts_2.visited;
    total = counts_1.total ++ counts_2.total}
+
+let read_points s =
+  let points_array : Bisect_common.point_definition array =
+    Marshal.from_string s 0 in
+  Array.sort compare points_array;
+  Array.to_list points_array

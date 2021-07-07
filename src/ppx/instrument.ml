@@ -865,6 +865,11 @@ struct
     |> fun (v, e, f, n, _) ->
       List.rev v, List.rev e, List.rev f, n && not use_aliases
 
+  let write_points points =
+    let points_array = Array.of_list points in
+    Array.sort compare points_array;
+    Marshal.to_string points_array []
+
   let runtime_initialization points file =
     let loc = Location.in_file file in
 
@@ -879,8 +884,7 @@ struct
     in
 
     let point_count = Ast_builder.Default.eint ~loc (List.length !points) in
-    let points_data =
-      Ast_builder.Default.estring ~loc (Common.write_points !points) in
+    let points_data = Ast_builder.Default.estring ~loc (write_points !points) in
     let file = Ast_builder.Default.estring ~loc file in
 
     let ast_convenience_str_opt = function
