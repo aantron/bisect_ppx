@@ -2,7 +2,7 @@
   "name": "bisect_ppx-test",
   "dependencies": {
     "bisect_ppx": "file:package",
-    "bs-platform": "^8.4.2",
+    "rescript": "^9.1.0",
     "esy": "^0.6.7"
   },
   "scripts": {
