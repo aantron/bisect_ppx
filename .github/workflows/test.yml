@@ -15,3 +15,7 @@ jobs:
     - run: npm install esy
     - run: echo PATH=$(pwd)/node_modules/.bin:$PATH >> $GITHUB_ENV
     - run: make -C test/bucklescript full-test
+    - if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: bash ./test/ci/travis-binaries.sh
