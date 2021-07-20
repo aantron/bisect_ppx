@@ -142,7 +142,7 @@ instead of in an `opam` file:
 <a id="ReScript"></a>
 ### ReScript
 
-Refer to [**aantron/bisect-starter-bsb**][rescript-repo], which produces
+Refer to [**aantron/bisect-starter-rescript**][rescript-repo], which produces
 [this report][rescript-report].
 
 1. [Depend on Bisect_ppx in `package.json`](https://github.com/aantron/bisect-starter-rescript/blob/master/package.json#L3-L6),
@@ -218,7 +218,7 @@ and install it:
 
     Usage with Jest requires Bisect_ppx version 2.4.0 or higher. See the
     [**aantron/bisect-starter-jest**][jest-repo] for a complete minimal example
-    project. The repo produces [this report][jest-report].
+    project. That repo produces [this report][jest-report].
 
     If the tests will be running in the browser, at the end of testing, call
 
