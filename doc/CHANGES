@@ -1,3 +1,11 @@
+Version 2.6.3 (2021-07-21):
+---------------------------
+
+  Changes
+
+  - Downgrade binaries to require Ubuntu only 18.04, not 20.04 (6f86646,
+    reported by Peter Piekarczyk).
+
 Version 2.6.2 (2021-07-20):
 ---------------------------
 
