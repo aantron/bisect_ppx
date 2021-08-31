@@ -64,15 +64,12 @@ is it easy to avoid preprocessing it, you can pass the `--exclusions` option to
 the Bisect_ppx preprocessor:
 
 ```
-(preprocess (pps bisect_ppx --exclusions bisect.exclude))
-(preprocessor_deps (file bisect.exclude))
+(instrumentation
+ (backend bisect_ppx --exclusions bisect.exclude)
+ (deps bisect.exclude))
 ```
 
-*Note: this requires using the old Dune integration, not the current
-`(instrumentation.backend ...)`. See the older README for
-[instructions](https://github.com/aantron/bisect_ppx/tree/a4b8cb617dd9b8f33be8da7b8e63390e81b85fb6#Dune)
-on how to use that integration. `bisect.exclude` will be usable with the new
-integration once https://github.com/ocaml/dune/issues/3983 is addressed.*
+This requires Dune 2.9 or later.
 
 Note that the paths to `bisect.exclude` might be different between the
 `preprocess` and `preprocessor_deps` stanzas, because `pps bisect_ppx` looks for
