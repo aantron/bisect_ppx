@@ -443,7 +443,10 @@ See [advanced usage][advanced] for:
 - Excluding generated files from coverage.
 - Environment variables.
 
+Cornell CS3110 offers a [Bisect_ppx tutorial][cs3110], featuring a video.
+
 [advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#readme
+[cs3110]: https://cs3110.github.io/textbook/chapters/correctness/black_glass_box.html#bisect
 
 
 
