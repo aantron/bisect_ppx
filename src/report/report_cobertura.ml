@@ -123,4 +123,80 @@ let pp_cobertura fmt ({sources; package; _} as cobertura) =
     pp_sources sources
     pp_package package
 
-let output _verbose _file _resolver _data _points = failwith "todo"
+let update_counts counts line_counts =
+  List.iter
+    (function
+      | None -> ()
+      | Some x when x > 0 -> Report_utils.update counts true
+      | Some x -> Report_utils.update counts false)
+    line_counts
+
+let line line hits =
+  { number = line; hits}
+
+let classes ~global_counts verbose data resolver points : class_ list =
+  let class_ in_file visited =
+    match resolver in_file with
+    | None ->
+      let () = verbose "... file not found" in
+      None
+    | Some resolved_in_file ->
+      let line_counts = Report_utils.line_counts verbose in_file resolved_in_file visited points in
+      let counts = Report_utils.make () in
+      let () = update_counts global_counts line_counts in
+      let () = update_counts counts line_counts in
+      let line_rate = Report_utils.rate counts in
+
+      let i = ref 1 in
+      let lines = List.filter_map
+          (fun x ->
+             let line = match x with
+               | None -> None
+               | Some nb ->
+                 Some (line !i nb)
+             in
+             let () = incr i in
+             line)
+          line_counts
+      in
+
+      Some ({name = in_file; complexity = 0; line_rate; branch_rate = 0; lines})
+  in
+
+  Hashtbl.fold
+    (fun in_file visited acc ->
+       Option.fold ~none:acc ~some:(fun x -> x :: acc) @@ class_ in_file visited)
+    data
+    []
+
+let package ~counts ~verbose ~data ~resolver ~points =
+  let classes = classes ~global_counts:counts verbose data resolver points in
+  let line_rate = Report_utils.rate counts in
+
+  { name = "."; line_rate; branch_rate = 0.0; complexity = 0; classes}
+
+let cobertura ~verbose ~data ~resolver ~points =
+  let counts = Report_utils.make () in
+  let package = package ~counts ~verbose ~data ~resolver ~points in
+  let sources = ["."] in
+  let rate = Report_utils.rate counts in
+  {
+    lines_valid = counts.total;
+    lines_covered = counts.visited;
+    line_rate = rate;
+    branches_covered = 0;
+    branches_valid = 0;
+    branch_rate = 0.0;
+    complexity = 0;
+    package;
+    sources;
+  }
+
+let output verbose file resolver data points =
+  let () = Report_utils.mkdirs (Filename.dirname file) in
+  let cobertura = cobertura ~verbose ~data ~resolver ~points in
+  let oc = open_out file in
+  let fmt = Format.formatter_of_out_channel oc in
+  let () = pp_cobertura fmt cobertura in
+  close_out oc
+
