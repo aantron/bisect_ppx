@@ -123,6 +123,10 @@ let pp_cobertura fmt ({sources; package; _} as cobertura) =
     pp_sources sources
     pp_package package
 
+let line_rate counts =
+  let open Report_utils in
+  Float.(of_int counts.visited /. of_int counts.total)
+
 let update_counts counts line_counts =
   List.iter
     (function
@@ -145,7 +149,7 @@ let classes ~global_counts verbose data resolver points : class_ list =
       let counts = Report_utils.make () in
       let () = update_counts global_counts line_counts in
       let () = update_counts counts line_counts in
-      let line_rate = Report_utils.rate counts in
+      let line_rate = line_rate counts in
 
       let i = ref 1 in
       let lines = List.filter_map
@@ -171,7 +175,7 @@ let classes ~global_counts verbose data resolver points : class_ list =
 
 let package ~counts ~verbose ~data ~resolver ~points =
   let classes = classes ~global_counts:counts verbose data resolver points in
-  let line_rate = Report_utils.rate counts in
+  let line_rate = line_rate counts in
 
   { name = "."; line_rate; branch_rate = 0.0; complexity = 0; classes}
 
@@ -179,7 +183,7 @@ let cobertura ~verbose ~data ~resolver ~points =
   let counts = Report_utils.make () in
   let package = package ~counts ~verbose ~data ~resolver ~points in
   let sources = ["."] in
-  let rate = Report_utils.rate counts in
+  let rate = line_rate counts in
   {
     lines_valid = counts.total;
     lines_covered = counts.visited;
