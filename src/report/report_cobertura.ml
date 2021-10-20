@@ -45,7 +45,7 @@ let pp_class_ fmt {name; line_rate; lines} =
       line_rate
   in
   fprintf fmt
-    "<class %s>@;<0 4><methods/>@;<0 4>%a@;<0 0></class>"
+    "<class %s>@;<0 4>%a@;<0 0></class>"
     class_infos
     pp_lines lines
 
