@@ -28,32 +28,35 @@ type cobertura = {
   package : package;
 }
 
-let pp_line fmt {number; hits} =
-  Format.fprintf fmt {|<line number="%d" hits="%d"/>|} number hits
+let pp_list pp fmt =
+  List.iter (fun x -> pp fmt x; Format.pp_print_string fmt "\n")
     
+let pp_line fmt {number; hits} =
+  Format.fprintf fmt "          <line number=\"%d\" hits=\"%d\"/>" number hits
+
 let pp_lines fmt lines =
   let open Format in
-  fprintf fmt "<lines>%a</lines>"
-    (pp_print_list pp_line) lines
+  fprintf fmt "        <lines>\n%a        </lines>\n"
+    (pp_list pp_line) lines
 
 let pp_class_ fmt {name; line_rate; lines} =
   let open Format in
   let class_infos =
-    Format.sprintf {|name="%s" filename="%s" line-rate="%f"|}
+    Format.sprintf "name=\"%s\" filename=\"%s\" line-rate=\"%f\""
       name
       name
       line_rate
   in
   fprintf fmt
-    "<class %s>%a</class>"
+    "      <class %s>\n%a     </class>"
     class_infos
     pp_lines lines
 
 let pp_classes fmt classes =
   let open Format in
   fprintf fmt
-    "<classes>%a</classes>"
-    (pp_print_list pp_class_) classes
+    "    <classes>\n%a    </classes>\n"
+    (pp_list pp_class_) classes
 
 let pp_package fmt {name; line_rate; classes } =
   let open Format in
@@ -62,18 +65,18 @@ let pp_package fmt {name; line_rate; classes } =
       name
       line_rate
   in
-  fprintf fmt {|<package %s>%a</package>|}
+  fprintf fmt "  <package %s>\n%a  </package>\n"
     package_infos
     pp_classes classes
 
 let pp_source fmt source =
-  Format.fprintf fmt "<source>%s</source>" source
+  Format.fprintf fmt "    <source>%s</source>" source
 
 let pp_sources fmt sources =
   let open Format in
   fprintf fmt
-    "<sources>%a</sources>"
-    (pp_print_list pp_source) sources
+    "  <sources>\n%a  </sources>\n"
+    (pp_list pp_source) sources
 
 let pp_cobertura fmt ({sources; package; _} as cobertura) =
   let open Format in
@@ -89,7 +92,7 @@ let pp_cobertura fmt ({sources; package; _} as cobertura) =
       line_rate
   in
   fprintf fmt
-    {|<?xml version="1.0" ?><coverage %s>%a%a</coverage>|}
+    "<?xml version=\"1.0\" ?>\n<coverage %s>\n%a%a</coverage>"
     (cobertura_infos cobertura)
     pp_sources sources
     pp_package package
