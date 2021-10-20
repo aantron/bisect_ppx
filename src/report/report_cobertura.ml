@@ -33,7 +33,7 @@ let pp_line fmt {number; hits} =
     
 let pp_lines fmt lines =
   let open Format in
-  fprintf fmt "<lines>@;<0 4>@[<v 4>    %a@]@;<0 4></lines>"
+  fprintf fmt "<lines>%a</lines>"
     (pp_print_list pp_line) lines
 
 let pp_class_ fmt {name; line_rate; lines} =
@@ -45,14 +45,14 @@ let pp_class_ fmt {name; line_rate; lines} =
       line_rate
   in
   fprintf fmt
-    "<class %s>@;<0 4>%a@;<0 0></class>"
+    "<class %s>%a</class>"
     class_infos
     pp_lines lines
 
 let pp_classes fmt classes =
   let open Format in
   fprintf fmt
-    "<classes>@;<0 4>@[<v 0>%a@]@;</classes>"
+    "<classes>%a</classes>"
     (pp_print_list pp_class_) classes
 
 let pp_package fmt {name; line_rate; classes } =
@@ -62,7 +62,7 @@ let pp_package fmt {name; line_rate; classes } =
       name
       line_rate
   in
-  fprintf fmt {|<package %s>@;<0 4>@[<v 0>%a@]@;</package>|}
+  fprintf fmt {|<package %s>%a</package>|}
     package_infos
     pp_classes classes
 
@@ -72,7 +72,7 @@ let pp_source fmt source =
 let pp_sources fmt sources =
   let open Format in
   fprintf fmt
-    "<sources>@;<0 4>@[<v 0>%a@]@;</sources>"
+    "<sources>%a</sources>"
     (pp_print_list pp_source) sources
 
 let pp_cobertura fmt ({sources; package; _} as cobertura) =
@@ -89,7 +89,7 @@ let pp_cobertura fmt ({sources; package; _} as cobertura) =
       line_rate
   in
   fprintf fmt
-    {|<?xml version="1.0" ?>@.<coverage %s>@;<0 4>@[<v 0>%a@]@;<0 4>@[<v 0>%a@]@;</coverage>@.|}
+    {|<?xml version="1.0" ?><coverage %s>%a%a</coverage>|}
     (cobertura_infos cobertura)
     pp_sources sources
     pp_package package
@@ -170,4 +170,3 @@ let output verbose file resolver data points =
   let fmt = Format.formatter_of_out_channel oc in
   let () = pp_cobertura fmt cobertura in
   close_out oc
-
