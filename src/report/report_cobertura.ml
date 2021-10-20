@@ -36,16 +36,13 @@ type cobertura = {
   package : package;
 }
 
+let pp_line fmt {number; hits} =
+  Format.fprintf fmt {|<line number="%d" hits="%d"/>|} number hits
+    
 let pp_lines fmt lines =
   let open Format in
-  let pp_line fmt { number; hits } =
-    fprintf fmt {|<line number="%d" hits="%d"/>|} number hits
-  in
-  let pp_lines lines =
-    pp_print_list pp_line lines
-  in
   fprintf fmt "<lines>@;<0 4>@[<v 4>    %a@]@;<0 4></lines>"
-    pp_lines lines
+    (pp_print_list pp_line) lines
 
 let pp_class_ fmt {name; complexity; line_rate; branch_rate; lines} =
   let open Format in
@@ -64,12 +61,9 @@ let pp_class_ fmt {name; complexity; line_rate; branch_rate; lines} =
 
 let pp_classes fmt classes =
   let open Format in
-  let pp_classes classes =
-    pp_print_list pp_class_ classes
-  in
   fprintf fmt
     "<classes>@;<0 4>@[<v 0>%a@]@;</classes>"
-    pp_classes classes
+    (pp_print_list pp_class_) classes
 
 let pp_package fmt {name; line_rate; branch_rate; complexity; classes } =
   let open Format in
@@ -84,17 +78,14 @@ let pp_package fmt {name; line_rate; branch_rate; complexity; classes } =
     package_infos
     pp_classes classes
 
+let pp_source fmt source =
+  Format.fprintf fmt "<source>%s</source>" source
+
 let pp_sources fmt sources =
   let open Format in
-  let pp_source fmt source =
-    fprintf fmt "<source>%s</source>" source
-  in
-  let pp_sources sources =
-    pp_print_list pp_source sources
-  in
   fprintf fmt
     "<sources>@;<0 4>@[<v 0>%a@]@;</sources>"
-    pp_sources sources
+    (pp_print_list pp_source) sources
 
 let pp_cobertura fmt ({sources; package; _} as cobertura) =
   let open Format in
