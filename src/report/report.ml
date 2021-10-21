@@ -369,6 +369,16 @@ let text per_file coverage_files coverage_paths () =
 
 
 
+let cobertura
+    file coverage_files coverage_paths search_path ignore_missing_files () =
+
+  let data, points = load_coverage coverage_files coverage_paths in
+  let verbose = if !Arguments.verbose then print_endline else ignore in
+  let search_in_path = search_file search_path ignore_missing_files in
+  Report_cobertura.output verbose file search_in_path data points
+
+
+
 let coveralls
     file coverage_files coverage_paths search_path ignore_missing_files () =
 
@@ -685,6 +695,14 @@ struct
       $ per_file $ coverage_files 0 $ coverage_paths)),
     term_info "summary" ~doc:"Write coverage summary to STDOUT."
 
+  let cobertura =
+    expect &&&
+    do_not_expect
+    |> Term.(app (const cobertura
+      $ output_file $ coverage_files 1
+      $ coverage_paths $ source_paths $ ignore_missing_files)),
+    term_info "cobertura" ~doc:"Generate Cobertura XML report"
+
   let coveralls =
     service_name &&&
     service_number &&&
@@ -717,7 +735,7 @@ struct
             ("See bisect-ppx-report $(i,COMMAND) --help for further " ^
             "information on each command, including options.")
         ]))
-      [html; send_to; text; coveralls]
+      [html; send_to; text; cobertura; coveralls]
     |> Term.exit
 end
 

@@ -13,46 +13,10 @@ let file_json verbose indent in_file resolver visited points =
     verbose "... file not found";
     None
   | Some resolved_in_file ->
-    let cmp_content = Hashtbl.find points in_file |> Report_utils.read_points in
-    verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
-    let len = Array.length visited in
-    let pts = (List.map
-                 (fun p ->
-                   let nb =
-                     if Common.(p.identifier) < len then
-                       visited.(Common.(p.identifier))
-                     else
-                       0 in
-                   (Common.(p.offset), nb))
-                 cmp_content) in
     let digest = Digest.to_hex (Digest.file resolved_in_file) in
-    let in_channel = open_in resolved_in_file in
     let line_counts =
-      try
-        let rec read number acc pts =
-          try
-            let _ = input_line in_channel in
-            let end_ofs = pos_in in_channel in
-            let before, after =
-              Report_utils.split (fun (o, _) -> o < end_ofs) pts in
-            let visited_lowest =
-              List.fold_left
-                (fun v (_, nb) ->
-                  match v with
-                  | None -> Some nb
-                  | Some nb' -> if nb < nb' then Some nb else Some nb')
-                None
-                before
-            in
-            read (number + 1) (visited_lowest::acc) after
-          with End_of_file -> List.rev acc
-        in
-        read 1 [] pts
-      with e ->
-        close_in_noerr in_channel;
-        raise e;
+      Report_utils.line_counts verbose in_file resolved_in_file visited points
     in
-    close_in_noerr in_channel;
     let scounts = List.map (function
       | None -> "null"
       | Some nb -> Printf.sprintf "%d" nb) line_counts in
