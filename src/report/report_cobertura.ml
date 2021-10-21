@@ -2,11 +2,16 @@
    LICENSE.md for details, or visit
    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
 
+
+
 module Common = Bisect_common
 
 type source = string
 
-type line = { number : int; hits : int }
+type line = {
+  number : int;
+  hits : int
+}
 
 type class_ = {
   name : string;
@@ -17,7 +22,7 @@ type class_ = {
 type package = {
   name : string;
   line_rate : float;
-  classes : class_ list
+  classes : class_ list;
 }
 
 type cobertura = {
@@ -30,7 +35,7 @@ type cobertura = {
 
 let pp_list pp fmt =
   List.iter (fun x -> pp fmt x; Format.pp_print_string fmt "\n")
-    
+
 let pp_line fmt {number; hits} =
   Format.fprintf fmt "          <line number=\"%d\" hits=\"%d\"/>" number hits
 
@@ -58,7 +63,7 @@ let pp_classes fmt classes =
     "    <classes>\n%a    </classes>\n"
     (pp_list pp_class_) classes
 
-let pp_package fmt {name; line_rate; classes } =
+let pp_package fmt {name; line_rate; classes} =
   let open Format in
   let package_infos =
     Format.sprintf {|name="%s" line-rate="%f"|}
@@ -80,11 +85,7 @@ let pp_sources fmt sources =
 
 let pp_cobertura fmt ({sources; package; _} as cobertura) =
   let open Format in
-  let cobertura_infos {
-      lines_valid;
-      lines_covered;
-      line_rate;
-      _ } =
+  let cobertura_infos {lines_valid; lines_covered; line_rate; _} =
     sprintf
       {|lines-valid="%d" lines-covered="%d" line-rate="%f"|}
       lines_valid
@@ -110,7 +111,7 @@ let update_counts counts line_counts =
     line_counts
 
 let line line hits =
-  { number = line; hits}
+  {number = line; hits}
 
 let classes ~global_counts verbose data resolver points : class_ list =
   let class_ in_file visited =
@@ -119,39 +120,40 @@ let classes ~global_counts verbose data resolver points : class_ list =
       let () = verbose "... file not found" in
       None
     | Some resolved_in_file ->
-      let line_counts = Report_utils.line_counts verbose in_file resolved_in_file visited points in
+      let line_counts =
+        Report_utils.line_counts
+          verbose in_file resolved_in_file visited points in
       let counts = Report_utils.make () in
       let () = update_counts global_counts line_counts in
       let () = update_counts counts line_counts in
       let line_rate = line_rate counts in
 
       let i = ref 1 in
-      let lines = List.filter_map
-          (fun x ->
-             let line = match x with
-               | None -> None
-               | Some nb ->
-                 Some (line !i nb)
-             in
-             let () = incr i in
-             line)
+      let lines =
+        List.filter_map (fun x ->
+          let line =
+            match x with
+            | None -> None
+            | Some nb ->
+              Some (line !i nb)
+          in
+          let () = incr i in
+          line)
           line_counts
       in
 
-      Some ({name = in_file; line_rate; lines})
+      Some {name = in_file; line_rate; lines}
   in
 
-  Hashtbl.fold
-    (fun in_file visited acc ->
-       Option.fold ~none:acc ~some:(fun x -> x :: acc) @@ class_ in_file visited)
+  Hashtbl.fold (fun in_file visited acc ->
+    Option.fold ~none:acc ~some:(fun x -> x::acc) @@ class_ in_file visited)
     data
     []
 
 let package ~counts ~verbose ~data ~resolver ~points =
   let classes = classes ~global_counts:counts verbose data resolver points in
   let line_rate = line_rate counts in
-
-  { name = "."; line_rate; classes}
+  {name = "."; line_rate; classes}
 
 let cobertura ~verbose ~data ~resolver ~points =
   let counts = Report_utils.make () in
