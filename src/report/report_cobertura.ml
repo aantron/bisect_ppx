@@ -100,7 +100,7 @@ let pp_cobertura fmt ({sources; package; _} as cobertura) =
 
 let line_rate counts =
   let open Report_utils in
-  Float.(of_int counts.visited /. of_int counts.total)
+  float_of_int counts.visited /. float_of_int counts.total
 
 let update_counts counts line_counts =
   List.iter
@@ -130,7 +130,7 @@ let classes ~global_counts verbose data resolver points : class_ list =
 
       let i = ref 1 in
       let lines =
-        List.filter_map (fun x ->
+        List.fold_left (fun acc x ->
           let line =
             match x with
             | None -> None
@@ -138,15 +138,21 @@ let classes ~global_counts verbose data resolver points : class_ list =
               Some (line !i nb)
           in
           let () = incr i in
-          line)
+          match line with
+          | None -> acc
+          | Some line -> line::acc)
+          []
           line_counts
+        |> List.rev
       in
 
       Some {name = in_file; line_rate; lines}
   in
 
   Hashtbl.fold (fun in_file visited acc ->
-    Option.fold ~none:acc ~some:(fun x -> x::acc) @@ class_ in_file visited)
+    match class_ in_file visited with
+    | None -> acc
+    | Some x -> x::acc)
     data
     []
 
