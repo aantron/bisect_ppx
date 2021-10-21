@@ -1114,7 +1114,8 @@ class instrumenter =
 
           match e.pexp_desc with
           (* Expressions that invoke arbitrary code, and may not terminate. *)
-          | Pexp_apply ([%expr (|>)] as operator, [(l, e); (l', e')]) ->
+          | Pexp_apply
+              ([%expr (|>)] | [%expr (|.)] as operator, [(l, e); (l', e')]) ->
             let apply =
               Exp.apply ~loc ~attrs
                 operator
