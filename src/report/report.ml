@@ -6,7 +6,6 @@
 
 module Arguments :
 sig
-  val report_outputs : ([ `Html | `Text | `Coveralls ] * string) list ref
   val verbose : bool ref
   val service_name : string ref
   val service_number : string ref
@@ -19,12 +18,8 @@ sig
   val dry_run : bool ref
   val expect : string list ref
   val do_not_expect : string list ref
-
-  val is_report_being_written_to_stdout : unit -> bool
 end =
 struct
-  let report_outputs = ref []
-
   let verbose = ref false
 
   let service_name = ref ""
@@ -48,9 +43,6 @@ struct
   let expect = ref []
 
   let do_not_expect = ref []
-
-  let is_report_being_written_to_stdout () =
-    !report_outputs |> List.exists (fun (_, file) -> file = "-")
 end
 
 
@@ -389,8 +381,6 @@ let coveralls
     | Some service ->
       let report_file = Coverage_service.report_filename service in
       info "will write coverage report to '%s'" report_file;
-      Arguments.report_outputs :=
-        !Arguments.report_outputs @ [`Coveralls, report_file];
 
       let ci =
         lazy begin
