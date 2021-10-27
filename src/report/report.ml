@@ -15,7 +15,6 @@ sig
   val git : bool ref
   val parallel : bool ref
   val send_to : string option ref
-  val dry_run : bool ref
   val expect : string list ref
   val do_not_expect : string list ref
 end =
@@ -37,8 +36,6 @@ struct
   let parallel = ref false
 
   let send_to = ref None
-
-  let dry_run = ref false
 
   let expect = ref []
 
@@ -370,7 +367,13 @@ let cobertura
 
 
 let coveralls
-    file coverage_files coverage_paths search_path ignore_missing_files () =
+    file
+    coverage_files
+    coverage_paths
+    search_path
+    ignore_missing_files
+    dry_run
+    () =
 
   let coverage_service = Coverage_service.from_argument () in
 
@@ -475,7 +478,7 @@ let coveralls
     let command = Coverage_service.send_command coverage_service in
     info "sending to %s with command:" name;
     info "%s" command;
-    if not !Arguments.dry_run then begin
+    if not dry_run then begin
       let exit_code = Sys.command command in
       let report = Coverage_service.report_filename coverage_service in
       if Sys.file_exists report then begin
@@ -654,7 +657,6 @@ struct
         info ["dry-run"] ~doc:
           ("Don't issue the final upload command and don't delete the " ^
           "intermediate coverage report file."))
-      --> (:=) Arguments.dry_run
     in
     service &&&
     service_name &&&
@@ -664,12 +666,11 @@ struct
     repo_token &&&
     git &&&
     parallel &&&
-    dry_run &&&
     expect &&&
     do_not_expect
     |> Term.(app (const coveralls
       $ const "" $ coverage_files 1 $ coverage_paths $ source_paths
-      $ ignore_missing_files)),
+      $ ignore_missing_files $ dry_run)),
     term_info "send-to" ~doc:"Send report to a supported web service."
       ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
 
@@ -704,7 +705,7 @@ struct
     do_not_expect
     |> Term.(app (const coveralls
       $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
-      $ ignore_missing_files)),
+      $ ignore_missing_files $ const false)),
     term_info "coveralls" ~doc:
       ("Generate Coveralls JSON report (for manual integration with web " ^
       "services).")
