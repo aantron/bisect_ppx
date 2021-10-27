@@ -4,8 +4,6 @@
 
 
 
-module Common = Bisect_common
-
 module Arguments :
 sig
   val report_outputs : ([ `Html | `Text | `Coveralls ] * string) list ref
@@ -310,7 +308,7 @@ let load_coverage files search_paths =
 
     Coverage_input_files.list files search_paths
     |> List.iter (fun out_file ->
-      Common.read_runtime_data out_file
+      Bisect_common.read_runtime_data out_file
       |> List.iter (fun (source_file, (file_counts, file_points)) ->
         let file_counts =
           let open Report_utils.Infix in
@@ -509,7 +507,8 @@ struct
     | exception Not_found -> []
     | directory -> [Filename.concat directory "default"]
 
-  open Cmdliner
+  module Term = Cmdliner.Term
+  module Arg = Cmdliner.Arg
 
   let (-->) a f = Term.(const f $ a)
   let (&&&) a b = Term.(const (fun () () -> ()) $ a $ b)
