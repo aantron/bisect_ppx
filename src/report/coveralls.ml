@@ -4,8 +4,6 @@
 
 
 
-module Common = Bisect_common
-
 let file_json verbose indent in_file resolver visited points =
   verbose (Printf.sprintf "Processing file '%s'..." in_file);
   match resolver in_file with
@@ -15,16 +13,19 @@ let file_json verbose indent in_file resolver visited points =
   | Some resolved_in_file ->
     let digest = Digest.to_hex (Digest.file resolved_in_file) in
     let line_counts =
-      Util.line_counts verbose in_file resolved_in_file visited points
+      Util.line_counts verbose in_file resolved_in_file visited points in
+    let scounts =
+      line_counts
+      |> List.map (function
+        | None -> "null"
+        | Some nb -> Printf.sprintf "%d" nb)
     in
-    let scounts = List.map (function
-      | None -> "null"
-      | Some nb -> Printf.sprintf "%d" nb) line_counts in
     let coverage = String.concat "," scounts in
     let indent_strings indent l =
       let i = String.make indent ' ' in
-      List.map (fun s -> i ^ s) l in
-    Some (
+      List.map (fun s -> i ^ s) l
+    in
+    Some begin
       [
         "{";
         Printf.sprintf "    \"name\": \"%s\"," in_file;
@@ -34,7 +35,7 @@ let file_json verbose indent in_file resolver visited points =
       ]
       |> indent_strings indent
       |> String.concat "\n"
-    )
+    end
 
 let output_of command =
   let channel = Unix.open_process_in command in
@@ -87,24 +88,23 @@ let output
 
   Util.mkdirs (Filename.dirname file);
   let file_jsons =
-    Hashtbl.fold
-      (fun in_file visited acc ->
-        let maybe_json = file_json verbose 8 in_file resolver visited points in
-        match maybe_json with
-        | None -> acc
-        | Some s -> s :: acc)
-      data
-      []
+    Hashtbl.fold begin fun in_file visited acc ->
+      let maybe_json = file_json verbose 8 in_file resolver visited points in
+      match maybe_json with
+      | None -> acc
+      | Some s -> s::acc
+    end data []
   in
   let repo_params =
-    [ "service_name", (String.trim service_name) ;
+    [
+      "service_name", (String.trim service_name);
       "service_number", (String.trim service_number);
-      "service_job_id", (String.trim service_job_id) ;
+      "service_job_id", (String.trim service_job_id);
       "service_pull_request", (String.trim service_pull_request);
-      "repo_token", (String.trim repo_token) ; ]
+      "repo_token", (String.trim repo_token);
+    ]
     |> List.filter (fun (_, v) -> (String.length v) > 0)
-    |> List.map (fun (n, v) ->
-      Printf.sprintf "    \"%s\": \"%s\"," n v)
+    |> List.map (fun (n, v) -> Printf.sprintf "    \"%s\": \"%s\"," n v)
     |> String.concat "\n"
   in
   let parallel =
@@ -115,18 +115,19 @@ let output
   in
   let write ch =
     Util.output_strings
-      [ "{" ;
-        repo_params ;
-        git ;
+      [
+        "{";
+        repo_params;
+        git;
         parallel;
-        "    \"source_files\": [" ;
-        (String.concat ",\n" file_jsons) ;
-        "    ]" ;
-        "}" ;
+        "    \"source_files\": [";
+        (String.concat ",\n" file_jsons);
+        "    ]";
+        "}";
       ]
       []
       ch
   in
   match file with
   | "-" -> write stdout
-  | f -> Common.try_out_channel false f write
+  | f -> Bisect_common.try_out_channel false f write

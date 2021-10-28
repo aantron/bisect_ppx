@@ -2,7 +2,7 @@
    LICENSE.md for details, or visit
    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
 
-module Common = Bisect_common
+
 
 module Infix =
 struct
@@ -81,9 +81,15 @@ let output_strings lines mapping ch =
       output_char ch '\n')
     lines
 
-type counts = { mutable visited : int; mutable total : int }
+type counts = {
+  mutable visited : int;
+  mutable total : int;
+}
 
-let make () = { visited = 0; total = 0 }
+let make () = {
+  visited = 0;
+  total = 0;
+}
 
 let update counts v =
   let open Infix in
@@ -103,17 +109,21 @@ let read_points s =
 
 let line_counts verbose in_file resolved_in_file visited points =
   let cmp_content = Hashtbl.find points in_file |> read_points in
-  let () = verbose (Printf.sprintf "... file has %d points" (List.length cmp_content)) in
+  let () =
+    verbose
+      (Printf.sprintf "... file has %d points" (List.length cmp_content))
+  in
   let len = Array.length visited in
-  let pts = (List.map
-               (fun p ->
-                  let nb =
-                    if Common.(p.identifier) < len then
-                      visited.(Common.(p.identifier))
-                    else
-                      0 in
-                  (Common.(p.offset), nb))
-               cmp_content) in
+  let pts =
+    cmp_content |> List.map (fun p ->
+      let nb =
+        if Bisect_common.(p.identifier) < len then
+          visited.(Bisect_common.(p.identifier))
+        else
+          0
+      in
+      (Bisect_common.(p.offset), nb))
+  in
   let in_channel = open_in resolved_in_file in
   let line_counts =
     try
