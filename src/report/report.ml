@@ -358,22 +358,22 @@ let coveralls
       report_file
   in
 
-      let ci =
-        lazy begin
-          match CI.detect () with
-          | Some ci ->
-            info "detected CI: %s" (CI.pretty_name ci);
-            ci
-          | None ->
-            error "unknown CI service or not in CI"
-        end
-      in
+  let ci =
+    lazy begin
+      match CI.detect () with
+      | Some ci ->
+        info "detected CI: %s" (CI.pretty_name ci);
+        ci
+      | None ->
+        error "unknown CI service or not in CI"
+    end
+  in
 
   let service_name =
     match coverage_service, service_name with
     | Some _, "" ->
-        let service_name = CI.name_in_report (Lazy.force ci) in
-        info "using service name '%s'" service_name;
+      let service_name = CI.name_in_report (Lazy.force ci) in
+      info "using service name '%s'" service_name;
       service_name
     | _ ->
       service_name
@@ -382,14 +382,14 @@ let coveralls
   let service_job_id =
     match coverage_service, service_job_id with
     | Some _, "" ->
-        let job_id_variable = CI.job_id_variable (Lazy.force ci) in
-        info "using job ID variable $%s" job_id_variable;
-        begin match Sys.getenv job_id_variable with
-        | value ->
-          value
-        | exception Not_found ->
-          error "expected job id in $%s" job_id_variable
-        end
+      let job_id_variable = CI.job_id_variable (Lazy.force ci) in
+      info "using job ID variable $%s" job_id_variable;
+      begin match Sys.getenv job_id_variable with
+      | value ->
+        value
+      | exception Not_found ->
+        error "expected job id in $%s" job_id_variable
+      end
     | _ ->
       service_job_id
   in
@@ -397,20 +397,20 @@ let coveralls
   let service_pull_request =
     match coverage_service, service_pull_request with
     | Some service, "" ->
-        let needs =
-          Coverage_service.needs_pull_request_number (Lazy.force ci) service in
-        begin match needs with
-        | None ->
+      let needs =
+        Coverage_service.needs_pull_request_number (Lazy.force ci) service in
+      begin match needs with
+      | None ->
+        service_pull_request
+      | Some pr_variable ->
+        match Sys.getenv pr_variable with
+        | value ->
+          info "using PR number variable $%s" pr_variable;
+          value
+        | exception Not_found ->
+          info "$%s not set" pr_variable;
           service_pull_request
-        | Some pr_variable ->
-          match Sys.getenv pr_variable with
-          | value ->
-            info "using PR number variable $%s" pr_variable;
-            value
-          | exception Not_found ->
-            info "$%s not set" pr_variable;
-            service_pull_request
-        end
+      end
     | _ ->
       service_pull_request
   in
@@ -418,23 +418,23 @@ let coveralls
   let repo_token =
     match coverage_service, repo_token with
     | Some service, "" ->
-        if Coverage_service.needs_repo_token (Lazy.force ci) service then begin
-          let repo_token_variables =
-            Coverage_service.repo_token_variables service in
-          let rec try_variables = function
-            | variable::more ->
-              begin match Sys.getenv variable with
-              | exception Not_found ->
-                try_variables more
-              | value ->
-                info "using repo token variable $%s" variable;
-                value
-              end
-            | [] ->
-              error "expected repo token in $%s" (List.hd repo_token_variables)
-          in
-          try_variables repo_token_variables
-        end
+      if Coverage_service.needs_repo_token (Lazy.force ci) service then begin
+        let repo_token_variables =
+          Coverage_service.repo_token_variables service in
+        let rec try_variables = function
+          | variable::more ->
+            begin match Sys.getenv variable with
+            | exception Not_found ->
+              try_variables more
+            | value ->
+              info "using repo token variable $%s" variable;
+              value
+            end
+          | [] ->
+            error "expected repo token in $%s" (List.hd repo_token_variables)
+        in
+        try_variables repo_token_variables
+      end
       else
         repo_token
     | _ ->
@@ -444,10 +444,10 @@ let coveralls
   let git =
     match coverage_service, git with
     | Some service, false ->
-        if Coverage_service.needs_git_info (Lazy.force ci) service then begin
-          info "including git info";
-          true
-        end
+      if Coverage_service.needs_git_info (Lazy.force ci) service then begin
+        info "including git info";
+        true
+      end
       else
         false
     | _ ->
