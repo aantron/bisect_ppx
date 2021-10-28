@@ -15,8 +15,6 @@ sig
   val git : bool ref
   val parallel : bool ref
   val send_to : string option ref
-  val expect : string list ref
-  val do_not_expect : string list ref
 end =
 struct
   let verbose = ref false
@@ -36,10 +34,6 @@ struct
   let parallel = ref false
 
   let send_to = ref None
-
-  let expect = ref []
-
-  let do_not_expect = ref []
 end
 
 
@@ -61,7 +55,8 @@ let error arguments =
 module Coverage_input_files :
 sig
   val list : string list -> string list -> string list
-  val expected_sources_are_present : string list -> unit
+  val expected_sources_are_present :
+    string list -> string list -> string list -> unit
 end =
 struct
   let has_extension extension filename =
@@ -167,16 +162,16 @@ struct
     |> List.flatten
     |> List.sort_uniq String.compare
 
-  let filtered_expected_files () =
-    let expected_files = list_expected_files !Arguments.expect in
-    let excluded_files = list_expected_files !Arguments.do_not_expect in
+  let filtered_expected_files expect do_not_expect =
+    let expected_files = list_expected_files expect in
+    let excluded_files = list_expected_files do_not_expect in
     expected_files
     |> List.filter (fun path -> not (List.mem path excluded_files))
     (* Not the fastest way. *)
 
-  let expected_sources_are_present present_files =
+  let expected_sources_are_present present_files expect do_not_expect =
     let present_files = List.map strip_extensions present_files in
-    let expected_files = filtered_expected_files () in
+    let expected_files = filtered_expected_files expect do_not_expect in
     expected_files |> List.iter (fun file ->
       if not (List.mem (strip_extensions file) present_files) then
         error "expected file '%s' is not included in the report" file)
@@ -290,7 +285,7 @@ end
 
 
 
-let load_coverage files search_paths =
+let load_coverage files search_paths expect do_not_expect =
   let data, points =
     let total_counts = Hashtbl.create 17 in
     let points = Hashtbl.create 17 in
@@ -312,7 +307,8 @@ let load_coverage files search_paths =
 
   let present_files =
     Hashtbl.fold (fun file _ acc -> file::acc) data [] in
-  Coverage_input_files.expected_sources_are_present present_files;
+  Coverage_input_files.expected_sources_are_present
+    present_files expect do_not_expect;
 
   data, points
 
@@ -339,9 +335,10 @@ let search_file l ignore_missing_files f =
 
 let html
     dir title tab_size theme coverage_files coverage_paths source_paths
-    ignore_missing_files () =
+    ignore_missing_files expect do_not_expect =
 
-  let data, points = load_coverage coverage_files coverage_paths in
+  let data, points =
+    load_coverage coverage_files coverage_paths expect do_not_expect in
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file source_paths ignore_missing_files in
   Report_utils.mkdirs dir;
@@ -349,17 +346,20 @@ let html
 
 
 
-let text per_file coverage_files coverage_paths () =
+let text per_file coverage_files coverage_paths expect do_not_expect =
   quiet := true;
-  let data, _ = load_coverage coverage_files coverage_paths in
+  let data, _ =
+    load_coverage coverage_files coverage_paths expect do_not_expect in
   Report_text.output ~per_file data
 
 
 
 let cobertura
-    file coverage_files coverage_paths search_path ignore_missing_files () =
+    file coverage_files coverage_paths search_path ignore_missing_files expect
+    do_not_expect =
 
-  let data, points = load_coverage coverage_files coverage_paths in
+  let data, points =
+    load_coverage coverage_files coverage_paths expect do_not_expect in
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file search_path ignore_missing_files in
   Report_cobertura.output verbose file search_in_path data points
@@ -367,13 +367,8 @@ let cobertura
 
 
 let coveralls
-    file
-    coverage_files
-    coverage_paths
-    search_path
-    ignore_missing_files
-    dry_run
-    () =
+    file coverage_files coverage_paths search_path ignore_missing_files expect
+    do_not_expect dry_run () =
 
   let coverage_service = Coverage_service.from_argument () in
 
@@ -455,7 +450,8 @@ let coveralls
       report_file
   in
 
-  let data, points = load_coverage coverage_files coverage_paths in
+  let data, points =
+    load_coverage coverage_files coverage_paths expect do_not_expect in
 
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file search_path ignore_missing_files in
@@ -595,7 +591,6 @@ struct
         "cases, files expected are limited to those with extensions .ml, " ^
         ".re, .mll, and .mly. When matching files, extensions are stripped, " ^
         "including nested .cppo extensions."))
-    --> (:=) Arguments.expect
 
   let do_not_expect =
     Arg.(value @@ opt_all string [] @@
@@ -607,7 +602,6 @@ struct
         "in the report. If $(i,PATH) does not end with a path separator, it " ^
         "is treated as the name of a single file, and that file is not " ^
         "required to appear in the report."))
-    --> (:=) Arguments.do_not_expect
 
   let html =
     let output_directory =
@@ -631,11 +625,10 @@ struct
           ("$(i,light) or $(i,dark). The default value, $(i,auto), causes " ^
           "the report's theme to adapt to system or browser preferences."))
     in
-    expect &&&
-    do_not_expect
-    |> Term.(app (const html
+    Term.(const html
       $ output_directory $ title $ tab_size $ theme $ coverage_files 0
-      $ coverage_paths $ source_paths $ ignore_missing_files)),
+      $ coverage_paths $ source_paths $ ignore_missing_files $ expect
+      $ do_not_expect),
     term_info "html" ~doc:"Generate HTML report locally."
       ~man:[
         `S "USAGE EXAMPLE";
@@ -665,12 +658,10 @@ struct
     service_pull_request &&&
     repo_token &&&
     git &&&
-    parallel &&&
-    expect &&&
-    do_not_expect
+    parallel
     |> Term.(app (const coveralls
       $ const "" $ coverage_files 1 $ coverage_paths $ source_paths
-      $ ignore_missing_files $ dry_run)),
+      $ ignore_missing_files $ expect $ do_not_expect $ dry_run)),
     term_info "send-to" ~doc:"Send report to a supported web service."
       ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
 
@@ -679,18 +670,14 @@ struct
       Arg.(value @@ flag @@
         info ["per-file"] ~doc:"Include coverage per source file.")
     in
-    expect &&&
-    do_not_expect
-    |> Term.(app (const text
-      $ per_file $ coverage_files 0 $ coverage_paths)),
+    Term.(const text
+      $ per_file $ coverage_files 0 $ coverage_paths $ expect $ do_not_expect),
     term_info "summary" ~doc:"Write coverage summary to STDOUT."
 
   let cobertura =
-    expect &&&
-    do_not_expect
-    |> Term.(app (const cobertura
-      $ output_file $ coverage_files 1
-      $ coverage_paths $ source_paths $ ignore_missing_files)),
+    Term.(const cobertura
+      $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
+      $ ignore_missing_files $ expect $ do_not_expect),
     term_info "cobertura" ~doc:"Generate Cobertura XML report"
 
   let coveralls =
@@ -700,12 +687,10 @@ struct
     service_pull_request &&&
     repo_token &&&
     git &&&
-    parallel &&&
-    expect &&&
-    do_not_expect
+    parallel
     |> Term.(app (const coveralls
       $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
-      $ ignore_missing_files $ const false)),
+      $ ignore_missing_files $ expect $ do_not_expect $ const false)),
     term_info "coveralls" ~doc:
       ("Generate Coveralls JSON report (for manual integration with web " ^
       "services).")
