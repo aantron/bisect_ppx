@@ -34,7 +34,7 @@ let split_filename name =
   dirname, basename
 
 let percentage stats =
-  let a, b = Report_utils.(stats.visited, stats.total) in
+  let a, b = Util.(stats.visited, stats.total) in
   let a, b = float_of_int a, float_of_int b in
   if b = 0. then 100. else (100. *. a) /. b
 
@@ -43,15 +43,15 @@ let output_html_index verbose title theme filename l =
 
   let stats =
     List.fold_left
-      (fun acc (_, _, s) -> Report_utils.add acc s)
-      (Report_utils.make ())
+      (fun acc (_, _, s) -> Util.add acc s)
+      (Util.make ())
       l in
 
   Common.try_out_channel
     false
     filename
     (fun channel ->
-      Report_utils.output_strings
+      Util.output_strings
         [  "<!DOCTYPE html>" ;
            "<html lang=\"en\"$(theme)>" ;
            "  <head>" ;
@@ -82,7 +82,7 @@ let output_html_index verbose title theme filename l =
             String.sub
               html_file prefix_length (String.length html_file - prefix_length)
         in
-        Report_utils.output_strings
+        Util.output_strings
           ["      <div>";
            "        <span class=\"meter\">";
            "          <span class=\"covered\" style=\"width: $(p)%\"></span>";
@@ -99,7 +99,7 @@ let output_html_index verbose title theme filename l =
           channel in
       List.iter per_file l;
 
-      Report_utils.output_strings
+      Util.output_strings
         [ "    </div>" ;
           "  </body>" ;
           "</html>" ]
@@ -141,10 +141,10 @@ let output_html
     verbose "... file not found";
     None
   | Some resolved_in_file ->
-    let cmp_content = Hashtbl.find points in_file |> Report_utils.read_points in
+    let cmp_content = Hashtbl.find points in_file |> Util.read_points in
     verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
     let len = Array.length visited in
-    let stats = Report_utils.make () in
+    let stats = Util.make () in
     let pts = ref (List.map
                      (fun p ->
                        let nb =
@@ -152,12 +152,12 @@ let output_html
                            visited.(Common.(p.identifier))
                          else
                            0 in
-                       Report_utils.update stats (nb > 0);
+                       Util.update stats (nb > 0);
                        (Common.(p.offset), nb))
                      cmp_content) in
     let dirname, basename = split_filename in_file in
     let in_channel, out_channel =
-      Report_utils.open_both resolved_in_file out_file in
+      Util.open_both resolved_in_file out_file in
     let rec make_path_to_report_root acc in_file_path_remaining =
       if in_file_path_remaining = "" ||
          in_file_path_remaining = Filename.current_dir_name ||
@@ -188,7 +188,7 @@ let output_html
             let line = input_line in_channel in
             let end_ofs = pos_in in_channel in
             let before, after =
-              Report_utils.split (fun (o, _) -> o < end_ofs) !pts in
+              Util.split (fun (o, _) -> o < end_ofs) !pts in
             pts := after;
             let line' = escape_line tab_size line start_ofs before in
             let visited, unvisited =
@@ -213,7 +213,7 @@ let output_html
       in
 
       (* Head and header. *)
-      Report_utils.output_strings
+      Util.output_strings
         [  "<!DOCTYPE html>" ;
            "<html lang=\"en\"$(theme)>" ;
            "  <head>" ;
@@ -254,7 +254,7 @@ let output_html
             else
               "bottom", (100. -. offset)
           in
-          Report_utils.output_strings
+          Util.output_strings
             ["      <span $(visited) style=\"$(origin):$(offset)%\"></span>"]
             ["visited", class_of_visited (visited, unvisited);
              "origin", origin;
@@ -263,7 +263,7 @@ let output_html
             out_channel
         end);
 
-      Report_utils.output_strings
+      Util.output_strings
         ["    </div>";
          "    <div id=\"report\">";
          "      <div id=\"lines-layer\">";
@@ -273,13 +273,13 @@ let output_html
 
       (* Line highlights. *)
       lines |> List.iter (fun (number, _, visited, unvisited) ->
-        Report_utils.output_strings
+        Util.output_strings
           ["<a id=\"L$(n)\"></a><span $(visited)> </span>"]
           ["n", string_of_int number;
            "visited", class_of_visited (visited, unvisited)]
           out_channel);
 
-      Report_utils.output_strings
+      Util.output_strings
         ["</pre>";
          "      </div>";
          "      <div id=\"text-layer\">";
@@ -295,7 +295,7 @@ let output_html
         let padded =
           (String.make (width - String.length formatted) ' ') ^  formatted in
 
-        Report_utils.output_strings
+        Util.output_strings
           ["<a href=\"#L$(n)\">$(padded)</a>"]
           ["n", formatted;
            "padded", padded]
@@ -316,7 +316,7 @@ let output_html
         output_string out_channel markup;
         output_char out_channel '\n');
 
-      Report_utils.output_strings
+      Util.output_strings
         ["</code></pre>";
          "      </div>";
          "    </div>";

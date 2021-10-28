@@ -15,7 +15,7 @@ let file_json verbose indent in_file resolver visited points =
   | Some resolved_in_file ->
     let digest = Digest.to_hex (Digest.file resolved_in_file) in
     let line_counts =
-      Report_utils.line_counts verbose in_file resolved_in_file visited points
+      Util.line_counts verbose in_file resolved_in_file visited points
     in
     let scounts = List.map (function
       | None -> "null"
@@ -85,7 +85,7 @@ let output
         metadata branch
   in
 
-  Report_utils.mkdirs (Filename.dirname file);
+  Util.mkdirs (Filename.dirname file);
   let file_jsons =
     Hashtbl.fold
       (fun in_file visited acc ->
@@ -114,7 +114,7 @@ let output
       ""
   in
   let write ch =
-    Report_utils.output_strings
+    Util.output_strings
       [ "{" ;
         repo_params ;
         git ;

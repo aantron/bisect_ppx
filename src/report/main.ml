@@ -270,7 +270,7 @@ let load_coverage files search_paths expect do_not_expect =
       Bisect_common.read_runtime_data out_file
       |> List.iter (fun (source_file, (file_counts, file_points)) ->
         let file_counts =
-          let open Report_utils.Infix in
+          let open Util.Infix in
           try (Hashtbl.find total_counts source_file) +| file_counts
           with Not_found -> file_counts
         in
@@ -316,8 +316,8 @@ let html
     load_coverage coverage_files coverage_paths expect do_not_expect in
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file source_paths ignore_missing_files in
-  Report_utils.mkdirs dir;
-  Report_html.output verbose dir tab_size title theme search_in_path data points
+  Util.mkdirs dir;
+  Html.output verbose dir tab_size title theme search_in_path data points
 
 
 
@@ -325,7 +325,7 @@ let text per_file coverage_files coverage_paths expect do_not_expect =
   quiet := true;
   let data, _ =
     load_coverage coverage_files coverage_paths expect do_not_expect in
-  Report_text.output ~per_file data
+  Text.output ~per_file data
 
 
 
@@ -337,7 +337,7 @@ let cobertura
     load_coverage coverage_files coverage_paths expect do_not_expect in
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file search_path ignore_missing_files in
-  Report_cobertura.output verbose file search_in_path data points
+  Cobertura.output verbose file search_in_path data points
 
 
 
@@ -460,7 +460,7 @@ let coveralls
   let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file search_path ignore_missing_files in
 
-  Report_coveralls.output verbose file
+  Coveralls.output verbose file
     service_name
     service_number
     service_job_id

@@ -99,15 +99,15 @@ let pp_cobertura fmt ({sources; package; _} as cobertura) =
     pp_package package
 
 let line_rate counts =
-  let open Report_utils in
+  let open Util in
   float_of_int counts.visited /. float_of_int counts.total
 
 let update_counts counts line_counts =
   List.iter
     (function
       | None -> ()
-      | Some x when x > 0 -> Report_utils.update counts true
-      | Some x -> Report_utils.update counts false)
+      | Some x when x > 0 -> Util.update counts true
+      | Some x -> Util.update counts false)
     line_counts
 
 let line line hits =
@@ -121,9 +121,9 @@ let classes ~global_counts verbose data resolver points : class_ list =
       None
     | Some resolved_in_file ->
       let line_counts =
-        Report_utils.line_counts
+        Util.line_counts
           verbose in_file resolved_in_file visited points in
-      let counts = Report_utils.make () in
+      let counts = Util.make () in
       let () = update_counts global_counts line_counts in
       let () = update_counts counts line_counts in
       let line_rate = line_rate counts in
@@ -162,7 +162,7 @@ let package ~counts ~verbose ~data ~resolver ~points =
   {name = "."; line_rate; classes}
 
 let cobertura ~verbose ~data ~resolver ~points =
-  let counts = Report_utils.make () in
+  let counts = Util.make () in
   let package = package ~counts ~verbose ~data ~resolver ~points in
   let sources = ["."] in
   let rate = line_rate counts in
@@ -175,7 +175,7 @@ let cobertura ~verbose ~data ~resolver ~points =
   }
 
 let output verbose file resolver data points =
-  let () = Report_utils.mkdirs (Filename.dirname file) in
+  let () = Util.mkdirs (Filename.dirname file) in
   let cobertura = cobertura ~verbose ~data ~resolver ~points in
   let oc = open_out file in
   let fmt = Format.formatter_of_out_channel oc in
