@@ -236,7 +236,7 @@ and install it:
     ```
     BISECT_ENABLE=yes npm run build
     npm run test
-    npx bisect-ppx-report.exe html
+    npx bisect-ppx-report html
     ```
 
     To exclude your test files from the report, change your PPX flags like so:

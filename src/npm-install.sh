@@ -6,8 +6,8 @@ esy_build() {
     esy install -P binaries.esy.json
     esy -P binaries.esy.json dune build -p bisect_ppx src/ppx/bucklescript/ppx.exe
     cp _build/default/src/ppx/bucklescript/ppx.exe ./ppx
-    esy -P binaries.esy.json dune build -p bisect_ppx src/report/report.exe
-    cp _build/default/src/report/report.exe ./bisect-ppx-report
+    esy -P binaries.esy.json dune build -p bisect_ppx src/report/main.exe
+    cp _build/default/src/report/main.exe ./bisect-ppx-report
     exit 0
 }
 
