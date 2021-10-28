@@ -7,33 +7,9 @@
 module Arguments :
 sig
   val verbose : bool ref
-  val service_name : string ref
-  val service_number : string ref
-  val service_job_id : string ref
-  val service_pull_request : string ref
-  val repo_token : string ref
-  val git : bool ref
-  val parallel : bool ref
-  val send_to : string option ref
 end =
 struct
   let verbose = ref false
-
-  let service_name = ref ""
-
-  let service_number = ref ""
-
-  let service_job_id = ref ""
-
-  let service_pull_request = ref ""
-
-  let repo_token = ref ""
-
-  let git = ref false
-
-  let parallel = ref false
-
-  let send_to = ref None
 end
 
 
@@ -230,7 +206,7 @@ type coverage_service = [
 
 module Coverage_service :
 sig
-  val from_argument : unit -> coverage_service option
+  val from_argument : string option -> coverage_service option
   val pretty_name : coverage_service -> string
   val report_filename : coverage_service -> string
   val send_command : coverage_service -> string
@@ -240,8 +216,7 @@ sig
   val needs_git_info : ci -> coverage_service -> bool
 end =
 struct
-  let from_argument () =
-    match !Arguments.send_to with
+  let from_argument = function
     | None -> None
     | Some "Codecov" -> Some `Codecov
     | Some "Coveralls" -> Some `Coveralls
@@ -368,9 +343,10 @@ let cobertura
 
 let coveralls
     file coverage_files coverage_paths search_path ignore_missing_files expect
-    do_not_expect dry_run () =
+    do_not_expect service service_name service_number service_job_id
+    service_pull_request repo_token git parallel dry_run =
 
-  let coverage_service = Coverage_service.from_argument () in
+  let coverage_service = Coverage_service.from_argument service in
 
   let file =
     match coverage_service with
@@ -379,6 +355,8 @@ let coveralls
     | Some service ->
       let report_file = Coverage_service.report_filename service in
       info "will write coverage report to '%s'" report_file;
+      report_file
+  in
 
       let ci =
         lazy begin
@@ -391,38 +369,55 @@ let coveralls
         end
       in
 
-      if !Arguments.service_name = "" then begin
+  let service_name =
+    match coverage_service, service_name with
+    | Some _, "" ->
         let service_name = CI.name_in_report (Lazy.force ci) in
         info "using service name '%s'" service_name;
-        Arguments.service_name := service_name;
-      end;
+      service_name
+    | _ ->
+      service_name
+  in
 
-      if !Arguments.service_job_id = "" then begin
+  let service_job_id =
+    match coverage_service, service_job_id with
+    | Some _, "" ->
         let job_id_variable = CI.job_id_variable (Lazy.force ci) in
         info "using job ID variable $%s" job_id_variable;
-        match Sys.getenv job_id_variable with
+        begin match Sys.getenv job_id_variable with
         | value ->
-          Arguments.service_job_id := value
+          value
         | exception Not_found ->
           error "expected job id in $%s" job_id_variable
-      end;
+        end
+    | _ ->
+      service_job_id
+  in
 
-      if !Arguments.service_pull_request = "" then begin
+  let service_pull_request =
+    match coverage_service, service_pull_request with
+    | Some service, "" ->
         let needs =
           Coverage_service.needs_pull_request_number (Lazy.force ci) service in
-        match needs with
+        begin match needs with
         | None ->
-          ()
+          service_pull_request
         | Some pr_variable ->
           match Sys.getenv pr_variable with
           | value ->
             info "using PR number variable $%s" pr_variable;
-            Arguments.service_pull_request := value
+            value
           | exception Not_found ->
-            info "$%s not set" pr_variable
-      end;
+            info "$%s not set" pr_variable;
+            service_pull_request
+        end
+    | _ ->
+      service_pull_request
+  in
 
-      if !Arguments.repo_token = "" then
+  let repo_token =
+    match coverage_service, repo_token with
+    | Some service, "" ->
         if Coverage_service.needs_repo_token (Lazy.force ci) service then begin
           let repo_token_variables =
             Coverage_service.repo_token_variables service in
@@ -433,21 +428,30 @@ let coveralls
                 try_variables more
               | value ->
                 info "using repo token variable $%s" variable;
-                Arguments.repo_token := value
+                value
               end
             | [] ->
               error "expected repo token in $%s" (List.hd repo_token_variables)
           in
           try_variables repo_token_variables
-        end;
+        end
+      else
+        repo_token
+    | _ ->
+      repo_token
+  in
 
-      if not !Arguments.git then
+  let git =
+    match coverage_service, git with
+    | Some service, false ->
         if Coverage_service.needs_git_info (Lazy.force ci) service then begin
           info "including git info";
-          Arguments.git := true
-        end;
-
-      report_file
+          true
+        end
+      else
+        false
+    | _ ->
+      git
   in
 
   let data, points =
@@ -457,13 +461,13 @@ let coveralls
   let search_in_path = search_file search_path ignore_missing_files in
 
   Report_coveralls.output verbose file
-    !Arguments.service_name
-    !Arguments.service_number
-    !Arguments.service_job_id
-    !Arguments.service_pull_request
-    !Arguments.repo_token
-    !Arguments.git
-    !Arguments.parallel
+    service_name
+    service_number
+    service_job_id
+    service_pull_request
+    repo_token
+    git
+    parallel
     search_in_path data points;
 
   match coverage_service with
@@ -540,43 +544,36 @@ struct
     Arg.(value @@ opt string "" @@
       info ["service-name"] ~docv:"STRING" ~doc:
         "Include \"service_name\": \"$(i,STRING)\" in the generated report.")
-    --> (:=) Arguments.service_name
 
   let service_number =
     Arg.(value @@ opt string "" @@
       info ["service-number"] ~docv:"STRING" ~doc:
         "Include \"service_number\": \"$(i,STRING)\" in the generated report.")
-    --> (:=) Arguments.service_number
 
   let service_job_id =
     Arg.(value @@ opt string "" @@
       info ["service-job-id"] ~docv:"STRING" ~doc:
         "Include \"service_job_id\": \"$(i,STRING)\" in the generated report.")
-    --> (:=) Arguments.service_job_id
 
   let service_pull_request =
     Arg.(value @@ opt string "" @@
       info ["service-pull-request"] ~docv:"STRING" ~doc:
         ("Include \"service_pull_request\": \"$(i,STRING)\" in the generated " ^
         "report."))
-    --> (:=) Arguments.service_pull_request
 
   let repo_token =
     Arg.(value @@ opt string "" @@
       info ["repo-token"] ~docv:"STRING" ~doc:
         "Include \"repo_token\": \"$(i,STRING)\" in the generated report.")
-    --> (:=) Arguments.repo_token
 
   let git =
     Arg.(value @@ flag @@
       info ["git"] ~doc:"Include git commit info in the generated report.")
-    --> (:=) Arguments.git
 
   let parallel =
     Arg.(value @@ flag @@
       info ["parallel"] ~doc:
         "Include \"parallel\": true in the generated report.")
-    --> (:=) Arguments.parallel
 
   let expect =
     Arg.(value @@ opt_all string [] @@
@@ -643,7 +640,6 @@ struct
     let service =
       Arg.(required @@ pos 0 (some string) None @@
         info [] ~docv:"SERVICE" ~doc:"'Coveralls' or 'Codecov'.")
-      --> fun s -> Arguments.send_to := Some s
     in
     let dry_run =
       Arg.(value @@ flag @@
@@ -651,17 +647,12 @@ struct
           ("Don't issue the final upload command and don't delete the " ^
           "intermediate coverage report file."))
     in
-    service &&&
-    service_name &&&
-    service_number &&&
-    service_job_id &&&
-    service_pull_request &&&
-    repo_token &&&
-    git &&&
-    parallel
-    |> Term.(app (const coveralls
+    Term.(const coveralls
       $ const "" $ coverage_files 1 $ coverage_paths $ source_paths
-      $ ignore_missing_files $ expect $ do_not_expect $ dry_run)),
+      $ ignore_missing_files $ expect $ do_not_expect
+      $ (const Option.some $ service) $ service_name $ service_number
+      $ service_job_id $ service_pull_request $ repo_token $ git $ parallel
+      $ dry_run),
     term_info "send-to" ~doc:"Send report to a supported web service."
       ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
 
@@ -681,16 +672,11 @@ struct
     term_info "cobertura" ~doc:"Generate Cobertura XML report"
 
   let coveralls =
-    service_name &&&
-    service_number &&&
-    service_job_id &&&
-    service_pull_request &&&
-    repo_token &&&
-    git &&&
-    parallel
-    |> Term.(app (const coveralls
+    Term.(const coveralls
       $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
-      $ ignore_missing_files $ expect $ do_not_expect $ const false)),
+      $ ignore_missing_files $ expect $ do_not_expect $ const None
+      $ service_name $ service_number $ service_job_id $ service_pull_request
+      $ repo_token $ git $ parallel $ const false),
     term_info "coveralls" ~doc:
       ("Generate Coveralls JSON report (for manual integration with web " ^
       "services).")
