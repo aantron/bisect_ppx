@@ -330,16 +330,16 @@ let output_and_send
     ~repo_token ~git ~parallel ~coverage_files ~coverage_paths ~source_paths
     ~ignore_missing_files ~expect ~do_not_expect;
 
-    let name = Coverage_service.pretty_name service in
-    let command = Coverage_service.send_command service in
-    Util.info "sending to %s with command:" name;
-    Util.info "%s" command;
-    if not dry_run then begin
-      let exit_code = Sys.command command in
-      let report = Coverage_service.report_filename service in
-      if Sys.file_exists report then begin
-        Util.info "deleting '%s'" report;
-        Sys.remove report
-      end;
-      exit exit_code
-    end
+  let name = Coverage_service.pretty_name service in
+  let command = Coverage_service.send_command service in
+  Util.info "sending to %s with command:" name;
+  Util.info "%s" command;
+  if not dry_run then begin
+    let exit_code = Sys.command command in
+    let report = Coverage_service.report_filename service in
+    if Sys.file_exists report then begin
+      Util.info "deleting '%s'" report;
+      Sys.remove report
+    end;
+    exit exit_code
+  end
