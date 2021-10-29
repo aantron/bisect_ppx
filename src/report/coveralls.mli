@@ -23,3 +23,22 @@ val output :
   expect:string list ->
   do_not_expect:string list ->
     unit
+
+val output_and_send :
+  to_file:string ->
+  service:string option ->
+  service_name:string ->
+  service_number:string ->
+  service_job_id:string ->
+  service_pull_request:string ->
+  repo_token:string ->
+  git:bool ->
+  parallel:bool ->
+  dry_run:bool ->
+  coverage_files:string list ->
+  coverage_paths:string list ->
+  source_paths:string list ->
+  ignore_missing_files:bool ->
+  expect:string list ->
+  do_not_expect:string list ->
+    unit
