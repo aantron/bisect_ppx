@@ -503,8 +503,6 @@ struct
   module Term = Cmdliner.Term
   module Arg = Cmdliner.Arg
 
-  let (-->) a f = Term.(const f $ a)
-  let (&&&) a b = Term.(const (fun () () -> ()) $ a $ b)
   let term_info = Term.info ~sdocs:"COMMON OPTIONS"
 
   let coverage_files from_position =

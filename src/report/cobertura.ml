@@ -107,7 +107,7 @@ let update_counts counts line_counts =
     (function
       | None -> ()
       | Some x when x > 0 -> Util.update counts true
-      | Some x -> Util.update counts false)
+      | Some _ -> Util.update counts false)
     line_counts
 
 let line line hits =
