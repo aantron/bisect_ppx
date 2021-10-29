@@ -25,10 +25,19 @@ let cobertura
 
 let coveralls
     to_file coverage_files coverage_paths source_paths ignore_missing_files
+    expect do_not_expect service_name service_number service_job_id
+    service_pull_request repo_token git parallel =
+  Coveralls.output
+    ~to_file ~service_name ~service_number ~service_job_id ~service_pull_request
+    ~repo_token ~git ~parallel ~coverage_files ~coverage_paths ~source_paths
+    ~ignore_missing_files ~expect ~do_not_expect
+
+let send_to
+    to_file coverage_files coverage_paths source_paths ignore_missing_files
     expect do_not_expect service service_name service_number service_job_id
     service_pull_request repo_token git parallel dry_run =
   Coveralls.output_and_send
-    ~to_file ~service_name ~service ~service_number ~service_job_id
+    ~to_file ~service ~service_name ~service_number ~service_job_id
     ~service_pull_request ~repo_token ~git ~parallel ~dry_run ~coverage_files
     ~coverage_paths ~source_paths ~ignore_missing_files ~expect ~do_not_expect
 
@@ -192,7 +201,7 @@ let send_to =
         ("Don't issue the final upload command and don't delete the " ^
         "intermediate coverage report file."))
   in
-  Term.(const set_verbose $ verbose $ const coveralls
+  Term.(const set_verbose $ verbose $ const send_to
     $ const "" $ coverage_files 1 $ coverage_paths $ source_paths
     $ ignore_missing_files $ expect $ do_not_expect
     $ (const Option.some $ service) $ service_name $ service_number
@@ -219,9 +228,9 @@ let cobertura =
 let coveralls =
   Term.(const set_verbose $ verbose $ const coveralls
     $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
-    $ ignore_missing_files $ expect $ do_not_expect $ const None
-    $ service_name $ service_number $ service_job_id $ service_pull_request
-    $ repo_token $ git $ parallel $ const false),
+    $ ignore_missing_files $ expect $ do_not_expect $ service_name
+    $ service_number $ service_job_id $ service_pull_request $ repo_token $ git
+    $ parallel),
   term_info "coveralls" ~doc:
     ("Generate Coveralls JSON report (for manual integration with web " ^
     "services).")
