@@ -4,44 +4,7 @@
 
 
 
-(* Thin wrappers, because cmdliner doesn't pass labeled arguments. *)
-
-let html
-    to_directory title tab_size theme coverage_files coverage_paths source_paths
-    ignore_missing_files expect do_not_expect =
-  Html.output
-    ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
-    ~source_paths ~ignore_missing_files ~expect ~do_not_expect
-
-let text per_file coverage_files coverage_paths expect do_not_expect =
-  Text.output ~per_file ~coverage_files ~coverage_paths ~expect ~do_not_expect
-
-let cobertura
-    to_file coverage_files coverage_paths source_paths ignore_missing_files
-    expect do_not_expect =
-  Cobertura.output
-    ~to_file ~coverage_files ~coverage_paths ~source_paths ~ignore_missing_files
-    ~expect ~do_not_expect
-
-let coveralls
-    to_file coverage_files coverage_paths source_paths ignore_missing_files
-    expect do_not_expect service_name service_number service_job_id
-    service_pull_request repo_token git parallel =
-  Coveralls.output
-    ~to_file ~service_name ~service_number ~service_job_id ~service_pull_request
-    ~repo_token ~git ~parallel ~coverage_files ~coverage_paths ~source_paths
-    ~ignore_missing_files ~expect ~do_not_expect
-
-let send_to
-    to_file coverage_files coverage_paths source_paths ignore_missing_files
-    expect do_not_expect service service_name service_number service_job_id
-    service_pull_request repo_token git parallel dry_run =
-  Coveralls.output_and_send
-    ~to_file ~service ~service_name ~service_number ~service_job_id
-    ~service_pull_request ~repo_token ~git ~parallel ~dry_run ~coverage_files
-    ~coverage_paths ~source_paths ~ignore_missing_files ~expect ~do_not_expect
-
-
+(* Helpers. *)
 
 let esy_source_dir =
   match Sys.getenv "cur__target_dir" with
@@ -50,6 +13,10 @@ let esy_source_dir =
 
 module Term = Cmdliner.Term
 module Arg = Cmdliner.Arg
+
+
+
+(* Common arguments. *)
 
 let term_info = Term.info ~sdocs:"COMMON OPTIONS"
 
@@ -68,7 +35,7 @@ let coverage_paths =
       ("Directory in which to look for .coverage files. This option can be " ^
       "specified multiple times. The search is recursive in each directory."))
 
-let output_file =
+let to_file =
   Arg.(required @@ pos 0 (some string) None @@
     info [] ~docv:"FILE" ~doc:"Output file name.")
 
@@ -154,15 +121,18 @@ let set_verbose verbose x =
   Util.verbose := verbose;
   x
 
+
+
+(* Subcommands. *)
+
 let html =
-  let output_directory =
+  let to_directory =
     Arg.(value @@ opt string "./_coverage" @@
       info ["o"] ~docv:"DIRECTORY" ~doc:"Output directory.")
   in
   let title =
     Arg.(value @@ opt string "Coverage report" @@
-      info ["title"] ~docv:"STRING" ~doc:
-        "Report title for use in HTML pages.")
+      info ["title"] ~docv:"STRING" ~doc:"Report title for use in HTML pages.")
   in
   let tab_size =
     Arg.(value @@ opt int 2 @@
@@ -176,10 +146,17 @@ let html =
         ("$(i,light) or $(i,dark). The default value, $(i,auto), causes " ^
         "the report's theme to adapt to system or browser preferences."))
   in
-  Term.(const set_verbose $ verbose $ const html
-    $ output_directory $ title $ tab_size $ theme $ coverage_files 0
-    $ coverage_paths $ source_paths $ ignore_missing_files $ expect
-    $ do_not_expect),
+
+  let call_with_labels
+      to_directory title tab_size theme coverage_files coverage_paths source_paths
+      ignore_missing_files expect do_not_expect =
+    Html.output
+      ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
+      ~source_paths ~ignore_missing_files ~expect ~do_not_expect
+  in
+  Term.(const set_verbose $ verbose $ const call_with_labels $ to_directory
+    $ title $ tab_size $ theme $ coverage_files 0 $ coverage_paths
+    $ source_paths $ ignore_missing_files $ expect $ do_not_expect),
   term_info "html" ~doc:"Generate HTML report locally."
     ~man:[
       `S "USAGE EXAMPLE";
@@ -189,6 +166,8 @@ let html =
         ("Then view the generated report at _coverage/index.html with your " ^
         "browser. All arguments are optional.")
     ]
+
+
 
 let send_to =
   let service =
@@ -201,7 +180,17 @@ let send_to =
         ("Don't issue the final upload command and don't delete the " ^
         "intermediate coverage report file."))
   in
-  Term.(const set_verbose $ verbose $ const send_to
+
+  let call_with_labels
+      to_file coverage_files coverage_paths source_paths ignore_missing_files
+      expect do_not_expect service service_name service_number service_job_id
+      service_pull_request repo_token git parallel dry_run =
+    Coveralls.output_and_send
+      ~to_file ~service ~service_name ~service_number ~service_job_id
+      ~service_pull_request ~repo_token ~git ~parallel ~dry_run ~coverage_files
+      ~coverage_paths ~source_paths ~ignore_missing_files ~expect ~do_not_expect
+  in
+  Term.(const set_verbose $ verbose $ const call_with_labels
     $ const "" $ coverage_files 1 $ coverage_paths $ source_paths
     $ ignore_missing_files $ expect $ do_not_expect
     $ (const Option.some $ service) $ service_name $ service_number
@@ -210,30 +199,60 @@ let send_to =
   term_info "send-to" ~doc:"Send report to a supported web service."
     ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
 
+
+
 let text =
   let per_file =
     Arg.(value @@ flag @@
       info ["per-file"] ~doc:"Include coverage per source file.")
   in
-  Term.(const set_verbose $ verbose $ const text
+
+  let call_with_labels
+      per_file coverage_files coverage_paths expect do_not_expect =
+    Text.output ~per_file ~coverage_files ~coverage_paths ~expect ~do_not_expect
+  in
+  Term.(const set_verbose $ verbose $ const call_with_labels
     $ per_file $ coverage_files 0 $ coverage_paths $ expect $ do_not_expect),
   term_info "summary" ~doc:"Write coverage summary to STDOUT."
 
+
+
 let cobertura =
-  Term.(const set_verbose $ verbose $ const cobertura
-    $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
-    $ ignore_missing_files $ expect $ do_not_expect),
+  let call_with_labels
+      to_file coverage_files coverage_paths source_paths ignore_missing_files
+      expect do_not_expect =
+    Cobertura.output
+      ~to_file ~coverage_files ~coverage_paths ~source_paths
+      ~ignore_missing_files ~expect ~do_not_expect
+  in
+  Term.(const set_verbose $ verbose $ const call_with_labels $ to_file
+    $ coverage_files 1 $ coverage_paths $ source_paths $ ignore_missing_files
+    $ expect $ do_not_expect),
   term_info "cobertura" ~doc:"Generate Cobertura XML report"
 
+
+
 let coveralls =
-  Term.(const set_verbose $ verbose $ const coveralls
-    $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
-    $ ignore_missing_files $ expect $ do_not_expect $ service_name
-    $ service_number $ service_job_id $ service_pull_request $ repo_token $ git
-    $ parallel),
+  let call_with_labels
+      to_file service_name service_number service_job_id service_pull_request
+      repo_token git parallel coverage_files coverage_paths source_paths
+      ignore_missing_files expect do_not_expect =
+    Coveralls.output
+      ~to_file ~service_name ~service_number ~service_job_id
+      ~service_pull_request ~repo_token ~git ~parallel ~coverage_files
+      ~coverage_paths ~source_paths ~ignore_missing_files ~expect ~do_not_expect
+  in
+  Term.(const set_verbose $ verbose $ const call_with_labels $ to_file
+    $ service_name $ service_number $ service_job_id $ service_pull_request
+    $ repo_token $ git $ parallel $ coverage_files 1 $ coverage_paths
+    $ source_paths $ ignore_missing_files $ expect $ do_not_expect),
   term_info "coveralls" ~doc:
     ("Generate Coveralls JSON report (for manual integration with web " ^
     "services).")
+
+
+
+(* Entry point. *)
 
 let () =
   Term.(eval_choice
