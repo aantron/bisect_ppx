@@ -4,15 +4,12 @@
 
 
 
-(** This module defines the output to Cobertura XML. *)
-
 val output :
-  string ->
-  (string -> string option) ->
-  (string, int array) Hashtbl.t ->
-  (string, string) Hashtbl.t ->
-  unit
-(** [output file resolver data points] writes a Cobertura XML [file] for
-    [data]. [verbose] is used for verbose output. [resolver] associates actual
-    paths to given filenames. [points] gives the marshalled locations of the
-    points in the file. *)
+  to_file:string ->
+  coverage_files:string list ->
+  coverage_paths:string list ->
+  source_paths:string list ->
+  ignore_missing_files:bool ->
+  expect:string list ->
+  do_not_expect:string list ->
+    unit

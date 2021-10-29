@@ -121,16 +121,12 @@ let html
 let text per_file coverage_files coverage_paths expect do_not_expect =
   Text.output ~per_file ~coverage_files ~coverage_paths ~expect ~do_not_expect
 
-
-
 let cobertura
-    file coverage_files coverage_paths search_path ignore_missing_files expect
-    do_not_expect =
-
-  let data, points =
-    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
-  let search_in_path = Util.search_file search_path ignore_missing_files in
-  Cobertura.output file search_in_path data points
+    to_file coverage_files coverage_paths source_paths ignore_missing_files
+    expect do_not_expect =
+  Cobertura.output
+    ~to_file ~coverage_files ~coverage_paths ~source_paths ~ignore_missing_files
+    ~expect ~do_not_expect
 
 
 
