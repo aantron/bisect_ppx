@@ -171,7 +171,8 @@ let html =
 
 let send_to =
   let service =
-    Arg.(required @@ pos 0 (some string) None @@
+    Arg.(required @@ pos 0
+      (enum ["Codecov", Some `Codecov; "Coveralls", Some `Coveralls]) None @@
       info [] ~docv:"SERVICE" ~doc:"'Coveralls' or 'Codecov'.")
   in
   let dry_run =
@@ -182,20 +183,18 @@ let send_to =
   in
 
   let call_with_labels
-      to_file coverage_files coverage_paths source_paths ignore_missing_files
-      expect do_not_expect service service_name service_number service_job_id
-      service_pull_request repo_token git parallel dry_run =
+      service service_name service_number service_job_id service_pull_request
+      repo_token git parallel dry_run coverage_files coverage_paths source_paths
+      ignore_missing_files expect do_not_expect =
     Coveralls.output_and_send
-      ~to_file ~service ~service_name ~service_number ~service_job_id
+      ~service ~service_name ~service_number ~service_job_id
       ~service_pull_request ~repo_token ~git ~parallel ~dry_run ~coverage_files
       ~coverage_paths ~source_paths ~ignore_missing_files ~expect ~do_not_expect
   in
-  Term.(const set_verbose $ verbose $ const call_with_labels
-    $ const "" $ coverage_files 1 $ coverage_paths $ source_paths
-    $ ignore_missing_files $ expect $ do_not_expect
-    $ (const Option.some $ service) $ service_name $ service_number
-    $ service_job_id $ service_pull_request $ repo_token $ git $ parallel
-    $ dry_run),
+  Term.(const set_verbose $ verbose $ const call_with_labels $ service
+    $ service_name $ service_number $ service_job_id $ service_pull_request
+    $ repo_token $ git $ parallel $ dry_run $ coverage_files 1 $ coverage_paths
+    $ source_paths $ ignore_missing_files $ expect $ do_not_expect),
   term_info "send-to" ~doc:"Send report to a supported web service."
     ~man:[`S "USAGE EXAMPLE"; `Pre "bisect-ppx-report send-to Coveralls"]
 

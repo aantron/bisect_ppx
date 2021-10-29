@@ -25,8 +25,7 @@ val output :
     unit
 
 val output_and_send :
-  to_file:string ->
-  service:string option ->
+  service:[ `Codecov | `Coveralls ] ->
   service_name:string ->
   service_number:string ->
   service_job_id:string ->

@@ -16,12 +16,18 @@
 From Travis to Coveralls.
 
   $ bisect-ppx-report send-to --dry-run No-such-service --verbose
-  Error: send-to: unknown coverage service 'No-such-service'
-  [1]
+  bisect-ppx-report: SERVICE argument: invalid value `No-such-service',
+                     expected either `Codecov' or `Coveralls'
+  Usage: bisect-ppx-report send-to [OPTION]... SERVICE [COVERAGE_FILES]...
+  Try `bisect-ppx-report send-to --help' or `bisect-ppx-report --help' for more information.
+  [124]
 
   $ bisect-ppx-report send-to --dry-run coveralls --verbose
-  Error: send-to: unknown coverage service 'coveralls'
-  [1]
+  bisect-ppx-report: SERVICE argument: invalid value `coveralls', expected
+                     either `Codecov' or `Coveralls'
+  Usage: bisect-ppx-report send-to [OPTION]... SERVICE [COVERAGE_FILES]...
+  Try `bisect-ppx-report send-to --help' or `bisect-ppx-report --help' for more information.
+  [124]
 
   $ bisect-ppx-report send-to --dry-run Coveralls --verbose
   Info: will write coverage report to 'coverage.json'

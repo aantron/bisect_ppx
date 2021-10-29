@@ -183,7 +183,6 @@ type coverage_service = [
 
 module Coverage_service :
 sig
-  val from_argument : string option -> coverage_service option
   val pretty_name : coverage_service -> string
   val report_filename : coverage_service -> string
   val send_command : coverage_service -> string
@@ -193,12 +192,6 @@ sig
   val needs_git_info : ci -> coverage_service -> bool
 end =
 struct
-  let from_argument = function
-    | None -> None
-    | Some "Codecov" -> Some `Codecov
-    | Some "Coveralls" -> Some `Coveralls
-    | Some other -> Util.error "send-to: unknown coverage service '%s'" other
-
   let pretty_name = function
     | `Codecov -> "Codecov"
     | `Coveralls -> "Coveralls"
@@ -236,21 +229,12 @@ struct
 end
 
 let output_and_send
-    ~to_file ~service ~service_name ~service_number ~service_job_id
-    ~service_pull_request ~repo_token ~git ~parallel ~dry_run ~coverage_files
-    ~coverage_paths ~source_paths ~ignore_missing_files ~expect ~do_not_expect =
+    ~service ~service_name ~service_number ~service_job_id ~service_pull_request
+    ~repo_token ~git ~parallel ~dry_run ~coverage_files ~coverage_paths
+    ~source_paths ~ignore_missing_files ~expect ~do_not_expect =
 
-  let coverage_service = Coverage_service.from_argument service in
-
-  let to_file =
-    match coverage_service with
-    | None ->
-      to_file
-    | Some service ->
-      let report_file = Coverage_service.report_filename service in
-      Util.info "will write coverage report to '%s'" report_file;
-      report_file
-  in
+  let to_file = Coverage_service.report_filename service in
+  Util.info "will write coverage report to '%s'" to_file;
 
   let ci =
     lazy begin
@@ -263,39 +247,36 @@ let output_and_send
     end
   in
 
-  let service_name =
-    match coverage_service, service_name with
-    | Some _, "" ->
-      let service_name = CI.name_in_report (Lazy.force ci) in
-      Util.info "using service name '%s'" service_name;
-      service_name
-    | _ ->
-      service_name
+  let or_default default string =
+    if string <> "" then
+      string
+    else
+      default ()
   in
 
+  let service_name =
+    service_name |> or_default (fun () -> CI.name_in_report (Lazy.force ci)) in
+  Util.info "using service name '%s'" service_name;
+
   let service_job_id =
-    match coverage_service, service_job_id with
-    | Some _, "" ->
+    service_job_id |> or_default begin fun () ->
       let job_id_variable = CI.job_id_variable (Lazy.force ci) in
       Util.info "using job ID variable $%s" job_id_variable;
-      begin match Sys.getenv job_id_variable with
+      match Sys.getenv job_id_variable with
       | value ->
         value
       | exception Not_found ->
         Util.error "expected job id in $%s" job_id_variable
-      end
-    | _ ->
-      service_job_id
+    end
   in
 
   let service_pull_request =
-    match coverage_service, service_pull_request with
-    | Some service, "" ->
+    service_pull_request |> or_default begin fun () ->
       let needs =
         Coverage_service.needs_pull_request_number (Lazy.force ci) service in
-      begin match needs with
+      match needs with
       | None ->
-        service_pull_request
+        ""
       | Some pr_variable ->
         match Sys.getenv pr_variable with
         | value ->
@@ -303,15 +284,12 @@ let output_and_send
           value
         | exception Not_found ->
           Util.info "$%s not set" pr_variable;
-          service_pull_request
-      end
-    | _ ->
-      service_pull_request
+          ""
+    end
   in
 
   let repo_token =
-    match coverage_service, repo_token with
-    | Some service, "" ->
+    repo_token |> or_default begin fun () ->
       if Coverage_service.needs_repo_token (Lazy.force ci) service then begin
         let repo_token_variables =
           Coverage_service.repo_token_variables service in
@@ -331,22 +309,20 @@ let output_and_send
         try_variables repo_token_variables
       end
       else
-        repo_token
-    | _ ->
-      repo_token
+        ""
+    end
   in
 
   let git =
-    match coverage_service, git with
-    | Some service, false ->
+    if not git then
       if Coverage_service.needs_git_info (Lazy.force ci) service then begin
         Util.info "including git info";
         true
       end
       else
         false
-    | _ ->
-      git
+    else
+      false
   in
 
   output
@@ -354,17 +330,13 @@ let output_and_send
     ~repo_token ~git ~parallel ~coverage_files ~coverage_paths ~source_paths
     ~ignore_missing_files ~expect ~do_not_expect;
 
-  match coverage_service with
-  | None ->
-    ()
-  | Some coverage_service ->
-    let name = Coverage_service.pretty_name coverage_service in
-    let command = Coverage_service.send_command coverage_service in
+    let name = Coverage_service.pretty_name service in
+    let command = Coverage_service.send_command service in
     Util.info "sending to %s with command:" name;
     Util.info "%s" command;
     if not dry_run then begin
       let exit_code = Sys.command command in
-      let report = Coverage_service.report_filename coverage_service in
+      let report = Coverage_service.report_filename service in
       if Sys.file_exists report then begin
         Util.info "deleting '%s'" report;
         Sys.remove report
