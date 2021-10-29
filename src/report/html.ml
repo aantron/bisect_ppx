@@ -4,12 +4,6 @@
 
 
 
-type theme = [
-  | `Light
-  | `Dark
-  | `Auto
-]
-
 let theme_class = function
   | `Light -> " class=\"light\""
   | `Dark -> " class=\"dark\""
@@ -364,10 +358,18 @@ let output_html tab_size title theme in_file out_file resolver visited points =
     close_out_noerr out_channel;
     Some stats
 
-let output dir tab_size title theme resolver data points =
+let output
+    ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
+    ~source_paths ~ignore_missing_files ~expect ~do_not_expect =
+
+  let data, points =
+    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
+  let resolver = Util.search_file source_paths ignore_missing_files in
+  Util.mkdirs to_directory;
+
   let files =
     Hashtbl.fold (fun in_file visited acc ->
-      let out_file = (Filename.concat dir in_file) ^ ".html" in
+      let out_file = (Filename.concat to_directory in_file) ^ ".html" in
       let maybe_stats =
         output_html tab_size title theme in_file out_file resolver
           visited points
@@ -379,7 +381,13 @@ let output dir tab_size title theme resolver data points =
     []
   in
   output_html_index
-    title theme (Filename.concat dir "index.html") (List.sort compare files);
-  output_file Assets.js (Filename.concat dir "coverage.js");
-  output_file Assets.highlight_js (Filename.concat dir "highlight.pack.js");
-  output_file Assets.css (Filename.concat dir "coverage.css")
+    title
+    theme
+    (Filename.concat to_directory "index.html")
+    (List.sort compare files);
+  output_file
+    Assets.js (Filename.concat to_directory "coverage.js");
+  output_file
+    Assets.highlight_js (Filename.concat to_directory "highlight.pack.js");
+  output_file
+    Assets.css (Filename.concat to_directory "coverage.css")

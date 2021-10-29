@@ -110,14 +110,12 @@ end
 
 
 let html
-    dir title tab_size theme coverage_files coverage_paths source_paths
+    to_directory title tab_size theme coverage_files coverage_paths source_paths
     ignore_missing_files expect do_not_expect =
 
-  let data, points =
-    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
-  let search_in_path = Util.search_file source_paths ignore_missing_files in
-  Util.mkdirs dir;
-  Html.output dir tab_size title theme search_in_path data points
+  Html.output
+    ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
+    ~source_paths ~ignore_missing_files ~expect ~do_not_expect
 
 
 

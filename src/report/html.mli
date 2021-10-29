@@ -4,27 +4,15 @@
 
 
 
-(** This module defines the output to HTML. *)
-
-
-type theme = [
-  | `Light
-  | `Dark
-  | `Auto
-]
-
 val output :
-  string ->
-  int ->
-  string ->
-  theme ->
-  (string -> string option) ->
-  (string, int array) Hashtbl.t ->
-  (string, string) Hashtbl.t ->
+  to_directory:string ->
+  title:string ->
+  tab_size:int ->
+  theme:[ `Light | `Dark | `Auto ] ->
+  coverage_files:string list ->
+  coverage_paths:string list ->
+  source_paths:string list ->
+  ignore_missing_files:bool ->
+  expect:string list ->
+  do_not_expect:string list ->
     unit
-(** [output dir tab_size title theme resolver data points] writes all
-    the HTML files for [data] in the directory [dir]. [verbose] is used for
-    verbose output, [tab_size] is the number of space characters to use as a
-    replacement for tabulations, [title] is the title for generated pages, and
-    [resolver] associates actual paths to given filenames. [points] gives the
-    marshalled locations of the points in the file. *)
