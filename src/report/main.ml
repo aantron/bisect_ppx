@@ -33,11 +33,7 @@ let coveralls
     ~coverage_paths ~source_paths ~ignore_missing_files ~expect ~do_not_expect
 
 
-module Command_line :
-sig
-  val eval : unit -> unit
-end =
-struct
+
   let esy_source_dir =
     match Sys.getenv "cur__target_dir" with
     | exception Not_found -> []
@@ -230,7 +226,7 @@ struct
       ("Generate Coveralls JSON report (for manual integration with web " ^
       "services).")
 
-  let eval () =
+  let () =
     Term.(eval_choice
       (ret (const (`Help (`Auto, None))),
       term_info
@@ -247,9 +243,3 @@ struct
         ]))
       [html; send_to; text; cobertura; coveralls]
     |> Term.exit
-end
-
-
-
-let () =
-  Command_line.eval ()
