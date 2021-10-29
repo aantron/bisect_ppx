@@ -8,6 +8,10 @@
 
 
 
+val verbose : bool ref
+val info : ('a, unit, string, unit) format4 -> 'a
+val error : ('a, unit, string, 'b) format4 -> 'a
+
 module Infix :
 sig
   val (+|) : int array -> int array -> int array
@@ -72,7 +76,6 @@ val read_points : string -> Bisect_common.point_definition list
 (** [read_points s] reads point definitions from the string [s]. *)
 
 val line_counts :
-  (string -> unit) ->
   'a -> string ->
   int array ->
   ('a, string) Hashtbl.t -> int option list

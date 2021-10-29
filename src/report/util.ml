@@ -4,6 +4,18 @@
 
 
 
+let verbose =
+  ref false
+
+let info arguments =
+  Printf.ksprintf (fun s ->
+    if !verbose then
+      Printf.printf "Info: %s\n%!" s) arguments
+
+let error arguments =
+  Printf.ksprintf (fun s ->
+    Printf.eprintf "Error: %s\n%!" s; exit 1) arguments
+
 module Infix =
 struct
   let (++) x y =
@@ -107,12 +119,9 @@ let read_points s =
   Array.sort compare points_array;
   Array.to_list points_array
 
-let line_counts verbose in_file resolved_in_file visited points =
+let line_counts in_file resolved_in_file visited points =
   let cmp_content = Hashtbl.find points in_file |> read_points in
-  let () =
-    verbose
-      (Printf.sprintf "... file has %d points" (List.length cmp_content))
-  in
+  info "... file has %d points" (List.length cmp_content);
   let len = Array.length visited in
   let pts =
     cmp_content |> List.map (fun p ->

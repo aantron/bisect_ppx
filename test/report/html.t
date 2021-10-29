@@ -5,8 +5,11 @@
   >  (instrumentation (backend bisect_ppx)))
   > EOF
   $ dune exec ./test.exe --instrument-with bisect_ppx
-  $ bisect-ppx-report html
+  $ bisect-ppx-report html --verbose
   Info: found coverage files in './'
+  Info: Processing file 'test.ml'...
+  Info: ... file has 3 points
+  Info: Writing index file...
   $ ls _coverage | sort
   coverage.css
   coverage.js

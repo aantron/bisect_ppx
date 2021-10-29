@@ -113,16 +113,15 @@ let update_counts counts line_counts =
 let line line hits =
   {number = line; hits}
 
-let classes ~global_counts verbose data resolver points : class_ list =
+let classes ~global_counts data resolver points : class_ list =
   let class_ in_file visited =
     match resolver in_file with
     | None ->
-      let () = verbose "... file not found" in
+      Util.info "... file not found";
       None
     | Some resolved_in_file ->
       let line_counts =
-        Util.line_counts
-          verbose in_file resolved_in_file visited points in
+        Util.line_counts in_file resolved_in_file visited points in
       let counts = Util.make () in
       let () = update_counts global_counts line_counts in
       let () = update_counts counts line_counts in
@@ -156,14 +155,14 @@ let classes ~global_counts verbose data resolver points : class_ list =
     data
     []
 
-let package ~counts ~verbose ~data ~resolver ~points =
-  let classes = classes ~global_counts:counts verbose data resolver points in
+let package ~counts ~data ~resolver ~points =
+  let classes = classes ~global_counts:counts data resolver points in
   let line_rate = line_rate counts in
   {name = "."; line_rate; classes}
 
-let cobertura ~verbose ~data ~resolver ~points =
+let cobertura ~data ~resolver ~points =
   let counts = Util.make () in
-  let package = package ~counts ~verbose ~data ~resolver ~points in
+  let package = package ~counts ~data ~resolver ~points in
   let sources = ["."] in
   let rate = line_rate counts in
   {
@@ -174,9 +173,9 @@ let cobertura ~verbose ~data ~resolver ~points =
     sources;
   }
 
-let output verbose file resolver data points =
+let output file resolver data points =
   let () = Util.mkdirs (Filename.dirname file) in
-  let cobertura = cobertura ~verbose ~data ~resolver ~points in
+  let cobertura = cobertura ~data ~resolver ~points in
   let oc = open_out file in
   let fmt = Format.formatter_of_out_channel oc in
   let () = pp_cobertura fmt cobertura in

@@ -36,8 +36,8 @@ let percentage stats =
   let a, b = float_of_int a, float_of_int b in
   if b = 0. then 100. else (100. *. a) /. b
 
-let output_html_index verbose title theme filename l =
-  verbose "Writing index file...";
+let output_html_index title theme filename l =
+  Util.info "Writing index file...";
 
   let stats =
     List.fold_left
@@ -146,17 +146,16 @@ let escape_line tab_size line offset points =
     end;
   Buffer.contents buff
 
-let output_html
-    verbose tab_size title theme in_file out_file resolver visited points =
+let output_html tab_size title theme in_file out_file resolver visited points =
 
-  verbose (Printf.sprintf "Processing file '%s'..." in_file);
+  Util.info "Processing file '%s'..." in_file;
   match resolver in_file with
   | None ->
-    verbose "... file not found";
+    Util.info "... file not found";
     None
   | Some resolved_in_file ->
     let cmp_content = Hashtbl.find points in_file |> Util.read_points in
-    verbose (Printf.sprintf "... file has %d points" (List.length cmp_content));
+    Util.info "... file has %d points" (List.length cmp_content);
     let len = Array.length visited in
     let stats = Util.make () in
     let pts =
@@ -365,12 +364,12 @@ let output_html
     close_out_noerr out_channel;
     Some stats
 
-let output verbose dir tab_size title theme resolver data points =
+let output dir tab_size title theme resolver data points =
   let files =
     Hashtbl.fold (fun in_file visited acc ->
       let out_file = (Filename.concat dir in_file) ^ ".html" in
       let maybe_stats =
-        output_html verbose tab_size title theme in_file out_file resolver
+        output_html tab_size title theme in_file out_file resolver
           visited points
       in
       match maybe_stats with
@@ -380,8 +379,7 @@ let output verbose dir tab_size title theme resolver data points =
     []
   in
   output_html_index
-    verbose title theme
-    (Filename.concat dir "index.html") (List.sort compare files);
+    title theme (Filename.concat dir "index.html") (List.sort compare files);
   output_file Assets.js (Filename.concat dir "coverage.js");
   output_file Assets.highlight_js (Filename.concat dir "highlight.pack.js");
   output_file Assets.css (Filename.concat dir "coverage.css")

@@ -14,7 +14,6 @@ type theme = [
 ]
 
 val output :
-  (string -> unit) ->
   string ->
   int ->
   string ->
@@ -23,7 +22,7 @@ val output :
   (string, int array) Hashtbl.t ->
   (string, string) Hashtbl.t ->
     unit
-(** [output verbose dir tab_size title theme resolver data points] writes all
+(** [output dir tab_size title theme resolver data points] writes all
     the HTML files for [data] in the directory [dir]. [verbose] is used for
     verbose output, [tab_size] is the number of space characters to use as a
     replacement for tabulations, [title] is the title for generated pages, and

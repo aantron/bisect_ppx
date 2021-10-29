@@ -4,30 +4,6 @@
 
 
 
-module Arguments :
-sig
-  val verbose : bool ref
-end =
-struct
-  let verbose = ref false
-end
-
-
-
-let quiet =
-  ref false
-
-let info arguments =
-  Printf.ksprintf (fun s ->
-    if not !quiet then
-      Printf.printf "Info: %s\n%!" s) arguments
-
-let error arguments =
-  Printf.ksprintf (fun s ->
-    Printf.eprintf "Error: %s\n%!" s; exit 1) arguments
-
-
-
 module Coverage_input_files :
 sig
   val list : string list -> string list -> string list
@@ -107,13 +83,13 @@ struct
       |> List.map Filename.dirname
       |> List.sort_uniq String.compare
       |> List.map (fun directory -> directory ^ Filename.dir_sep)
-      |> List.iter (info "found coverage files in '%s'")
+      |> List.iter (Util.info "found coverage files in '%s'")
     | _ ->
       ()
     end;
 
     if all_coverage_files = [] then
-      error "no coverage files given on command line or found"
+      Util.error "no coverage files given on command line or found"
     else
       all_coverage_files
 
@@ -150,7 +126,7 @@ struct
     let expected_files = filtered_expected_files expect do_not_expect in
     expected_files |> List.iter (fun file ->
       if not (List.mem (strip_extensions file) present_files) then
-        error "expected file '%s' is not included in the report" file)
+        Util.error "expected file '%s' is not included in the report" file)
 end
 
 
@@ -220,7 +196,7 @@ struct
     | None -> None
     | Some "Codecov" -> Some `Codecov
     | Some "Coveralls" -> Some `Coveralls
-    | Some other -> error "send-to: unknown coverage service '%s'" other
+    | Some other -> Util.error "send-to: unknown coverage service '%s'" other
 
   let pretty_name = function
     | `Codecov -> "Codecov"
@@ -314,15 +290,13 @@ let html
 
   let data, points =
     load_coverage coverage_files coverage_paths expect do_not_expect in
-  let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file source_paths ignore_missing_files in
   Util.mkdirs dir;
-  Html.output verbose dir tab_size title theme search_in_path data points
+  Html.output dir tab_size title theme search_in_path data points
 
 
 
 let text per_file coverage_files coverage_paths expect do_not_expect =
-  quiet := true;
   let data, _ =
     load_coverage coverage_files coverage_paths expect do_not_expect in
   Text.output ~per_file data
@@ -335,9 +309,8 @@ let cobertura
 
   let data, points =
     load_coverage coverage_files coverage_paths expect do_not_expect in
-  let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file search_path ignore_missing_files in
-  Cobertura.output verbose file search_in_path data points
+  Cobertura.output file search_in_path data points
 
 
 
@@ -354,7 +327,7 @@ let coveralls
       file
     | Some service ->
       let report_file = Coverage_service.report_filename service in
-      info "will write coverage report to '%s'" report_file;
+      Util.info "will write coverage report to '%s'" report_file;
       report_file
   in
 
@@ -362,10 +335,10 @@ let coveralls
     lazy begin
       match CI.detect () with
       | Some ci ->
-        info "detected CI: %s" (CI.pretty_name ci);
+        Util.info "detected CI: %s" (CI.pretty_name ci);
         ci
       | None ->
-        error "unknown CI service or not in CI"
+        Util.error "unknown CI service or not in CI"
     end
   in
 
@@ -373,7 +346,7 @@ let coveralls
     match coverage_service, service_name with
     | Some _, "" ->
       let service_name = CI.name_in_report (Lazy.force ci) in
-      info "using service name '%s'" service_name;
+      Util.info "using service name '%s'" service_name;
       service_name
     | _ ->
       service_name
@@ -383,12 +356,12 @@ let coveralls
     match coverage_service, service_job_id with
     | Some _, "" ->
       let job_id_variable = CI.job_id_variable (Lazy.force ci) in
-      info "using job ID variable $%s" job_id_variable;
+      Util.info "using job ID variable $%s" job_id_variable;
       begin match Sys.getenv job_id_variable with
       | value ->
         value
       | exception Not_found ->
-        error "expected job id in $%s" job_id_variable
+        Util.error "expected job id in $%s" job_id_variable
       end
     | _ ->
       service_job_id
@@ -405,10 +378,10 @@ let coveralls
       | Some pr_variable ->
         match Sys.getenv pr_variable with
         | value ->
-          info "using PR number variable $%s" pr_variable;
+          Util.info "using PR number variable $%s" pr_variable;
           value
         | exception Not_found ->
-          info "$%s not set" pr_variable;
+          Util.info "$%s not set" pr_variable;
           service_pull_request
       end
     | _ ->
@@ -427,11 +400,12 @@ let coveralls
             | exception Not_found ->
               try_variables more
             | value ->
-              info "using repo token variable $%s" variable;
+              Util.info "using repo token variable $%s" variable;
               value
             end
           | [] ->
-            error "expected repo token in $%s" (List.hd repo_token_variables)
+            Util.error
+              "expected repo token in $%s" (List.hd repo_token_variables)
         in
         try_variables repo_token_variables
       end
@@ -445,7 +419,7 @@ let coveralls
     match coverage_service, git with
     | Some service, false ->
       if Coverage_service.needs_git_info (Lazy.force ci) service then begin
-        info "including git info";
+        Util.info "including git info";
         true
       end
       else
@@ -457,10 +431,10 @@ let coveralls
   let data, points =
     load_coverage coverage_files coverage_paths expect do_not_expect in
 
-  let verbose = if !Arguments.verbose then print_endline else ignore in
   let search_in_path = search_file search_path ignore_missing_files in
 
-  Coveralls.output verbose file
+  Coveralls.output
+    file
     service_name
     service_number
     service_job_id
@@ -476,13 +450,13 @@ let coveralls
   | Some coverage_service ->
     let name = Coverage_service.pretty_name coverage_service in
     let command = Coverage_service.send_command coverage_service in
-    info "sending to %s with command:" name;
-    info "%s" command;
+    Util.info "sending to %s with command:" name;
+    Util.info "%s" command;
     if not dry_run then begin
       let exit_code = Sys.command command in
       let report = Coverage_service.report_filename coverage_service in
       if Sys.file_exists report then begin
-        info "deleting '%s'" report;
+        Util.info "deleting '%s'" report;
         Sys.remove report
       end;
       exit exit_code
@@ -598,6 +572,14 @@ struct
         "is treated as the name of a single file, and that file is not " ^
         "required to appear in the report."))
 
+  let verbose =
+    Arg.(value @@ flag @@
+      info ["verbose"] ~docs:"COMMON OPTIONS" ~doc:"Print diagnostic messages.")
+
+  let set_verbose verbose x =
+    Util.verbose := verbose;
+    x
+
   let html =
     let output_directory =
       Arg.(value @@ opt string "./_coverage" @@
@@ -620,7 +602,7 @@ struct
           ("$(i,light) or $(i,dark). The default value, $(i,auto), causes " ^
           "the report's theme to adapt to system or browser preferences."))
     in
-    Term.(const html
+    Term.(const set_verbose $ verbose $ const html
       $ output_directory $ title $ tab_size $ theme $ coverage_files 0
       $ coverage_paths $ source_paths $ ignore_missing_files $ expect
       $ do_not_expect),
@@ -645,7 +627,7 @@ struct
           ("Don't issue the final upload command and don't delete the " ^
           "intermediate coverage report file."))
     in
-    Term.(const coveralls
+    Term.(const set_verbose $ verbose $ const coveralls
       $ const "" $ coverage_files 1 $ coverage_paths $ source_paths
       $ ignore_missing_files $ expect $ do_not_expect
       $ (const Option.some $ service) $ service_name $ service_number
@@ -659,18 +641,18 @@ struct
       Arg.(value @@ flag @@
         info ["per-file"] ~doc:"Include coverage per source file.")
     in
-    Term.(const text
+    Term.(const set_verbose $ verbose $ const text
       $ per_file $ coverage_files 0 $ coverage_paths $ expect $ do_not_expect),
     term_info "summary" ~doc:"Write coverage summary to STDOUT."
 
   let cobertura =
-    Term.(const cobertura
+    Term.(const set_verbose $ verbose $ const cobertura
       $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
       $ ignore_missing_files $ expect $ do_not_expect),
     term_info "cobertura" ~doc:"Generate Cobertura XML report"
 
   let coveralls =
-    Term.(const coveralls
+    Term.(const set_verbose $ verbose $ const coveralls
       $ output_file $ coverage_files 1 $ coverage_paths $ source_paths
       $ ignore_missing_files $ expect $ do_not_expect $ const None
       $ service_name $ service_number $ service_job_id $ service_pull_request

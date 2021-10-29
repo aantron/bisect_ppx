@@ -34,8 +34,11 @@ Reporter still works even in the presence of line number directives.
   let () =
     h ()
   $ dune exec ./test2.exe --instrument-with bisect_ppx
-  $ bisect-ppx-report html
+  $ bisect-ppx-report html --verbose
   Info: found coverage files in './'
+  Info: Processing file 'test2.ml'...
+  Info: ... file has 5 points
+  Info: Writing index file...
   $ cat _coverage/test2.ml.html
   <!DOCTYPE html>
   <html lang="en">

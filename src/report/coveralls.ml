@@ -4,16 +4,16 @@
 
 
 
-let file_json verbose indent in_file resolver visited points =
-  verbose (Printf.sprintf "Processing file '%s'..." in_file);
+let file_json indent in_file resolver visited points =
+  Util.info "Processing file '%s'..." in_file;
   match resolver in_file with
   | None ->
-    verbose "... file not found";
+    Util.info "... file not found";
     None
   | Some resolved_in_file ->
     let digest = Digest.to_hex (Digest.file resolved_in_file) in
     let line_counts =
-      Util.line_counts verbose in_file resolved_in_file visited points in
+      Util.line_counts in_file resolved_in_file visited points in
     let scounts =
       line_counts
       |> List.map (function
@@ -53,7 +53,6 @@ let metadata name field =
   |> Printf.sprintf "\"%s\":\"%s\"" name
 
 let output
-    verbose
     file
     service_name
     service_number
@@ -89,7 +88,7 @@ let output
   Util.mkdirs (Filename.dirname file);
   let file_jsons =
     Hashtbl.fold begin fun in_file visited acc ->
-      let maybe_json = file_json verbose 8 in_file resolver visited points in
+      let maybe_json = file_json 8 in_file resolver visited points in
       match maybe_json with
       | None -> acc
       | Some s -> s::acc
