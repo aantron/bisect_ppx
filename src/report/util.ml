@@ -160,3 +160,27 @@ let line_counts in_file resolved_in_file visited points =
   in
   let () = close_in_noerr in_channel in
   line_counts
+
+let search_file source_paths ignore_missing_files file =
+  let fail () =
+    if ignore_missing_files then
+      None
+    else
+      raise (Sys_error (file ^ ": No such file or directory"))
+  in
+  let rec search = function
+    | hd::tl ->
+      let f' = Filename.concat hd file in
+      if Sys.file_exists f' then
+        Some f'
+      else
+        search tl
+    | [] ->
+      fail ()
+  in
+  if Filename.is_implicit file then
+    search source_paths
+  else if Sys.file_exists file then
+    Some file
+  else
+    fail ()

@@ -81,3 +81,5 @@ val line_counts :
   ('a, string) Hashtbl.t -> int option list
 (** [line_counts verbose in_file resolved_in_file visited points] computes the
     visited lines for [in_file]. *)
+
+val search_file : string list -> bool -> string -> string option
