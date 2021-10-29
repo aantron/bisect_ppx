@@ -131,16 +131,16 @@ let cobertura
 
 
 let coveralls
-    file coverage_files coverage_paths search_path ignore_missing_files expect
-    do_not_expect service service_name service_number service_job_id
+    to_file coverage_files coverage_paths source_paths ignore_missing_files
+    expect do_not_expect service service_name service_number service_job_id
     service_pull_request repo_token git parallel dry_run =
 
   let coverage_service = Coverage_service.from_argument service in
 
-  let file =
+  let to_file =
     match coverage_service with
     | None ->
-      file
+      to_file
     | Some service ->
       let report_file = Coverage_service.report_filename service in
       Util.info "will write coverage report to '%s'" report_file;
@@ -244,21 +244,10 @@ let coveralls
       git
   in
 
-  let data, points =
-    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
-
-  let search_in_path = Util.search_file search_path ignore_missing_files in
-
   Coveralls.output
-    file
-    service_name
-    service_number
-    service_job_id
-    service_pull_request
-    repo_token
-    git
-    parallel
-    search_in_path data points;
+    ~to_file ~service_name ~service_number ~service_job_id ~service_pull_request
+    ~repo_token ~git ~parallel ~coverage_files ~coverage_paths ~source_paths
+    ~ignore_missing_files ~expect ~do_not_expect;
 
   match coverage_service with
   | None ->

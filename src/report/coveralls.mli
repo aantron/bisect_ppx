@@ -8,14 +8,18 @@
 
 
 val output :
-  string -> string -> string -> string -> string -> string -> bool -> bool ->
-  (string -> string option) ->
-  (string, int array) Hashtbl.t ->
-  (string, string) Hashtbl.t ->
+  to_file:string ->
+  service_name:string ->
+  service_number:string ->
+  service_job_id:string ->
+  service_pull_request:string ->
+  repo_token:string ->
+  git:bool ->
+  parallel:bool ->
+  coverage_files:string list ->
+  coverage_paths:string list ->
+  source_paths:string list ->
+  ignore_missing_files:bool ->
+  expect:string list ->
+  do_not_expect:string list ->
     unit
-(** [output file service_name service_job_id repo_token resolver data points]
-    writes a Coveralls JSON [file] for [data]. [verbose] is used for verbose
-    output. [service_name], [service_job_id], and [repo_token] are each used for the
-    respective field in the Coveralls JSON, if not the emptry string. [resolver]
-    associates actual paths to given filenames. [points] gives the marshalled
-    locations of the points in the file. *)

@@ -53,17 +53,13 @@ let metadata name field =
   |> Printf.sprintf "\"%s\":\"%s\"" name
 
 let output
-    file
-    service_name
-    service_number
-    service_job_id
-    service_pull_request
-    repo_token
-    git
-    parallel
-    resolver
-    data
-    points =
+    ~to_file ~service_name ~service_number ~service_job_id ~service_pull_request
+    ~repo_token ~git ~parallel ~coverage_files ~coverage_paths ~source_paths
+    ~ignore_missing_files ~expect ~do_not_expect =
+
+  let data, points =
+    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
+  let resolver = Util.search_file source_paths ignore_missing_files in
 
   let git =
     if not git then
@@ -85,7 +81,7 @@ let output
         metadata branch
   in
 
-  Util.mkdirs (Filename.dirname file);
+  Util.mkdirs (Filename.dirname to_file);
   let file_jsons =
     Hashtbl.fold begin fun in_file visited acc ->
       let maybe_json = file_json 8 in_file resolver visited points in
@@ -127,6 +123,6 @@ let output
       []
       ch
   in
-  match file with
+  match to_file with
   | "-" -> write stdout
   | f -> Bisect_common.try_out_channel false f write
