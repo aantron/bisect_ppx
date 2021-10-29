@@ -109,20 +109,27 @@ end
 
 
 
-let search_file l ignore_missing_files f =
+let search_file source_paths ignore_missing_files file =
   let fail () =
-    if ignore_missing_files then None
+    if ignore_missing_files then
+      None
     else
-      raise (Sys_error (f ^ ": No such file or directory")) in
+      raise (Sys_error (file ^ ": No such file or directory"))
+  in
   let rec search = function
-    | hd :: tl ->
-        let f' = Filename.concat hd f in
-        if Sys.file_exists f' then Some f' else search tl
-    | [] -> fail () in
-  if Filename.is_implicit f then
-    search l
-  else if Sys.file_exists f then
-    Some f
+    | hd::tl ->
+      let f' = Filename.concat hd file in
+      if Sys.file_exists f' then
+        Some f'
+      else
+        search tl
+    | [] ->
+      fail ()
+  in
+  if Filename.is_implicit file then
+    search source_paths
+  else if Sys.file_exists file then
+    Some file
   else
     fail ()
 
