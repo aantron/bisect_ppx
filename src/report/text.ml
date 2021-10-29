@@ -4,7 +4,10 @@
 
 
 
-let output ~per_file counts =
+let output ~per_file ~coverage_files ~coverage_paths ~expect ~do_not_expect =
+  let data, _ =
+    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
+
   let stats =
     Hashtbl.fold (fun file counts acc ->
       let total = Array.length counts in
@@ -12,7 +15,7 @@ let output ~per_file counts =
         Array.fold_left
           (fun acc count -> if count > 0 then acc + 1 else acc) 0 counts
       in
-      (file, visited, total)::acc) counts []
+      (file, visited, total)::acc) data []
   in
 
   let percentage numerator denominator =

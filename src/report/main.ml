@@ -109,20 +109,17 @@ end
 
 
 
+(* Thin wrappers, because cmdliner doesn't pass labeled arguments. *)
+
 let html
     to_directory title tab_size theme coverage_files coverage_paths source_paths
     ignore_missing_files expect do_not_expect =
-
   Html.output
     ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
     ~source_paths ~ignore_missing_files ~expect ~do_not_expect
 
-
-
 let text per_file coverage_files coverage_paths expect do_not_expect =
-  let data, _ =
-    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
-  Text.output ~per_file data
+  Text.output ~per_file ~coverage_files ~coverage_paths ~expect ~do_not_expect
 
 
 

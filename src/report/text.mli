@@ -4,5 +4,10 @@
 
 
 
-val output : per_file:bool -> (string, int array) Hashtbl.t -> unit
-(** Writes a text summary report to STDOUT. *)
+val output :
+   per_file:bool ->
+   coverage_files:string list ->
+   coverage_paths:string list ->
+   expect:string list ->
+   do_not_expect:string list ->
+      unit
