@@ -110,7 +110,7 @@ let output
     else
       ""
   in
-  let write ch =
+  Bisect_common.try_out_channel false to_file begin fun ch ->
     Printf.fprintf ch {|{
 %s
 %s
@@ -124,10 +124,7 @@ let output
       git
       parallel
       (String.concat ",\n" file_jsons)
-  in
-  match to_file with
-  | "-" -> write stdout
-  | f -> Bisect_common.try_out_channel false f write
+  end
 
 
 
