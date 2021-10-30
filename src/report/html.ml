@@ -5,8 +5,8 @@
 
 
 let theme_class = function
-  | `Light -> " class=\"light\""
-  | `Dark -> " class=\"dark\""
+  | `Light -> {| class="light"|}
+  | `Dark -> {| class="dark"|}
   | `Auto -> ""
 
 let output_file content filename =
@@ -106,7 +106,7 @@ let escape_line tab_size line offset points =
   let marker_if_any content =
     match !pts with
     | (o, n)::tl when o = !ofs ->
-      Printf.bprintf buff "<span data-count=\"%i\">%s</span>" n content;
+      Printf.bprintf buff {|<span data-count="%i">%s</span>|} n content;
       pts := tl
     | _ ->
       Buffer.add_string buff content
@@ -199,9 +199,9 @@ let output_html tab_size title theme in_file out_file resolver visited points =
       in
 
       let class_of_visited = function
-        | true, false -> "class=\"visited\""
-        | false, true -> "class=\"unvisited\""
-        | true, true -> "class=\"some-visited\""
+        | true, false -> {|class="visited"|}
+        | false, true -> {|class="unvisited"|}
+        | true, true -> {|class="some-visited"|}
         | false, false -> ""
       in
 

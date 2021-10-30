@@ -4,8 +4,6 @@
 
 
 
-module Common = Bisect_common
-
 type source = string
 
 type line = {
