@@ -25,9 +25,6 @@ let try_in_channel bin x f =
   let open_ch = if bin then open_in_bin else open_in in
   try_finally (open_ch x) f (close_in_noerr)
 
-let try_out_channel bin x f =
-  let open_ch = if bin then open_out_bin else open_out in
-  try_finally (open_ch x) f (close_out_noerr)
 
 
 (* I/O functions *)

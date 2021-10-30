@@ -181,6 +181,10 @@ let output
   let () = Util.mkdirs (Filename.dirname to_file) in
   let cobertura = cobertura ~data ~resolver ~points in
   let oc = open_out to_file in
+  try
   let fmt = Format.formatter_of_out_channel oc in
   let () = pp_cobertura fmt cobertura in
   close_out oc
+  with exn ->
+    close_out_noerr oc;
+    raise exn

@@ -15,13 +15,6 @@ type point_definition = {
 (** The type of point definitions, that is places of interest in the
     source code. *)
 
-(** {1 Utility functions} *)
-
-val try_out_channel : bool -> string -> (out_channel -> 'a) -> 'a
-(** [try_out_channel bin filename f] opens an output channel for the file given
-    at [filename], and then runs [f]. When [f] returns or raises an exception,
-    the channel is closed. If [bin] is [true], the channel is opened in binary
-    mode. Otherwise, it is opened in text mode. *)
 
 
 (** {1 I/O functions} *)

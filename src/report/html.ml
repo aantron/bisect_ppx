@@ -10,10 +10,13 @@ let theme_class = function
   | `Auto -> ""
 
 let output_file content filename =
-  Bisect_common.try_out_channel
-    false
-    filename
-    (fun channel -> Printf.fprintf channel "%s" content)
+  let channel = open_out filename in
+  try
+    Printf.fprintf channel "%s" content;
+    close_out channel
+  with exn ->
+    close_out_noerr channel;
+    raise exn
 
 let split_filename name =
   let dirname =
@@ -40,10 +43,8 @@ let output_html_index title theme filename files =
       files
   in
 
-  Bisect_common.try_out_channel
-    false
-    filename
-    begin fun channel ->
+  let channel = open_out filename in
+  try
       let write format = Printf.fprintf channel format in
 
       write {|<!DOCTYPE html>
@@ -95,8 +96,15 @@ let output_html_index title theme filename files =
       write {|    </div>
   </body>
 </html>
-|}
-    end
+|};
+
+      close_out channel
+
+    with exn ->
+      close_out_noerr channel;
+      raise exn
+
+
 
 let escape_line tab_size line offset points =
   let buff = Buffer.create (String.length line) in

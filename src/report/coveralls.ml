@@ -110,7 +110,8 @@ let output
     else
       ""
   in
-  Bisect_common.try_out_channel false to_file begin fun ch ->
+  let ch = open_out to_file in
+  try
     Printf.fprintf ch {|{
 %s
 %s
@@ -123,8 +124,12 @@ let output
       repo_params
       git
       parallel
-      (String.concat ",\n" file_jsons)
-  end
+      (String.concat ",\n" file_jsons);
+    close_out ch
+
+  with exn ->
+    close_out_noerr ch;
+    raise exn
 
 
 
