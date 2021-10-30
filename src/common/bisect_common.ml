@@ -9,6 +9,8 @@ type point_definition = {
     identifier : int;
   }
 
+type coverage_data = (string * (int array * string)) array
+
 
 
 (* I/O functions *)
@@ -70,7 +72,7 @@ let runtime_data_to_string () =
   | [] ->
     None
   | _ ->
-    Array.of_list data
+    (Array.of_list data : coverage_data)
     |> Writer.(write (array (pair string (pair (array int) string))))
     |> fun s -> Some s
 

@@ -15,6 +15,8 @@ type point_definition = {
 (** The type of point definitions, that is places of interest in the
     source code. *)
 
+type coverage_data = (string * (int array * string)) array
+
 
 
 (** {1 I/O functions} *)

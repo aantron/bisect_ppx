@@ -231,7 +231,9 @@ let get_relative_path file =
       file
 
 let read_runtime_data filename =
-  Reader.(read (array (pair string (pair (array int) string)))) ~filename
+  let data : Bisect_common.coverage_data =
+    Reader.(read (array (pair string (pair (array int) string)))) ~filename in
+  data
   |> Array.to_list
   |> List.map (fun (file, data) -> get_relative_path file, data)
 
