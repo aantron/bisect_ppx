@@ -19,10 +19,7 @@ type point_definition = {
 
 (** {1 I/O functions} *)
 
-exception Invalid_file of string * string
-(** Exception to be raised when a read file does not conform to the
-    Bisect format. The parameter is the name of the incriminated file
-    and the reason of the error. *)
+val magic_number_rtd : string
 
 val write_runtime_data : out_channel -> unit
 (** [write_runtime_data o] writes the current runtime data to the output
@@ -40,12 +37,6 @@ val runtime_data_to_string : unit -> string option
 
 val random_filename : string -> string
 (** Returns a random filename, with the given prefix. *)
-
-val read_runtime_data : string -> (string * (int array * string)) list
-(** [read_runtime_data f] reads the runtime data from file [f].
-
-    Raises [Sys_error] if an i/o error occurs. May also raise
-    [Invalid_file], [Unsupported_version], or [Modified_file]. *)
 
 val reset_counters : unit -> unit
 (** Clears accumulated coverage statistics. *)
