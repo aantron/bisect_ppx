@@ -16,25 +16,25 @@ let error arguments =
   Printf.ksprintf (fun s ->
     Printf.eprintf "Error: %s\n%!" s; exit 1) arguments
 
-  let (++) x y =
-    if ((x > 0) && (y > 0) && (x > max_int - y)) then
-      max_int
-    else if ((x < 0) && (y < 0) && (x < min_int - y)) then
-      min_int
-    else
-      x + y
+let (++) x y =
+  if ((x > 0) && (y > 0) && (x > max_int - y)) then
+    max_int
+  else if ((x < 0) && (y < 0) && (x < min_int - y)) then
+    min_int
+  else
+    x + y
 
-  let rec zip op x y =
-    let lx = Array.length x in
-    let ly = Array.length y in
-    if lx >= ly then begin
-      let z = Array.copy x in
-      for i = 0 to (pred ly) do
-        z.(i) <- op x.(i) y.(i)
-      done;
-      z
-    end else
-      zip op y x
+let rec zip op x y =
+  let lx = Array.length x in
+  let ly = Array.length y in
+  if lx >= ly then begin
+    let z = Array.copy x in
+    for i = 0 to (pred ly) do
+      z.(i) <- op x.(i) y.(i)
+    done;
+    z
+  end else
+    zip op y x
 
 let elementwise_saturation_addition x y =
   zip (++) x y
