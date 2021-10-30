@@ -2,6 +2,10 @@
 build :
 	dune build -p bisect_ppx
 
+.PHONY : watch
+watch :
+	dune build -p bisect_ppx -w
+
 TEST := @runtest
 
 .PHONY : test
