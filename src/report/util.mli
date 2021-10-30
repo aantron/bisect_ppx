@@ -40,16 +40,6 @@ val open_both : string -> string -> in_channel * out_channel
     Raises an exception if an error occurs; ensures that files are either
     both opened or both closed. *)
 
-val output_strings :
-  string list -> (string * string) list -> out_channel -> unit
-(** [output_strings lines mapping ch] writes the elements of [lines]
-    to the channel [ch]. Each line is written after substituting
-    {i $(xyz)} sequences as described by [Buffer.add_substitute]. The
-    substitution is based on the association list [mapping]; if no mapping
-    is found, [""] is used.
-
-    Raises an exception if an error occurs. *)
-
 (** Types and functions related to visitation counts.
     All operations gracefully handle overflows by ensuring that:
     - a value above [max_int] is encoded by [max_int];

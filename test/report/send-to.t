@@ -58,13 +58,13 @@ From Travis to Coveralls.
       "service_job_id": "100",
   
   
-      "source_files": [
+    "source_files": [
           {
               "name": "test.ml",
               "source_digest": "55ec0167abb99a3141afb092c92d0e23",
               "coverage": [null,1,null,null,0,null,null,1]
           }
-      ]
+    ]
   }
 
 
@@ -86,13 +86,13 @@ From Travis to Codecov.
       "service_job_id": "100",
   
   
-      "source_files": [
+    "source_files": [
           {
               "name": "test.ml",
               "source_digest": "55ec0167abb99a3141afb092c92d0e23",
               "coverage": [null,1,null,null,0,null,null,1]
           }
-      ]
+    ]
   }
 
 
@@ -145,13 +145,13 @@ From CircleCI to Coveralls.
       "repo_token": "abc",
       "git":{"head":{"id":"5689966cc697646c10975ff9355863bc12744ea0","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"master","remotes":{}},
   
-      "source_files": [
+    "source_files": [
           {
               "name": "test.ml",
               "source_digest": "55ec0167abb99a3141afb092c92d0e23",
               "coverage": [null,1,null,null,0,null,null,1]
           }
-      ]
+    ]
   }
 
 
@@ -173,13 +173,13 @@ From CircleCI to Codecov.
       "service_job_id": "100",
   
   
-      "source_files": [
+    "source_files": [
           {
               "name": "test.ml",
               "source_digest": "55ec0167abb99a3141afb092c92d0e23",
               "coverage": [null,1,null,null,0,null,null,1]
           }
-      ]
+    ]
   }
 
 
@@ -222,13 +222,13 @@ From GitHub Actions to Coveralls.
       "repo_token": "abc",
       "git":{"head":{"id":"5689966cc697646c10975ff9355863bc12744ea0","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"master","remotes":{}},
   
-      "source_files": [
+    "source_files": [
           {
               "name": "test.ml",
               "source_digest": "55ec0167abb99a3141afb092c92d0e23",
               "coverage": [null,1,null,null,0,null,null,1]
           }
-      ]
+    ]
   }
 
 
@@ -250,11 +250,11 @@ From GitHub Actions to Codecov
       "service_job_id": "100",
   
   
-      "source_files": [
+    "source_files": [
           {
               "name": "test.ml",
               "source_digest": "55ec0167abb99a3141afb092c92d0e23",
               "coverage": [null,1,null,null,0,null,null,1]
           }
-      ]
+    ]
   }

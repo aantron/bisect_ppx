@@ -13,7 +13,7 @@ let output_file content filename =
   Bisect_common.try_out_channel
     false
     filename
-    (fun channel -> output_string channel content)
+    (fun channel -> Printf.fprintf channel "%s" content)
 
 let split_filename name =
   let dirname =
@@ -30,46 +30,42 @@ let percentage stats =
   let a, b = float_of_int a, float_of_int b in
   if b = 0. then 100. else (100. *. a) /. b
 
-let output_html_index title theme filename l =
+let output_html_index title theme filename files =
   Util.info "Writing index file...";
 
   let stats =
     List.fold_left
       (fun acc (_, _, s) -> Util.add acc s)
       (Util.make ())
-      l
+      files
   in
 
   Bisect_common.try_out_channel
     false
     filename
     begin fun channel ->
-      Util.output_strings
-        [
-          "<!DOCTYPE html>";
-          "<html lang=\"en\"$(theme)>";
-          "  <head>";
-          "    <title>$(title)</title>";
-          "    <link rel=\"stylesheet\" type=\"text/css\" href=\"coverage.css\" />";
-          "    <meta charset=\"utf-8\" />";
-          "  </head>";
-          "  <body>";
-          "    <div id=\"header\">";
-          "      <h1>$(title)</h1>";
-          "      <h2>$(percentage)%</h2>";
-          "    </div>";
-          "    <div id=\"files\">";
-        ]
-        [
-          "title", title;
-          "theme", theme_class theme;
-          "percentage",
-            Printf.sprintf "%.02f"
-              (floor ((percentage stats) *. 100.) /. 100.);
-        ]
-        channel;
+      let write format = Printf.fprintf channel format in
 
-      let per_file (name, html_file, stats) =
+      write {|<!DOCTYPE html>
+<html lang="en"%s>
+  <head>
+    <title>%s</title>
+    <link rel="stylesheet" type="text/css" href="coverage.css"/>
+    <meta charset="utf-8"/>
+  </head>
+  <body>
+    <div id="header">
+      <h1>%s</h1>
+      <h2>%.02f%%</h2>
+    </div>
+    <div id="files">
+|}
+        (theme_class theme)
+        title
+        title
+        (floor ((percentage stats) *. 100.) /. 100.);
+
+      files |> List.iter begin fun (name, html_file, stats) ->
         let dirname, basename = split_filename name in
         let relative_html_file =
           if Filename.is_relative html_file then
@@ -79,36 +75,27 @@ let output_html_index title theme filename l =
             String.sub
               html_file prefix_length (String.length html_file - prefix_length)
         in
-        Util.output_strings
-          [
-            "      <div>";
-            "        <span class=\"meter\">";
-            "          <span class=\"covered\" style=\"width: $(p)%\"></span>";
-            "        </span>";
-            "        <span class=\"percentage\">$(p)%</span>";
-            "        <a href=\"$(link)\">";
-            "          <span class=\"dirname\">$(dir)</span>$(name)";
-            "        </a>";
-            "      </div>";
-          ]
-          [
-            "p", Printf.sprintf "%.00f" (floor (percentage stats));
-            "link", relative_html_file;
-            "dir", dirname;
-            "name", basename;
-          ]
-          channel
-      in
-      List.iter per_file l;
+        let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
+        write {|      <div>
+        <span class="meter">
+          <span class="covered" style="width: %s%%"></span>
+        </span>
+        <span class="percentage">%s%%</span>
+        <a href="%s">
+          <span class="dirname">%s</span>%s
+        </a>
+      </div>
+|}
+          percentage
+          percentage
+          relative_html_file
+          dirname basename;
+      end;
 
-      Util.output_strings
-        [
-          "    </div>";
-          "  </body>";
-          "</html>";
-        ]
-        []
-        channel
+      write {|    </div>
+  </body>
+</html>
+|}
     end
 
 let escape_line tab_size line offset points =
@@ -218,40 +205,36 @@ let output_html tab_size title theme in_file out_file resolver visited points =
         | false, false -> ""
       in
 
+      let write format = Printf.fprintf out_channel format in
+
       (* Head and header. *)
-      Util.output_strings
-        [
-          "<!DOCTYPE html>";
-          "<html lang=\"en\"$(theme)>";
-          "  <head>";
-          "    <title>$(title)</title>";
-          "    <link rel=\"stylesheet\" href=\"$(style_css)\" />";
-          "    <script src=\"$(highlight_js)\"></script>";
-          "    <script>hljs.initHighlightingOnLoad();</script>";
-          "    <meta charset=\"utf-8\" />";
-          "  </head>";
-          "  <body>";
-          "    <div id=\"header\">";
-          "      <h1>";
-          "        <a href=\"$(index_html)\">";
-          "          <span class=\"dirname\">$(dir)</span>$(name)";
-          "        </a>";
-          "      </h1>";
-          "      <h2>$(percentage)%</h2>";
-          "    </div>";
-          "    <div id=\"navbar\">";
-        ]
-        [
-          "dir", dirname;
-          "name", basename;
-          "title", title;
-          "theme", theme_class theme;
-          "percentage", Printf.sprintf "%.02f" (percentage stats);
-          "style_css", style_css;
-          "highlight_js", highlight_js;
-          "index_html", index_html;
-        ]
-        out_channel;
+      write {|<!DOCTYPE html>
+<html lang="en"%s>
+  <head>
+    <title>%s</title>
+    <link rel="stylesheet" href="%s"/>
+    <script src="%s"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <meta charset="utf-8"/>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="%s">
+          <span class="dirname">%s</span>%s
+        </a>
+      </h1>
+      <h2>%.02f%%</h2>
+    </div>
+    <div id="navbar">
+|}
+        (theme_class theme)
+        title
+        style_css
+        highlight_js
+        index_html
+        dirname basename
+        (percentage stats);
 
       (* Navigation bar items. *)
       lines |> List.iter begin fun (number, _, visited, unvisited) ->
@@ -264,47 +247,28 @@ let output_html tab_size title theme in_file out_file resolver visited points =
             else
               "bottom", (100. -. offset)
           in
-          Util.output_strings
-            ["      <span $(visited) style=\"$(origin):$(offset)%\"></span>"]
-            [
-              "visited", class_of_visited (visited, unvisited);
-              "origin", origin;
-              "offset", Printf.sprintf "%.02f" offset;
-              "n", string_of_int number;
-            ]
-            out_channel
+          write "      <span %s style=\"%s:%.02f%%\"></span>\n"
+            (class_of_visited (visited, unvisited)) origin offset;
         end
       end;
 
-      Util.output_strings
-        [
-          "    </div>";
-          "    <div id=\"report\">";
-          "      <div id=\"lines-layer\">";
-          "        <pre>";
-        ]
-        []
-        out_channel;
+      write {|    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+|};
 
       (* Line highlights. *)
       lines |> List.iter (fun (number, _, visited, unvisited) ->
-        Util.output_strings
-          ["<a id=\"L$(n)\"></a><span $(visited)> </span>"]
-          [
-            "n", string_of_int number;
-            "visited", class_of_visited (visited, unvisited);
-          ]
-          out_channel);
+        write "<a id=\"L%i\"></a><span %s> </span>\n"
+          number
+          (class_of_visited (visited, unvisited)));
 
-      Util.output_strings
-        [
-          "</pre>";
-          "      </div>";
-          "      <div id=\"text-layer\">";
-          "        <pre id=\"line-numbers\">";
-        ]
-        []
-        out_channel;
+      write {|</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+|};
 
       let width = string_of_int line_count |> String.length in
 
@@ -312,15 +276,8 @@ let output_html tab_size title theme in_file out_file resolver visited points =
       lines |> List.iter (fun (number, _, _, _) ->
         let formatted = string_of_int number in
         let padded =
-          (String.make (width - String.length formatted) ' ') ^  formatted in
-
-        Util.output_strings
-          ["<a href=\"#L$(n)\">$(padded)</a>"]
-          [
-            "n", formatted;
-            "padded", padded;
-          ]
-          out_channel);
+          (String.make (width - String.length formatted) ' ') ^ formatted in
+        write "<a href=\"#L%s\">%s</a>\n" formatted padded);
 
       let syntax =
         if Filename.check_suffix basename ".re" then
@@ -329,25 +286,20 @@ let output_html tab_size title theme in_file out_file resolver visited points =
           "ocaml"
       in
 
-      output_string out_channel "</pre>\n";
-      Printf.fprintf out_channel "<pre><code class=\"%s\">" syntax;
+      write "</pre>\n";
+      write "<pre><code class=\"%s\">" syntax;
 
       (* Code lines. *)
-      lines |> List.iter (fun (_, markup, _, _) ->
-        output_string out_channel markup;
-        output_char out_channel '\n');
+      lines |> List.iter (fun (_, markup, _, _) -> write "%s\n" markup);
 
-      Util.output_strings
-        [
-          "</code></pre>";
-          "      </div>";
-          "    </div>";
-          "    <script src=\"$(coverage_js)\"></script>";
-          "  </body>";
-          "</html>";
-        ]
-        ["coverage_js", coverage_js]
-        out_channel
+      write {|</code></pre>
+      </div>
+    </div>
+    <script src="%s"></script>
+  </body>
+</html>
+|}
+        coverage_js
 
     with e ->
       close_in_noerr in_channel;

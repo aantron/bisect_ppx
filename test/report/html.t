@@ -21,8 +21,8 @@
   <html lang="en">
     <head>
       <title>Coverage report</title>
-      <link rel="stylesheet" type="text/css" href="coverage.css" />
-      <meta charset="utf-8" />
+      <link rel="stylesheet" type="text/css" href="coverage.css"/>
+      <meta charset="utf-8"/>
     </head>
     <body>
       <div id="header">
@@ -47,10 +47,10 @@
   <html lang="en">
     <head>
       <title>Coverage report</title>
-      <link rel="stylesheet" href="coverage.css" />
+      <link rel="stylesheet" href="coverage.css"/>
       <script src="highlight.pack.js"></script>
       <script>hljs.initHighlightingOnLoad();</script>
-      <meta charset="utf-8" />
+      <meta charset="utf-8"/>
     </head>
     <body>
       <div id="header">

@@ -111,19 +111,19 @@ let output
       ""
   in
   let write ch =
-    Util.output_strings
-      [
-        "{";
-        repo_params;
-        git;
-        parallel;
-        "    \"source_files\": [";
-        (String.concat ",\n" file_jsons);
-        "    ]";
-        "}";
-      ]
-      []
-      ch
+    Printf.fprintf ch {|{
+%s
+%s
+%s
+  "source_files": [
+%s
+  ]
+}
+|}
+      repo_params
+      git
+      parallel
+      (String.concat ",\n" file_jsons)
   in
   match to_file with
   | "-" -> write stdout

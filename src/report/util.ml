@@ -82,17 +82,6 @@ let open_both in_file out_file =
     close_in_noerr in_channel;
     raise e
 
-let output_strings lines mapping ch =
-  let get x =
-    try List.assoc x mapping with Not_found -> "" in
-  List.iter
-    (fun l ->
-      let buff = Buffer.create (String.length l) in
-      Buffer.add_substitute buff get l;
-      output_string ch (Buffer.contents buff);
-      output_char ch '\n')
-    lines
-
 type counts = {
   mutable visited : int;
   mutable total : int;
