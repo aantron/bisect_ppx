@@ -13,8 +13,9 @@ scratch/
 *.install
 *.merlin
 
-# Emacs temporary files.
+# Editor files.
 *~
+.vscode/
 
 # Pollution from the usage tests.
 *.coverage
