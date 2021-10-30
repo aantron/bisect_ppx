@@ -16,8 +16,6 @@ let error arguments =
   Printf.ksprintf (fun s ->
     Printf.eprintf "Error: %s\n%!" s; exit 1) arguments
 
-module Infix =
-struct
   let (++) x y =
     if ((x > 0) && (y > 0) && (x > max_int - y)) then
       max_int
@@ -38,8 +36,8 @@ struct
     end else
       zip op y x
 
-  let (+|) x y = zip (++) x y
-end
+let elementwise_saturation_addition x y =
+  zip (++) x y
 
 let mkdirs ?(perm=0o755) dir =
   let rec mk dir =
@@ -93,12 +91,10 @@ let make () = {
 }
 
 let update counts v =
-  let open Infix in
   counts.total <- counts.total ++ 1;
   if v then counts.visited <- counts.visited ++ 1
 
 let add counts_1 counts_2 =
-  let open Infix in
   {visited = counts_1.visited ++ counts_2.visited;
    total = counts_1.total ++ counts_2.total}
 

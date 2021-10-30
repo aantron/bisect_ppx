@@ -247,8 +247,10 @@ let load_coverage files search_paths expect do_not_expect =
       read_runtime_data out_file
       |> List.iter (fun (source_file, (file_counts, file_points)) ->
         let file_counts =
-          let open Util.Infix in
-          try (Hashtbl.find total_counts source_file) +| file_counts
+          try
+            Util.elementwise_saturation_addition
+              (Hashtbl.find total_counts source_file)
+              file_counts
           with Not_found -> file_counts
         in
         Hashtbl.replace total_counts source_file file_counts;

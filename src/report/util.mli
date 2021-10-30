@@ -12,14 +12,11 @@ val verbose : bool ref
 val info : ('a, unit, string, unit) format4 -> 'a
 val error : ('a, unit, string, 'b) format4 -> 'a
 
-module Infix :
-sig
-  val (+|) : int array -> int array -> int array
-  (** Returns the sum of the passed arrays, using saturation arithmetic to sum
-      elements. The length of the returned array is the maximum of the lengths
-      of the passed arrays, missing elements from the smallest array being
-      supposed to be equal to [0]. *)
-end
+val elementwise_saturation_addition : int array -> int array -> int array
+(** Returns the sum of the passed arrays, using saturation arithmetic to sum
+    elements. The length of the returned array is the maximum of the lengths of
+    the passed arrays, missing elements from the smallest array being supposed
+    to be equal to [0]. *)
 
 val mkdirs : ?perm:Unix.file_perm -> string -> unit
 (** Creates the directory whose path is passed, and all necessary parent
