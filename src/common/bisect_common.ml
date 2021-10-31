@@ -95,6 +95,6 @@ let write_runtime_data channel =
 let prng =
   Random.State.make_self_init () [@coverage off]
 
-let random_filename base_name =
+let random_filename ~prefix =
   Printf.sprintf "%s%09d.coverage"
-    base_name (abs (Random.State.int prng 1000000000))
+    prefix (abs (Random.State.int prng 1000000000))

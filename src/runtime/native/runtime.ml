@@ -62,7 +62,7 @@ let write_coverage_data () =
     ()
   | Some data ->
     let rec create_file attempts =
-      let filename = Common.random_filename "bisect" in
+      let filename = Common.random_filename ~prefix:"bisect" in
       let flags = [Open_wronly; Open_creat; Open_excl; Open_binary] in
       match open_out_gen flags 0o644 filename with
       | exception exn ->
@@ -77,9 +77,9 @@ let write_coverage_data () =
     create_file 100
 
 let file_channel () =
-  let base_name = full_path (env_to_fname "BISECT_FILE" default_bisect_file) in
+  let prefix = full_path (env_to_fname "BISECT_FILE" default_bisect_file) in
   let rec create_file () =
-    let filename = Common.random_filename base_name in
+    let filename = Common.random_filename ~prefix in
     try
       let fd = Unix.(openfile filename [O_WRONLY; O_CREAT; O_EXCL] 0o644) in
       let channel = Unix.out_channel_of_descr fd in

@@ -81,5 +81,5 @@ val runtime_data_to_string : unit -> string option
 val reset_counters : unit -> unit
 (** Clears accumulated visit counts. All array cells are set to zero. *)
 
-val random_filename : string -> string
+val random_filename : prefix:string -> string
 (** Returns a random filename with the given prefix. *)

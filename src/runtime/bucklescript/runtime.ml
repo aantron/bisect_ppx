@@ -13,7 +13,7 @@ let write_coverage_data () =
     ()
   | Some data ->
     let rec create_file attempts =
-      let filename = Bisect_common.random_filename "bisect" in
+      let filename = Bisect_common.random_filename ~prefix:"bisect" in
       match Node.Fs.openSync filename `Write_fail_if_exists with
       | exception exn ->
         if attempts = 0 then
