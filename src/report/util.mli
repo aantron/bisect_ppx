@@ -59,13 +59,8 @@ val update : counts -> bool -> unit
 val add : counts -> counts -> counts
 (** [add x y] returns the sum of counts [x] and [y]. *)
 
-val read_points : string -> Bisect_common.point_definition list
-(** [read_points s] reads point definitions from the string [s]. *)
-
 val line_counts :
-  'a -> string ->
-  int array ->
-  ('a, string) Hashtbl.t -> int option list
+  'a -> string -> int array -> ('a, int list) Hashtbl.t -> int option list
 (** [line_counts verbose in_file resolved_in_file visited points] computes the
     visited lines for [in_file]. *)
 

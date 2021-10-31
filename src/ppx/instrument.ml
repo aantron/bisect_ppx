@@ -45,8 +45,6 @@ module Str = Ppxlib.Ast_helper.Str
 module Cl = Ppxlib.Ast_helper.Cl
 module Cf = Ppxlib.Ast_helper.Cf
 
-module Common = Bisect_common
-
 
 
 (* Can be removed once Bisect_ppx requires OCaml >= 4.08. *)
@@ -141,9 +139,15 @@ sig
     points -> string -> Parsetree.structure_item list
 end =
 struct
-  type points = Common.point_definition list ref
+  type points = {
+    mutable offsets : int list;
+    mutable count : int;
+  }
 
-  let init () = ref []
+  let init () = {
+    offsets = [];
+    count = 0;
+  }
 
   (* Given an AST for an expression [e], replaces it by the sequence expression
      [instrumentation; e], where [instrumentation] is some code that tells
@@ -191,18 +195,19 @@ struct
           Location.(Lexing.(loc.loc_end.pos_cnum - 1))
       in
       let point =
-        try
-          List.find
-            (fun point -> Common.(point.offset) = point_offset)
-            !points
-        with Not_found ->
-          let new_index = List.length !points in
-          let new_point =
-            Common.{offset = point_offset; identifier = new_index} in
-          points := new_point::!points;
-          new_point
+        let rec find_point points offset index offsets =
+          match offsets with
+          | offset'::_ when offset' = offset -> index
+          | _::rest -> find_point points offset (index - 1) rest
+          | [] ->
+            let index = points.count in
+            points.offsets <- offset::points.offsets;
+            points.count <- points.count + 1;
+            index
+        in
+        find_point points point_offset (points.count - 1) points.offsets
       in
-      Ast_builder.Default.eint ~loc point.identifier
+      Ast_builder.Default.eint ~loc point
 
     in
 
@@ -865,11 +870,6 @@ struct
     |> fun (v, e, f, n, _) ->
       List.rev v, List.rev e, List.rev f, n && not use_aliases
 
-  let write_points points =
-    let points_array = Array.of_list points in
-    Array.sort compare points_array;
-    Marshal.to_string points_array []
-
   let runtime_initialization points file =
     let loc = Location.in_file file in
 
@@ -883,9 +883,18 @@ struct
       "Bisect_visit___" ^ (Buffer.contents buffer)
     in
 
-    let point_count = Ast_builder.Default.eint ~loc (List.length !points) in
-    let points_data = Ast_builder.Default.estring ~loc (write_points !points) in
-    let file = Ast_builder.Default.estring ~loc file in
+    let points_data =
+      let open Parsetree in
+        let rec inline_point_offsets acc = function
+        | [] -> acc
+        | offset::more ->
+          inline_point_offsets
+            [%expr [%e Ast_builder.Default.eint ~loc offset]::[%e acc]]
+            more
+      in
+      inline_point_offsets [%expr []] points.offsets
+    in
+    let filename = Ast_builder.Default.estring ~loc file in
 
     let ast_convenience_str_opt = function
       | None ->
@@ -894,8 +903,8 @@ struct
         Some (Ast_builder.Default.estring ~loc v)
         |> Exp.construct ~loc {txt = Longident.parse "Some"; loc}
     in
-    let bisect_file = ast_convenience_str_opt !Common.bisect_file in
-    let bisect_silent = ast_convenience_str_opt !Common.bisect_silent in
+    let bisect_file = ast_convenience_str_opt !Bisect_common.bisect_file in
+    let bisect_silent = ast_convenience_str_opt !Bisect_common.bisect_silent in
 
     (* ___bisect_visit___ is a function with a reference to a point count array.
        It is called every time a point is visited.
@@ -971,13 +980,13 @@ struct
         let open Parsetree in
         [%stri
           let ___bisect_visit___ =
-            let point_definitions = [%e points_data] in
-            let `Staged cb =
+            let points = [%e points_data] in
+            let `Visit visit =
               Bisect.Runtime.register_file
                 ~bisect_file:[%e bisect_file] ~bisect_silent:[%e bisect_silent]
-                [%e file] ~point_count:[%e point_count] ~point_definitions
+                ~filename:[%e filename] ~points
             in
-            cb
+            visit
         ]
       in
 

@@ -98,25 +98,19 @@ let add counts_1 counts_2 =
   {visited = counts_1.visited ++ counts_2.visited;
    total = counts_1.total ++ counts_2.total}
 
-let read_points s =
-  let points_array : Bisect_common.point_definition array =
-    Marshal.from_string s 0 in
-  Array.sort compare points_array;
-  Array.to_list points_array
-
 let line_counts in_file resolved_in_file visited points =
-  let cmp_content = Hashtbl.find points in_file |> read_points in
+  let cmp_content = Hashtbl.find points in_file in
   info "... file has %d points" (List.length cmp_content);
   let len = Array.length visited in
   let pts =
-    cmp_content |> List.map (fun p ->
+    cmp_content |> List.mapi (fun index offset ->
       let nb =
-        if Bisect_common.(p.identifier) < len then
-          visited.(Bisect_common.(p.identifier))
+        if index < len then
+          visited.(index)
         else
           0
       in
-      (Bisect_common.(p.offset), nb))
+      (offset, nb))
   in
   let in_channel = open_in resolved_in_file in
   let line_counts =

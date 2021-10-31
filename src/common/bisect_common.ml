@@ -4,85 +4,70 @@
 
 
 
-type point_definition = {
-    offset : int;
-    identifier : int;
-  }
+type instrumented_file = {
+  filename : string;
+  points : int list;
+  counts : int array;
+}
 
-type coverage_data = (string * (int array * string)) array
+type coverage =
+  instrumented_file list
 
 
 
-(* I/O functions *)
+let coverage_file_identifier = "BISECT-COVERAGE-4"
 
-let magic_number_rtd = "BISECTOUT3"
+let write_int formatter i =
+  Format.fprintf formatter " %i" i
 
-module Writer :
-sig
-  type 'a t
+let write_string formatter s =
+  Format.fprintf formatter " %i %s" (String.length s) s
 
-  val int : int t
-  val string : string t
-  val pair : 'a t -> 'b t -> ('a * 'b) t
-  val array : 'a t -> 'a array t
+let write_array write_element formatter a =
+  Format.fprintf formatter " %i" (Array.length a);
+  Array.iter (write_element formatter) a
 
-  val write : 'a t -> 'a -> string
-end =
-struct
-  type 'a t = Buffer.t -> 'a -> unit
+let write_list write_element formatter l =
+  Format.fprintf formatter " %i" (List.length l);
+  List.iter (write_element formatter) l
 
-  let w =
-    Printf.bprintf
+let write_instrumented_file formatter {filename; points; counts} =
+  write_string formatter filename;
+  write_list write_int formatter points;
+  write_array write_int formatter counts
 
-  let int b i =
-    w b " %i" i
+let write_coverage formatter coverage =
+  Format.fprintf formatter "%s" coverage_file_identifier;
+  write_list write_instrumented_file formatter coverage;
+  Format.pp_print_flush formatter ()
 
-  let string b s =
-    w b " %i %s" (String.length s) s
 
-  let pair left right b (l, r) =
-    left b l;
-    right b r
 
-  let array element b a =
-    w b " %i" (Array.length a);
-    Array.iter (element b) a
-
-  let write writer v =
-    let b = Buffer.create 4096 in
-    Buffer.add_string b magic_number_rtd;
-    writer b v;
-    Buffer.contents b
-end
-
-let table : (string, int array * string) Hashtbl.t Lazy.t =
+let table : (string, instrumented_file) Hashtbl.t Lazy.t =
   lazy (Hashtbl.create 17)
 
 let reset_counters () =
   Lazy.force table
-  |> Hashtbl.iter begin fun _ (point_state, _) ->
-    match Array.length point_state with
+  |> Hashtbl.iter begin fun _ {counts; _} ->
+    match Array.length counts with
     | 0 -> ()
-    | n -> Array.fill point_state 0 (n - 1) 0
+    | n -> Array.fill counts 0 (n - 1) 0
   end
 
+let flatten_data () =
+  Hashtbl.fold (fun _ file acc -> file::acc) (Lazy.force table) []
+
 let runtime_data_to_string () =
-  let data = Hashtbl.fold (fun k v acc -> (k, v)::acc) (Lazy.force table) [] in
-  match data with
+  match flatten_data () with
   | [] ->
     None
-  | _ ->
-    (Array.of_list data : coverage_data)
-    |> Writer.(write (array (pair string (pair (array int) string))))
-    |> fun s -> Some s
+  | data ->
+    let buffer = Buffer.create 4096 in
+    write_coverage (Format.formatter_of_buffer buffer) data;
+    Some (Buffer.contents buffer)
 
 let write_runtime_data channel =
-  let data =
-    match runtime_data_to_string () with
-    | Some s -> s
-    | None -> Writer.(write (array int)) [||]
-  in
-  output_string channel data
+  write_coverage (Format.formatter_of_out_channel channel) (flatten_data ())
 
 let prng =
   Random.State.make_self_init () [@coverage off]
@@ -91,18 +76,15 @@ let random_filename base_name =
   Printf.sprintf "%s%09d.coverage"
     base_name (abs (Random.State.int prng 1000000000))
 
-let register_file file ~point_count ~point_definitions =
-  let point_state = Array.make point_count 0 in
+let register_file ~filename ~points =
+  let counts = Array.make (List.length points) 0 in
   let table = Lazy.force table in
-  if not (Hashtbl.mem table file) then
-    Hashtbl.add table file (point_state, point_definitions);
-  `Staged (fun point_index ->
-    let current_count = point_state.(point_index) in
-    point_state.(point_index) <-
-      if current_count < max_int then
-        current_count + 1
-      else
-        current_count)
+  if not (Hashtbl.mem table filename) then
+    Hashtbl.add table filename {filename; points; counts};
+  `Visit (fun index ->
+    let current_count = counts.(index) in
+    if current_count < max_int then
+      counts.(index) <- current_count + 1)
 
 
 

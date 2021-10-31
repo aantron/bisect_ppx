@@ -6,4 +6,4 @@
 
 val load_coverage :
   string list -> string list -> string list -> string list ->
-    (string, int array) Hashtbl.t * (string, string) Hashtbl.t
+    (string, int array) Hashtbl.t * (string, int list) Hashtbl.t

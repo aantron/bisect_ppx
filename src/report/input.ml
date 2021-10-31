@@ -146,72 +146,66 @@ let try_in_channel bin x f =
 (* filename + reason *)
 exception Invalid_file of string * string
 
-module Reader :
-sig
-  type 'a t
-
-  val int : int t
-  val string : string t
-  val pair : 'a t -> 'b t -> ('a * 'b) t
-  val array : 'a t -> 'a array t
-
-  val read : 'a t -> filename:string -> 'a
-end =
-struct
-  type 'a t = Buffer.t -> in_channel -> 'a
-
-  let junk c =
-    try ignore (input_char c)
+  let junk channel =
+    try ignore (input_char channel)
     with End_of_file -> ()
 
-  let int b c =
-    Buffer.clear b;
+  let read_int buffer channel =
+    Buffer.clear buffer;
     let rec loop () =
-      match input_char c with
+      match input_char channel with
       | exception End_of_file -> ()
       | ' ' -> ()
-      | c -> Buffer.add_char b c; loop ()
+      | c -> Buffer.add_char buffer c; loop ()
     in
     loop ();
-    int_of_string (Buffer.contents b)
+    int_of_string (Buffer.contents buffer)
 
-  let string b c =
-    let length = int b c in
-    let s = really_input_string c length in
-    junk c;
-    s
+  let read_string buffer channel =
+    let length = read_int buffer channel in
+    let string = really_input_string channel length in
+    junk channel;
+    string
 
-  let pair left right b c =
-    let l = left b c in
-    let r = right b c in
-    l, r
+  let read_array read_element buffer channel =
+    let length = read_int buffer channel in
+    Array.init length (fun _index -> read_element buffer channel)
 
-  let array element b c =
-    let length = int b c in
-    Array.init length (fun _index -> element b c)
+let read_list read_element buffer channel =
+  read_array read_element buffer channel |> Array.to_list
 
-  let read reader ~filename =
+let read_instrumented_file buffer channel =
+  let filename = read_string buffer channel in
+  let points = read_list read_int buffer channel in
+  let counts = read_array read_int buffer channel in
+  Bisect_common.{filename; points; counts}
+
+let read_coverage buffer channel =
+  read_list read_instrumented_file buffer channel
+
+  let read ~filename =
     try_in_channel true filename begin fun c ->
       let magic_number_in_file =
-        try really_input_string c (String.length Bisect_common.magic_number_rtd)
+        try
+          really_input_string
+            c (String.length Bisect_common.coverage_file_identifier)
         with End_of_file ->
           raise
             (Invalid_file
               (filename, "unexpected end of file while reading magic number"))
       in
-      if magic_number_in_file <> Bisect_common.magic_number_rtd then
+      if magic_number_in_file <> Bisect_common.coverage_file_identifier then
         raise (Invalid_file (filename, "bad magic number"));
 
       junk c;
 
       let b = Buffer.create 4096 in
-      try reader b c
+      try read_coverage b c
       with e ->
         raise
           (Invalid_file
             (filename, "exception reading data: " ^ Printexc.to_string e))
     end
-end
 
 let get_relative_path file =
   if Filename.is_relative file then
@@ -231,32 +225,30 @@ let get_relative_path file =
       file
 
 let read_runtime_data filename =
-  let data : Bisect_common.coverage_data =
-    Reader.(read (array (pair string (pair (array int) string)))) ~filename in
-  data
-  |> Array.to_list
-  |> List.map (fun (file, data) -> get_relative_path file, data)
+  read ~filename
+  |> List.map (fun file ->
+    Bisect_common.{file with filename = get_relative_path file.filename})
 
 let load_coverage files search_paths expect do_not_expect =
   let data, points =
     let total_counts = Hashtbl.create 17 in
-    let points = Hashtbl.create 17 in
+    let all_points = Hashtbl.create 17 in
 
     Coverage_input_files.list files search_paths
     |> List.iter (fun out_file ->
       read_runtime_data out_file
-      |> List.iter (fun (source_file, (file_counts, file_points)) ->
+      |> List.iter (fun Bisect_common.{filename; points; counts} ->
         let file_counts =
           try
             Util.elementwise_saturation_addition
-              (Hashtbl.find total_counts source_file)
-              file_counts
-          with Not_found -> file_counts
+              (Hashtbl.find total_counts filename)
+              counts
+          with Not_found -> counts
         in
-        Hashtbl.replace total_counts source_file file_counts;
-        Hashtbl.replace points source_file file_points));
+        Hashtbl.replace total_counts filename file_counts;
+        Hashtbl.replace all_points filename points));
 
-    total_counts, points
+    total_counts, all_points
   in
 
   let present_files =

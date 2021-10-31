@@ -143,20 +143,20 @@ let output_html tab_size title theme in_file out_file resolver visited points =
     Util.info "... file not found";
     None
   | Some resolved_in_file ->
-    let cmp_content = Hashtbl.find points in_file |> Util.read_points in
+    let cmp_content = Hashtbl.find points in_file in
     Util.info "... file has %d points" (List.length cmp_content);
     let len = Array.length visited in
     let stats = Util.make () in
     let pts =
-      ref (cmp_content |> List.map (fun p ->
+      ref (cmp_content |> List.mapi (fun index offset ->
         let nb =
-          if Bisect_common.(p.identifier) < len then
-            visited.(Bisect_common.(p.identifier))
+          if index < len then
+            visited.(index)
           else
             0
         in
         Util.update stats (nb > 0);
-        (Bisect_common.(p.offset), nb)))
+        (offset, nb)))
     in
     let dirname, basename = split_filename in_file in
     let in_channel, out_channel = Util.open_both resolved_in_file out_file in

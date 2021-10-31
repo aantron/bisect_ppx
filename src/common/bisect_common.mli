@@ -8,20 +8,21 @@
     various parts of Bisect. *)
 
 
-type point_definition = {
-    offset : int; (** Point offset, relative to file beginning. *)
-    identifier : int; (** Point identifier, unique in file. *)
-  }
-(** The type of point definitions, that is places of interest in the
-    source code. *)
 
-type coverage_data = (string * (int array * string)) array
+type instrumented_file = {
+  filename : string;
+  points : int list; (** Byte offsets of the points placed in the file. *)
+  counts : int array; (** Visitation counts, one for each point. *)
+}
+
+type coverage =
+  instrumented_file list
 
 
 
 (** {1 I/O functions} *)
 
-val magic_number_rtd : string
+val coverage_file_identifier : string
 
 val write_runtime_data : out_channel -> unit
 (** [write_runtime_data o] writes the current runtime data to the output
@@ -44,8 +45,7 @@ val reset_counters : unit -> unit
 (** Clears accumulated coverage statistics. *)
 
 val register_file :
-  string -> point_count:int -> point_definitions:string ->
-    [`Staged of (int -> unit)]
+  filename:string -> points:int list -> [`Visit of (int -> unit)]
 (** [register_file file ~point_count ~point_definitions] indicates that the file
     [file] is part of the application that has been instrumented.
     [point_definitions] is a serialized [Common.point_definition list] giving

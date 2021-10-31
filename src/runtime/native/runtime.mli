@@ -41,10 +41,9 @@
 val register_file :
   bisect_file:string option ->
   bisect_silent:string option ->
-  string ->
-  point_count:int ->
-  point_definitions:string ->
-    [`Staged of (int -> unit)]
+  filename:string ->
+  points:int list ->
+    [`Visit of (int -> unit)]
 (** [register_file ~bisect_file ~bisect_silent file ~point_count
     ~point_definitions] indicates that the file [file] is part of the
     application that has been instrumented. [point_definitions] is a serialized

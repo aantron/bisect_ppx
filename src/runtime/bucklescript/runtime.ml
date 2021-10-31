@@ -43,7 +43,6 @@ let write_coverage_data_on_exit () =
     exit_hook_added := true
   end
 
-let register_file
-    ~bisect_file:_ ~bisect_silent:_ file ~point_count ~point_definitions =
+let register_file ~bisect_file:_ ~bisect_silent:_ ~filename ~points =
   write_coverage_data_on_exit ();
-  Bisect_common.register_file file ~point_count ~point_definitions
+  Bisect_common.register_file ~filename ~points
