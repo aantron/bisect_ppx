@@ -14,3 +14,9 @@ class instrumenter : object
 end
 (**  This class implements an instrumenter to be used through the {i -ppx}
     command-line switch. *)
+
+val bisect_file : string option ref
+(** Default value for [BISECT_FILE]. *)
+
+val bisect_silent : string option ref
+(** Default value for [BISECT_SILENT]. *)

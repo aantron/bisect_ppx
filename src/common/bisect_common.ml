@@ -4,6 +4,9 @@
 
 
 
+(* Basic types and file [bisect*.coverage] file identifier. Shared with the
+   reporter. *)
+
 type instrumented_file = {
   filename : string;
   points : int list;
@@ -13,9 +16,11 @@ type instrumented_file = {
 type coverage =
   instrumented_file list
 
-
-
 let coverage_file_identifier = "BISECT-COVERAGE-4"
+
+
+
+(* Output functions for the [bisect*.coverage] file format. *)
 
 let write_int formatter i =
   Format.fprintf formatter " %i" i
@@ -43,8 +48,25 @@ let write_coverage formatter coverage =
 
 
 
+(* Accumulated visit counts. This is used only by the native and ReScript
+   runtimes. It is idly linked as part of this module into the PPX and reporter,
+   as well, but not used by them. *)
+
 let table : (string, instrumented_file) Hashtbl.t Lazy.t =
   lazy (Hashtbl.create 17)
+
+let register_file ~filename ~points =
+  let counts = Array.make (List.length points) 0 in
+  let table = Lazy.force table in
+  if not (Hashtbl.mem table filename) then
+    Hashtbl.add table filename {filename; points; counts};
+  `Visit (fun index ->
+    let current_count = counts.(index) in
+    if current_count < max_int then
+      counts.(index) <- current_count + 1)
+
+let flatten_data () =
+  Hashtbl.fold (fun _ file acc -> file::acc) (Lazy.force table) []
 
 let reset_counters () =
   Lazy.force table
@@ -54,8 +76,9 @@ let reset_counters () =
     | n -> Array.fill counts 0 (n - 1) 0
   end
 
-let flatten_data () =
-  Hashtbl.fold (fun _ file acc -> file::acc) (Lazy.force table) []
+
+
+(** Helpers for serializing the coverage data in {!table}. *)
 
 let runtime_data_to_string () =
   match flatten_data () with
@@ -75,18 +98,3 @@ let prng =
 let random_filename base_name =
   Printf.sprintf "%s%09d.coverage"
     base_name (abs (Random.State.int prng 1000000000))
-
-let register_file ~filename ~points =
-  let counts = Array.make (List.length points) 0 in
-  let table = Lazy.force table in
-  if not (Hashtbl.mem table filename) then
-    Hashtbl.add table filename {filename; points; counts};
-  `Visit (fun index ->
-    let current_count = counts.(index) in
-    if current_count < max_int then
-      counts.(index) <- current_count + 1)
-
-
-
-let bisect_file = ref None
-let bisect_silent = ref None
