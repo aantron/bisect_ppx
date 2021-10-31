@@ -146,30 +146,30 @@ let try_in_channel bin x f =
 (* filename + reason *)
 exception Invalid_file of string * string
 
-  let junk channel =
-    try ignore (input_char channel)
-    with End_of_file -> ()
+let junk channel =
+  try ignore (input_char channel)
+  with End_of_file -> ()
 
-  let read_int buffer channel =
-    Buffer.clear buffer;
-    let rec loop () =
-      match input_char channel with
-      | exception End_of_file -> ()
-      | ' ' -> ()
-      | c -> Buffer.add_char buffer c; loop ()
-    in
-    loop ();
-    int_of_string (Buffer.contents buffer)
+let read_int buffer channel =
+  Buffer.clear buffer;
+  let rec loop () =
+    match input_char channel with
+    | exception End_of_file -> ()
+    | ' ' -> ()
+    | c -> Buffer.add_char buffer c; loop ()
+  in
+  loop ();
+  int_of_string (Buffer.contents buffer)
 
-  let read_string buffer channel =
-    let length = read_int buffer channel in
-    let string = really_input_string channel length in
-    junk channel;
-    string
+let read_string buffer channel =
+  let length = read_int buffer channel in
+  let string = really_input_string channel length in
+  junk channel;
+  string
 
-  let read_array read_element buffer channel =
-    let length = read_int buffer channel in
-    Array.init length (fun _index -> read_element buffer channel)
+let read_array read_element buffer channel =
+  let length = read_int buffer channel in
+  Array.init length (fun _index -> read_element buffer channel)
 
 let read_list read_element buffer channel =
   read_array read_element buffer channel |> Array.to_list
@@ -183,29 +183,29 @@ let read_instrumented_file buffer channel =
 let read_coverage buffer channel =
   read_list read_instrumented_file buffer channel
 
-  let read ~filename =
-    try_in_channel true filename begin fun c ->
-      let magic_number_in_file =
-        try
-          really_input_string
-            c (String.length Bisect_common.coverage_file_identifier)
-        with End_of_file ->
-          raise
-            (Invalid_file
-              (filename, "unexpected end of file while reading magic number"))
-      in
-      if magic_number_in_file <> Bisect_common.coverage_file_identifier then
-        raise (Invalid_file (filename, "bad magic number"));
-
-      junk c;
-
-      let b = Buffer.create 4096 in
-      try read_coverage b c
-      with e ->
+let read ~filename =
+  try_in_channel true filename begin fun c ->
+    let magic_number_in_file =
+      try
+        really_input_string
+          c (String.length Bisect_common.coverage_file_identifier)
+      with End_of_file ->
         raise
           (Invalid_file
-            (filename, "exception reading data: " ^ Printexc.to_string e))
-    end
+            (filename, "unexpected end of file while reading magic number"))
+    in
+    if magic_number_in_file <> Bisect_common.coverage_file_identifier then
+      raise (Invalid_file (filename, "bad magic number"));
+
+    junk c;
+
+    let b = Buffer.create 4096 in
+    try read_coverage b c
+    with e ->
+      raise
+        (Invalid_file
+          (filename, "exception reading data: " ^ Printexc.to_string e))
+  end
 
 let get_relative_path file =
   if Filename.is_relative file then
