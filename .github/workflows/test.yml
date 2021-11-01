@@ -2,12 +2,15 @@ name: test
 on: [push, pull_request]
 
 jobs:
-  bucklescript:
+  rescript:
     strategy:
+      fail-fast: false
       matrix:
         os:
         - ubuntu-18.04
         - macos-10.15
+        # Build binaries on older systems to require lower versions of libc and
+        # other system libraries.
 
     runs-on: ${{matrix.os}}
     steps:
@@ -19,3 +22,59 @@ jobs:
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
       run: bash ./test/ci/travis-binaries.sh
+
+  opam:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-latest
+        ocaml:
+        - 4.13.1
+        - 4.12.1
+        - 4.11.2
+        - 4.10.2
+        - 4.09.1
+        - 4.08.1
+        - 4.07.1
+        - 4.06.1
+        - 4.05.0
+        - 4.04.2
+        include:
+        - os: macos-latest
+          ocaml: 4.12.1
+          # ocamlformat 0.16.0, used in testing, doesn't support OCaml 4.13, and
+          # we are using a Linux binary of it. So, hold the Mac build back to
+          # 4.12 for now, and install ocamlformat from opam on Mac.
+
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: avsm/setup-ocaml@v2
+      with:
+        ocaml-compiler: ${{ matrix.ocaml }}
+    - run: opam install --deps-only --yes .
+    - if: ${{runner.os == 'Linux'}}
+      run: |
+        wget https://github.com/aantron/ocamlformat-binary/releases/download/0.15.0/ocamlformat
+        sudo mv ocamlformat /usr/local/bin/ocamlformat
+        sudo chmod a+x /usr/local/bin/ocamlformat
+    - if: ${{runner.os != 'Linux'}}
+      run: opam install ocamlformat.0.16.0
+    - run: |
+        opam --version
+        opam exec -- ocaml -version
+        opam exec -- ocamlformat --version
+
+    - run: opam exec -- make build
+    - run: |
+        case `opam exec -- ocamlc -version` in
+          "4.07.1") TEST_ALIAS=@compatible;;
+          "4.06.1") TEST_ALIAS=@compatible;;
+          "4.05.0") TEST_ALIAS=@compatible;;
+          "4.04.2") TEST_ALIAS=@compatible;;
+          *) TEST_ALIAS=@runtest;;
+        esac
+        unset GITHUB_ACTIONS
+        unset GITHUB_RUN_NUMBER
+        opam exec -- make test TEST=$TEST_ALIAS
