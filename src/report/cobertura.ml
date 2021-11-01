@@ -96,34 +96,31 @@ let pp_cobertura fmt ({sources; package; _} as cobertura) =
     pp_sources sources
     pp_package package
 
-let line_rate counts =
-  let open Util in
-  float_of_int counts.visited /. float_of_int counts.total
+let line_rate (visited, total) =
+  float_of_int visited /. float_of_int total
 
 let update_counts counts line_counts =
-  List.iter
-    (function
-      | None -> ()
-      | Some x when x > 0 -> Util.update counts true
-      | Some _ -> Util.update counts false)
-    line_counts
+  List.fold_left (fun ((visited, total) as acc) -> function
+    | None -> acc
+    | Some x when x > 0 -> (visited + 1, total + 1)
+    | Some _ -> (visited, total + 1))
+    counts line_counts
 
 let line line hits =
   {number = line; hits}
 
 let classes ~global_counts data resolver points : class_ list =
   let class_ in_file visited =
-    match resolver in_file with
+    match resolver ~filename:in_file with
     | None ->
       Util.info "... file not found";
       None
     | Some resolved_in_file ->
+      let points = Hashtbl.find points in_file in
       let line_counts =
-        Util.line_counts in_file resolved_in_file visited points in
-      let counts = Util.make () in
-      let () = update_counts global_counts line_counts in
-      let () = update_counts counts line_counts in
-      let line_rate = line_rate counts in
+        Util.line_counts ~filename:resolved_in_file ~points ~counts:visited in
+      global_counts := update_counts !global_counts line_counts;
+      let line_rate = line_rate (update_counts (0, 0) line_counts) in
 
       let i = ref 1 in
       let lines =
@@ -155,17 +152,17 @@ let classes ~global_counts data resolver points : class_ list =
 
 let package ~counts ~data ~resolver ~points =
   let classes = classes ~global_counts:counts data resolver points in
-  let line_rate = line_rate counts in
+  let line_rate = line_rate !counts in
   {name = "."; line_rate; classes}
 
 let cobertura ~data ~resolver ~points =
-  let counts = Util.make () in
+  let counts = ref (0, 0) in
   let package = package ~counts ~data ~resolver ~points in
   let sources = ["."] in
-  let rate = line_rate counts in
+  let rate = line_rate !counts in
   {
-    lines_valid = counts.total;
-    lines_covered = counts.visited;
+    lines_valid = snd !counts;
+    lines_covered = fst !counts;
     line_rate = rate;
     package;
     sources;
@@ -177,7 +174,8 @@ let output
 
   let data, points =
     Input.load_coverage coverage_files coverage_paths expect do_not_expect in
-  let resolver = Util.search_file source_paths ignore_missing_files in
+  let resolver =
+    Util.find_file ~source_roots:source_paths ~ignore_missing_files in
   let () = Util.mkdirs (Filename.dirname to_file) in
   let cobertura = cobertura ~data ~resolver ~points in
   let oc = open_out to_file in

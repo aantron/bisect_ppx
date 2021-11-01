@@ -8,14 +8,15 @@
 
 let file_json indent in_file resolver visited points =
   Util.info "Processing file '%s'..." in_file;
-  match resolver in_file with
+  match resolver ~filename:in_file with
   | None ->
     Util.info "... file not found";
     None
   | Some resolved_in_file ->
     let digest = Digest.to_hex (Digest.file resolved_in_file) in
+    let points = Hashtbl.find points in_file in
     let line_counts =
-      Util.line_counts in_file resolved_in_file visited points in
+      Util.line_counts ~filename:resolved_in_file ~points ~counts:visited in
     let scounts =
       line_counts
       |> List.map (function
@@ -61,7 +62,8 @@ let output
 
   let data, points =
     Input.load_coverage coverage_files coverage_paths expect do_not_expect in
-  let resolver = Util.search_file source_paths ignore_missing_files in
+  let resolver =
+    Util.find_file ~source_roots:source_paths ~ignore_missing_files in
 
   let git =
     if not git then

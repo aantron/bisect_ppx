@@ -229,6 +229,26 @@ let read_runtime_data filename =
   |> List.map (fun file ->
     Bisect_common.{file with filename = get_relative_path file.filename})
 
+let saturating_add x y =
+  if ((x > 0) && (y > 0) && (x > max_int - y)) then
+    max_int
+  else if ((x < 0) && (y < 0) && (x < min_int - y)) then
+    min_int
+  else
+    x + y
+
+let elementwise_saturating_add xs ys =
+  let longer, shorter =
+    if Array.length xs >= Array.length ys then
+      xs, ys
+    else
+      ys, xs
+  in
+  let result = Array.copy longer in
+  shorter |> Array.iteri (fun index v ->
+    result.(index) <- saturating_add v result.(index));
+  result
+
 let load_coverage files search_paths expect do_not_expect =
   let data, points =
     let total_counts = Hashtbl.create 17 in
@@ -240,7 +260,7 @@ let load_coverage files search_paths expect do_not_expect =
       |> List.iter (fun Bisect_common.{filename; points; counts} ->
         let file_counts =
           try
-            Util.elementwise_saturation_addition
+            elementwise_saturating_add
               (Hashtbl.find total_counts filename)
               counts
           with Not_found -> counts

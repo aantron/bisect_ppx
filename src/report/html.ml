@@ -28,18 +28,20 @@ let split_filename name =
   let basename = Filename.basename name in
   dirname, basename
 
-let percentage stats =
-  let a, b = Util.(stats.visited, stats.total) in
-  let a, b = float_of_int a, float_of_int b in
-  if b = 0. then 100. else (100. *. a) /. b
+let percentage (visited, total) =
+  if total = 0 then
+    100.
+  else
+    100. *. (float_of_int visited) /. (float_of_int total)
 
 let output_html_index title theme filename files =
   Util.info "Writing index file...";
 
   let stats =
     List.fold_left
-      (fun acc (_, _, s) -> Util.add acc s)
-      (Util.make ())
+      (fun (visited, total) (_, _, (visited', total')) ->
+        (visited + visited', total + total'))
+      (0, 0)
       files
   in
 
@@ -135,10 +137,33 @@ let escape_line tab_size line offset points =
     end;
   Buffer.contents buff
 
-let output_html tab_size title theme in_file out_file resolver visited points =
+let open_both in_file out_file =
+  let in_channel = open_in in_file in
 
+  try
+    let rec make_out_dir path =
+      if Sys.file_exists path then
+        ()
+      else begin
+        let parent = Filename.dirname path in
+        make_out_dir parent;
+        Unix.mkdir path 0o755
+      end
+    in
+    make_out_dir (Filename.dirname out_file);
+
+    let out_channel = open_out out_file in
+    (in_channel, out_channel)
+
+  with e ->
+    close_in_noerr in_channel;
+    raise e
+
+
+
+let output_html tab_size title theme in_file out_file resolver visited points =
   Util.info "Processing file '%s'..." in_file;
-  match resolver in_file with
+  match resolver ~filename:in_file with
   | None ->
     Util.info "... file not found";
     None
@@ -146,7 +171,7 @@ let output_html tab_size title theme in_file out_file resolver visited points =
     let cmp_content = Hashtbl.find points in_file in
     Util.info "... file has %d points" (List.length cmp_content);
     let len = Array.length visited in
-    let stats = Util.make () in
+    let stats = ref (0, 0) in
     let pts =
       ref (cmp_content |> List.mapi (fun index offset ->
         let nb =
@@ -155,11 +180,18 @@ let output_html tab_size title theme in_file out_file resolver visited points =
           else
             0
         in
-        Util.update stats (nb > 0);
+        let visited, total = !stats in
+        let visited =
+          if nb > 0 then
+            visited + 1
+          else
+            visited
+        in
+        stats := (visited, total + 1);
         (offset, nb)))
     in
     let dirname, basename = split_filename in_file in
-    let in_channel, out_channel = Util.open_both resolved_in_file out_file in
+    let in_channel, out_channel = open_both resolved_in_file out_file in
     let rec make_path_to_report_root acc in_file_path_remaining =
       if in_file_path_remaining = "" ||
          in_file_path_remaining = Filename.current_dir_name ||
@@ -242,7 +274,7 @@ let output_html tab_size title theme in_file out_file resolver visited points =
         highlight_js
         index_html
         dirname basename
-        (percentage stats);
+        (percentage !stats);
 
       (* Navigation bar items. *)
       lines |> List.iter begin fun (number, _, visited, unvisited) ->
@@ -316,7 +348,7 @@ let output_html tab_size title theme in_file out_file resolver visited points =
 
     close_in_noerr in_channel;
     close_out_noerr out_channel;
-    Some stats
+    Some !stats
 
 let output
     ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
@@ -324,7 +356,8 @@ let output
 
   let data, points =
     Input.load_coverage coverage_files coverage_paths expect do_not_expect in
-  let resolver = Util.search_file source_paths ignore_missing_files in
+  let resolver =
+    Util.find_file ~source_roots:source_paths ~ignore_missing_files in
   Util.mkdirs to_directory;
 
   let files =

@@ -16,103 +16,68 @@ let error arguments =
   Printf.ksprintf (fun s ->
     Printf.eprintf "Error: %s\n%!" s; exit 1) arguments
 
-let (++) x y =
-  if ((x > 0) && (y > 0) && (x > max_int - y)) then
-    max_int
-  else if ((x < 0) && (y < 0) && (x < min_int - y)) then
-    min_int
-  else
-    x + y
 
-let rec zip op x y =
-  let lx = Array.length x in
-  let ly = Array.length y in
-  if lx >= ly then begin
-    let z = Array.copy x in
-    for i = 0 to (pred ly) do
-      z.(i) <- op x.(i) y.(i)
-    done;
-    z
-  end else
-    zip op y x
 
-let elementwise_saturation_addition x y =
-  zip (++) x y
+let split f list =
+  let rec split acc list =
+    match list with
+    | head::tail ->
+      if f head then split (head::acc) tail
+      else (List.rev acc), list
+    | [] ->
+      (List.rev acc), []
+  in
+  split [] list
 
-let mkdirs ?(perm=0o755) dir =
-  let rec mk dir =
-    if not (Sys.file_exists dir) then begin
-      mk (Filename.dirname dir);
-      Unix.mkdir dir perm
+
+
+let mkdirs directory =
+  let rec make directory =
+    if not (Sys.file_exists directory) then begin
+      make (Filename.dirname directory);
+      Unix.mkdir directory 0o755
     end in
-  mk dir
+  make directory
 
-let split p l =
-  let rec spl acc l =
-    match l with
-    | hd :: tl ->
-        if (p hd) then
-          spl (hd :: acc) tl
-        else
-          (List.rev acc), l
-    | [] -> (List.rev acc), [] in
-  spl [] l
+let find_file ~source_roots ~ignore_missing_files ~filename =
+  let fail () =
+    if ignore_missing_files then
+      None
+    else
+      raise (Sys_error (filename ^ ": No such file or directory"))
+  in
+  let rec search = function
+    | head::tail ->
+      let f' = Filename.concat head filename in
+      if Sys.file_exists f' then
+        Some f'
+      else
+        search tail
+    | [] ->
+      fail ()
+  in
+  if Filename.is_implicit filename then
+    search source_roots
+  else if Sys.file_exists filename then
+    Some filename
+  else
+    fail ()
 
-let open_both in_file out_file =
-  let in_channel = open_in in_file in
 
-  try
-    let rec make_out_dir path =
-      if Sys.file_exists path then
-        ()
-      else begin
-        let parent = Filename.dirname path in
-        make_out_dir parent;
-        Unix.mkdir path 0o755
-      end
-    in
-    make_out_dir (Filename.dirname out_file);
-
-    let out_channel = open_out out_file in
-    (in_channel, out_channel)
-
-  with e ->
-    close_in_noerr in_channel;
-    raise e
-
-type counts = {
-  mutable visited : int;
-  mutable total : int;
-}
-
-let make () = {
-  visited = 0;
-  total = 0;
-}
-
-let update counts v =
-  counts.total <- counts.total ++ 1;
-  if v then counts.visited <- counts.visited ++ 1
-
-let add counts_1 counts_2 =
-  {visited = counts_1.visited ++ counts_2.visited;
-   total = counts_1.total ++ counts_2.total}
-
-let line_counts in_file resolved_in_file visited points =
-  let cmp_content = Hashtbl.find points in_file in
-  info "... file has %d points" (List.length cmp_content);
-  let len = Array.length visited in
+let line_counts ~filename ~points ~counts =
+  info "... file has %d points" (List.length points);
+  let len = Array.length counts in
   let pts =
-    cmp_content |> List.mapi (fun index offset ->
+    points |> List.mapi (fun index offset ->
       let nb =
         if index < len then
-          visited.(index)
+          counts.(index)
         else
           0
       in
       (offset, nb))
   in
-  let in_channel = open_in resolved_in_file in
+  let in_channel = open_in filename in
   let line_counts =
     try
       let rec read number acc pts =
@@ -121,11 +86,10 @@ let line_counts in_file resolved_in_file visited points =
           let end_ofs = pos_in in_channel in
           let before, after = split (fun (o, _) -> o < end_ofs) pts in
           let visited_lowest =
-            List.fold_left
-              (fun v (_, nb) ->
-                 match v with
-                 | None -> Some nb
-                 | Some nb' -> if nb < nb' then Some nb else Some nb')
+            List.fold_left (fun v (_, nb) ->
+              match v with
+              | None -> Some nb
+              | Some nb' -> if nb < nb' then Some nb else Some nb')
               None
               before
           in
@@ -139,27 +103,3 @@ let line_counts in_file resolved_in_file visited points =
   in
   let () = close_in_noerr in_channel in
   line_counts
-
-let search_file source_paths ignore_missing_files file =
-  let fail () =
-    if ignore_missing_files then
-      None
-    else
-      raise (Sys_error (file ^ ": No such file or directory"))
-  in
-  let rec search = function
-    | hd::tl ->
-      let f' = Filename.concat hd file in
-      if Sys.file_exists f' then
-        Some f'
-      else
-        search tl
-    | [] ->
-      fail ()
-  in
-  if Filename.is_implicit file then
-    search source_paths
-  else if Sys.file_exists file then
-    Some file
-  else
-    fail ()
