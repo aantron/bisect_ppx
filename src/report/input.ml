@@ -4,13 +4,6 @@
 
 
 
-module Coverage_input_files :
-sig
-  val list : string list -> string list -> string list
-  val expected_sources_are_present :
-    string list -> string list -> string list -> unit
-end =
-struct
   let has_extension extension filename =
     Filename.check_suffix filename extension
 
@@ -127,7 +120,6 @@ struct
     expected_files |> List.iter (fun file ->
       if not (List.mem (strip_extensions file) present_files) then
         Util.error "expected file '%s' is not included in the report" file)
-end
 
 let try_finally x f h =
   let res =
@@ -254,8 +246,7 @@ let load_coverage files search_paths expect do_not_expect =
     let total_counts = Hashtbl.create 17 in
     let all_points = Hashtbl.create 17 in
 
-    Coverage_input_files.list files search_paths
-    |> List.iter (fun out_file ->
+    list files search_paths |> List.iter (fun out_file ->
       read_runtime_data out_file
       |> List.iter (fun Bisect_common.{filename; points; counts} ->
         let file_counts =
@@ -273,7 +264,6 @@ let load_coverage files search_paths expect do_not_expect =
 
   let present_files =
     Hashtbl.fold (fun file _ acc -> file::acc) data [] in
-  Coverage_input_files.expected_sources_are_present
-    present_files expect do_not_expect;
+  expected_sources_are_present present_files expect do_not_expect;
 
   data, points

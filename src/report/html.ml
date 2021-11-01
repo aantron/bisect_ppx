@@ -358,8 +358,8 @@ let output
     Input.load_coverage coverage_files coverage_paths expect do_not_expect in
   let resolver =
     Util.find_file ~source_roots:source_paths ~ignore_missing_files in
-  Util.mkdirs to_directory;
 
+  Util.mkdirs to_directory;
   let files =
     Hashtbl.fold (fun in_file visited acc ->
       let out_file = (Filename.concat to_directory in_file) ^ ".html" in

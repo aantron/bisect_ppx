@@ -4,8 +4,6 @@
 
 
 
-type source = string
-
 type line = {
   number : int;
   hits : int
@@ -27,7 +25,7 @@ type cobertura = {
   lines_valid : int;
   lines_covered : int;
   line_rate : float;
-  sources : source list;
+  sources : string list;
   package : package;
 }
 
@@ -176,13 +174,13 @@ let output
     Input.load_coverage coverage_files coverage_paths expect do_not_expect in
   let resolver =
     Util.find_file ~source_roots:source_paths ~ignore_missing_files in
-  let () = Util.mkdirs (Filename.dirname to_file) in
   let cobertura = cobertura ~data ~resolver ~points in
+  let () = Util.mkdirs (Filename.dirname to_file) in
   let oc = open_out to_file in
   try
-  let fmt = Format.formatter_of_out_channel oc in
-  let () = pp_cobertura fmt cobertura in
-  close_out oc
+    let fmt = Format.formatter_of_out_channel oc in
+    let () = pp_cobertura fmt cobertura in
+    close_out oc
   with exn ->
     close_out_noerr oc;
     raise exn

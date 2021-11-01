@@ -85,7 +85,6 @@ let output
         metadata branch
   in
 
-  Util.mkdirs (Filename.dirname to_file);
   let file_jsons =
     Hashtbl.fold begin fun in_file visited acc ->
       let maybe_json = file_json 8 in_file resolver visited points in
@@ -112,6 +111,8 @@ let output
     else
       ""
   in
+
+  Util.mkdirs (Filename.dirname to_file);
   let ch = open_out to_file in
   try
     Printf.fprintf ch {|{

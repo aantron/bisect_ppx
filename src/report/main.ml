@@ -4,6 +4,11 @@
 
 
 
+(* cmdliner wrappers for each of the reports in the other .ml files, and the
+   program entry point. *)
+
+
+
 (* Helpers. *)
 
 let esy_source_dir =
@@ -148,8 +153,8 @@ let html =
   in
 
   let call_with_labels
-      to_directory title tab_size theme coverage_files coverage_paths source_paths
-      ignore_missing_files expect do_not_expect =
+      to_directory title tab_size theme coverage_files coverage_paths
+      source_paths ignore_missing_files expect do_not_expect =
     Html.output
       ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
       ~source_paths ~ignore_missing_files ~expect ~do_not_expect
