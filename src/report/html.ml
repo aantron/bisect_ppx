@@ -38,9 +38,9 @@ let output_html_index title theme filename files =
 
   let channel = open_out filename in
   try
-      let write format = Printf.fprintf channel format in
+    let write format = Printf.fprintf channel format in
 
-      write {|<!DOCTYPE html>
+    write {|<!DOCTYPE html>
 <html lang="en"%s>
   <head>
     <title>%s</title>
@@ -54,23 +54,23 @@ let output_html_index title theme filename files =
     </div>
     <div id="files">
 |}
-        (theme_class theme)
-        title
-        title
-        (floor ((percentage stats) *. 100.) /. 100.);
+      (theme_class theme)
+      title
+      title
+      (floor ((percentage stats) *. 100.) /. 100.);
 
-      files |> List.iter begin fun (name, html_file, stats) ->
-        let dirname, basename = split_filename name in
-        let relative_html_file =
-          if Filename.is_relative html_file then
-            html_file
-          else
-            let prefix_length = String.length Filename.dir_sep in
-            String.sub
-              html_file prefix_length (String.length html_file - prefix_length)
-        in
-        let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
-        write {|      <div>
+    files |> List.iter begin fun (name, html_file, stats) ->
+      let dirname, basename = split_filename name in
+      let relative_html_file =
+        if Filename.is_relative html_file then
+          html_file
+        else
+          let prefix_length = String.length Filename.dir_sep in
+          String.sub
+            html_file prefix_length (String.length html_file - prefix_length)
+      in
+      let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
+      write {|      <div>
         <span class="meter">
           <span class="covered" style="width: %s%%"></span>
         </span>
@@ -80,22 +80,22 @@ let output_html_index title theme filename files =
         </a>
       </div>
 |}
-          percentage
-          percentage
-          relative_html_file
-          dirname basename;
-      end;
+        percentage
+        percentage
+        relative_html_file
+        dirname basename;
+    end;
 
-      write {|    </div>
+    write {|    </div>
   </body>
 </html>
 |};
 
-      close_out channel
+    close_out channel
 
-    with exn ->
-      close_out_noerr channel;
-      raise exn
+  with exn ->
+    close_out_noerr channel;
+    raise exn
 
 
 
@@ -158,86 +158,86 @@ let output_for_source_file
     tab_size title theme source_file_on_disk html_file_on_disk
     {Bisect_common.filename; points; counts} =
 
-    let len = Array.length counts in
-    let stats = ref (0, 0) in
-    let pts =
-      ref (points |> List.mapi (fun index offset ->
-        let nb =
-          if index < len then
-            counts.(index)
-          else
-            0
-        in
-        let visited, total = !stats in
-        let visited =
-          if nb > 0 then
-            visited + 1
-          else
-            visited
-        in
-        stats := (visited, total + 1);
-        (offset, nb)))
-    in
-    let dirname, basename = split_filename filename in
-    let in_channel, out_channel =
-      open_both source_file_on_disk html_file_on_disk in
-    let rec make_path_to_report_root acc in_file_path_remaining =
-      if in_file_path_remaining = "" ||
-         in_file_path_remaining = Filename.current_dir_name ||
-         in_file_path_remaining = Filename.dir_sep then
-        acc
-      else
-        let path_component = Filename.basename in_file_path_remaining in
-        let parent = Filename.dirname in_file_path_remaining in
-        if path_component = Filename.current_dir_name then
-          make_path_to_report_root acc parent
+  let len = Array.length counts in
+  let stats = ref (0, 0) in
+  let pts =
+    ref (points |> List.mapi (fun index offset ->
+      let nb =
+        if index < len then
+          counts.(index)
         else
-          make_path_to_report_root
-            (Filename.concat acc Filename.parent_dir_name)
-            parent
+          0
+      in
+      let visited, total = !stats in
+      let visited =
+        if nb > 0 then
+          visited + 1
+        else
+          visited
+      in
+      stats := (visited, total + 1);
+      (offset, nb)))
+  in
+  let dirname, basename = split_filename filename in
+  let in_channel, out_channel =
+    open_both source_file_on_disk html_file_on_disk in
+  let rec make_path_to_report_root acc in_file_path_remaining =
+    if in_file_path_remaining = "" ||
+        in_file_path_remaining = Filename.current_dir_name ||
+        in_file_path_remaining = Filename.dir_sep then
+      acc
+    else
+      let path_component = Filename.basename in_file_path_remaining in
+      let parent = Filename.dirname in_file_path_remaining in
+      if path_component = Filename.current_dir_name then
+        make_path_to_report_root acc parent
+      else
+        make_path_to_report_root
+          (Filename.concat acc Filename.parent_dir_name)
+          parent
+  in
+  let path_to_report_root =
+    make_path_to_report_root "" (Filename.dirname filename) in
+  let style_css = Filename.concat path_to_report_root "coverage.css" in
+  let coverage_js = Filename.concat path_to_report_root "coverage.js" in
+  let highlight_js =
+    Filename.concat path_to_report_root "highlight.pack.js" in
+  let index_html = Filename.concat path_to_report_root "index.html" in
+  (try
+    let lines, line_count =
+      let rec read number acc =
+        let start_ofs = pos_in in_channel in
+        try
+          let line = input_line in_channel in
+          let end_ofs = pos_in in_channel in
+          let before, after = Util.split (fun (o, _) -> o < end_ofs) !pts in
+          pts := after;
+          let line' = escape_line tab_size line start_ofs before in
+          let visited, unvisited =
+            List.fold_left
+              (fun (v, u) (_, nb) ->
+                ((v || (nb > 0)), (u || (nb = 0))))
+              (false, false)
+              before
+          in
+          read (number + 1) ((number, line', visited, unvisited)::acc)
+
+        with End_of_file -> List.rev acc, number - 1
+      in
+      read 1 []
     in
-    let path_to_report_root =
-      make_path_to_report_root "" (Filename.dirname filename) in
-    let style_css = Filename.concat path_to_report_root "coverage.css" in
-    let coverage_js = Filename.concat path_to_report_root "coverage.js" in
-    let highlight_js =
-      Filename.concat path_to_report_root "highlight.pack.js" in
-    let index_html = Filename.concat path_to_report_root "index.html" in
-    (try
-      let lines, line_count =
-        let rec read number acc =
-          let start_ofs = pos_in in_channel in
-          try
-            let line = input_line in_channel in
-            let end_ofs = pos_in in_channel in
-            let before, after = Util.split (fun (o, _) -> o < end_ofs) !pts in
-            pts := after;
-            let line' = escape_line tab_size line start_ofs before in
-            let visited, unvisited =
-              List.fold_left
-                (fun (v, u) (_, nb) ->
-                  ((v || (nb > 0)), (u || (nb = 0))))
-                (false, false)
-                before
-            in
-            read (number + 1) ((number, line', visited, unvisited)::acc)
 
-          with End_of_file -> List.rev acc, number - 1
-        in
-        read 1 []
-      in
+    let class_of_visited = function
+      | true, false -> {|class="visited"|}
+      | false, true -> {|class="unvisited"|}
+      | true, true -> {|class="some-visited"|}
+      | false, false -> ""
+    in
 
-      let class_of_visited = function
-        | true, false -> {|class="visited"|}
-        | false, true -> {|class="unvisited"|}
-        | true, true -> {|class="some-visited"|}
-        | false, false -> ""
-      in
+    let write format = Printf.fprintf out_channel format in
 
-      let write format = Printf.fprintf out_channel format in
-
-      (* Head and header. *)
-      write {|<!DOCTYPE html>
+    (* Head and header. *)
+    write {|<!DOCTYPE html>
 <html lang="en"%s>
   <head>
     <title>%s</title>
@@ -257,87 +257,87 @@ let output_for_source_file
     </div>
     <div id="navbar">
 |}
-        (theme_class theme)
-        title
-        style_css
-        highlight_js
-        index_html
-        dirname basename
-        (percentage !stats);
+      (theme_class theme)
+      title
+      style_css
+      highlight_js
+      index_html
+      dirname basename
+      (percentage !stats);
 
-      (* Navigation bar items. *)
-      lines |> List.iter begin fun (number, _, visited, unvisited) ->
-        if unvisited then begin
-          let offset =
-            (float_of_int number) /. (float_of_int line_count) *. 100. in
-          let origin, offset =
-            if offset <= 50. then
-              "top", offset
-            else
-              "bottom", (100. -. offset)
-          in
-          write "      <span %s style=\"%s:%.02f%%\"></span>\n"
-            (class_of_visited (visited, unvisited)) origin offset;
-        end
-      end;
+    (* Navigation bar items. *)
+    lines |> List.iter begin fun (number, _, visited, unvisited) ->
+      if unvisited then begin
+        let offset =
+          (float_of_int number) /. (float_of_int line_count) *. 100. in
+        let origin, offset =
+          if offset <= 50. then
+            "top", offset
+          else
+            "bottom", (100. -. offset)
+        in
+        write "      <span %s style=\"%s:%.02f%%\"></span>\n"
+          (class_of_visited (visited, unvisited)) origin offset;
+      end
+    end;
 
-      write {|    </div>
+    write {|    </div>
     <div id="report">
       <div id="lines-layer">
         <pre>
 |};
 
-      (* Line highlights. *)
-      lines |> List.iter (fun (number, _, visited, unvisited) ->
-        write "<a id=\"L%i\"></a><span %s> </span>\n"
-          number
-          (class_of_visited (visited, unvisited)));
+    (* Line highlights. *)
+    lines |> List.iter (fun (number, _, visited, unvisited) ->
+      write "<a id=\"L%i\"></a><span %s> </span>\n"
+        number
+        (class_of_visited (visited, unvisited)));
 
-      write {|</pre>
+    write {|</pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
 |};
 
-      let width = string_of_int line_count |> String.length in
+    let width = string_of_int line_count |> String.length in
 
-      (* Line numbers. *)
-      lines |> List.iter (fun (number, _, _, _) ->
-        let formatted = string_of_int number in
-        let padded =
-          (String.make (width - String.length formatted) ' ') ^ formatted in
-        write "<a href=\"#L%s\">%s</a>\n" formatted padded);
+    (* Line numbers. *)
+    lines |> List.iter (fun (number, _, _, _) ->
+      let formatted = string_of_int number in
+      let padded =
+        (String.make (width - String.length formatted) ' ') ^ formatted in
+      write "<a href=\"#L%s\">%s</a>\n" formatted padded);
 
-      let syntax =
-        if Filename.check_suffix basename ".re" then
-          "reasonml"
-        else
-          "ocaml"
-      in
+    let syntax =
+      if Filename.check_suffix basename ".re" then
+        "reasonml"
+      else
+        "ocaml"
+    in
 
-      write "</pre>\n";
-      write "<pre><code class=\"%s\">" syntax;
+    write "</pre>\n";
+    write "<pre><code class=\"%s\">" syntax;
 
-      (* Code lines. *)
-      lines |> List.iter (fun (_, markup, _, _) -> write "%s\n" markup);
+    (* Code lines. *)
+    lines |> List.iter (fun (_, markup, _, _) -> write "%s\n" markup);
 
-      write {|</code></pre>
+    write {|</code></pre>
       </div>
     </div>
     <script src="%s"></script>
   </body>
 </html>
 |}
-        coverage_js
+      coverage_js
 
-    with e ->
-      close_in_noerr in_channel;
-      close_out_noerr out_channel;
-      raise e);
-
+  with e ->
     close_in_noerr in_channel;
     close_out_noerr out_channel;
-    !stats
+    raise e);
+
+  close_in_noerr in_channel;
+  close_out_noerr out_channel;
+  !stats
 
 
 
