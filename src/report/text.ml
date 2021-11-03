@@ -5,8 +5,9 @@
 
 
 let output ~per_file ~coverage_files ~coverage_paths ~expect ~do_not_expect =
-  let data, _ =
-    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
+  let _, data =
+    Input.load_coverage
+      ~coverage_files ~coverage_paths ~expect ~do_not_expect in
 
   let stats =
     Hashtbl.fold (fun file counts acc ->

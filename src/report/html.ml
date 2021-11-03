@@ -354,8 +354,9 @@ let output
     ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
     ~source_paths ~ignore_missing_files ~expect ~do_not_expect =
 
-  let data, points =
-    Input.load_coverage coverage_files coverage_paths expect do_not_expect in
+  let points, data =
+    Input.load_coverage
+      ~coverage_files ~coverage_paths ~expect ~do_not_expect in
   let resolver =
     Util.find_file ~source_roots:source_paths ~ignore_missing_files in
 
