@@ -11,8 +11,24 @@
 (** {1 Logging} *)
 
 val verbose : bool ref
+(** Whether {!Util.info} causes any output to be displayed. Set by
+    [--verbose]. *)
+
 val info : ('a, unit, string, unit) format4 -> 'a
-val error : ('a, unit, string, 'b) format4 -> 'a
+(** Writes a message to STDERR if {!Util.verbose} is set. The message is
+    prefixed with ["Info: "]. *)
+
+val fatal : ('a, unit, string, 'b) format4 -> 'a
+(** Writes a message to STDERR and exits the process with [1]. The message is
+    prefixed with ["Error: "].
+
+    [bisect-ppx-report] favors this kind of error handling because it is local
+    and composable. All values needed to generate the error message are
+    available in local scope, and the "handler" is near the code that causes the
+    error. On the other hand, [bisect-ppx-report] is a simple enough program
+    that it does not need to do any fancy error handling (the operating system
+    will automatically close any open files when the process exits). So there is
+    no need for a stack of exception handlers to respond to errors. *)
 
 
 
@@ -27,15 +43,16 @@ val split : ('a -> bool) -> 'a list -> ('a list * 'a list)
 (** {1 File system} *)
 
 val mkdirs : string -> unit
-(** Creates the given directory, and any necessary parent directories. Raises
-    [Unix.Unix_error] if creation fails. *)
+(** Creates the given directory, and any necessary parent directories. Failure
+    to create directory is considered fatal, and the function terminates the
+    reporter process. *)
 
-val find_file :
+val find_source_file :
   source_roots:string list -> ignore_missing_files:bool -> filename:string ->
     string option
 (** Attempts to find the given file relative to each of the given potential
     source roots. If the file cannot be found, either evaluates to [None] if
-    [~ignore_missing_files:true], or raises [Sys_error] if
+    [~ignore_missing_files:true], or terminates the process if
     [~ignore_missing_files:false]. *)
 
 
@@ -52,4 +69,10 @@ val line_counts :
 
     This function is "lossy," as OCaml code often has multiple points on one
     line. However, this is a necessary conversion for line-based coverage report
-    formats, such as Coveralls and Cobertura. *)
+    formats, such as Coveralls and Cobertura.
+
+    This function reads the file with [~filename]. In case of an error, it
+    terminates the process. The file's existence should already have been
+    checked by {!Util.find_source_file}. An error in [line_counts] therefore
+    suggests a permissions problem, a race condition with another process, or
+    another abnormal situation. *)

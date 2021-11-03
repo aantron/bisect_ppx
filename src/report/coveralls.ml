@@ -10,7 +10,6 @@ let file_json indent resolver {Bisect_common.filename; points; counts} =
   Util.info "Processing file '%s'..." filename;
   match resolver ~filename with
   | None ->
-    Util.info "... file not found";
     None
   | Some resolved_in_file ->
     let digest = Digest.to_hex (Digest.file resolved_in_file) in
@@ -63,7 +62,7 @@ let output
     Input.load_coverage
       ~coverage_files ~coverage_paths ~expect ~do_not_expect in
   let resolver =
-    Util.find_file ~source_roots:source_paths ~ignore_missing_files in
+    Util.find_source_file ~source_roots:source_paths ~ignore_missing_files in
 
   let git =
     if not git then
@@ -248,7 +247,7 @@ let output_and_send
         Util.info "detected CI: %s" (CI.pretty_name ci);
         ci
       | None ->
-        Util.error "unknown CI service or not in CI"
+        Util.fatal "unknown CI service or not in CI"
     end
   in
 
@@ -271,7 +270,7 @@ let output_and_send
       | value ->
         value
       | exception Not_found ->
-        Util.error "expected job id in $%s" job_id_variable
+        Util.fatal "expected job id in $%s" job_id_variable
     end
   in
 
@@ -308,7 +307,7 @@ let output_and_send
               value
             end
           | [] ->
-            Util.error
+            Util.fatal
               "expected repo token in $%s" (List.hd repo_token_variables)
         in
         try_variables repo_token_variables

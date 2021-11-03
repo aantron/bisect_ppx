@@ -12,7 +12,7 @@ let info arguments =
     if !verbose then
       Printf.printf "Info: %s\n%!" s) arguments
 
-let error arguments =
+let fatal arguments =
   Printf.ksprintf (fun s ->
     Printf.eprintf "Error: %s\n%!" s; exit 1) arguments
 
@@ -37,14 +37,25 @@ let mkdirs directory =
       make (Filename.dirname directory);
       Unix.mkdir directory 0o755
     end in
-  make directory
+  try make directory
+  with Unix.(Unix_error (error, _, path)) ->
+    fatal "unable to create directory '%s': %s" path (Unix.error_message error)
 
-let find_file ~source_roots ~ignore_missing_files ~filename =
+let find_source_file ~source_roots ~ignore_missing_files ~filename =
   let fail () =
-    if ignore_missing_files then
+    let message =
+      source_roots
+      |> List.map (Printf.sprintf "  - %s")
+      |> fun text ->
+        (Printf.sprintf "cannot find source file '%s' in:" filename)::text
+      |> String.concat "\n"
+    in
+    if ignore_missing_files then begin
+      info "%s" message;
       None
+    end
     else
-      raise (Sys_error (filename ^ ": No such file or directory"))
+      fatal "%s\nHint: consider passing --ignore-missing-files." message
   in
   let rec search = function
     | head::tail ->
@@ -66,7 +77,6 @@ let find_file ~source_roots ~ignore_missing_files ~filename =
 
 
 let line_counts ~filename ~points ~counts =
-  info "... file has %d points" (List.length points);
   let len = Array.length counts in
   let points =
     points
@@ -83,12 +93,16 @@ let line_counts ~filename ~points ~counts =
       in
       (offset, nb))
   in
-  let in_channel = open_in filename in
+  let in_channel =
+    try open_in filename
+    with Sys_error message -> fatal "cannot open file '%s': %s" filename message
+  in
   let line_counts =
     try
       let rec read number acc pts =
-        try
-          let _ = input_line in_channel in
+        match input_line in_channel with
+        | exception End_of_file -> List.rev acc
+        | _ ->
           let end_ofs = pos_in in_channel in
           let before, after = split (fun (o, _) -> o < end_ofs) pts in
           let visited_lowest =
@@ -100,12 +114,13 @@ let line_counts ~filename ~points ~counts =
               before
           in
           read (number + 1) (visited_lowest::acc) after
-        with End_of_file -> List.rev acc
       in
       read 1 [] pts
-    with e ->
+    with exn ->
       close_in_noerr in_channel;
-      raise e;
+      match exn with
+      | Sys_error message -> fatal "cannot read file '%s': %s" filename message
+      | _ -> raise exn
   in
-  let () = close_in_noerr in_channel in
+  close_in_noerr in_channel;
   line_counts

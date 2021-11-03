@@ -49,7 +49,6 @@ From Travis to Coveralls.
   Info: using job ID variable $TRAVIS_JOB_ID
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 6 points
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
   $ cat coverage.json
@@ -77,7 +76,6 @@ From Travis to Codecov.
   Info: using job ID variable $TRAVIS_JOB_ID
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 6 points
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json
   $ cat coverage.json
@@ -134,7 +132,6 @@ From CircleCI to Coveralls.
   Info: including git info
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 6 points
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
   $ cat coverage.json
@@ -164,7 +161,6 @@ From CircleCI to Codecov.
   Info: using job ID variable $CIRCLE_BUILD_NUM
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 6 points
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json
   $ cat coverage.json
@@ -212,7 +208,6 @@ From GitHub Actions to Coveralls.
   Info: including git info
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 6 points
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
   $ cat coverage.json
@@ -241,7 +236,6 @@ From GitHub Actions to Codecov
   Info: using job ID variable $GITHUB_RUN_NUMBER
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 6 points
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json
   $ cat coverage.json

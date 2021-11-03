@@ -83,7 +83,7 @@ let list_coverage_files files_on_command_line coverage_search_paths =
   end;
 
   if all_coverage_files = [] then
-    Util.error "no coverage files given on command line or found"
+    Util.fatal "no coverage files given on command line or found"
   else
     all_coverage_files
 
@@ -128,7 +128,7 @@ let assert_expected_sources_are_present present_files expect do_not_expect =
   filtered_expected_files expect do_not_expect
   |> List.iter (fun file ->
     if not (List.mem (strip_extensions file) present_files) then
-      Util.error "expected file '%s' is not included in the report" file)
+      Util.fatal "expected file '%s' is not included in the report" file)
 
 
 

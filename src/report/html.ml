@@ -376,11 +376,10 @@ let output
     Hashtbl.fold begin fun _ file acc ->
       let filename = Bisect_common.(file.filename) in
       let source_file_on_disk =
-        Util.find_file
+        Util.find_source_file
           ~source_roots:source_paths ~ignore_missing_files ~filename in
       match source_file_on_disk with
       | None ->
-        Util.info "'%s': source file not found" filename;
         acc
       | Some source_file_on_disk ->
         let html_file_on_disk =

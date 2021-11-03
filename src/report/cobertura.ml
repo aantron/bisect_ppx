@@ -111,7 +111,6 @@ let classes ~global_counts resolver coverage : class_ list =
   let class_ {Bisect_common.filename; points; counts} =
     match resolver ~filename with
     | None ->
-      Util.info "... file not found";
       None
     | Some resolved_in_file ->
       let line_counts =
@@ -173,7 +172,7 @@ let output
     Input.load_coverage
       ~coverage_files ~coverage_paths ~expect ~do_not_expect in
   let resolver =
-    Util.find_file ~source_roots:source_paths ~ignore_missing_files in
+    Util.find_source_file ~source_roots:source_paths ~ignore_missing_files in
   let cobertura = cobertura ~resolver ~coverage in
   let () = Util.mkdirs (Filename.dirname to_file) in
   let oc = open_out to_file in
