@@ -9,15 +9,6 @@ let theme_class = function
   | `Dark -> {| class="dark"|}
   | `Auto -> ""
 
-let output_file content filename =
-  let channel = open_out filename in
-  try
-    Printf.fprintf channel "%s" content;
-    close_out channel
-  with exn ->
-    close_out_noerr channel;
-    raise exn
-
 let split_filename name =
   let dirname =
     match Filename.dirname name with
@@ -161,22 +152,19 @@ let open_both in_file out_file =
 
 
 
-let output_html tab_size title theme in_file out_file resolver visited points =
-  Util.info "Processing file '%s'..." in_file;
-  match resolver ~filename:in_file with
-  | None ->
-    Util.info "... file not found";
-    None
-  | Some resolved_in_file ->
-    let cmp_content = Hashtbl.find points in_file in
-    Util.info "... file has %d points" (List.length cmp_content);
-    let len = Array.length visited in
+(* Individual HTML files corresponding to each source file. *)
+
+let output_for_source_file
+    tab_size title theme source_file_on_disk html_file_on_disk
+    {Bisect_common.filename; points; counts} =
+
+    let len = Array.length counts in
     let stats = ref (0, 0) in
     let pts =
-      ref (cmp_content |> List.mapi (fun index offset ->
+      ref (points |> List.mapi (fun index offset ->
         let nb =
           if index < len then
-            visited.(index)
+            counts.(index)
           else
             0
         in
@@ -190,8 +178,9 @@ let output_html tab_size title theme in_file out_file resolver visited points =
         stats := (visited, total + 1);
         (offset, nb)))
     in
-    let dirname, basename = split_filename in_file in
-    let in_channel, out_channel = open_both resolved_in_file out_file in
+    let dirname, basename = split_filename filename in
+    let in_channel, out_channel =
+      open_both source_file_on_disk html_file_on_disk in
     let rec make_path_to_report_root acc in_file_path_remaining =
       if in_file_path_remaining = "" ||
          in_file_path_remaining = Filename.current_dir_name ||
@@ -208,7 +197,7 @@ let output_html tab_size title theme in_file out_file resolver visited points =
             parent
     in
     let path_to_report_root =
-      make_path_to_report_root "" (Filename.dirname in_file) in
+      make_path_to_report_root "" (Filename.dirname filename) in
     let style_css = Filename.concat path_to_report_root "coverage.css" in
     let coverage_js = Filename.concat path_to_report_root "coverage.js" in
     let highlight_js =
@@ -348,40 +337,73 @@ let output_html tab_size title theme in_file out_file resolver visited points =
 
     close_in_noerr in_channel;
     close_out_noerr out_channel;
-    Some !stats
+    !stats
+
+
+
+(* Assets, such as CSS and JavaScript files. *)
+
+let output_string_to_separate_file content filename =
+  let channel = open_out filename in
+  try
+    Printf.fprintf channel "%s" content;
+    close_out channel
+  with exn ->
+    close_out_noerr channel;
+    raise exn
+
+
+
+(* HTML generator entry point. *)
 
 let output
     ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
     ~source_paths ~ignore_missing_files ~expect ~do_not_expect =
 
-  let points, data =
+  (* Read all the [.coverage] files and get per-source file visit counts. *)
+  let coverage =
     Input.load_coverage
       ~coverage_files ~coverage_paths ~expect ~do_not_expect in
-  let resolver =
-    Util.find_file ~source_roots:source_paths ~ignore_missing_files in
 
+  (* Write each of the HTML files corresponding to each source file. *)
   Util.mkdirs to_directory;
   let files =
-    Hashtbl.fold (fun in_file visited acc ->
-      let out_file = (Filename.concat to_directory in_file) ^ ".html" in
-      let maybe_stats =
-        output_html tab_size title theme in_file out_file resolver
-          visited points
-      in
-      match maybe_stats with
-      | None -> acc
-      | Some stats -> (in_file, (in_file ^ ".html"), stats)::acc)
-    data
+    Hashtbl.fold begin fun _ file acc ->
+      let filename = Bisect_common.(file.filename) in
+      let source_file_on_disk =
+        Util.find_file
+          ~source_roots:source_paths ~ignore_missing_files ~filename in
+      match source_file_on_disk with
+      | None ->
+        Util.info "'%s': source file not found" filename;
+        acc
+      | Some source_file_on_disk ->
+        let html_file_on_disk =
+          (Filename.concat to_directory filename) ^ ".html" in
+        let html_file_relative = filename ^ ".html" in
+        let stats =
+          output_for_source_file
+            tab_size title theme source_file_on_disk html_file_on_disk file in
+        (filename, html_file_relative, stats)::acc
+    end
+    coverage
     []
   in
+
+  (* Write the coverage report landing page. *)
   output_html_index
     title
     theme
     (Filename.concat to_directory "index.html")
     (List.sort compare files);
-  output_file
-    Assets.js (Filename.concat to_directory "coverage.js");
-  output_file
-    Assets.highlight_js (Filename.concat to_directory "highlight.pack.js");
-  output_file
-    Assets.css (Filename.concat to_directory "coverage.css")
+
+  (* Write the asset files. *)
+  output_string_to_separate_file
+    Assets.js
+    (Filename.concat to_directory "coverage.js");
+  output_string_to_separate_file
+    Assets.highlight_js
+    (Filename.concat to_directory "highlight.pack.js");
+  output_string_to_separate_file
+    Assets.css
+    (Filename.concat to_directory "coverage.css")

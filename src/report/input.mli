@@ -9,10 +9,10 @@ val load_coverage :
   coverage_paths:string list ->
   expect:string list ->
   do_not_expect:string list ->
-    ((string, int list) Hashtbl.t * (string, int array) Hashtbl.t)
+    Bisect_common.coverage
 (** Loads the given [~coverage_files], and any [.coverage] files found under the
-    given [~coverage_paths]. Returns a pair of the accumulated per-source-file
-    points offsets and visit counts.
+    given [~coverage_paths]. Returns the per-source coverage data, accumulated
+    across all the [.coverage] files.
 
     [~expect] is a list of expected source files and/or source directories that
     should appear in the returned coverage data. [~do_not_expect] subtracts some

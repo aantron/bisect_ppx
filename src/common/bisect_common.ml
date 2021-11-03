@@ -13,8 +13,7 @@ type instrumented_file = {
   counts : int array;
 }
 
-type coverage =
-  instrumented_file list
+type coverage = (string, instrumented_file) Hashtbl.t
 
 let coverage_file_identifier = "BISECT-COVERAGE-4"
 
@@ -52,24 +51,24 @@ let write_coverage formatter coverage =
    runtimes. It is idly linked as part of this module into the PPX and reporter,
    as well, but not used by them. *)
 
-let table : (string, instrumented_file) Hashtbl.t Lazy.t =
+let coverage : coverage Lazy.t =
   lazy (Hashtbl.create 17)
 
 let register_file ~filename ~points =
   let counts = Array.make (List.length points) 0 in
-  let table = Lazy.force table in
-  if not (Hashtbl.mem table filename) then
-    Hashtbl.add table filename {filename; points; counts};
+  let coverage = Lazy.force coverage in
+  if not (Hashtbl.mem coverage filename) then
+    Hashtbl.add coverage filename {filename; points; counts};
   `Visit (fun index ->
     let current_count = counts.(index) in
     if current_count < max_int then
       counts.(index) <- current_count + 1)
 
 let flatten_data () =
-  Hashtbl.fold (fun _ file acc -> file::acc) (Lazy.force table) []
+  Hashtbl.fold (fun _ file acc -> file::acc) (Lazy.force coverage) []
 
 let reset_counters () =
-  Lazy.force table
+  Lazy.force coverage
   |> Hashtbl.iter begin fun _ {counts; _} ->
     match Array.length counts with
     | 0 -> ()
@@ -78,7 +77,7 @@ let reset_counters () =
 
 
 
-(** Helpers for serializing the coverage data in {!table}. *)
+(** Helpers for serializing the coverage data in {!coverage}. *)
 
 let runtime_data_to_string () =
   match flatten_data () with

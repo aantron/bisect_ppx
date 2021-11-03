@@ -30,10 +30,10 @@ type instrumented_file = {
 }
 (** Data gathered for a single source file. *)
 
-type coverage =
-  instrumented_file list
+type coverage = (string, instrumented_file) Hashtbl.t
 (** A binary instrumented with Bisect, when run, produces coverage statistics
-    for each of its source files. *)
+    for each of its source files. The runtime and reporter both index the
+    statistics by source file name. *)
 
 val coverage_file_identifier : string
 (** A string written at the beginning of each [bisect*.coverage] files. Provides

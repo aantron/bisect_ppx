@@ -5,18 +5,18 @@
 
 
 let output ~per_file ~coverage_files ~coverage_paths ~expect ~do_not_expect =
-  let _, data =
+  let coverage =
     Input.load_coverage
       ~coverage_files ~coverage_paths ~expect ~do_not_expect in
 
   let stats =
-    Hashtbl.fold (fun file counts acc ->
-      let total = Array.length counts in
+    Hashtbl.fold (fun _ (file : Bisect_common.instrumented_file) acc ->
+      let total = Array.length file.counts in
       let visited =
         Array.fold_left
-          (fun acc count -> if count > 0 then acc + 1 else acc) 0 counts
+          (fun acc count -> if count > 0 then acc + 1 else acc) 0 file.counts
       in
-      (file, visited, total)::acc) data []
+      (file.filename, visited, total)::acc) coverage []
   in
 
   let percentage numerator denominator =

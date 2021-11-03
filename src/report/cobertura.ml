@@ -107,16 +107,15 @@ let update_counts counts line_counts =
 let line line hits =
   {number = line; hits}
 
-let classes ~global_counts data resolver points : class_ list =
-  let class_ in_file visited =
-    match resolver ~filename:in_file with
+let classes ~global_counts resolver coverage : class_ list =
+  let class_ {Bisect_common.filename; points; counts} =
+    match resolver ~filename with
     | None ->
       Util.info "... file not found";
       None
     | Some resolved_in_file ->
-      let points = Hashtbl.find points in_file in
       let line_counts =
-        Util.line_counts ~filename:resolved_in_file ~points ~counts:visited in
+        Util.line_counts ~filename:resolved_in_file ~points ~counts in
       global_counts := update_counts !global_counts line_counts;
       let line_rate = line_rate (update_counts (0, 0) line_counts) in
 
@@ -138,24 +137,24 @@ let classes ~global_counts data resolver points : class_ list =
         |> List.rev
       in
 
-      Some {name = in_file; line_rate; lines}
+      Some {name = filename; line_rate; lines}
   in
 
-  Hashtbl.fold (fun in_file visited acc ->
-    match class_ in_file visited with
+  Hashtbl.fold (fun _ file acc ->
+    match class_ file with
     | None -> acc
     | Some x -> x::acc)
-    data
+    coverage
     []
 
-let package ~counts ~data ~resolver ~points =
-  let classes = classes ~global_counts:counts data resolver points in
+let package ~counts ~resolver ~coverage =
+  let classes = classes ~global_counts:counts resolver coverage in
   let line_rate = line_rate !counts in
   {name = "."; line_rate; classes}
 
-let cobertura ~data ~resolver ~points =
+let cobertura ~resolver ~coverage =
   let counts = ref (0, 0) in
-  let package = package ~counts ~data ~resolver ~points in
+  let package = package ~counts ~resolver ~coverage in
   let sources = ["."] in
   let rate = line_rate !counts in
   {
@@ -170,12 +169,12 @@ let output
     ~to_file ~coverage_files ~coverage_paths ~source_paths ~ignore_missing_files
     ~expect ~do_not_expect =
 
-  let points, data =
+  let coverage =
     Input.load_coverage
       ~coverage_files ~coverage_paths ~expect ~do_not_expect in
   let resolver =
     Util.find_file ~source_roots:source_paths ~ignore_missing_files in
-  let cobertura = cobertura ~data ~resolver ~points in
+  let cobertura = cobertura ~resolver ~coverage in
   let () = Util.mkdirs (Filename.dirname to_file) in
   let oc = open_out to_file in
   try

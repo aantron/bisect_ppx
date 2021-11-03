@@ -6,17 +6,16 @@
 
 (* The actual Coveralls report. *)
 
-let file_json indent in_file resolver visited points =
-  Util.info "Processing file '%s'..." in_file;
-  match resolver ~filename:in_file with
+let file_json indent resolver {Bisect_common.filename; points; counts} =
+  Util.info "Processing file '%s'..." filename;
+  match resolver ~filename with
   | None ->
     Util.info "... file not found";
     None
   | Some resolved_in_file ->
     let digest = Digest.to_hex (Digest.file resolved_in_file) in
-    let points = Hashtbl.find points in_file in
     let line_counts =
-      Util.line_counts ~filename:resolved_in_file ~points ~counts:visited in
+      Util.line_counts ~filename:resolved_in_file ~points ~counts in
     let scounts =
       line_counts
       |> List.map (function
@@ -31,7 +30,7 @@ let file_json indent in_file resolver visited points =
     Some begin
       [
         "{";
-        Printf.sprintf "    \"name\": \"%s\"," in_file;
+        Printf.sprintf "    \"name\": \"%s\"," filename;
         Printf.sprintf "    \"source_digest\": \"%s\"," digest;
         Printf.sprintf "    \"coverage\": [%s]" coverage;
         "}";
@@ -60,7 +59,7 @@ let output
     ~repo_token ~git ~parallel ~coverage_files ~coverage_paths ~source_paths
     ~ignore_missing_files ~expect ~do_not_expect =
 
-  let points, data =
+  let coverage =
     Input.load_coverage
       ~coverage_files ~coverage_paths ~expect ~do_not_expect in
   let resolver =
@@ -87,12 +86,12 @@ let output
   in
 
   let file_jsons =
-    Hashtbl.fold begin fun in_file visited acc ->
-      let maybe_json = file_json 8 in_file resolver visited points in
+    Hashtbl.fold begin fun _ file acc ->
+      let maybe_json = file_json 8 resolver file in
       match maybe_json with
       | None -> acc
       | Some s -> s::acc
-    end data []
+    end coverage []
   in
   let repo_params =
     [

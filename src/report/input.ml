@@ -194,8 +194,8 @@ let read_instrumented_file buffer channel =
 let read_coverage buffer channel =
   read_list read_instrumented_file buffer channel
 
-let read ~filename =
-  let channel = open_in_bin filename in
+let read ~coverage_file =
+  let channel = open_in_bin coverage_file in
   try
     let magic_number_in_file =
       try
@@ -204,10 +204,11 @@ let read ~filename =
       with End_of_file ->
         raise
           (Invalid_file
-            (filename, "unexpected end of file while reading magic number"))
+            (coverage_file,
+            "unexpected end of file while reading magic number"))
     in
     if magic_number_in_file <> Bisect_common.coverage_file_identifier then
-      raise (Invalid_file (filename, "bad magic number"));
+      raise (Invalid_file (coverage_file, "bad magic number"));
 
     junk channel;
 
@@ -217,7 +218,7 @@ let read ~filename =
       with e ->
         raise
           (Invalid_file
-            (filename, "exception reading data: " ^ Printexc.to_string e));
+            (coverage_file, "exception reading data: " ^ Printexc.to_string e));
     in
     close_in_noerr channel;
     result
@@ -251,38 +252,37 @@ let elementwise_saturating_add xs ys =
     result.(index) <- saturating_add v result.(index));
   result
 
-(* Iterate over all the [.coverage] files specified on the command line or
-   found. Load each one. Then iterate over all the source files for which
-   coverage data is found. Accumulate visit counts when the same source file is
-   mentioned in multiple [.coverage] files. Store one copy of the point offset
-   data for each source file. *)
 let load_coverage ~coverage_files ~coverage_paths ~expect ~do_not_expect =
-  let points, counts =
-    let all_points = Hashtbl.create 17 in
-    let total_counts = Hashtbl.create 17 in
 
-    list_coverage_files coverage_files coverage_paths
-    |> List.iter begin fun filename ->
-      let coverage_per_source_file = read ~filename in
-      coverage_per_source_file
-      |> List.iter begin fun Bisect_common.{filename; points; counts} ->
-        let counts =
-          match Hashtbl.find total_counts filename with
-          | counts_so_far -> elementwise_saturating_add counts counts_so_far
-          | exception Not_found -> counts
-        in
-        Hashtbl.replace all_points filename points;
-        Hashtbl.replace total_counts filename counts
-      end
-    end;
+  (* This corresponds to the run-time coverage data ([val coverage]) in
+     [src/common/bisect_common.ml], except that it is accumulated (below) over
+     all the [.coverage] files found by the reporter, which would
+     typically come from multiple instances of the runtime. *)
+  let coverage : (string, Bisect_common.instrumented_file) Hashtbl.t =
+    Hashtbl.create 17 in
 
-    all_points, total_counts
-  in
+  list_coverage_files coverage_files coverage_paths
+  |> List.iter begin fun coverage_file ->
+
+    (* Read coverage from one [.coverage] file, containing data for multiple
+       source files. Other [.coverage] files may also have data for some of the
+       same source files, so we need to accumulate the visit counts. *)
+    read ~coverage_file
+    |> List.iter begin fun Bisect_common.{filename; points; counts} ->
+      let counts =
+        match Hashtbl.find coverage filename with
+        | file -> elementwise_saturating_add counts file.counts
+        | exception Not_found -> counts
+      in
+      Hashtbl.replace coverage filename {filename; points; counts}
+    end
+
+  end;
 
   (* Check that all source files specified with [--expect] are present in the
-     resulting accumulated data. *)
+     resulting accumulated coverage data. *)
   let present_files =
-    Hashtbl.fold (fun filename _ acc -> filename::acc) counts [] in
+    Hashtbl.fold (fun filename _ acc -> filename::acc) coverage [] in
   assert_expected_sources_are_present present_files expect do_not_expect;
 
-  points, counts
+  coverage
