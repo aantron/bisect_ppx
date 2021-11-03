@@ -16,4 +16,12 @@ val load_coverage :
 
     [~expect] is a list of expected source files and/or source directories that
     should appear in the returned coverage data. [~do_not_expect] subtracts some
-    files and directories from [~expect]. *)
+    files and directories from [~expect].
+
+    Any I/O errors that occur during this function are considered fatal, as the
+    [.coverage] files have already been found. Failure to open such a file is
+    probably a permissions error, a race condition with another process, or
+    another serious and unusual condition. A missing source file, relative to
+    the set given by [~expect], is also a fatal error, because the user has
+    explicitly stated that the source file should be represented in the
+    report. *)

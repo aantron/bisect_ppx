@@ -6,5 +6,5 @@
   > EOF
   $ dune exec ./test.exe --instrument-with bisect_ppx
   $ bisect-ppx-report summary --verbose
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Coverage: 2/6 (33.33%)

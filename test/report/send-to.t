@@ -47,7 +47,7 @@ From Travis to Coveralls.
   Info: detected CI: Travis
   Info: using service name 'travis-ci'
   Info: using job ID variable $TRAVIS_JOB_ID
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Info: Processing file 'test.ml'...
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
@@ -74,7 +74,7 @@ From Travis to Codecov.
   Info: detected CI: Travis
   Info: using service name 'travis-ci'
   Info: using job ID variable $TRAVIS_JOB_ID
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Info: Processing file 'test.ml'...
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json
@@ -130,7 +130,7 @@ From CircleCI to Coveralls.
   Info: using PR number variable $CIRCLE_PULL_REQUEST
   Info: using repo token variable $COVERALLS_REPO_TOKEN
   Info: including git info
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Info: Processing file 'test.ml'...
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
@@ -159,7 +159,7 @@ From CircleCI to Codecov.
   Info: detected CI: CircleCI
   Info: using service name 'circleci'
   Info: using job ID variable $CIRCLE_BUILD_NUM
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Info: Processing file 'test.ml'...
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json
@@ -206,7 +206,7 @@ From GitHub Actions to Coveralls.
   Info: $PULL_REQUEST_NUMBER not set
   Info: using repo token variable $COVERALLS_REPO_TOKEN
   Info: including git info
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Info: Processing file 'test.ml'...
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
@@ -234,7 +234,7 @@ From GitHub Actions to Codecov
   Info: detected CI: GitHub Actions
   Info: using service name 'github'
   Info: using job ID variable $GITHUB_RUN_NUMBER
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Info: Processing file 'test.ml'...
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json

@@ -39,7 +39,7 @@ let mkdirs directory =
     end in
   try make directory
   with Unix.(Unix_error (error, _, path)) ->
-    fatal "unable to create directory '%s': %s" path (Unix.error_message error)
+    fatal "cannot create directory '%s': %s" path (Unix.error_message error)
 
 let find_source_file ~source_roots ~ignore_missing_files ~filename =
   let fail () =
@@ -95,7 +95,8 @@ let line_counts ~filename ~points ~counts =
   in
   let in_channel =
     try open_in filename
-    with Sys_error message -> fatal "cannot open file '%s': %s" filename message
+    with Sys_error message ->
+      fatal "cannot open source file '%s': %s" filename message
   in
   let line_counts =
     try
@@ -119,8 +120,10 @@ let line_counts ~filename ~points ~counts =
     with exn ->
       close_in_noerr in_channel;
       match exn with
-      | Sys_error message -> fatal "cannot read file '%s': %s" filename message
-      | _ -> raise exn
+      | Sys_error message ->
+        fatal "cannot read source file '%s': %s" filename message
+      | _ ->
+        raise exn
   in
   close_in_noerr in_channel;
   line_counts

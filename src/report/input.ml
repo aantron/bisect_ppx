@@ -77,13 +77,13 @@ let list_coverage_files files_on_command_line coverage_search_paths =
     |> List.map Filename.dirname
     |> List.sort_uniq String.compare
     |> List.map (fun directory -> directory ^ Filename.dir_sep)
-    |> List.iter (Util.info "found coverage files in '%s'")
+    |> List.iter (Util.info "found *.coverage files in '%s'")
   | _ ->
     ()
   end;
 
   if all_coverage_files = [] then
-    Util.fatal "no coverage files given on command line or found"
+    Util.fatal "no *.coverage files found"
   else
     all_coverage_files
 
@@ -154,9 +154,6 @@ let get_relative_path file =
     with Invalid_argument _ ->
       file
 
-(* filename + reason *)
-exception Invalid_file of string * string
-
 let junk channel =
   try ignore (input_char channel)
   with End_of_file -> ()
@@ -195,35 +192,34 @@ let read_coverage buffer channel =
   read_list read_instrumented_file buffer channel
 
 let read ~coverage_file =
-  let channel = open_in_bin coverage_file in
+  let channel =
+    try open_in_bin coverage_file
+    with Sys_error message ->
+      Util.fatal "cannot open coverage file '%s': %s" coverage_file message
+  in
   try
     let magic_number_in_file =
-      try
-        really_input_string
-          channel (String.length Bisect_common.coverage_file_identifier)
-      with End_of_file ->
-        raise
-          (Invalid_file
-            (coverage_file,
-            "unexpected end of file while reading magic number"))
+      really_input_string
+        channel (String.length Bisect_common.coverage_file_identifier)
     in
     if magic_number_in_file <> Bisect_common.coverage_file_identifier then
-      raise (Invalid_file (coverage_file, "bad magic number"));
+      Util.fatal "coverage file '%s' has invalid file header" coverage_file;
 
     junk channel;
 
     let buffer = Buffer.create 4096 in
-    let result =
-      try read_coverage buffer channel
-      with e ->
-        raise
-          (Invalid_file
-            (coverage_file, "exception reading data: " ^ Printexc.to_string e));
-    in
+    let result = read_coverage buffer channel in
     close_in_noerr channel;
     result
 
-  with exn ->
+  with
+  | End_of_file ->
+    Util.fatal "coverage file '%s' is truncated" coverage_file
+  | Sys_error message ->
+    Util.fatal "cannot read coverage file '%s': %s" coverage_file message
+  | Failure _ ->
+    Util.fatal "cannot read coverage file '%s': bad integer" coverage_file
+  | exn ->
     close_in_noerr channel;
     raise exn
 

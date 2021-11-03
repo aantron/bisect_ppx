@@ -6,7 +6,7 @@
   > EOF
   $ dune exec ./test.exe --instrument-with bisect_ppx
   $ bisect-ppx-report html --verbose
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Info: Writing index file...
   $ ls _coverage | sort
   coverage.css

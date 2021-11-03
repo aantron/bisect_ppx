@@ -9,7 +9,7 @@ Reporter fails to create the output directory.
   $ dune exec ./test.exe --instrument-with bisect_ppx
   $ touch foo
   $ bisect-ppx-report html -o foo/bar/
-  Error: unable to create directory 'foo/bar/': Not a directory
+  Error: cannot create directory 'foo/bar/': Not a directory
   [1]
 
 
@@ -24,5 +24,5 @@ Reporter fails to create intermediate directory.
   $ dune exec ./test.exe --instrument-with bisect_ppx
   $ touch foo
   $ bisect-ppx-report html -o foo/bar/baz/
-  Error: unable to create directory 'foo/bar': Not a directory
+  Error: cannot create directory 'foo/bar': Not a directory
   [1]

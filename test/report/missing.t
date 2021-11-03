@@ -30,7 +30,7 @@ Missing files trigger a neat error.
   $ rm -rf _build
   $ mv test.ml test2.ml
   $ bisect-ppx-report html --ignore-missing-files --verbose
-  Info: found coverage files in './'
+  Info: found *.coverage files in './'
   Info: cannot find source file 'test.ml' in:
     - .
     - ./_build/default
