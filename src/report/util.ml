@@ -68,8 +68,13 @@ let find_file ~source_roots ~ignore_missing_files ~filename =
 let line_counts ~filename ~points ~counts =
   info "... file has %d points" (List.length points);
   let len = Array.length counts in
+  let points =
+    points
+    |> List.mapi (fun index offset -> (offset, index))
+    |> List.sort compare
+  in
   let pts =
-    points |> List.mapi (fun index offset ->
+    points |> List.map (fun (offset, index) ->
       let nb =
         if index < len then
           counts.(index)

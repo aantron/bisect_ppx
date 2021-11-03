@@ -49,7 +49,7 @@ From Travis to Coveralls.
   Info: using job ID variable $TRAVIS_JOB_ID
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 3 points
+  Info: ... file has 6 points
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
   $ cat coverage.json
@@ -61,8 +61,8 @@ From Travis to Coveralls.
     "source_files": [
           {
               "name": "test.ml",
-              "source_digest": "55ec0167abb99a3141afb092c92d0e23",
-              "coverage": [null,1,null,null,0,null,null,1]
+              "source_digest": "c006f07c5cf67adcdb328acb8f085dd9",
+              "coverage": [null,1,null,null,0,null,null,1,null,null,null,null,0,0,null,0]
           }
     ]
   }
@@ -77,7 +77,7 @@ From Travis to Codecov.
   Info: using job ID variable $TRAVIS_JOB_ID
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 3 points
+  Info: ... file has 6 points
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json
   $ cat coverage.json
@@ -89,8 +89,8 @@ From Travis to Codecov.
     "source_files": [
           {
               "name": "test.ml",
-              "source_digest": "55ec0167abb99a3141afb092c92d0e23",
-              "coverage": [null,1,null,null,0,null,null,1]
+              "source_digest": "c006f07c5cf67adcdb328acb8f085dd9",
+              "coverage": [null,1,null,null,0,null,null,1,null,null,null,null,0,0,null,0]
           }
     ]
   }
@@ -134,7 +134,7 @@ From CircleCI to Coveralls.
   Info: including git info
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 3 points
+  Info: ... file has 6 points
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
   $ cat coverage.json
@@ -148,8 +148,8 @@ From CircleCI to Coveralls.
     "source_files": [
           {
               "name": "test.ml",
-              "source_digest": "55ec0167abb99a3141afb092c92d0e23",
-              "coverage": [null,1,null,null,0,null,null,1]
+              "source_digest": "c006f07c5cf67adcdb328acb8f085dd9",
+              "coverage": [null,1,null,null,0,null,null,1,null,null,null,null,0,0,null,0]
           }
     ]
   }
@@ -164,7 +164,7 @@ From CircleCI to Codecov.
   Info: using job ID variable $CIRCLE_BUILD_NUM
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 3 points
+  Info: ... file has 6 points
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json
   $ cat coverage.json
@@ -176,8 +176,8 @@ From CircleCI to Codecov.
     "source_files": [
           {
               "name": "test.ml",
-              "source_digest": "55ec0167abb99a3141afb092c92d0e23",
-              "coverage": [null,1,null,null,0,null,null,1]
+              "source_digest": "c006f07c5cf67adcdb328acb8f085dd9",
+              "coverage": [null,1,null,null,0,null,null,1,null,null,null,null,0,0,null,0]
           }
     ]
   }
@@ -212,7 +212,7 @@ From GitHub Actions to Coveralls.
   Info: including git info
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 3 points
+  Info: ... file has 6 points
   Info: sending to Coveralls with command:
   Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
   $ cat coverage.json
@@ -225,8 +225,8 @@ From GitHub Actions to Coveralls.
     "source_files": [
           {
               "name": "test.ml",
-              "source_digest": "55ec0167abb99a3141afb092c92d0e23",
-              "coverage": [null,1,null,null,0,null,null,1]
+              "source_digest": "c006f07c5cf67adcdb328acb8f085dd9",
+              "coverage": [null,1,null,null,0,null,null,1,null,null,null,null,0,0,null,0]
           }
     ]
   }
@@ -241,7 +241,7 @@ From GitHub Actions to Codecov
   Info: using job ID variable $GITHUB_RUN_NUMBER
   Info: found coverage files in './'
   Info: Processing file 'test.ml'...
-  Info: ... file has 3 points
+  Info: ... file has 6 points
   Info: sending to Codecov with command:
   Info: curl -s https://codecov.io/bash | bash -s -- -Z -f coverage.json
   $ cat coverage.json
@@ -253,8 +253,8 @@ From GitHub Actions to Codecov
     "source_files": [
           {
               "name": "test.ml",
-              "source_digest": "55ec0167abb99a3141afb092c92d0e23",
-              "coverage": [null,1,null,null,0,null,null,1]
+              "source_digest": "c006f07c5cf67adcdb328acb8f085dd9",
+              "coverage": [null,1,null,null,0,null,null,1,null,null,null,null,0,0,null,0]
           }
     ]
   }

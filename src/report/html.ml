@@ -160,8 +160,13 @@ let output_for_source_file
 
   let len = Array.length counts in
   let stats = ref (0, 0) in
+  let points =
+    points
+    |> List.mapi (fun index offset -> (offset, index))
+    |> List.sort compare
+  in
   let pts =
-    ref (points |> List.mapi (fun index offset ->
+    ref (points |> List.map (fun (offset, index) ->
       let nb =
         if index < len then
           counts.(index)
