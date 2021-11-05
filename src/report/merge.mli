@@ -4,7 +4,7 @@
 
 
 
-(** This module merge the existing coverage files into a single coverage file *)
+(** This module merges coverage files into a single coverage file, summing counters pointwise *)
 
 
 val output :
