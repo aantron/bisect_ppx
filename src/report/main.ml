@@ -256,6 +256,16 @@ let coveralls =
 
 
 
+let merge =
+  let call_with_labels
+      to_file coverage_files coverage_paths expect do_not_expect =
+    Merge.output
+      ~to_file ~coverage_files ~coverage_paths ~expect ~do_not_expect
+  in
+  Term.(const set_verbose $ verbose $ const call_with_labels $ to_file
+    $ coverage_files 1 $ coverage_paths $ expect $ do_not_expect),
+  term_info "merge" ~doc:"Merge coverage files"
+
 (* Entry point. *)
 
 let () =
@@ -273,5 +283,5 @@ let () =
           ("See bisect-ppx-report $(i,COMMAND) --help for further " ^
           "information on each command, including options.")
       ]))
-    [html; send_to; text; cobertura; coveralls]
+    [html; send_to; text; cobertura; coveralls; merge]
   |> Term.exit
