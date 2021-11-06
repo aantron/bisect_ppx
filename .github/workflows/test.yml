@@ -57,21 +57,31 @@ jobs:
     - uses: avsm/setup-ocaml@v2
       with:
         ocaml-compiler: ${{matrix.ocaml}}
-    - run: opam install --deps-only --yes .
-    - if: ${{runner.os == 'Linux'}}
+
+    - name: Install opam dependencies
+      run: opam install --deps-only --yes .
+
+    - name: Install ocamlformat (Linux)
+      if: ${{runner.os == 'Linux'}}
       run: |
         wget https://github.com/aantron/ocamlformat-binary/releases/download/0.15.0/ocamlformat
         sudo mv ocamlformat /usr/local/bin/ocamlformat
         sudo chmod a+x /usr/local/bin/ocamlformat
-    - if: ${{runner.os != 'Linux'}}
+    - name: Install ocamlformat (non-Linux)
+      if: ${{runner.os != 'Linux'}}
       run: opam install ocamlformat.0.16.0 --yes
-    - run: |
+
+    - name: Version feedback
+      run: |
         opam --version
         opam exec -- ocaml -version
         opam exec -- ocamlformat --version
 
-    - run: opam exec -- make build
-    - if: ${{runner.os != 'Windows'}}
+    - name: Build
+      run: opam exec -- make build
+
+    - name: Test
+      if: ${{runner.os != 'Windows'}}
       run: |
         case `opam exec -- ocamlc -version` in
           "4.07.1") TEST_ALIAS=@compatible;;
@@ -85,13 +95,19 @@ jobs:
         opam exec -- make test TEST=$TEST_ALIAS
 
     # Reason requires OCaml <= 4.12.
-    - if: ${{matrix.ocaml == '4.12.1' && runner.os == 'Linux'}}
+    - name: Usage test
+      if: ${{matrix.ocaml == '4.12.1' && runner.os == 'Linux'}}
+      run: |
+        opam install reason js_of_ocaml --yes
+        opam exec -- make clean-usage usage
+
+    - name: Submit self-coverage to Coveralls
+      if: ${{matrix.ocaml == '4.12.1' && runner.os == 'Linux'}}
+      continue-on-error: true
       env:
         COVERALLS_REPO_TOKEN: ${{secrets.GITHUB_TOKEN}}
         PULL_REQUEST_NUMBER: ${{github.event.number}}
       run: |
-        opam install reason js_of_ocaml --yes
-        opam exec -- make clean-usage usage
         (unset GITHUB_ACTIONS && unset GITHUB_RUN_NUMBER && \
          unset COVERALLS_REPO_TOKEN && unset PULL_REQUEST_NUMBER && \
           opam exec -- make clean self-coverage)
