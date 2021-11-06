@@ -8,7 +8,7 @@ you test thoroughly by showing what's **not** tested.
 You can browse the report seen above [online here][gh-pages-report].
 
 [self]: https://github.com/aantron/bisect_ppx
-[ci]: https://travis-ci.org/aantron/bisect_ppx
+[ci]: https://github.com/aantron/bisect_ppx/actions
 [ci-img]: https://img.shields.io/github/workflow/status/aantron/bisect_ppx/test/master
 [sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
 [coveralls]: https://coveralls.io/github/aantron/bisect_ppx?branch=master
