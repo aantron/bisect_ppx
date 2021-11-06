@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>kstream.ml &mdash; Coverage report</title>
+    <meta name="description" content="98.88% coverage in src/kstream.ml">
+    <link rel="stylesheet" href="../coverage.css"/>
+    <script src="../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../index.html">
+          <span class="dirname">src/</span>kstream.ml
+        </a>
+      </h1>
+      <h2>98.88%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="top:13.53%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="some-visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span class="visited"> </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span class="visited"> </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span > </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span > </span>
+<a id="L94"></a><span > </span>
+<a id="L95"></a><span > </span>
+<a id="L96"></a><span class="visited"> </span>
+<a id="L97"></a><span > </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span class="visited"> </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span > </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span > </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span class="visited"> </span>
+<a id="L107"></a><span class="visited"> </span>
+<a id="L108"></a><span class="visited"> </span>
+<a id="L109"></a><span class="visited"> </span>
+<a id="L110"></a><span class="visited"> </span>
+<a id="L111"></a><span > </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span > </span>
+<a id="L114"></a><span > </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span class="visited"> </span>
+<a id="L119"></a><span > </span>
+<a id="L120"></a><span > </span>
+<a id="L121"></a><span class="visited"> </span>
+<a id="L122"></a><span > </span>
+<a id="L123"></a><span class="visited"> </span>
+<a id="L124"></a><span class="visited"> </span>
+<a id="L125"></a><span class="visited"> </span>
+<a id="L126"></a><span > </span>
+<a id="L127"></a><span > </span>
+<a id="L128"></a><span > </span>
+<a id="L129"></a><span class="visited"> </span>
+<a id="L130"></a><span > </span>
+<a id="L131"></a><span > </span>
+<a id="L132"></a><span class="visited"> </span>
+<a id="L133"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
+</pre>
+<pre><code class="ocaml">(* This file is part of Markup.ml, released under the MIT license. See
+   LICENSE.md for details, or visit https://github.com/aantron/markup.ml. *)
+
+open Common
+
+type 'a t = {mutable f : exn cont -&gt; unit cont -&gt; 'a cont -&gt; unit}
+
+let make f = <span data-count="3290">{</span>f}
+
+let construct c =
+  <span data-count="163">l</span>et s = ref None in
+  (fun throw e k -&gt;
+    <span data-count="6430">m</span>atch !s with
+    | <span data-count="163">N</span>one -&gt; c throw (fun s' -&gt; <span data-count="161">s</span> := Some s'; s'.f throw e k)
+    | <span data-count="6267">S</span>ome s' -&gt; s'.f throw e k)
+  |&gt; make
+
+let empty () = <span data-count="11">(</span>fun _ e _ -&gt; <span data-count="0">e</span> ()) |&gt; make
+
+let next {f} throw e k = <span data-count="182671">f</span> throw e k
+
+let next_option {f} throw k = <span data-count="18641">f</span> throw (fun () -&gt; <span data-count="465">k</span> None) (fun v -&gt; <span data-count="18170">k</span> (Some v))
+
+let next_expected {f} throw k =
+  <span data-count="549">f</span> throw (fun () -&gt; <span data-count="1">t</span>hrow (Failure "stream empty")) k
+
+let next_n n s throw k =
+  <span data-count="667">i</span>f n &lt; 0 then <span data-count="2">t</span>hrow (Invalid_argument "n is negative")
+  else
+    <span data-count="665">l</span>et rec iterate acc = function
+      | <span data-count="663">0</span> -&gt; k (List.re<span data-count="663">v</span> acc)
+      | <span data-count="2875">n</span> -&gt;
+        next s throw
+          (fun () -&gt; <span data-count="44">i</span>terate acc 0) (fun v -&gt; <span data-count="2829">i</span>terate (v::acc) (n - 1))
+    in
+
+    iterate [] n
+
+let push ({f} as s) v = <span data-count="1607">s</span>.f &lt;- fun _ _ k -&gt; <span data-count="1556">s</span>.f &lt;- f; k v
+
+let push_option s = function
+  | <span data-count="16">N</span>one -&gt; ()
+  | <span data-count="247">S</span>ome v -&gt; push s v
+
+let push_list ({f} as s) = function
+  | <span data-count="59">[</span>] -&gt; ()
+  | <span data-count="534">v</span>s -&gt;
+    let remainder = ref vs in
+    s.f &lt;- fun throw e k -&gt;
+      <span data-count="2374">m</span>atch !remainder with
+      | <span data-count="435">[</span>] -&gt; s.f &lt;- f; f throw e k
+      | <span data-count="1939">v</span>::vs -&gt; remainder := vs; k v
+
+let peek s throw e k = <span data-count="284">n</span>ext s throw e (fun v -&gt; <span data-count="273">p</span>ush s v; <span data-count="273">k</span> v)
+
+let peek_option s throw k =
+  <span data-count="150">p</span>eek s throw (fun () -&gt; <span data-count="6">k</span> None) (fun v -&gt; <span data-count="143">k</span> (Some v))
+
+let peek_expected s throw k =
+  <span data-count="18">p</span>eek s throw (fun () -&gt; <span data-count="1">t</span>hrow (Failure "stream empty")) k
+
+let peek_n n s throw k = <span data-count="330">n</span>ext_n n s throw (fun vs -&gt; <span data-count="328">p</span>ush_list s vs; <span data-count="328">k</span> vs)
+
+let tap g ({f} as s) =
+  <span data-count="4">(</span>s.f &lt;- fun throw e k -&gt; <span data-count="29">f</span> throw e (fun v -&gt; <span data-count="27">g</span> v; <span data-count="27">k</span> v));
+  fun () -&gt; <span data-count="3">s</span>.f &lt;- f
+
+let checkpoint s =
+  <span data-count="177">l</span>et buffer = ref [] in
+  let s' =
+    (fun throw e k -&gt;
+      <span data-count="2992">s</span>.f throw e (fun v -&gt; <span data-count="2969">b</span>uffer := v::!buffer; k v))
+    |&gt; make
+  in
+  <span data-count="177">l</span>et restore () = <span data-count="159">p</span>ush_list s (List.re<span data-count="159">v</span> !buffer) in
+  s', restore
+
+let transform f init s =
+  <span data-count="15">l</span>et current_acc = ref (Some init) in
+  let to_emit = ref [] in
+  let rec operate throw e k =
+    <span data-count="257">m</span>atch !to_emit with
+    | <span data-count="116">v</span>::more -&gt; to_emit := more; k v
+    | <span data-count="141">[</span>] -&gt;
+      match !current_acc with
+      | <span data-count="1">N</span>one -&gt; e ()
+      | <span data-count="140">S</span>ome acc -&gt;
+        next s throw e (fun v -&gt;
+          <span data-count="116">f</span> acc v throw (fun (vs, acc') -&gt;
+            <span data-count="116">t</span>o_emit := vs;
+            current_acc := acc';
+            operate throw e k))
+  in
+  make operate
+
+let map f s = <span data-count="45">(</span>fun throw e k -&gt; <span data-count="214">n</span>ext s throw e (fun v -&gt; <span data-count="168">f</span> v throw k)) |&gt; make
+
+let rec fold f v s throw k =
+  <span data-count="132943">n</span>ext s throw
+    (fun () -&gt; <span data-count="629">k</span> v)
+    (fun v' -&gt; <span data-count="132297">f</span> v v' throw (fun v'' -&gt; <span data-count="132292">f</span>old f v'' s throw k))
+
+let iter f s throw k = <span data-count="592">f</span>old (fun () v throw k -&gt; <span data-count="22079">f</span> v throw k) () s throw k
+
+let filter_map f s =
+  <span data-count="12">l</span>et rec emit throw e k =
+    <span data-count="65">n</span>ext s throw e (fun v -&gt;
+      <span data-count="55">f</span> v throw (function
+        | <span data-count="23">N</span>one -&gt; emit throw e k
+        | <span data-count="30">S</span>ome v -&gt; k v))
+  in
+  make emit
+
+let filter f s =
+  <span data-count="4">s</span> |&gt; filter_map (fun v throw k -&gt;
+    <span data-count="13">f</span> v throw (function
+      | <span data-count="8">t</span>rue -&gt; k (Some v)
+      | <span data-count="4">f</span>alse -&gt; k None))
+
+let of_list l =
+  <span data-count="123">l</span>et l = ref l in
+  (fun _ e k -&gt;
+    <span data-count="481">m</span>atch !l with
+    | <span data-count="128">[</span>] -&gt; e ()
+    | <span data-count="353">v</span>::l' -&gt; l := l'; k v)
+  |&gt; make
+
+let to_list s throw k =
+  <span data-count="53">f</span>old (fun l v _ k -&gt; <span data-count="206">k</span> (v::l)) [] s throw (fun l -&gt; <span data-count="43">k</span> (List.re<span data-count="43">v</span> l))
+
+let enumerate s =
+  <span data-count="30">l</span>et index = ref 0 in
+  s |&gt; map (fun v _ k -&gt; <span data-count="76">i</span>ndex := !index + 1; k ((!index - 1), v))
+</code></pre>
+      </div>
+    </div>
+    <script src="../coverage.js"></script>
+  </body>
+</html>

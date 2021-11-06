@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+<meta charset="utf-8">
+
+<title>Bisect_ppx - Code coverage for OCaml</title>
+<meta name="description"
+      content="Code coverage for OCaml with nice HTML reports. Done by means of
+               a ppx extension.">
+<link rel="canonical" href="https://github.com/aantron/bisect_ppx">
+
+<link rel="stylesheet" href="https://sindresorhus.com/github-markdown-css/github-markdown.css">
+
+<style>
+.markdown-body {
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 45px;
+}
+
+#css-attribution {
+    margin-top: 5em;
+    opacity: 0.5;
+}
+</style>
+
+</head>
+<body class="markdown-body">
+
+<a href="https://github.com/aantron/bisect_ppx"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://camo.githubusercontent.com/567c3a48d796e2fc06ea80409cc9dd82bf714434/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png"></a>
+<h1>Bisect_ppx   <a href="https://github.com/aantron/bisect_ppx/releases"><img src="https://img.shields.io/badge/version-2.4.0-blue.svg" alt="Version" /></a> <a href="https://travis-ci.org/aantron/bisect_ppx"><img src="https://img.shields.io/travis/aantron/bisect_ppx/master.svg?label=travis" alt="Travis status" /></a> <a href="https://ci.appveyor.com/project/aantron/bisect-ppx/branch/master"><img src="https://img.shields.io/appveyor/ci/aantron/bisect-ppx/master.svg?label=appveyor" alt="AppVeyor status" /></a> <a href="https://coveralls.io/github/aantron/bisect_ppx?branch=master"><img src="https://img.shields.io/coveralls/aantron/bisect_ppx/master.svg" alt="Coverage" /></a></h1>
+<p><a href="https://github.com/aantron/bisect_ppx">Bisect_ppx</a> is a code coverage tool for OCaml and Reason. It helps you
+test thoroughly by showing what's <strong>not</strong> tested.</p>
+<p><a href="http://aantron.github.io/bisect_ppx/demo/"><img src="https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif" alt="Bisect_ppx usage example" /></a></p>
+<p>You can browse the report seen above <a href="http://aantron.github.io/bisect_ppx/demo/">online here</a>. The
+details of how it is generated are in the <a href="#Example">worked example</a>.</p>
+<br>
+<h4>Table of contents</h4>
+<ul>
+<li><a href="#Usage"><strong>Usage</strong></a>
+<ul>
+<li><a href="#Dune"><strong>Dune</strong></a>   (<a href="https://github.com/aantron/bisect-starter-dune#readme">starter repo</a>, <a href="https://aantron.github.io/bisect-starter-dune/">report</a>)</li>
+<li><a href="#esy"><strong>esy</strong></a>   (<a href="https://github.com/aantron/bisect-starter-esy">starter repo</a>, <a href="https://aantron.github.io/bisect-starter-esy/">report</a>)</li>
+<li><a href="#BuckleScript"><strong>BuckleScript</strong></a>   (<a href="https://github.com/aantron/bisect-starter-bsb#readme">starter repo</a>, <a href="https://aantron.github.io/bisect-starter-bsb/">report</a>)</li>
+<li><a href="#Js_of_ocaml"><strong>Js_of_ocaml</strong></a>   (<a href="https://github.com/aantron/bisect-starter-jsoo#readme">starter repo</a>, <a href="https://aantron.github.io/bisect-starter-jsoo/">report</a>)</li>
+<li><a href="#Ocamlbuild"><strong>Ocamlfind, Ocamlbuild, and OASIS</strong></a></li>
+</ul>
+</li>
+<li><a href="#Coveralls"><strong>Sending to Coveralls</strong></a></li>
+<li><a href="#Exclusion"><strong>Controlling coverage with <code>[@coverage off]</code></strong></a></li>
+<li><a href="#Example"><strong>Real-world example examined</strong></a>   (<a href="https://github.com/aantron/markup.ml#readme">repo</a>, <a href="http://aantron.github.io/bisect_ppx/demo/">report</a>, <a href="https://coveralls.io/github/aantron/markup.ml">coveralls</a>)</li>
+<li><a href="#Other"><strong>Other topics</strong></a></li>
+<li><a href="#Users"><strong>Bisect_ppx users</strong></a></li>
+<li><a href="#Contributing"><strong>Contributing</strong></a></li>
+</ul>
+<br>
+<p><a id="Usage"></a></p>
+<h2>Usage</h2>
+<p><a id="Dune"></a></p>
+<h3>Dune</h3>
+<p>Refer to <a href="https://github.com/aantron/bisect-starter-dune#readme"><strong>aantron/bisect-starter-dune</strong></a>, which produces
+<a href="https://aantron.github.io/bisect-starter-dune/">this report</a>.</p>
+<ol>
+<li>
+<p><a href="https://github.com/aantron/bisect-starter-dune/blob/master/bisect-starter-dune.opam#L10">Depend on Bisect_ppx</a>
+in your <code>opam</code> file:</p>
+<pre><code>depends: [
+  &quot;bisect_ppx&quot; {dev &amp; &gt;= &quot;2.0.0&quot;}
+]
+</code></pre>
+</li>
+<li>
+<p><a href="https://github.com/aantron/bisect-starter-dune/blob/master/dune#L4">Mark the code under test for preprocessing by
+<code>bisect_ppx</code></a> in your <code>dune</code> file:</p>
+<pre><code class="language-ocaml">(* -*- tuareg -*- *)
+
+let preprocess =
+  match Sys.getenv &quot;BISECT_ENABLE&quot; with
+  | &quot;yes&quot; -&gt; &quot;(preprocess (pps bisect_ppx))&quot;
+  | _ -&gt; &quot;&quot;
+  | exception Not_found -&gt; &quot;&quot;
+
+let () = Jbuild_plugin.V1.send @@ {|
+
+(library
+ (public_name my_lib)
+ |} ^ preprocess ^ {|)
+
+|}
+</code></pre>
+<p>This uses Dune's
+<a href="https://dune.readthedocs.io/en/stable/advanced-topics.html#ocaml-syntax">OCaml syntax</a>
+to completely take <code>bisect_ppx</code> out as a dependency, except when the
+environment variable <code>BISECT_ENABLE</code> is set to <code>yes</code>. This is so that you
+can release your project without it depending on <code>bisect_ppx</code> for non-<code>dev</code>
+builds.</p>
+<p>After <a href="https://github.com/ocaml/dune/issues/57">ocaml/dune#57</a>, Dune will have a lighter-weight built-in
+syntax for conditional preprocessing.</p>
+<p>For now, the OCaml syntax can be understood as prepending a few lines of
+OCaml code to a regular <code>dune</code> file, and then replacing the <code>preprocess</code>
+stanza with <code>|} ^ preprocess ^ {|</code>. See
+<a href="https://github.com/aantron/bisect-starter-dune/commit/24ffb2153d3c42ff166c78a9f55095bd12f10f4e#diff-cabdb1014252d39ac018f447e7d5fbc2">here</a>
+for a neat summary of the patch.</p>
+</li>
+<li>
+<p>Build and run your test binary. In addition to testing your code, when
+exiting, it will write one or more files with names like
+<code>bisect0123456789.coverage</code>:</p>
+<pre><code>BISECT_ENABLE=yes dune runtest --force
+</code></pre>
+<p>The <code>--force</code> flag forces all your tests to run, which is needed for an
+accurate coverage report.</p>
+<p>To run tests without coverage, do</p>
+<pre><code>dune runtest
+</code></pre>
+</li>
+<li>
+<p>Generate the <a href="https://aantron.github.io/bisect-starter-dune/">coverage report</a> in <code>_coverage/index.html</code>:</p>
+<pre><code>bisect-ppx-report html
+</code></pre>
+<p>You can also generate a short summary in the terminal:</p>
+<pre><code>bisect-ppx-report summary
+</code></pre>
+</li>
+</ol>
+<br>
+<p><a id="esy"></a></p>
+<h3>esy</h3>
+<p>Refer to <a href="https://github.com/aantron/bisect-starter-esy"><strong>aantron/bisect-starter-esy</strong></a>, which produces <a href="https://aantron.github.io/bisect-starter-esy/">this
+report</a>.</p>
+<p>The instructions are the same as for regular <a href="#Dune">Dune</a> usage, but...</p>
+<ol>
+<li>
+<p><a href="https://github.com/aantron/bisect-starter-esy/blob/master/package.json#L5">Depend on Bisect_ppx in <code>package.json</code></a>,
+instead of in an <code>opam</code> file:</p>
+<pre><code class="language-json">&quot;devDependencies&quot;: {
+  &quot;@opam/bisect_ppx&quot;: &quot;^2.0.0&quot;,
+}
+</code></pre>
+</li>
+<li>
+<p>Use the <code>esy</code> command for the build and for running binaries:</p>
+<pre><code>esy install
+BISECT_ENABLE=yes esy dune runtest --force
+esy dune exec bisect-ppx-report -- html
+</code></pre>
+</li>
+</ol>
+<br>
+<p><a id="BuckleScript"></a></p>
+<h3>BuckleScript</h3>
+<p>Refer to <a href="https://github.com/aantron/bisect-starter-bsb#readme"><strong>aantron/bisect-starter-bsb</strong></a>, which produces
+<a href="https://aantron.github.io/bisect-starter-bsb/">this report</a>.</p>
+<ol>
+<li>
+<p><a href="https://github.com/aantron/bisect-starter-bsb/blob/master/package.json#L3-L6">Depend on Bisect_ppx in <code>package.json</code></a>,
+and install it:</p>
+<pre><code class="language-json">&quot;devDependencies&quot;: {
+  &quot;bisect_ppx&quot;: &quot;^2.0.0&quot;
+},
+&quot;dependencies&quot;: {
+  &quot;bs-platform&quot;: &quot;*&quot;
+}
+</code></pre>
+<pre><code>npm install
+</code></pre>
+<p>If you are using Yarn, you need to run an extra command because of
+<a href="https://github.com/yarnpkg/yarn/issues/3421">yarnpkg/pkg#3421</a>:</p>
+<pre><code>yarn add bisect_ppx
+yarn --check-files
+</code></pre>
+<p>If pre-built binaries aren't available for your system, the build will
+automatically fall back to building Bisect_ppx from source using
+<a href="https://esy.sh">esy</a>, which will take a few minutes the first time. If this
+happens, you may need to install esy, if it is not already installed:</p>
+<pre><code>npm install -g esy
+npm install
+</code></pre>
+</li>
+<li>
+<p><a href="https://github.com/aantron/bisect-starter-bsb/blob/master/bsconfig.json#L3-L8">Add Bisect_ppx to your <code>bsconfig.json</code></a>:</p>
+<pre><code class="language-json">&quot;bs-dependencies&quot;: [
+  &quot;bisect_ppx&quot;
+],
+&quot;ppx-flags&quot;: [
+  &quot;bisect_ppx/ppx&quot;
+]
+</code></pre>
+</li>
+<li>
+<p>If you are using Jest, add this to your <code>package.json</code>:</p>
+<pre><code class="language-json">&quot;setupFilesAfterEnv&quot;: [&quot;bisect_ppx/src/runtime/bucklescript/jest.js&quot;]
+</code></pre>
+<p>If the tests will be running in the browser, at the end of testing, call</p>
+<pre><code class="language-reason">Bisect.Runtime.get_coverage_data();
+</code></pre>
+<p>This returns binary coverage data in a <code>string option</code>, which you should
+upload or otherwise get out of the browser, and write into a <code>.coverage</code>
+file.</p>
+</li>
+<li>
+<p>Build in development with <code>BISECT_ENABLE=yes</code>, run tests, and generate the
+<a href="https://aantron.github.io/bisect-starter-bsb/">coverage report</a> in <code>_coverage/index.html</code>:</p>
+<pre><code>BISECT_ENABLE=yes npm run build
+npm run test
+npx bisect-ppx-report.exe html
+</code></pre>
+<p>To exclude your test files from the report, change your PPX flags like so:</p>
+<pre><code class="language-json">&quot;ppx-flags&quot;: [
+  [&quot;bisect_ppx/ppx&quot;, &quot;--exclude-files&quot;, &quot;.*test\\.re&quot;]
+]
+</code></pre>
+<p>The last argument is a regular expression in the syntax of OCaml's <a href="https://caml.inria.fr/pub/docs/manual-ocaml/libref/Str.html"><code>Str</code>
+module</a>. Note
+that backslashes need to be escaped both inside the regular expression, and
+again because they are inside a JSON string.</p>
+<p>Multiple <code>--exclude-files</code> option can be specified if you want to provide
+multiple patterns.</p>
+</li>
+<li>
+<p>If your project uses both BuckleScript and native Dune, native Dune will
+start picking up OCaml files that are part of the BuckleScript <code>bisect_ppx</code>
+package. To prevent this, add a <code>dune</code> with the following contents to the
+root of your project:</p>
+<pre><code>(data_only_dirs node_modules)
+</code></pre>
+</li>
+</ol>
+<br>
+<p><a id="Js_of_ocaml"></a></p>
+<h3>Js_of_ocaml</h3>
+<p>Refer to <a href="https://github.com/aantron/bisect-starter-jsoo#readme"><strong>aantron/bisect-starter-jsoo</strong></a>, which produces
+<a href="https://aantron.github.io/bisect-starter-jsoo/">this report</a>.</p>
+<ol>
+<li>
+<p>Follow the <a href="#Dune">Dune instructions</a> above, except that <a href="https://github.com/aantron/bisect-starter-jsoo/blob/master/dune#L9">the final test
+script must be linked with <code>bisect_ppx.runtime</code></a>
+(but not instrumented):</p>
+<pre><code class="language-scheme">(executable
+ (name my_tester)
+ (libraries bisect_ppx.runtime))
+</code></pre>
+</li>
+<li>
+<p>If the tests will run on Node, <a href="https://github.com/aantron/bisect-starter-jsoo/blob/master/tester.ml#L3">call this function</a>
+at the end of testing to write <code>bisect0123456789.coverage</code>:</p>
+<pre><code class="language-ocaml">Bisect.Runtime.write_coverage_data ()
+</code></pre>
+<p>If the tests will run in the browser, call</p>
+<pre><code class="language-ocaml">Bisect.Runtime.get_coverage_data ()
+</code></pre>
+<p>to get binary coverage data in a string option. Upload this string or
+otherwise extract it from the browser to create an <code>.coverage</code> file.</p>
+</li>
+<li>
+<p>Build the usual Js_of_ocaml target, including the instrumented code under
+test, then run the reporter to generate the <a href="https://aantron.github.io/bisect-starter-jsoo/">coverage report</a> in
+<code>_coverage/index.html</code>:</p>
+<pre><code>BISECT_ENABLE=yes dune build my_tester.bc.js
+bisect-ppx-report html
+</code></pre>
+</li>
+</ol>
+<br>
+<p><a id="Ocamlbuild"></a></p>
+<h3>Ocamlfind, Ocamlbuild, and OASIS</h3>
+<ul>
+<li>
+<p><a href="https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-ocamlbuild">Ocamlbuild</a>
+and <a href="https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-oasis">OASIS</a>
+instructions can be found at
+<a href="https://github.com/aantron/bisect_ppx-ocamlbuild#readme">aantron/bisect_ppx-ocamlbuild</a>.</p>
+</li>
+<li>
+<p>With Ocamlfind, you must have your build script issue the right commands, to
+instrument the code under test, but not the tester:</p>
+<pre><code>ocamlfind opt -package bisect_ppx -c src/source.ml
+ocamlfind opt -c test/test.ml
+ocamlfind opt -linkpkg -package bisect_ppx src/source.cmx test/test.cmx
+</code></pre>
+<p>Running the tester will then produce <code>bisect0123456789.coverage</code> files,
+which you can process with <code>bisect-ppx-report</code>.</p>
+</li>
+</ul>
+<br>
+<p><a id="Coveralls"></a></p>
+<h2>Sending to <a href="https://coveralls.io">Coveralls</a></h2>
+<p><code>bisect-ppx-report</code> can send reports to Coveralls and Codecov directly from
+Travis, CircleCI, and GitHub Actions. To do this, run</p>
+<pre><code>bisect-ppx-report send-to Coveralls
+</code></pre>
+<p>or</p>
+<pre><code>bisect-ppx-report send-to Codecov
+</code></pre>
+<p>When sending specifically from GitHub Actions to Coveralls, use</p>
+<pre><code>- run: bisect-ppx-report send-to Coveralls
+  env:
+    COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    PULL_REQUEST_NUMBER: ${{ github.event.number }}
+</code></pre>
+<p>Put these commands in your CI script in the same place you would run
+<code>bisect-ppx-report html</code> locally. See
+<a href="https://github.com/aantron/bisect-ci-integration-megatest#readme">bisect-ci-integration-megatest</a>
+for example CI scripts and current status of these integrations.</p>
+<p>If you'd like Bisect_ppx to support other CI and/or coverage services, please
+open an issue or send a pull request!</p>
+<p>As a workaround for missing CI/coverage integrations, and for development,
+<code>bisect-ppx-report</code> can also generate a JSON report in Coveralls format, which
+can be uploaded to a service of your choice using a separate command. For
+example, to send manually from Travis to Coveralls:</p>
+<pre><code>bisect-ppx-report \
+  coveralls coverage.json \
+  --service-name travis-ci \
+  --service-job-id $TRAVIS_JOB_ID
+curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+</code></pre>
+<p>For other CI services, replace <code>--service-name</code> and <code>--service-job-id</code> as
+follows:</p>
+<table>
+<thead>
+<tr>
+<th>CI service</th>
+<th><code>--service-name</code></th>
+<th><code>--service-job-id</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Travis</td>
+<td><code>travis-ci</code></td>
+<td><code>$TRAVIS_JOB_ID</code></td>
+</tr>
+<tr>
+<td>CircleCI</td>
+<td><code>circleci</code></td>
+<td><code>$CIRCLE_BUILD_NUM</code></td>
+</tr>
+<tr>
+<td>Semaphore</td>
+<td><code>semaphore</code></td>
+<td><code>$REVISION</code></td>
+</tr>
+<tr>
+<td>Jenkins</td>
+<td><code>jenkins</code></td>
+<td><code>$BUILD_ID</code></td>
+</tr>
+<tr>
+<td>Codeship</td>
+<td><code>codeship</code></td>
+<td><code>$CI_BUILD_NUMBER</code></td>
+</tr>
+<tr>
+<td>GitHub Actions</td>
+<td><code>github</code></td>
+<td><code>$GITHUB_RUN_NUMBER</code></td>
+</tr></tbody></table>
+<p>Note that Coveralls-style reports are less precise than the HTML reports
+generated by Bisect_ppx, because Coveralls considers entire lines as visited or
+not visited. Bisect_ppx instead considers individual expressions. There can be
+many expressions on a single line, and the HTML report separately considers each
+expression as visited or not visited.</p>
+<br>
+<p><a id="Exclusion"></a></p>
+<h2>Controlling coverage with <code>[@coverage off]</code></h2>
+<p>You can tag expressions with <code>[@coverage off]</code>, and neither they, nor their
+subexpressions, will be instrumented by Bisect_ppx.</p>
+<p>Likewise, you can tag module-level <code>let</code>-declarations with <code>[@@coverage off]</code>,
+and they won't be instrumented.</p>
+<p>You can also turn off instrumentation for blocks of declarations inside a
+module with <code>[@@@coverage off]</code> and <code>[@@@coverage on]</code>.</p>
+<p>Finally, you can exclude an entire file by putting <code>[@@@coverage exclude_file]</code>
+into its top-level module. However, whenever possible, it is recommended to
+exclude files by not preprocessing with Bisect_ppx to begin with.</p>
+<br>
+<p><a id="Example"></a></p>
+<h2>Real-world example examined</h2>
+<p>Refer to:</p>
+<ul>
+<li><a href="https://github.com/aantron/markup.ml#readme"><strong>aantron/markup.ml</strong></a>, which produces
+<a href="http://aantron.github.io/bisect_ppx/demo/">this local report</a>, and
+<a href="https://coveralls.io/github/aantron/markup.ml">this report on Coveralls</a>.</li>
+<li>The <a href="#Dune">Dune instructions</a> and <a href="#Coveralls">Coveralls instructions</a> above.</li>
+</ul>
+<p>The details:</p>
+<ol>
+<li>
+<p>The project <a href="https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/markup.opam#L21">depeds on package <code>bisect_ppx</code></a>,
+so that Bisect_ppx is installed by <code>opam pin --dev-repo markup</code> and <code>opam install .</code></p>
+</li>
+<li>
+<p>There are three libraries in <a href="https://github.com/aantron/markup.ml/tree/33e40c49827fca4e10cc6a9c64a073f30d797f5b/src"><code>src/</code></a>, each set to have its
+sources preprocessed by Bisect_ppx:</p>
+<ul>
+<li><a href="https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/src/dune#L5"><code>markup</code></a></li>
+<li><a href="https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/src/lwt/dune#L5"><code>markup-lwt</code></a></li>
+<li><a href="https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/src/lwt_unix/dune#L5"><code>markup-lwt.unix</code></a></li>
+</ul>
+<p>Because of the <code>--conditional</code> flag, preprocessing is enabled only when
+<code>BISECT_ENABLE=yes</code> is set in the environment, so it is off by default.</p>
+</li>
+<li>
+<p>A coverage build is triggered by running <a href="https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/Makefile#L19-L25"><code>make coverage</code></a>. This target...</p>
+<ul>
+<li>
+<p>Depends on <code>make clean</code>. This is a workaround until
+<a href="https://github.com/ocaml/dune/issues/57">ocaml/dune#57</a> is solved. The problem is that doing a coverage
+build, after normal builds, should force all sources to be recompiled, so
+that they can be instrumented by the Bisect_ppx preprocessor. However, Dune
+doesn't know about this — it doesn't know that the behavior of the
+preprocessor depends on the <code>BISECT_ENABLE</code> environment variable.</p>
+<p>Indeed, the preprocessor shouldn't read this environment variable. The
+preprocessor should just be turned off by Dune when not building for
+coverage. However, Dune does not currently have the ability to
+conditionally turn off a preprocessor.</p>
+<p>In any case, to deal with this problem, the project always does a clean
+build when building for coverage.</p>
+</li>
+<li>
+<p>Does a fresh build with <code>BISECT_ENABLE=yes</code>, causing the sources of the
+three libraries mentioned above to be instrumented.</p>
+</li>
+<li>
+<p>Runs the test suite. <code>bisect*.coverage</code> files with coverage data are
+produced as a side effect.</p>
+</li>
+<li>
+<p>Runs <code>bisect-ppx-report</code> to generate both the typical HTML report in
+<code>_coverage/index.html</code>, and also a textual summary in the terminal for very
+fast iteration.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>make coverage</code> is also <a href="https://github.com/aantron/markup.ml/blob/33e40c49827fca4e10cc6a9c64a073f30d797f5b/.travis.yml#L33-L35">used in Travis</a>
+to submit coverage reports to Coveralls. At the end of <code>make coverage</code>, the
+<code>bisect*.coverage</code> files are still present, so <code>.travis.yml</code> runs
+<code>bisect-ppx-report</code> again to generate the Coveralls report. This follows the
+<a href="#Coveralls">Coveralls</a> instructions exactly.</p>
+<p>Coveralls can be configured to <a href="https://github.com/aantron/markup.ml/pull/47#issuecomment-521707675">leave comments</a>
+about changes in coverage. It is usually configured to at least add an
+additional check to branches and PRs — see the &quot;3 checks passed&quot; in
+the hidden Details of the <a href="https://github.com/aantron/markup.ml/pull/47">linked PR</a>.</p>
+</li>
+<li>
+<p>During release, <code>(preprocess (pps bisect_ppx))</code> is <a href="https://github.com/aantron/markup.ml/commit/ea68bebf5c3a19f56350393e359d444f864154e3#diff-d218652a79a651b9be8eee7641ea0893L5">removed from all libraries that are being released</a>. This is typically in a one-commit release branch off master, which is what ends up being tagged.</p>
+<p>This won't be necessary after <a href="https://github.com/ocaml/dune/issues/57">ocaml/dune#57</a> is addressed.</p>
+</li>
+</ol>
+<br>
+<p><a id="Other"></a></p>
+<h2>Other topics</h2>
+<p>See <a href="https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#readme">advanced usage</a> for:</p>
+<ul>
+<li>Exhaustiveness checking.</li>
+<li>Excluding generated files from coverage.</li>
+<li>Environment variables.</li>
+</ul>
+<br>
+<p><a id="Users"></a></p>
+<h2>Bisect_ppx users</h2>
+<p>A small sample of projects using Bisect_ppx:</p>
+<!-- Sort OCaml and Reason first if Bisect_ppx usage is merged. -->
+<ul>
+<li>
+<p>Core tools</p>
+<ul>
+<li><a href="https://github.com/ocsigen/lwt">Lwt</a>   (<a href="https://coveralls.io/github/ocsigen/lwt">report</a>)</li>
+<li><a href="https://github.com/ocaml/odoc">Odoc</a></li>
+<li><a href="https://github.com/ocaml-ppx/ocamlformat">ocamlformat</a></li>
+<li><a href="https://github.com/ocaml/ocaml/pull/8874">OCaml</a></li>
+<li><a href="https://github.com/facebook/reason/pull/1794#issuecomment-361440670">Reason</a></li>
+<li><a href="https://github.com/ocamllabs/ocaml-ctypes">ctypes</a></li>
+</ul>
+</li>
+<li>
+<p>Libraries</p>
+<ul>
+<li><a href="https://github.com/aantron/markup.ml#readme">Markup.ml</a>   (<a href="https://coveralls.io/github/aantron/markup.ml">report</a>)</li>
+<li><a href="https://github.com/aantron/lambdasoup#readme">Lambda Soup</a>   (<a href="https://coveralls.io/github/aantron/lambdasoup">report</a>)</li>
+<li><a href="https://github.com/brendanlong/ocaml-trie">Trie</a>   (<a href="https://coveralls.io/github/brendanlong/ocaml-trie?branch=master">report</a>)</li>
+<li><a href="https://github.com/brendanlong/ocaml-ooxml">ocaml-ooxml</a>   (<a href="https://coveralls.io/github/brendanlong/ocaml-ooxml?branch=master">report</a>)</li>
+<li><a href="https://github.com/anuragsoni/routes">routes</a>   (<a href="https://codecov.io/gh/anuragsoni/routes">report</a>)</li>
+</ul>
+</li>
+<li>
+<p>Applications</p>
+<ul>
+<li><a href="https://xenproject.org/developers/teams/xen-api/">XAPI</a>   (<a href="https://coveralls.io/github/xapi-project/xen-api?branch=master">1</a>, <a href="https://coveralls.io/github/xapi-project/nbd">2</a>, <a href="https://coveralls.io/github/xapi-project/xcp-idl">3</a>, <a href="https://coveralls.io/github/xapi-project/rrd-transport?branch=master">4</a>, <a href="https://github.com/xapi-project/xenopsd">5</a>)</li>
+<li><a href="https://github.com/Zilliqa/scilla#readme">Scilla</a>   (<a href="https://coveralls.io/github/Zilliqa/scilla?branch=master">report</a>)</li>
+<li><a href="https://github.com/CodaProtocol/coda">Coda</a></li>
+<li><a href="https://github.com/o1-labs/snarky">snarky</a></li>
+<li><a href="https://github.com/comby-tools/comby">comby</a>   (<a href="https://coveralls.io/github/comby-tools/comby?branch=master">report</a>)</li>
+<li><a href="https://github.com/johnelse/ocaml-irc-client#readme">ocaml-irc-client</a>   (<a href="https://coveralls.io/github/johnelse/ocaml-irc-client">report</a>)</li>
+</ul>
+</li>
+</ul>
+<br>
+<p><a id="Contributing"></a></p>
+<h2>Contributing</h2>
+<p>Bug reports and pull requests are warmly welcome. Bisect_ppx is developed on
+GitHub, so please <a href="https://github.com/aantron/bisect_ppx/issues">open an issue</a>.</p>
+<p>Bisect_ppx is developed mainly using opam. To get the latest development
+version, run</p>
+<pre><code>opam source --dev-repo --pin bisect_ppx
+</code></pre>
+<p>You will now have a <code>bisect_ppx</code> subdirectory to work in. Try these <code>Makefile</code>
+targets:</p>
+<ul>
+<li><code>make test</code> for unit tests.</li>
+<li><code>make usage</code> for build system integration tests, except BuckleScript.</li>
+<li><code>make -C test/bucklescript full-test</code> for BuckleScript. This requires NPM and
+esy.</li>
+</ul>
+
+<div id="css-attribution">
+  This page uses <a href="https://github.com/sindresorhus/github-markdown-css">github-markdown-css</a>.
+</div>
+
+</body>
+</html>
