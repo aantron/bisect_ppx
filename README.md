@@ -1,17 +1,15 @@
-# Bisect_ppx &nbsp; [![Travis status][travis-img]][travis] [![AppVeyor status][appveyor-img]][appveyor] [![Coverage][coveralls-img]][coveralls]
+# Bisect_ppx &nbsp; [![CI status][ci-img]][ci] [![Coverage][coveralls-img]][coveralls]
 
-[Bisect_ppx][self] is a code coverage tool for OCaml and Reason. It helps you
-test thoroughly by showing what's **not** tested.
+[**Bisect_ppx**][self] is a code coverage tool for OCaml and Reason. It helps
+you test thoroughly by showing what's **not** tested.
 
 [![Bisect_ppx usage example][sample]][gh-pages-report]
 
 You can browse the report seen above [online here][gh-pages-report].
 
 [self]: https://github.com/aantron/bisect_ppx
-[travis]: https://travis-ci.org/aantron/bisect_ppx
-[travis-img]: https://img.shields.io/travis/aantron/bisect_ppx/master.svg?label=travis
-[appveyor]: https://ci.appveyor.com/project/aantron/bisect-ppx/branch/master
-[appveyor-img]: https://img.shields.io/appveyor/ci/aantron/bisect-ppx/master.svg?label=appveyor
+[ci]: https://travis-ci.org/aantron/bisect_ppx
+[ci-img]: https://img.shields.io/github/workflow/status/aantron/bisect_ppx/test/master
 [sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
 [coveralls]: https://coveralls.io/github/aantron/bisect_ppx?branch=master
 [coveralls-img]: https://img.shields.io/coveralls/aantron/bisect_ppx/master.svg
