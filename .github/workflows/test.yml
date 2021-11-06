@@ -24,6 +24,8 @@ jobs:
       run: bash ./test/ci/travis-binaries.sh
 
   opam:
+    if: ${{github.ref != 'refs/heads/binaries'}}
+
     strategy:
       fail-fast: false
       matrix:
@@ -52,7 +54,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: avsm/setup-ocaml@v2
       with:
-        ocaml-compiler: ${{ matrix.ocaml }}
+        ocaml-compiler: ${{matrix.ocaml}}
     - run: opam install --deps-only --yes .
     - if: ${{runner.os == 'Linux'}}
       run: |
@@ -60,7 +62,7 @@ jobs:
         sudo mv ocamlformat /usr/local/bin/ocamlformat
         sudo chmod a+x /usr/local/bin/ocamlformat
     - if: ${{runner.os != 'Linux'}}
-      run: opam install ocamlformat.0.16.0
+      run: opam install ocamlformat.0.16.0 --yes
     - run: |
         opam --version
         opam exec -- ocaml -version
@@ -78,3 +80,18 @@ jobs:
         unset GITHUB_ACTIONS
         unset GITHUB_RUN_NUMBER
         opam exec -- make test TEST=$TEST_ALIAS
+
+    # Reason requires OCaml <= 4.12.
+    - if: ${{matrix.ocaml == '4.12.1' && runner.os == 'Linux'}}
+      env:
+        COVERALLS_REPO_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        PULL_REQUEST_NUMBER: ${{github.event.number}}
+      run: |
+        opam install reason js_of_ocaml --yes
+        opam exec -- make clean-usage usage
+        (unset GITHUB_ACTIONS && unset GITHUB_RUN_NUMBER && \
+         unset COVERALLS_REPO_TOKEN && unset PULL_REQUEST_NUMBER && \
+          opam exec -- make clean self-coverage)
+        (cd _self && \
+          _build/install/default/bin/meta-bisect-ppx-report \
+            send-to Coveralls bisect*.meta)
