@@ -48,6 +48,8 @@ jobs:
           # ocamlformat 0.16.0, used in testing, doesn't support OCaml 4.13, and
           # we are using a Linux binary of it. So, hold the Mac build back to
           # 4.12 for now, and install ocamlformat from opam on Mac.
+        - os: windows-latest
+          ocaml: 4.12.1
 
     runs-on: ${{matrix.os}}
     steps:
@@ -69,7 +71,8 @@ jobs:
         opam exec -- ocamlformat --version
 
     - run: opam exec -- make build
-    - run: |
+    - if: ${{runner.os != 'Windows'}}
+      run: |
         case `opam exec -- ocamlc -version` in
           "4.07.1") TEST_ALIAS=@compatible;;
           "4.06.1") TEST_ALIAS=@compatible;;
