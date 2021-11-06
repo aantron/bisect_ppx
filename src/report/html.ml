@@ -40,24 +40,28 @@ let output_html_index title theme filename files =
   try
     let write format = Printf.fprintf channel format in
 
+    let overall_coverage =
+      Printf.sprintf "%.02f%%" (floor ((percentage stats) *. 100.) /. 100.) in
     write {|<!DOCTYPE html>
 <html lang="en"%s>
   <head>
-    <title>%s</title>
-    <link rel="stylesheet" type="text/css" href="coverage.css"/>
     <meta charset="utf-8"/>
+    <title>%s</title>
+    <meta name="description" content="%s coverage overall"/>
+    <link rel="stylesheet" type="text/css" href="coverage.css"/>
   </head>
   <body>
     <div id="header">
       <h1>%s</h1>
-      <h2>%.02f%%</h2>
+      <h2>%s</h2>
     </div>
     <div id="files">
 |}
       (theme_class theme)
       title
+      overall_coverage
       title
-      (floor ((percentage stats) *. 100.) /. 100.);
+      overall_coverage;
 
     files |> List.iter begin fun (name, html_file, stats) ->
       let dirname, basename = split_filename name in
@@ -242,14 +246,16 @@ let output_for_source_file
     let write format = Printf.fprintf out_channel format in
 
     (* Head and header. *)
+    let file_coverage = Printf.sprintf "%.02f%%" (percentage !stats) in
     write {|<!DOCTYPE html>
 <html lang="en"%s>
   <head>
-    <title>%s</title>
+    <meta charset="utf-8"/>
+    <title>%s &mdash; %s</title>
+    <meta name="description" content="%s coverage in %s">
     <link rel="stylesheet" href="%s"/>
     <script src="%s"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <meta charset="utf-8"/>
   </head>
   <body>
     <div id="header">
@@ -258,17 +264,20 @@ let output_for_source_file
           <span class="dirname">%s</span>%s
         </a>
       </h1>
-      <h2>%.02f%%</h2>
+      <h2>%s</h2>
     </div>
     <div id="navbar">
 |}
       (theme_class theme)
+      basename
       title
+      file_coverage
+      filename
       style_css
       highlight_js
       index_html
       dirname basename
-      (percentage !stats);
+      file_coverage;
 
     (* Navigation bar items. *)
     lines |> List.iter begin fun (number, _, visited, unvisited) ->

@@ -49,11 +49,12 @@ Reporter still works even in the presence of line number directives.
   <!DOCTYPE html>
   <html lang="en">
     <head>
-      <title>Coverage report</title>
+      <meta charset="utf-8"/>
+      <title>test2.ml &mdash; Coverage report</title>
+      <meta name="description" content="50.00% coverage in test2.ml">
       <link rel="stylesheet" href="coverage.css"/>
       <script src="highlight.pack.js"></script>
       <script>hljs.initHighlightingOnLoad();</script>
-      <meta charset="utf-8"/>
     </head>
     <body>
       <div id="header">

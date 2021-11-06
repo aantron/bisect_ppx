@@ -18,9 +18,10 @@
   <!DOCTYPE html>
   <html lang="en">
     <head>
-      <title>Coverage report</title>
-      <link rel="stylesheet" type="text/css" href="coverage.css"/>
       <meta charset="utf-8"/>
+      <title>Coverage report</title>
+      <meta name="description" content="33.33% coverage overall"/>
+      <link rel="stylesheet" type="text/css" href="coverage.css"/>
     </head>
     <body>
       <div id="header">
@@ -44,11 +45,12 @@
   <!DOCTYPE html>
   <html lang="en">
     <head>
-      <title>Coverage report</title>
+      <meta charset="utf-8"/>
+      <title>test.ml &mdash; Coverage report</title>
+      <meta name="description" content="33.33% coverage in test.ml">
       <link rel="stylesheet" href="coverage.css"/>
       <script src="highlight.pack.js"></script>
       <script>hljs.initHighlightingOnLoad();</script>
-      <meta charset="utf-8"/>
     </head>
     <body>
       <div id="header">
