@@ -33,6 +33,7 @@
     "dune-project",
     "binaries.esy.json",
     "src",
-    "bin"
+    "bin",
+    "bisect-ppx-report"
   ]
 }

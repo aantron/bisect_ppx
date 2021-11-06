@@ -159,14 +159,6 @@ and install it:
     npm install
     ```
 
-    If you are using Yarn, you need to run an extra command because of
-    [yarnpkg/pkg#3421](https://github.com/yarnpkg/yarn/issues/3421):
-
-    ```
-    yarn add bisect_ppx
-    yarn --check-files
-    ```
-
     If pre-built binaries aren't available for your system, the build will
     automatically fall back to building Bisect_ppx from source using
     [esy](https://esy.sh), which will take a few minutes the first time. If this

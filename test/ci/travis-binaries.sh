@@ -37,6 +37,8 @@ try_to_commit() {
     strip bin/$OS/ppx
     strip bin/$OS/bisect-ppx-report
     git add bin/
+    cp src/report/dummy-binary ./bisect-ppx-report
+    git add bisect-ppx-report
     echo "Binaries for '$OS'" > commit-message
     if [ `ls bin | wc -l` != 2 ]
     then
