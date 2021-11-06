@@ -5,9 +5,9 @@
 
 
 val output :
-   per_file:bool ->
-   coverage_files:string list ->
-   coverage_paths:string list ->
-   expect:string list ->
-   do_not_expect:string list ->
-      unit
+  per_file:bool ->
+  coverage_files:string list ->
+  coverage_paths:string list ->
+  expect:string list ->
+  do_not_expect:string list ->
+    unit
