@@ -175,11 +175,18 @@ let output
     Util.find_source_file ~source_roots:source_paths ~ignore_missing_files in
   let cobertura = cobertura ~resolver ~coverage in
   let () = Util.mkdirs (Filename.dirname to_file) in
-  let oc = open_out to_file in
+  let oc =
+    try open_out to_file
+    with Sys_error message ->
+      Util.fatal "cannot open output file '%s': %s" to_file message
+  in
   try
     let fmt = Format.formatter_of_out_channel oc in
     let () = pp_cobertura fmt cobertura in
     close_out oc
-  with exn ->
+  with
+  | Sys_error message ->
+    Util.fatal "cannot write output file '%s': %s" to_file message
+  | exn ->
     close_out_noerr oc;
     raise exn

@@ -112,7 +112,11 @@ let output
   in
 
   Util.mkdirs (Filename.dirname to_file);
-  let ch = open_out to_file in
+  let ch =
+    try open_out to_file
+    with Sys_error message ->
+      Util.fatal "cannot open output file '%s': %s" to_file message
+  in
   try
     Printf.fprintf ch {|{
 %s
@@ -129,7 +133,10 @@ let output
       (String.concat ",\n" file_jsons);
     close_out ch
 
-  with exn ->
+  with
+  | Sys_error message ->
+    Util.fatal "cannot write output file '%s': %s" to_file message
+  | exn ->
     close_out_noerr ch;
     raise exn
 

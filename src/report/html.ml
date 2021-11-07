@@ -36,7 +36,11 @@ let output_html_index title theme filename files =
       files
   in
 
-  let channel = open_out filename in
+  let channel =
+    try open_out filename
+    with Sys_error message ->
+      Util.fatal "cannot open output file '%s': %s" filename message
+  in
   try
     let write format = Printf.fprintf channel format in
 
@@ -97,7 +101,10 @@ let output_html_index title theme filename files =
 
     close_out channel
 
-  with exn ->
+  with
+  | Sys_error message ->
+    Util.fatal "cannot write output file '%s': %s" filename message
+  | exn ->
     close_out_noerr channel;
     raise exn
 
@@ -131,28 +138,6 @@ let escape_line tab_size line offset points =
       incr ofs
     end;
   Buffer.contents buff
-
-let open_both in_file out_file =
-  let in_channel = open_in in_file in
-
-  try
-    let rec make_out_dir path =
-      if Sys.file_exists path then
-        ()
-      else begin
-        let parent = Filename.dirname path in
-        make_out_dir parent;
-        Unix.mkdir path 0o755
-      end
-    in
-    make_out_dir (Filename.dirname out_file);
-
-    let out_channel = open_out out_file in
-    (in_channel, out_channel)
-
-  with e ->
-    close_in_noerr in_channel;
-    raise e
 
 
 
@@ -188,8 +173,17 @@ let output_for_source_file
       (offset, nb)))
   in
   let dirname, basename = split_filename filename in
-  let in_channel, out_channel =
-    open_both source_file_on_disk html_file_on_disk in
+  Util.mkdirs (Filename.dirname html_file_on_disk);
+  let in_channel =
+    try open_in source_file_on_disk
+    with Sys_error message ->
+      Util.fatal "cannot open source file '%s': %s" source_file_on_disk message
+  in
+  let out_channel =
+    try open_out html_file_on_disk
+    with Sys_error message ->
+      Util.fatal "cannot open output file '%s': %s" html_file_on_disk message
+  in
   let rec make_path_to_report_root acc in_file_path_remaining =
     if in_file_path_remaining = "" ||
         in_file_path_remaining = Filename.current_dir_name ||
@@ -358,11 +352,18 @@ let output_for_source_file
 (* Assets, such as CSS and JavaScript files. *)
 
 let output_string_to_separate_file content filename =
-  let channel = open_out filename in
+  let channel =
+    try open_out filename
+    with Sys_error message ->
+      Util.fatal "cannot open output file '%s': %s" filename message
+  in
   try
     Printf.fprintf channel "%s" content;
     close_out channel
-  with exn ->
+  with
+  | Sys_error message ->
+    Util.fatal "cannot write output file '%s': %s" filename message
+  | exn ->
     close_out_noerr channel;
     raise exn
 
