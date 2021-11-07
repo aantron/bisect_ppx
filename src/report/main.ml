@@ -42,7 +42,7 @@ let coverage_paths =
 
 let to_file =
   Arg.(required @@ pos 0 (some string) None @@
-    info [] ~docv:"FILE" ~doc:"Output file name.")
+    info [] ~docv:"OUTPUT_FILE" ~doc:"Output file name.")
 
 let source_paths =
   Arg.(value @@ opt_all string (["."; "./_build/default"] @ esy_source_dir) @@
