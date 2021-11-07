@@ -71,11 +71,16 @@ jobs:
       if: ${{runner.os != 'Linux'}}
       run: opam install ocamlformat.0.16.0 --yes
 
+    - name: Install coreutils (Mac)
+      if: ${{runner.os == 'macOS'}}
+      run: brew install coreutils
+
     - name: Version feedback
       run: |
         opam --version
         opam exec -- ocaml -version
         opam exec -- ocamlformat --version
+        truncate --version
 
     - name: Build
       run: opam exec -- make build
