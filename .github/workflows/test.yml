@@ -21,7 +21,7 @@ jobs:
     - if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-      run: bash ./test/ci/travis-binaries.sh
+      run: bash ./test/ci/binaries.sh
 
   opam:
     if: ${{github.ref != 'refs/heads/binaries'}}
