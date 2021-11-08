@@ -65,6 +65,9 @@ val register_file :
 
 (** {1 [.coverage] output} *)
 
+val write_runtime_coverage : coverage -> out_channel -> unit
+(** Writes the [coverage] to the given output channel. *)
+
 val write_runtime_data : out_channel -> unit
 (** Writes the current accumulated coverage data (of type {!coverage}) to the
     given output channel. *)

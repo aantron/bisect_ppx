@@ -64,8 +64,11 @@ let register_file ~filename ~points =
     if current_count < max_int then
       counts.(index) <- current_count + 1)
 
+let flatten_coverage coverage =
+  Hashtbl.fold (fun _ file acc -> file::acc) coverage []
+
 let flatten_data () =
-  Hashtbl.fold (fun _ file acc -> file::acc) (Lazy.force coverage) []
+  flatten_coverage (Lazy.force coverage)
 
 let reset_counters () =
   Lazy.force coverage
@@ -87,6 +90,9 @@ let runtime_data_to_string () =
     let buffer = Buffer.create 4096 in
     write_coverage (Format.formatter_of_buffer buffer) data;
     Some (Buffer.contents buffer)
+
+let write_runtime_coverage coverage channel =
+  write_coverage (Format.formatter_of_out_channel channel) (flatten_coverage coverage)
 
 let write_runtime_data channel =
   write_coverage (Format.formatter_of_out_channel channel) (flatten_data ())
