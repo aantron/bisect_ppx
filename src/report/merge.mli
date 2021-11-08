@@ -11,6 +11,4 @@ val output :
   to_file:string ->
   coverage_files:string list ->
   coverage_paths:string list ->
-  expect:string list ->
-  do_not_expect:string list ->
     unit

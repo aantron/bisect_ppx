@@ -257,13 +257,11 @@ let coveralls =
 
 
 let merge =
-  let call_with_labels
-      to_file coverage_files coverage_paths expect do_not_expect =
-    Merge.output
-      ~to_file ~coverage_files ~coverage_paths ~expect ~do_not_expect
+  let call_with_labels to_file coverage_files coverage_paths =
+    Merge.output ~to_file ~coverage_files ~coverage_paths
   in
   Term.(const set_verbose $ verbose $ const call_with_labels $ to_file
-    $ coverage_files 1 $ coverage_paths $ expect $ do_not_expect),
+    $ coverage_files 1 $ coverage_paths),
   term_info "merge" ~doc:"Merge coverage files"
 
 (* Entry point. *)

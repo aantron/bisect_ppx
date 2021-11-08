@@ -3,10 +3,10 @@
    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
 
 
-let output ~to_file ~coverage_files ~coverage_paths ~expect ~do_not_expect =
+let output ~to_file ~coverage_files ~coverage_paths =
   let coverage =
     Input.load_coverage
-      ~coverage_files ~coverage_paths ~expect ~do_not_expect in
+      ~coverage_files ~coverage_paths ~expect:[] ~do_not_expect:[] in
   let () = Util.mkdirs (Filename.dirname to_file) in
   let oc = open_out to_file in
   try
