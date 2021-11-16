@@ -20,3 +20,6 @@ val bisect_file : string option ref
 
 val bisect_silent : string option ref
 (** Default value for [BISECT_SILENT]. *)
+
+val bisect_sigterm : bool ref
+(** Default value for [BISECT_SIGTERM]. *)

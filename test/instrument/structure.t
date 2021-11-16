@@ -8,7 +8,7 @@ An empty file. Show the bare registration code.
       let points = [] in
       let (`Visit visit) =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
-          ~filename:"test.ml" ~points
+          ~filename:"test.ml" ~points ~bisect_sigterm:false
       in
       visit
   
