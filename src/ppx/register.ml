@@ -44,6 +44,11 @@ let switches = [
   ("--bisect-silent",
   Arg.String (fun s -> Instrument.bisect_silent := Some s),
   " Default value for BISECT_SILENT environment variable");
+
+  ("--bisect-sigterm",
+  Arg.Set Instrument.bisect_sigterm,
+  (" Install a signal handler writing coverage data and" ^
+   " terminating on reception of SIGTERM"));
 ]
 
 let () =

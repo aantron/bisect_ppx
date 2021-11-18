@@ -7,6 +7,7 @@
 val register_file :
   bisect_file:string option ->
   bisect_silent:string option ->
+  bisect_sigterm:bool ->
   filename:string ->
   points:int list ->
     [`Visit of (int -> unit)]
@@ -16,7 +17,7 @@ val register_file :
     [Common.point_definition list] giving the locations of all points in the
     file. The returned callback is used to increment visitation counts.
 
-    [~bisect_file] and [~bisect_silent] are ignored. *)
+    [~bisect_file], [~bisect_silent], and [~bisect_sigterm] are ignored. *)
 
 val get_coverage_data : unit -> string option
 (** Returns the binary coverage data accumulated by the program so far. This

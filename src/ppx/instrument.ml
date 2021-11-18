@@ -117,6 +117,8 @@ let bisect_file = ref None
 
 let bisect_silent = ref None
 
+let bisect_sigterm = ref false
+
 module Generated_code :
 sig
   type points
@@ -909,6 +911,10 @@ struct
     in
     let bisect_file = ast_convenience_str_opt !bisect_file in
     let bisect_silent = ast_convenience_str_opt !bisect_silent in
+    let bisect_sigterm =
+      let open Parsetree in
+      if !bisect_sigterm then [%expr true] else [%expr false]
+    in
 
     (* ___bisect_visit___ is a function with a reference to a point count array.
        It is called every time a point is visited.
@@ -988,7 +994,7 @@ struct
             let `Visit visit =
               Bisect.Runtime.register_file
                 ~bisect_file:[%e bisect_file] ~bisect_silent:[%e bisect_silent]
-                ~filename:[%e filename] ~points
+                ~filename:[%e filename] ~points ~bisect_sigterm:[%e bisect_sigterm]
             in
             visit
         ]

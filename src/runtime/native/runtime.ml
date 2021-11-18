@@ -10,6 +10,10 @@ let default_bisect_file = ref "bisect"
 
 let default_bisect_silent = ref "bisect.log"
 
+let sigterm_enable = ref false
+
+let bisect_file_written = ref false
+
 type message =
   | Unable_to_create_file
   | Unable_to_write_file
@@ -30,6 +34,14 @@ let full_path fname =
     fname
 
 let env_to_fname env default = try Sys.getenv env with Not_found -> !default
+
+let env_to_boolean ?(default = false) env =
+  try
+    match Sys.getenv env with
+    | "true" -> true
+    | "false" -> false
+    | _ -> default
+  with Not_found -> default
 
 let verbose =
   lazy begin
@@ -114,11 +126,33 @@ let dump () =
         verbose Unable_to_write_file);
       close_out_noerr channel
 
-let register_dump : unit Lazy.t =
-  lazy (at_exit dump)
+let sigterm_handler (_ : int) =
+  bisect_file_written := true;
+  dump ();
+  exit 0
 
-let register_file ~bisect_file ~bisect_silent ~filename ~points =
+let dump_at_exit () =
+  if not !bisect_file_written then begin
+    if !sigterm_enable then begin
+      ignore @@ Sys.(signal sigterm Signal_ignore);
+      bisect_file_written := true;
+      dump ();
+      ignore @@ Sys.(signal sigterm Signal_default)
+    end
+    else
+      dump ()
+  end
+
+let register_dump : unit Lazy.t =
+  lazy (at_exit dump_at_exit)
+
+let register_sigterm_hander : unit Lazy.t =
+  lazy (ignore @@ Sys.(signal sigterm (Signal_handle sigterm_handler)))
+
+let register_file ~bisect_file ~bisect_silent ~bisect_sigterm ~filename ~points =
   (match bisect_file with None -> () | Some v -> default_bisect_file := v);
   (match bisect_silent with None -> () | Some v -> default_bisect_silent := v);
+  sigterm_enable := env_to_boolean ~default:bisect_sigterm "BISECT_SIGTERM";
+  (if !sigterm_enable then Lazy.force register_sigterm_hander);
   let () = Lazy.force register_dump in
   Common.register_file ~filename ~points

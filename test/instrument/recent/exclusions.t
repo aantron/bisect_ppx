@@ -42,7 +42,7 @@
         let points = [12] in
         let `Visit visit =
           Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
-            ~filename:"not_excluded.ml" ~points in
+            ~filename:"not_excluded.ml" ~points ~bisect_sigterm:false in
         visit
       let ___bisect_post_visit___ point_index result =
         ___bisect_visit___ point_index; result
