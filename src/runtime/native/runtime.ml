@@ -35,11 +35,11 @@ let full_path fname =
 
 let env_to_fname env default = try Sys.getenv env with Not_found -> !default
 
-let env_to_boolean ?(default = false) env =
+let env_to_boolean env default =
   try
-    match Sys.getenv env with
-    | "true" -> true
-    | "false" -> false
+    match (String.uppercase [@ocaml.warning "-3"]) (Sys.getenv env) with
+    | "YES" -> true
+    | "NO" -> false
     | _ -> default
   with Not_found -> default
 
@@ -152,7 +152,7 @@ let register_sigterm_hander : unit Lazy.t =
 let register_file ~bisect_file ~bisect_silent ~bisect_sigterm ~filename ~points =
   (match bisect_file with None -> () | Some v -> default_bisect_file := v);
   (match bisect_silent with None -> () | Some v -> default_bisect_silent := v);
-  sigterm_enable := env_to_boolean ~default:bisect_sigterm "BISECT_SIGTERM";
+  sigterm_enable := env_to_boolean "BISECT_SIGTERM" bisect_sigterm;
   (if !sigterm_enable then Lazy.force register_sigterm_hander);
   let () = Lazy.force register_dump in
   Common.register_file ~filename ~points
