@@ -132,14 +132,16 @@ let sigterm_handler (_ : int) =
   exit 0
 
 let dump_at_exit () =
-  if not !bisect_file_written then
-    (if !sigterm_enable then
-      (ignore @@ Sys.(signal sigterm Signal_ignore);
-       bisect_file_written := true;
-       dump ();
-       ignore @@ Sys.(signal sigterm Signal_default))
-     else
-       dump ())
+  if not !bisect_file_written then begin
+    if !sigterm_enable then begin
+      ignore @@ Sys.(signal sigterm Signal_ignore);
+      bisect_file_written := true;
+      dump ();
+      ignore @@ Sys.(signal sigterm Signal_default)
+    end
+    else
+      dump ()
+  end
 
 let register_dump : unit Lazy.t =
   lazy (at_exit dump_at_exit)
