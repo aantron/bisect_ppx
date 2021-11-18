@@ -7,7 +7,7 @@ Bisect's runtime can install a signal handler.
   >  (preprocess (pps bisect_ppx --bisect-sigterm)))
   > EOF
   $ dune exec ./daemon.exe
-  $ ls bisect*.coverage | wc -l
+  $ ls bisect*.coverage | wc -l | sed 's/ *//'
   2
   $ bisect-ppx-report summary --verbose
   Info: found *.coverage files in './'

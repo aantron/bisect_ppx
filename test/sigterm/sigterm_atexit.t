@@ -21,7 +21,7 @@ handler, we should see no message and find two coverage traces:
   >  (preprocess (pps bisect_ppx --bisect-sigterm)))
   > EOF
   $ dune exec ./at_exit_main.exe
-  $ ls bisect*.coverage | wc -l
+  $ ls bisect*.coverage | wc -l | sed 's/ *//'
   2
   $ bisect-ppx-report summary --verbose
   Info: found *.coverage files in './'
