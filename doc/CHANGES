@@ -1,3 +1,26 @@
+Version 2.7.0 (2021-11-23):
+---------------------------
+
+  Additions
+
+  - Reports in Cobertura XML format, used on GitLab (#383, Valentin Chaboche).
+  - .coverage file merging (#389, Valentin Chaboche).
+  - Environment variable BISECT_SIGTERM and PPX option --bisect-sigterm, which
+    cause the runtime to write .coverage files upon receiving SIGTERM (#390,
+    Arvid Jakobsson).
+  - bisect-ppx-report: verbose logging now hidden behind new --verbose flag
+    (4b36eb4).
+  - HTML: minimal metadata so that links to reports are decorated by social
+    media platforms (#373).
+
+  Bugs fixed
+
+  - Adapt to change in how ReScript represents -> (#382, reported by Danni
+    Friedland).
+  - Broken installation on pnpm (#381, reported by Tillmann Rendel).
+  - bisect-ppx-report: clearer error messages (#386, 6327d04).
+  - HTML: visit count tooltip not visible on last line of report (#374).
+
 Version 2.6.3 (2021-07-21):
 ---------------------------
 
