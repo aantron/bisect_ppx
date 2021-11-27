@@ -26,7 +26,7 @@ You can browse the report seen above [online here][gh-pages-report].
   - [**ReScript**](#ReScript) &nbsp; ([starter repo][rescript-repo], [report][rescript-report])
   - [**Js_of_ocaml**](#Js_of_ocaml) &nbsp; ([starter repo][jsoo-repo], [report][jsoo-report])
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
-- [**Sending to Coveralls**](#Coveralls)
+- [**Sending to Coveralls and Codecov**](#Coveralls)
 - [**Controlling coverage with `[@coverage off]`**](#Exclusion)
 - [**Other topics**](#Other)
 - [**Bisect_ppx users**](#Users)
@@ -338,10 +338,11 @@ instrument the code under test, but not the tester:
 <br>
 
 <a id="Coveralls"></a>
-## Sending to [Coveralls](https://coveralls.io)
+## Sending to Coveralls and Codecov
 
-`bisect-ppx-report` can send reports to **Coveralls** and **Codecov** directly
-from **Travis**, **CircleCI**, and **GitHub Actions**. To do this, run
+`bisect-ppx-report` can send reports to [**Coveralls**](https://coveralls.io)
+and [**Codecov**](https://codecov.io/) directly from **Travis**, **CircleCI**,
+and **GitHub Actions**. To do this, run
 
 ```
 bisect-ppx-report send-to Coveralls
