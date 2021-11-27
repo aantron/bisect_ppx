@@ -431,6 +431,7 @@ See [advanced usage][advanced] for:
 
 - Exhaustiveness checking.
 - Excluding generated files from coverage.
+- SIGTERM handling.
 - Environment variables.
 
 Cornell CS3110 offers a [Bisect_ppx tutorial][cs3110], featuring a video.
