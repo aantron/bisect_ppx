@@ -9,7 +9,7 @@
 
     - the instrumenter (PPX)
     - the native runtime ([Bisect.Runtime] in [src/runtime/native/])
-    - the ReScript runtime ([Bisect.Runtime] in [src/runtime/bucklescript/])
+    - the ReScript runtime ([Bisect.Runtime] in [src/runtime/js/])
     - the reporter ([bisect-ppx-report]) *)
 
 

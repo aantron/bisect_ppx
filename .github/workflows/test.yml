@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v2
     - run: npm install esy
     - run: echo PATH=$(pwd)/node_modules/.bin:$PATH >> $GITHUB_ENV
-    - run: make -C test/bucklescript full-test
+    - run: make -C test/js full-test
     - if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}

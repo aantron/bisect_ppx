@@ -22,7 +22,7 @@ SELF_COVERAGE := _self
 clean :
 	dune clean
 	make clean-usage
-	make -C test/bucklescript clean
+	make -C test/js clean
 	rm -rf $(SELF_COVERAGE)
 
 INSTALLED_ENVIRONMENT := \
@@ -103,8 +103,8 @@ self-coverage-diff :
 
 EXPECTED_FILES := \
   --expect bisect_ppx/src/ \
-  --do-not-expect bisect_ppx/src/ppx/bucklescript/ \
-  --do-not-expect bisect_ppx/src/runtime/bucklescript/
+  --do-not-expect bisect_ppx/src/ppx/js/ \
+  --do-not-expect bisect_ppx/src/runtime/js/
 
 .PHONY : self-coverage-test
 self-coverage-test :

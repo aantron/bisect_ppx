@@ -27,7 +27,7 @@ a.out
 # opam 2.
 _opam/
 
-# BuckleScript, NPM, esy.
+# ReScript, NPM, esy, Melange.
 node_modules/
 package-lock.json
 lib/

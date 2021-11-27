@@ -185,7 +185,7 @@ and install it:
     ```json
     "jest": {
       "setupFilesAfterEnv": [
-        "bisect_ppx/lib/js/src/runtime/bucklescript/jest.js"
+        "bisect_ppx/lib/js/src/runtime/js/jest.js"
       ]
     }
     ```
@@ -194,7 +194,7 @@ and install it:
     `bsconfig.json`, replace the path by
 
     ```json
-    "bisect_ppx/src/runtime/bucklescript/jest.js"
+    "bisect_ppx/src/runtime/js/jest.js"
     ```
 
     You can exclude your test cases from the coverage report by adding this to
@@ -510,6 +510,6 @@ targets:
 
 - `make test` for unit tests.
 - `make usage` for build system integration tests, except ReScript.
-- `make -C test/bucklescript full-test` for ReScript. This requires npm and esy.
+- `make -C test/js full-test` for ReScript. This requires npm and esy.
 
 [issues]: https://github.com/aantron/bisect_ppx/issues
