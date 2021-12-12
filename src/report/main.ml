@@ -11,6 +11,11 @@
 
 (* Helpers. *)
 
+let workspace_dir =
+  match Util.find_dune_workspace_root () with
+  | None -> "./_build/default"
+  | Some workspace -> Filename.concat workspace "_build/default"
+
 let esy_source_dir =
   match Sys.getenv "cur__target_dir" with
   | exception Not_found -> []
@@ -31,8 +36,9 @@ let coverage_files from_position =
       ("Optional list of *.coverage files produced during testing. If not " ^
       "specified, and $(b,--coverage-path) is also not specified, " ^
       "bisect-ppx-report will search for *.coverage files non-recursively " ^
-      "in ./ and recursively in ./_build, and, if run under esy, inside " ^
-      "the esy sandbox."))
+      "in ./ and recursively in ./_build/, and, if run under esy, inside " ^
+      "the esy sandbox. If run inside an explicit Dune workspace, ./_build/ " ^
+      "is taken relative to the workspace root."))
 
 let coverage_paths =
   Arg.(value @@ opt_all string [] @@
@@ -45,13 +51,15 @@ let to_file =
     info [] ~docv:"OUTPUT_FILE" ~doc:"Output file name.")
 
 let source_paths =
-  Arg.(value @@ opt_all string (["."; "./_build/default"] @ esy_source_dir) @@
+  Arg.(value @@ opt_all string (["."; workspace_dir] @ esy_source_dir) @@
     info ["source-path"] ~docv:"DIRECTORY" ~doc:
       ("Directory in which to look for source files. This option can be " ^
       "specified multiple times. File paths are concatenated with each " ^
       "$(b,--source-path) directory when looking for files. The default " ^
       "directories are ./ and ./_build/default/. If running inside an esy " ^
-      "sandbox, the default/ directory in the sandbox is also included."))
+      "sandbox, the default/ directory in the sandbox is also included. If " ^
+      "inside an explicit Dune workspace, ./_build/default/ is taken " ^
+      "relative to the workspace root."))
 
 let ignore_missing_files =
   Arg.(value @@ flag @@

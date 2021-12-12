@@ -41,6 +41,30 @@ let mkdirs directory =
   with Unix.(Unix_error (error, _, path)) ->
     fatal "cannot create directory '%s': %s" path (Unix.error_message error)
 
+let workspace_root =
+  lazy begin
+    let rec loop path =
+      let parent = Filename.dirname path in
+      let parent_result =
+        if parent <> path && not (Filename.is_relative parent) then
+          loop parent
+        else
+          None
+      in
+      match parent_result with
+      | Some _ -> parent_result
+      | None ->
+        if Sys.file_exists (Filename.concat path "dune-workspace") then
+          Some path
+        else
+          None
+    in
+    loop (Sys.getcwd ())
+  end
+
+let find_dune_workspace_root () =
+  Lazy.force workspace_root
+
 let find_source_file ~source_roots ~ignore_missing_files ~filename =
   let fail () =
     let message =

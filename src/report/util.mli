@@ -47,6 +47,10 @@ val mkdirs : string -> unit
     to create directory is considered fatal, and the function terminates the
     reporter process. *)
 
+val find_dune_workspace_root : unit -> string option
+(** Returns the directory containing the outermost [dune-workspace] file,
+    relative to the current directory. *)
+
 val find_source_file :
   source_roots:string list -> ignore_missing_files:bool -> filename:string ->
     string option

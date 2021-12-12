@@ -51,8 +51,11 @@ let list_coverage_files files_on_command_line coverage_search_paths =
         list_non_recursively is_coverage_file Filename.current_dir_name in
       let paths =
         match Sys.getenv "cur__target_dir" with
-        | exception Not_found -> ["_build"]
         | directory -> [directory; "_build"]
+        | exception Not_found ->
+          match Util.find_dune_workspace_root () with
+          | None -> ["_build"]
+          | Some workspace -> [Filename.concat workspace "_build"]
       in
       files, paths
 
