@@ -151,6 +151,7 @@ let output_for_source_file
   let stats = ref (0, 0) in
   let points =
     points
+    |> Array.to_list
     |> List.mapi (fun index offset -> (offset, index))
     |> List.sort compare
   in

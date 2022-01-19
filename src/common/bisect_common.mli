@@ -25,7 +25,7 @@
 
 type instrumented_file = {
   filename : string; (** Source file name. *)
-  points : int list; (** Byte offsets of the points placed in the file. *)
+  points : int array; (** Byte offsets of the points placed in the file. *)
   counts : int array; (** Visitation counts, one for each point. *)
 }
 (** Data gathered for a single source file. *)
@@ -45,7 +45,7 @@ val coverage_file_identifier : string
 (** {1 Initialization} *)
 
 val register_file :
-  filename:string -> points:int list -> [`Visit of (int -> unit)]
+  filename:string -> points:int array -> [`Visit of (int -> unit)]
 (** Each source file is instrumented to call {!Bisect.Runtime.register_file} at
     run time, during program initialization. {!Bisect.Runtime.register_file}
     eventually forwards to this function, {!Biesct_common.register_file}. This

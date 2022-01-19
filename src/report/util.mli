@@ -64,7 +64,7 @@ val find_source_file :
 (** {1 Coverage statistics} *)
 
 val line_counts :
-  filename:string -> points:int list -> counts:int array -> int option list
+  filename:string -> points:int array -> counts:int array -> int option list
 (** Computes the visited lines for [~filename]. For each line, returns either:
 
     - [None], if there is no point on the line.

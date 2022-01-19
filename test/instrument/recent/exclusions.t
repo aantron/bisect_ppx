@@ -39,7 +39,7 @@
   module Bisect_visit___not_excluded___ml =
     struct
       let ___bisect_visit___ =
-        let points = [12] in
+        let points = [|12|] in
         let `Visit visit =
           Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
             ~filename:"not_excluded.ml" ~points ~bisect_sigterm:false in

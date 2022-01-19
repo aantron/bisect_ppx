@@ -9,7 +9,7 @@
 
 type instrumented_file = {
   filename : string;
-  points : int list;
+  points : int array;
   counts : int array;
 }
 
@@ -37,7 +37,7 @@ let write_list write_element formatter l =
 
 let write_instrumented_file formatter {filename; points; counts} =
   write_string formatter filename;
-  write_list write_int formatter points;
+  write_list write_int formatter (Array.to_list points);
   write_array write_int formatter counts
 
 let write_coverage formatter coverage =
@@ -55,7 +55,7 @@ let coverage : coverage Lazy.t =
   lazy (Hashtbl.create 17)
 
 let register_file ~filename ~points =
-  let counts = Array.make (List.length points) 0 in
+  let counts = Array.make (Array.length points) 0 in
   let coverage = Lazy.force coverage in
   if not (Hashtbl.mem coverage filename) then
     Hashtbl.add coverage filename {filename; points; counts};
