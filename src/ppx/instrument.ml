@@ -890,15 +890,10 @@ struct
     in
 
     let points_data =
-      let open Parsetree in
-        let rec inline_point_offsets acc = function
-        | [] -> acc
-        | offset::more ->
-          inline_point_offsets
-            [%expr [%e Ast_builder.Default.eint ~loc offset]::[%e acc]]
-            more
-      in
-      inline_point_offsets [%expr []] points.offsets
+      Ast_builder.Default.pexp_array ~loc
+        (List.map
+          (fun offset -> Ast_builder.Default.eint ~loc offset)
+          (List.rev points.offsets))
     in
     let filename = Ast_builder.Default.estring ~loc file in
 

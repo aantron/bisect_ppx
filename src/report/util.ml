@@ -104,6 +104,7 @@ let line_counts ~filename ~points ~counts =
   let len = Array.length counts in
   let points =
     points
+    |> Array.to_list
     |> List.mapi (fun index offset -> (offset, index))
     |> List.sort compare
   in

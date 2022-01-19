@@ -5,7 +5,7 @@ An empty file. Show the bare registration code.
   > EOF
   module Bisect_visit___test___ml = struct
     let ___bisect_visit___ =
-      let points = [] in
+      let points = [||] in
       let (`Visit visit) =
         Bisect.Runtime.register_file ~bisect_file:None ~bisect_silent:None
           ~filename:"test.ml" ~points ~bisect_sigterm:false

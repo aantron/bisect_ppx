@@ -187,7 +187,7 @@ let read_list read_element buffer channel =
 
 let read_instrumented_file buffer channel =
   let filename = read_string buffer channel |> get_relative_path in
-  let points = read_list read_int buffer channel in
+  let points = read_array read_int buffer channel in
   let counts = read_array read_int buffer channel in
   Bisect_common.{filename; points; counts}
 

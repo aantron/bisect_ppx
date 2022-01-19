@@ -47,7 +47,7 @@ val register_file :
   bisect_silent:string option ->
   bisect_sigterm:bool ->
   filename:string ->
-  points:int list ->
+  points:int array ->
     [`Visit of (int -> unit)]
 (** [register_file ~bisect_file ~bisect_silent ~bisect_sigterm file ~point_count
     ~point_definitions] indicates that the file [file] is part of the
