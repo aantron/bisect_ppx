@@ -891,7 +891,7 @@ struct
 
     let points_data =
         Ast_builder.Default.pexp_array ~loc (List.map (
-          fun offset -> Ast_builder.Default.eint ~loc: Location.none offset
+          fun offset -> Ast_builder.Default.eint ~loc offset
         ) (List.rev points.offsets))
     in
     let filename = Ast_builder.Default.estring ~loc file in

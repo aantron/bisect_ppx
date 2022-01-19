@@ -37,7 +37,7 @@ let write_list write_element formatter l =
 
 let write_instrumented_file formatter {filename; points; counts} =
   write_string formatter filename;
-  write_list write_int formatter (Array.to_list points);
+  write_array write_int formatter points;
   write_array write_int formatter counts
 
 let write_coverage formatter coverage =
