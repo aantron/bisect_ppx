@@ -1,3 +1,11 @@
+Version 2.7.1 (2022-01-19):
+---------------------------
+
+  Bugs fixed
+
+  - Emit point data as arrays instead of as lists, to avoid exposing JavaScript
+    tooling to large AST structures (#395, Jaap Frolich).
+
 Version 2.7.0 (2021-11-23):
 ---------------------------
 
