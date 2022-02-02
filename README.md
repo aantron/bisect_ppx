@@ -1,4 +1,4 @@
-# Bisect_ppx &nbsp; [![CI status][ci-img]][ci] [![Coverage][coveralls-img]][coveralls]
+# Bisect_ppx &nbsp; [![Coverage][coveralls-img]][coveralls]
 
 [**Bisect_ppx**][self] is a code coverage tool for OCaml and Reason. It helps
 you test thoroughly by showing what's **not** tested.
@@ -8,8 +8,6 @@ you test thoroughly by showing what's **not** tested.
 You can browse the report seen above [online here][gh-pages-report].
 
 [self]: https://github.com/aantron/bisect_ppx
-[ci]: https://github.com/aantron/bisect_ppx/actions
-[ci-img]: https://img.shields.io/github/workflow/status/aantron/bisect_ppx/test/master
 [sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
 [coveralls]: https://coveralls.io/github/aantron/bisect_ppx?branch=master
 [coveralls-img]: https://img.shields.io/coveralls/aantron/bisect_ppx/master.svg
