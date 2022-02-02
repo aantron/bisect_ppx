@@ -405,6 +405,13 @@ code span[data-count="0"] {
     color: var(--color);
 }
 
+.stats {
+    display: inline-block;
+    min-width: 4em;
+    font-size: 90%;
+    color: var(--color);
+}
+
 #files a {
     text-decoration: none;
     border-bottom: 1px solid var(--underline-color);

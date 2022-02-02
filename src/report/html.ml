@@ -67,7 +67,7 @@ let output_html_index title theme filename files =
       title
       overall_coverage;
 
-    files |> List.iter begin fun (name, html_file, stats) ->
+    files |> List.iter begin fun (name, html_file, ((visited, total) as stats)) ->
       let dirname, basename = split_filename name in
       let relative_html_file =
         if Filename.is_relative html_file then
@@ -83,6 +83,7 @@ let output_html_index title theme filename files =
           <span class="covered" style="width: %s%%"></span>
         </span>
         <span class="percentage">%s%%</span>
+        <span class="stats">%d/%d</span>
         <a href="%s">
           <span class="dirname">%s</span>%s
         </a>
@@ -90,6 +91,7 @@ let output_html_index title theme filename files =
 |}
         percentage
         percentage
+        visited total
         relative_html_file
         dirname basename;
     end;
