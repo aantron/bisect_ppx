@@ -219,6 +219,7 @@ let output_html_index title theme filename files =
 
     List.iter print_line files;
     write {|    </div>
+     <script src="coverage.js"></script>
   </body>
 </html>
 |};

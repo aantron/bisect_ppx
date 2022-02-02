@@ -60,6 +60,9 @@ function handle_navbar_clicks()
     var line_count = document.querySelectorAll("a[id]").length;
     var navbar = document.querySelector("#navbar");
 
+    if (navbar === null)
+        return;
+
     navbar.onclick = function (event)
     {
         event.preventDefault();
@@ -95,3 +98,39 @@ function handle_line_number_clicks()
 };
 
 handle_line_number_clicks();
+
+function handle_collapsible_click()
+{
+    document.querySelectorAll("summary").forEach(
+        function (summary)
+        {
+            summary.onclick = function (event)
+            {
+                if (event.shiftKey) {
+                    var details = summary.parentElement;
+                    var sub_details = details.querySelectorAll("details");
+                    var all_are_open = true;
+                    sub_details.forEach(
+                        function (sub_details) {
+                            all_are_open =
+                                all_are_open &&
+                                sub_details.hasAttribute('open');
+                        }
+                    );
+                    sub_details.forEach(
+                        function (details)
+                        {
+                            if (all_are_open) {
+                                details.removeAttribute('open');
+                            } else {
+                                details.setAttribute('open', '');
+                            }
+                        }
+                    );
+                    return false;
+                }
+            };
+        });
+}
+
+handle_collapsible_click();
