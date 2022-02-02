@@ -400,16 +400,16 @@ code span[data-count="0"] {
 
 .percentage {
     display: inline-block;
-    width: 4em;
+    width: 8em;
     font-size: 90%;
     color: var(--color);
 }
 
 .stats {
     display: inline-block;
-    min-width: 4em;
-    font-size: 90%;
+    font-size: 70%;
     color: var(--color);
+    opacity: 0.5;
 }
 
 #files a {

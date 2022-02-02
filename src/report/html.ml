@@ -28,13 +28,94 @@ let percentage (visited, total) =
 let output_html_index title theme filename files =
   Util.info "Writing index file...";
 
-  let stats =
+  let add_stats (visited, total) (visited', total') =
+    (visited + visited', total + total') in
+
+  let sum_stats files =
     List.fold_left
-      (fun (visited, total) (_, _, (visited', total')) ->
-        (visited + visited', total + total'))
+      (fun stats (_, _, stats') -> add_stats stats stats')
       (0, 0)
       files
   in
+
+  (*
+    [subdirectory_of dir ~directory file] returns [Some subdirectory] if file is
+    a contained in the subdirectory [subdirectory] of [directory].
+
+    If [file] is not contained in [directory] or if [file] is
+    contained directly in [directory] then [None] is returned.
+   *)
+  let subdirectory_of ~directory file =
+    let len_file = String.length file in
+    let len_directory = String.length directory in
+    if len_file < len_directory then None
+    else if (String.sub file 0 len_directory <> directory) then None
+    else
+      let lfind_string_opt ~needle haystack =
+        let rec aux i haystack =
+          if String.(length haystack < length needle) then None
+          else if String.(sub haystack 0 (length needle)) = needle then Some i
+          else aux (i+1) String.(sub haystack 1 (length haystack - 1))
+        in aux 0 haystack
+      in
+      let file_rel = String.sub file len_directory (len_file - len_directory) in
+      match lfind_string_opt ~needle:Filename.dir_sep file_rel with
+      | Some i -> Some (String.sub file_rel 0 i)
+      | None -> None
+  in
+
+  (* [partition_files ~directory files] returns two lists:
+
+       - the first is a list of pairs [(sub_directory, sub_files)],
+         each corresponding to a [sub_directory] of [~directory] and the files
+         contained (recursively) there in
+       - the second is a list of files, each corresponding to a sub file of
+         [~directory]
+
+     This function assumes that [files] are sorted lexicographically.
+   *)
+  let partition_files ~directory files =
+    let is_child_of ~directory name =
+      let directory', _ = split_filename name in
+      directory' = directory
+    in
+    let rec aux sub_dirs =
+      function
+        [] -> (sub_dirs, [])
+      | (name, _, _) as file :: files ->
+         match subdirectory_of ~directory name with
+         | None ->
+            let (sub_files, _) =
+              Util.split
+                (fun (name, _, _) -> is_child_of ~directory name)
+                (file :: files)
+            in
+            (sub_dirs, sub_files)
+         | Some root ->
+            let sub_dir, files' =
+              Util.split
+                (fun (name, _, _) -> subdirectory_of ~directory name = Some root)
+                (file :: files) in
+            aux ((root, sub_dir) :: sub_dirs) files'
+    in aux [] files
+  in
+
+  let collate files =
+    let rec collate_aux directory files =
+      let (sub_dirs, sub_files) = partition_files ~directory files in
+      let (dir_lines, dir_stats) =
+        List.fold_left
+          (fun (lines, stats) (sub_dir, files)  ->
+            let directory = directory ^ sub_dir ^ "/" in
+            let (sub_dir_lines, sub_dir_stats) = collate_aux directory files in
+            let dir_line = (directory, None, sub_dir_stats) in
+            (lines @ sub_dir_lines @ [dir_line], add_stats stats sub_dir_stats))
+          ([], (0, 0)) sub_dirs in
+      (dir_lines @ sub_files, add_stats dir_stats (sum_stats sub_files))
+    in
+    collate_aux ""
+      (List.map (fun (name, html_file, stats) ->
+           (name, Some html_file, stats)) files) in
 
   let channel =
     try open_out filename
@@ -43,6 +124,8 @@ let output_html_index title theme filename files =
   in
   try
     let write format = Printf.fprintf channel format in
+
+    let (files, stats) = collate files in
 
     let overall_coverage =
       Printf.sprintf "%.02f%%" (floor ((percentage stats) *. 100.) /. 100.) in
@@ -67,33 +150,45 @@ let output_html_index title theme filename files =
       title
       overall_coverage;
 
-    files |> List.iter begin fun (name, html_file, ((visited, total) as stats)) ->
-      let dirname, basename = split_filename name in
-      let relative_html_file =
-        if Filename.is_relative html_file then
-          html_file
-        else
-          let prefix_length = String.length Filename.dir_sep in
-          String.sub
-            html_file prefix_length (String.length html_file - prefix_length)
-      in
+    files |> List.iter begin fun (name, html_file_opt, ((visited, total) as stats)) ->
       let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
       write {|      <div>
         <span class="meter">
           <span class="covered" style="width: %s%%"></span>
         </span>
-        <span class="percentage">%s%%</span>
-        <span class="stats">%d/%d</span>
-        <a href="%s">
-          <span class="dirname">%s</span>%s
-        </a>
-      </div>
+        <span class="percentage">%s%% <span class="stats">(%d/%d)</span></span>
 |}
         percentage
         percentage
-        visited total
-        relative_html_file
-        dirname basename;
+        visited total;
+      (match html_file_opt with
+      | Some html_file ->
+         let dirname, basename = split_filename name in
+         let relative_html_file =
+           if Filename.is_relative html_file then
+             html_file
+           else
+             let prefix_length = String.length Filename.dir_sep in
+             String.sub
+               html_file prefix_length (String.length html_file - prefix_length)
+         in
+         write {|
+        <a href="%s">
+          <span class="dirname">%s</span>%s
+        </a>
+|}
+           relative_html_file
+           dirname basename;
+      | None ->
+         write {|
+          <span class="dirname">%s</span>
+|}
+           name;
+         );
+      write {|
+      </div>
+|};
+
     end;
 
     write {|    </div>
