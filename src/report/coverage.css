@@ -398,9 +398,37 @@ code span[data-count="0"] {
     border-right: 1px solid var(--meter-separator-color);
 }
 
+.file, .directory {
+    display: flex;
+}
+
+summary {
+    cursor: pointer;
+    display: flex;
+}
+
+.summary-indicator {
+    display: inline-block;
+    width: 1em;
+}
+
+details > summary > .summary-indicator {
+    text-align: center;
+    font-weight: bold;
+}
+
+details > summary > .summary-indicator::before {
+    content: "+";
+}
+
+details[open] > summary > .summary-indicator::before {
+    content: "-";
+}
+
 .percentage {
     display: inline-block;
     width: 8em;
+    margin-left: 0.5em;
     font-size: 90%;
     color: var(--color);
 }

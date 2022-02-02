@@ -25,6 +25,12 @@ let percentage (visited, total) =
   else
     100. *. (float_of_int visited) /. (float_of_int total)
 
+type coverage_file = (string * string * (int * int))
+
+type coverage_file_struct =
+  | File of coverage_file
+  | Directory of (string * coverage_file_struct list * (int * int))
+
 let output_html_index title theme filename files =
   Util.info "Writing index file...";
 
@@ -100,22 +106,27 @@ let output_html_index title theme filename files =
     in aux [] files
   in
 
-  let collate files =
-    let rec collate_aux directory files =
+  let collate : coverage_file list -> coverage_file_struct list * (int * int) =
+    fun files ->
+    let rec collate_aux :
+              string -> coverage_file list ->
+              (coverage_file_struct list * (int * int)) =
+      fun directory files ->
       let (sub_dirs, sub_files) = partition_files ~directory files in
       let (dir_lines, dir_stats) =
         List.fold_left
           (fun (lines, stats) (sub_dir, files)  ->
             let directory = directory ^ sub_dir ^ "/" in
             let (sub_dir_lines, sub_dir_stats) = collate_aux directory files in
-            let dir_line = (directory, None, sub_dir_stats) in
-            (lines @ sub_dir_lines @ [dir_line], add_stats stats sub_dir_stats))
+            let sub_dir_struct = Directory (directory, sub_dir_lines, sub_dir_stats) in
+            (lines @ [sub_dir_struct], add_stats stats sub_dir_stats))
           ([], (0, 0)) sub_dirs in
-      (dir_lines @ sub_files, add_stats dir_stats (sum_stats sub_files))
+      let sub_files_struct = List.map (fun file -> File file) sub_files in
+      let dir_stats = add_stats dir_stats (sum_stats sub_files) in
+      (dir_lines @ sub_files_struct, dir_stats)
     in
-    collate_aux ""
-      (List.map (fun (name, html_file, stats) ->
-           (name, Some html_file, stats)) files) in
+    collate_aux "" files
+  in
 
   let channel =
     try open_out filename
@@ -150,10 +161,10 @@ let output_html_index title theme filename files =
       title
       overall_coverage;
 
-    files |> List.iter begin fun (name, html_file_opt, ((visited, total) as stats)) ->
-      let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
-      write {|      <div>
-        <span class="meter">
+    let rec print_line =
+      let write_meter ((visited, total) as stats) =
+        let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
+      write {|        <span class="meter">
           <span class="covered" style="width: %s%%"></span>
         </span>
         <span class="percentage">%s%% <span class="stats">(%d/%d)</span></span>
@@ -161,8 +172,13 @@ let output_html_index title theme filename files =
         percentage
         percentage
         visited total;
-      (match html_file_opt with
-      | Some html_file ->
+      in
+      function
+      | File (name, html_file, stats) ->
+         write {|      <div class="file">
+<span class="summary-indicator"></span>
+|};
+         write_meter stats ;
          let dirname, basename = split_filename name in
          let relative_html_file =
            if Filename.is_relative html_file then
@@ -179,18 +195,29 @@ let output_html_index title theme filename files =
 |}
            relative_html_file
            dirname basename;
-      | None ->
-         write {|
-          <span class="dirname">%s</span>
-|}
-           name;
-         );
-      write {|
-      </div>
+         write {|      </div>
 |};
 
-    end;
 
+      | Directory (name, files, stats) ->
+         write {|      <details open="">
+        <summary>
+        <span class="summary-indicator"></span>
+        <div class="directory">
+|};
+         write_meter stats ;
+         write {|
+          <span class="dirname">%s</span>
+        </div>
+        </summary>
+|}
+        name;
+      List.iter print_line files;
+      write {|     </details>
+|} ;
+    in
+
+    List.iter print_line files;
     write {|    </div>
   </body>
 </html>
