@@ -412,6 +412,11 @@ summary {
     width: 1em;
 }
 
+/* Adds indentation to the directory tree */
+details > details, details > .file {
+    margin-left: 1em;
+}
+
 details > summary > .summary-indicator {
     text-align: center;
     font-weight: bold;
