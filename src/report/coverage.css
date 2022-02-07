@@ -10,6 +10,7 @@
 
     --color: #000;
     --dirname-color: #bbb;
+    --stats-color: #aaa;
     --underline-color: #ddd;
     --visited-color: #eaffea;
     --visited-number-color: rgba(64, 192, 64, 0.2);
@@ -43,6 +44,7 @@
 
     --color: #bebebe;
     --dirname-color: #666;
+    --stats-color: #555;
     --underline-color: #444;
     --visited-color: #002800;
     --visited-number-color: #252;
@@ -410,6 +412,7 @@ summary {
 .summary-indicator {
     display: inline-block;
     width: 1em;
+    color: var(--color);
 }
 
 /* Adds indentation to the directory tree */
@@ -432,8 +435,8 @@ details[open] > summary > .summary-indicator::before {
 
 .percentage {
     display: inline-block;
-    width: 8em;
-    margin-left: 0.5em;
+    min-width: 7.5em;
+    margin: 0 0.5em;
     font-size: 90%;
     color: var(--color);
 }
@@ -441,8 +444,7 @@ details[open] > summary > .summary-indicator::before {
 .stats {
     display: inline-block;
     font-size: 70%;
-    color: var(--color);
-    opacity: 0.5;
+    color: var(--stats-color);
 }
 
 #files a {
