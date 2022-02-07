@@ -115,20 +115,20 @@ let dump_counters_exn =
 let dump () =
   match Sys.backend_type with
   | Sys.Other "js_of_ocaml" ->
-    (* The dump function is a no-op when running a js_of_ocaml-compiled
-       binary, as the Unix file-manipulating functions will not be
-       present; instead, the user must explicitly call write_coverage_data
-       or get_coverage_data as appropriate. *)
+    (* The dump function is a no-op when running a js_of_ocaml-compiled binary,
+       as the Unix file-manipulating functions will not be present; instead, the
+       user must explicitly call write_coverage_data or get_coverage_data as
+       appropriate. *)
     ()
   | _ ->
     match file_channel () with
     | None -> ()
     | Some channel ->
-        (try
-          dump_counters_exn channel
-        with _ ->
-          verbose Unable_to_write_file);
-        close_out_noerr channel
+      (try
+        dump_counters_exn channel
+      with _ ->
+        verbose Unable_to_write_file);
+      close_out_noerr channel
 
 let sigterm_handler (_ : int) =
   bisect_file_written := true;
