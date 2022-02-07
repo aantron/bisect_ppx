@@ -398,7 +398,7 @@ code span[data-count="0"] {
     border-right: 1px solid var(--meter-separator-color);
 }
 
-.file, .directory {
+#files div {
     display: flex;
 }
 
@@ -413,7 +413,7 @@ summary {
 }
 
 /* Adds indentation to the directory tree */
-details > details, details > .file {
+details > details, details > div {
     margin-left: 1em;
 }
 
