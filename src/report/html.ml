@@ -164,14 +164,14 @@ let output_html_index ~tree title theme filename files =
     let rec print_line ~tree =
       let write_meter ((visited, total) as stats) =
         let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
-      write {|        <span class="meter">
+        write {|        <span class="meter">
           <span class="covered" style="width: %s%%"></span>
         </span>
-        <span class="percentage">%s%% <span class="stats">(%d/%d)</span></span>
+        <span class="percentage">%s%% <span class="stats">(%#d / %#d)</span></span>
 |}
-        percentage
-        percentage
-        visited total;
+          percentage
+          percentage
+          visited total;
       in
       function
       | File (name, html_file, stats) ->
