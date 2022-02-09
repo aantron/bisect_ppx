@@ -223,8 +223,7 @@ let output_html_index ~tree title theme filename files =
     write {|    </div>
 |};
     if tree then
-      write {|
-    <script src="coverage.js"></script>
+      write {|    <script src="coverage.js"></script>
 |};
     write {|  </body>
 </html>
