@@ -25,11 +25,11 @@ let percentage (visited, total) =
   else
     100. *. (float_of_int visited) /. (float_of_int total)
 
-type coverage_file = (string * string * (int * int))
+type index_file = (string * string * (int * int))
 
-type coverage_file_struct =
-  | File of coverage_file
-  | Directory of (string * coverage_file_struct list * (int * int))
+type index_element =
+  | File of index_file
+  | Directory of (string * index_element list * (int * int))
 
 let output_html_index ~tree title theme filename files =
   Util.info "Writing index file...";
@@ -58,11 +58,11 @@ let output_html_index ~tree title theme filename files =
     else if (String.sub file 0 len_directory <> directory) then None
     else
       let lfind_string_opt ~needle haystack =
-        let rec aux i haystack =
-          if String.(length haystack < length needle) then None
-          else if String.(sub haystack 0 (length needle)) = needle then Some i
-          else aux (i+1) String.(sub haystack 1 (length haystack - 1))
-        in aux 0 haystack
+        let rec aux i =
+          if String.(length haystack - i < length needle) then None
+          else if String.(sub haystack i (length needle)) = needle then Some i
+          else aux (i+1)
+        in aux 0
       in
       let file_rel = String.sub file len_directory (len_file - len_directory) in
       match lfind_string_opt ~needle:Filename.dir_sep file_rel with
@@ -73,15 +73,15 @@ let output_html_index ~tree title theme filename files =
   (* [partition_files ~directory files] returns two lists:
 
        - the first is a list of pairs [(sub_directory, sub_files)],
-         each corresponding to a [sub_directory] of [~directory] and the files
-         contained (recursively) there in
-       - the second is a list of files, each corresponding to a sub file of
+         each corresponding to a [sub_directory] of [~directory] and the [sub_files]
+         contained (recursively) therein
+       - the second is a list of files, corresponding to the set of immediate sub-files of
          [~directory]
 
      This function assumes that [files] are sorted lexicographically.
    *)
   let partition_files ~directory files =
-    let is_child_of ~directory name =
+    let immediate_child_of ~directory name =
       let directory', _ = split_filename name in
       directory' = directory
     in
@@ -93,7 +93,7 @@ let output_html_index ~tree title theme filename files =
          | None ->
             let (sub_files, _) =
               Util.split
-                (fun (name, _, _) -> is_child_of ~directory name)
+                (fun (name, _, _) -> immediate_child_of ~directory name)
                 (file :: files)
             in
             (sub_dirs, sub_files)
@@ -106,24 +106,24 @@ let output_html_index ~tree title theme filename files =
     in aux [] files
   in
 
-  let collate : coverage_file list -> coverage_file_struct list * (int * int) =
+  let collate : index_file list -> index_element list * (int * int) =
     fun files ->
     let rec collate_aux :
-              string -> coverage_file list ->
-              (coverage_file_struct list * (int * int)) =
+              string -> index_file list ->
+              (index_element list * (int * int)) =
       fun directory files ->
       let (sub_dirs, sub_files) = partition_files ~directory files in
-      let (dir_lines, dir_stats) =
+      let (dir_elements, dir_stats) =
         List.fold_left
           (fun (lines, stats) (sub_dir, files)  ->
             let directory = directory ^ sub_dir ^ "/" in
-            let (sub_dir_lines, sub_dir_stats) = collate_aux directory files in
-            let sub_dir_struct = Directory (directory, sub_dir_lines, sub_dir_stats) in
-            (lines @ [sub_dir_struct], add_stats stats sub_dir_stats))
+            let (sub_dir_elements, sub_dir_stats) = collate_aux directory files in
+            let sub_dir_element = Directory (directory, sub_dir_elements, sub_dir_stats) in
+            (sub_dir_element :: lines, add_stats stats sub_dir_stats))
           ([], (0, 0)) sub_dirs in
-      let sub_files_struct = List.map (fun file -> File file) sub_files in
+      let sub_files_element = List.map (fun file -> File file) sub_files in
       let dir_stats = add_stats dir_stats (sum_stats sub_files) in
-      (dir_lines @ sub_files_struct, dir_stats)
+      ((List.rev dir_elements) @ sub_files_element, dir_stats)
     in
     collate_aux "" files
   in
@@ -193,13 +193,10 @@ let output_html_index ~tree title theme filename files =
          write {|        <a href="%s">
           <span class="dirname">%s</span>%s
         </a>
+      </div>
 |}
            relative_html_file
            dirname basename;
-         write {|      </div>
-|};
-
-
       | Directory (name, files, stats) when tree ->
          write {|      <details open="">
         <summary>
@@ -211,11 +208,12 @@ let output_html_index ~tree title theme filename files =
         </div>
         </summary>
 |}
-        name;
-      List.iter (print_line ~tree) files;
-      write {|      </details>
+           name;
+         List.iter (print_line ~tree) files;
+         write {|      </details>
 |} ;
-      | Directory (_, files, _) -> List.iter (print_line ~tree) files;
+      | Directory (_, files, _) ->
+         List.iter (print_line ~tree) files;
     in
 
     List.iter (print_line ~tree) files;
