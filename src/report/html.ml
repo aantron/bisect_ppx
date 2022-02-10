@@ -167,7 +167,7 @@ let output_html_index ~tree title theme filename files =
         write {|        <span class="meter">
           <span class="covered" style="width: %s%%"></span>
         </span>
-        <span class="percentage">%s%% <span class="stats">(%#d / %#d)</span></span>
+        <span class="percentage">%s%% <span class="stats">(%d / %d)</span></span>
 |}
           percentage
           percentage
