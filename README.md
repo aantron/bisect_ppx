@@ -458,6 +458,7 @@ A small sample of projects using Bisect_ppx:
   - [ctypes][ctypes]
 
 - Libraries
+  - [Irmin](https://github.com/mirage/irmin) &nbsp; ([report](https://app.codecov.io/gh/mirage/irmin))
   - [Markup.ml][markupml] &nbsp; ([report][markupml-coveralls])
   - [Lambda Soup][soup] &nbsp; ([report](https://coveralls.io/github/aantron/lambdasoup))
   - [Trie](https://github.com/brendanlong/ocaml-trie) &nbsp; ([report](https://coveralls.io/github/brendanlong/ocaml-trie?branch=master))
@@ -466,12 +467,12 @@ A small sample of projects using Bisect_ppx:
 
 - Applications
 
+  - [Tezos](https://gitlab.com/tezos/tezos)
   - [XAPI](https://xenproject.org/developers/teams/xen-api/) &nbsp; ([1](https://coveralls.io/github/xapi-project/xen-api?branch=master), [2](https://coveralls.io/github/xapi-project/nbd), [3](https://coveralls.io/github/xapi-project/xcp-idl), [4](https://coveralls.io/github/xapi-project/rrd-transport?branch=master), [5](https://github.com/xapi-project/xenopsd))
   - [Scilla](https://github.com/Zilliqa/scilla#readme) &nbsp; ([report](https://coveralls.io/github/Zilliqa/scilla?branch=master))
   - [Coda](https://github.com/CodaProtocol/coda)
   - [snarky](https://github.com/o1-labs/snarky)
   - [comby](https://github.com/comby-tools/comby) &nbsp; ([report](https://coveralls.io/github/comby-tools/comby?branch=master))
-  - [ocaml-irc-client][ocaml-irc-client] &nbsp; ([report][irc-coveralls])
 
 [lwt]: https://github.com/ocsigen/lwt
 [odoc]: https://github.com/ocaml/odoc
