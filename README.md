@@ -496,18 +496,15 @@ A small sample of projects using Bisect_ppx:
 Bug reports and pull requests are warmly welcome. Bisect_ppx is developed on
 GitHub, so please [open an issue][issues].
 
-Bisect_ppx is developed mainly using opam. To get the latest development
-version, run
-
-```
-opam source --dev-repo --pin bisect_ppx
-```
-
-You will now have a `bisect_ppx` subdirectory to work in. Try these `Makefile`
-targets:
+After cloning the repo, try these `Makefile` targets:
 
 - `make test` for unit tests.
 - `make usage` for build system integration tests, except ReScript.
 - `make -C test/js full-test` for ReScript. This requires npm and esy.
+
+If you'd like to build an npm package, run `npm pack`. You can install the
+resulting `.tgz` file in another project with `npm install`. This requires esy,
+as the Bisect binaries will not be pre-built. The npm package will use esy to
+build them automatically.
 
 [issues]: https://github.com/aantron/bisect_ppx/issues
