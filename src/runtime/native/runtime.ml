@@ -37,7 +37,7 @@ let env_to_fname env default = try Sys.getenv env with Not_found -> !default
 
 let env_to_boolean env default =
   try
-    match (String.uppercase [@ocaml.warning "-3"]) (Sys.getenv env) with
+    match String.uppercase_ascii (Sys.getenv env) with
     | "YES" -> true
     | "NO" -> false
     | _ -> default
@@ -46,7 +46,7 @@ let env_to_boolean env default =
 let verbose =
   lazy begin
     let fname = env_to_fname "BISECT_SILENT" default_bisect_silent in
-    match (String.uppercase [@ocaml.warning "-3"]) fname with
+    match String.uppercase_ascii fname with
     | "YES" | "ON" -> fun _ -> ()
     | "ERR"        -> fun msg -> prerr_endline (string_of_message msg)
     | _uc_fname    ->
