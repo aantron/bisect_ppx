@@ -490,10 +490,13 @@ struct
         |> List.map (fun (location_trace, p'') ->
           (location_trace, Pat.alias ~loc ~attrs p'' x))
 
-      | Ppat_construct (c, Some p') ->
+      | Ppat_construct (c, Some ([], p')) ->
         recur ~enclosing_loc p'
         |> List.map (fun (location_trace, p'') ->
           (location_trace, Pat.construct ~loc ~attrs c (Some p'')))
+
+      | Ppat_construct (_, Some (_ :: _, _)) ->
+        Location.raise_errorf ~loc "bisect_ppx: named existentials aren't supported"
 
       | Ppat_variant (c, Some p') ->
         recur ~enclosing_loc p'
@@ -708,10 +711,13 @@ struct
       List.map (fun (_, p') -> bound_variables p') fields
       |> List.flatten
 
-    | Ppat_construct (_, Some p') | Ppat_variant (_, Some p')
+    | Ppat_construct (_, Some ([], p')) | Ppat_variant (_, Some p')
     | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
     | Ppat_open (_, p') ->
       bound_variables p'
+
+    | Ppat_construct (_, Some ({loc; _} :: _, _)) ->
+      Location.raise_errorf ~loc "bisect_ppx: named existentials aren't supported"
 
     | Ppat_or (p_1, _) ->
       bound_variables p_1 (* Should be unreachable. *)
@@ -725,10 +731,13 @@ struct
     | Ppat_type _ | Ppat_variant _ ->
       true
 
-    | Ppat_alias (p', _) | Ppat_construct (_, Some p')
+    | Ppat_alias (p', _) | Ppat_construct (_, Some ([], p'))
     | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
     | Ppat_open (_, p') ->
       has_polymorphic_variant p'
+
+    | Ppat_construct (_, Some ({loc; _} :: _, _)) ->
+      Location.raise_errorf ~loc "bisect_ppx: named existentials aren't supported"
 
     | Ppat_tuple ps | Ppat_array ps ->
       List.exists has_polymorphic_variant ps
