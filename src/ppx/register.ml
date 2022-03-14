@@ -14,7 +14,7 @@ let enabled () =
     match Sys.getenv "BISECT_ENABLE" with
     | exception Not_found ->
       `Disabled
-    | s when (String.uppercase [@ocaml.warning "-3"]) s = "YES" ->
+    | s when String.uppercase_ascii s = "YES" ->
       `Enabled
     | _ ->
       `Disabled
