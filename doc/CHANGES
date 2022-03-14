@@ -1,10 +1,17 @@
-Version 2.8.0 (2022-07-10):
+Version 2.8.1 (2022-03-14):
+---------------------------
+
+  Bugs fixed
+
+  - OCaml 5.00 compatibility (#399, @kit-ty-kate).
+
+Version 2.8.0 (2022-02-10):
 ---------------------------
 
   Additions
 
   - HTML: collapsible tree index for large projects, activated by --tree option
-    (Arvid Jakobsson, #396).
+    (#396, Arvid Jakobsson).
 
   Bugs fixed
 
