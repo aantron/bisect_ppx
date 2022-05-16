@@ -85,25 +85,25 @@ let output_html_index ~tree title theme filename files =
       let directory', _ = split_filename name in
       directory' = directory
     in
-    let rec aux sub_dirs =
+    let rec aux sub_dirs sub_files =
       function
-        [] -> (sub_dirs, [])
+        [] -> (List.rev sub_dirs, List.concat (List.rev sub_files))
       | (name, _, _) as file :: files ->
          match subdirectory_of ~directory name with
          | None ->
-            let (sub_files, _) =
+            let (sub_files_here, files') =
               Util.split
                 (fun (name, _, _) -> immediate_child_of ~directory name)
                 (file :: files)
             in
-            (sub_dirs, sub_files)
+            aux sub_dirs (sub_files_here :: sub_files) files'
          | Some root ->
             let sub_dir, files' =
               Util.split
                 (fun (name, _, _) -> subdirectory_of ~directory name = Some root)
                 (file :: files) in
-            aux ((root, sub_dir) :: sub_dirs) files'
-    in aux [] files
+            aux ((root, sub_dir) :: sub_dirs) sub_files files'
+    in aux [] [] files
   in
 
   let collate : index_file list -> index_element list * (int * int) =
