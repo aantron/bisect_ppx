@@ -30,13 +30,14 @@
           buildPhase = "make test";
           installPhase = "mkdir -p $out";
         };
-        rescript = pkgs.stdenv.mkDerivation {
-          src = ./.;
-          name = "bisect_ppx - test rescript";
-          buildInputs = buildInputs;
-          buildPhase = "make build && make -C test/js full-test";
-          installPhase = "mkdir -p $out";
-        };
+        # This requires internet access
+       # rescript = pkgs.stdenv.mkDerivation {
+       #   src = ./.;
+       #   name = "bisect_ppx - test rescript";
+       #   buildInputs = buildInputs;
+       #   buildPhase = "make build && make -C test/js full-test";
+       #   installPhase = "mkdir -p $out";
+       # };
       };
     };
 }
