@@ -7,6 +7,7 @@
       pkgs = import nixpkgs { inherit system; };
       buildInputs = with pkgs; [
         git
+        glibc # Something to do with esy
         dune_2
         ocamlformat_0_16_0 # ci currently tests with ocamlformat 0.16
       ] ++ (with ocaml-ng.ocamlPackages_4_13;
@@ -14,6 +15,7 @@
             ocaml
             findlib # Just so that ocaml can discover the libraries given in the environment
             ppxlib cmdliner # dependencies of bisect_ppx
+            js_of_ocaml
           ]);
     in {
       devShells.${system}.default = pkgs.mkShell {
@@ -30,7 +32,7 @@
         };
         rescript = pkgs.stdenv.mkDerivation {
           src = ./.;
-          name = "bisect_ppx - try rescript";
+          name = "bisect_ppx - test rescript";
           buildInputs = buildInputs;
           buildPhase = "make build && make -C test/js full-test";
           installPhase = "mkdir -p $out";
