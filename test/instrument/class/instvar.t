@@ -25,6 +25,7 @@ Pexp_override traversed.
   >     val x = ()
   >     method foo = {< x = print_endline "foo" >}
   >   end
+  > EOF
   let _ =
     object
       val x = ()

@@ -138,7 +138,7 @@ From CircleCI to Coveralls.
       "service_job_id": "100",
       "service_pull_request": "10",
       "repo_token": "abc",
-      "git":{"head":{"id":"5689966cc697646c10975ff9355863bc12744ea0","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"master","remotes":{}},
+      "git":{"head":{"id":"5689966cc697646c10975ff9355863bc12744ea0","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"main","remotes":{}},
   
     "source_files": [
           {
@@ -213,7 +213,7 @@ From GitHub Actions to Coveralls.
       "service_name": "github",
       "service_job_id": "100",
       "repo_token": "abc",
-      "git":{"head":{"id":"5689966cc697646c10975ff9355863bc12744ea0","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"master","remotes":{}},
+      "git":{"head":{"id":"5689966cc697646c10975ff9355863bc12744ea0","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"main","remotes":{}},
   
     "source_files": [
           {

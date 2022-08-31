@@ -5,8 +5,13 @@
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
-      buildInputs = with pkgs; [ git dune_2 ocaml ocamlformat ] ++ (with ocamlPackages;
+      buildInputs = with pkgs; [
+        git
+        dune_2
+        ocamlformat_0_16_0 # ci currently tests with ocamlformat 0.16
+      ] ++ (with ocaml-ng.ocamlPackages_4_13;
           [
+            ocaml
             findlib # Just so that ocaml can discover the libraries given in the environment
             ppxlib cmdliner # dependencies of bisect_ppx
           ]);
@@ -17,15 +22,18 @@
       };
       packages.${system} = {
         default = pkgs.stdenv.mkDerivation {
-          name = "Build and test";
+          name = "bisect_ppx - build and test";
+          src = ./.;
           buildInputs = buildInputs;
           buildPhase = "make test";
           installPhase = "mkdir -p $out";
         };
         rescript = pkgs.stdenv.mkDerivation {
-          name = "Try rescript";
+          src = ./.;
+          name = "bisect_ppx - try rescript";
           buildInputs = buildInputs;
-          buildPhase = "make test && make -C test/js full-test";
+          buildPhase = "make build && make -C test/js full-test";
+          installPhase = "mkdir -p $out";
         };
       };
     };
