@@ -3,7 +3,7 @@
     "ocaml": ">= 4.2.0",
     "@opam/cmdliner": "^1.0.0",
     "@opam/dune": "^2.7.0",
-    "@opam/ppxlib": ">= 0.21.0"
+    "@opam/ppxlib": "<= 0.25"
   },
   "esy": {
     "build": "dune build -p bisect_ppx",
