@@ -12,8 +12,8 @@ test :
 full-test : clean install test
 
 .PHONY : install
-install :
-	npm pack ../..
+install : package
+	npm pack ../../..
 	tar xf *.tgz
 	npm install
 	npm list || true
