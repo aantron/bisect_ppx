@@ -12,7 +12,7 @@ test :
 full-test : clean install test
 
 .PHONY : install
-install : package
+install :
 	npm pack ../../..
 	tar xf *.tgz
 	npm install
