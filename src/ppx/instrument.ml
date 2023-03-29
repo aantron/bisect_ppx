@@ -490,10 +490,11 @@ struct
         |> List.map (fun (location_trace, p'') ->
           (location_trace, Pat.alias ~loc ~attrs p'' x))
 
-      | Ppat_construct (c, Some (exnames, p')) ->
+      | Ppat_construct (c, Some (ts, p')) ->
         recur ~enclosing_loc p'
         |> List.map (fun (location_trace, p'') ->
-          (location_trace, Pat.mk  ~loc ~attrs Pat.(Ppat_construct (c, Some(exnames, p'')))))
+          (location_trace,
+          Pat.mk ~loc ~attrs Pat.(Ppat_construct (c, Some (ts, p'')))))
 
       | Ppat_variant (c, Some p') ->
         recur ~enclosing_loc p'
