@@ -490,10 +490,10 @@ struct
         |> List.map (fun (location_trace, p'') ->
           (location_trace, Pat.alias ~loc ~attrs p'' x))
 
-      | Ppat_construct (c, Some p') ->
+      | Ppat_construct (c, Some (exnames, p')) ->
         recur ~enclosing_loc p'
         |> List.map (fun (location_trace, p'') ->
-          (location_trace, Pat.construct ~loc ~attrs c (Some p'')))
+          (location_trace, Pat.mk  ~loc ~attrs Pat.(Ppat_construct (c, Some(exnames, p'')))))
 
       | Ppat_variant (c, Some p') ->
         recur ~enclosing_loc p'
@@ -708,7 +708,7 @@ struct
       List.map (fun (_, p') -> bound_variables p') fields
       |> List.flatten
 
-    | Ppat_construct (_, Some p') | Ppat_variant (_, Some p')
+    | Ppat_construct (_, Some (_, p')) | Ppat_variant (_, Some p')
     | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
     | Ppat_open (_, p') ->
       bound_variables p'
@@ -725,7 +725,7 @@ struct
     | Ppat_type _ | Ppat_variant _ ->
       true
 
-    | Ppat_alias (p', _) | Ppat_construct (_, Some p')
+    | Ppat_alias (p', _) | Ppat_construct (_, Some (_, p'))
     | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
     | Ppat_open (_, p') ->
       has_polymorphic_variant p'
