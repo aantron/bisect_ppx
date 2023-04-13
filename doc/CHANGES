@@ -1,3 +1,14 @@
+Version 2.8.2 (2023-04-13):
+---------------------------
+
+  Additions
+
+  - ppxlib 0.26.0 and 0.27.0 compatibility (#400, Sonja Heinze).
+
+  Bugs fixed
+
+  - Collation of subdirectories in HTML report (#401, Luke Maurer).
+
 Version 2.8.1 (2022-03-14):
 ---------------------------
 
