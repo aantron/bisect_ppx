@@ -21,7 +21,22 @@ let esy_source_dir =
   | exception Not_found -> []
   | directory -> [Filename.concat directory "default"]
 
-module Term = Cmdliner.Term
+(* Many of the values used from Cmdliner.Term are deprecated in favor of values
+   from Cmdliner.Cmd. However, Cmdliner.Cmd was introduced in Cmdliner 1.1.0,
+   which requires OCaml 4.08.0. Bisect_ppx still supports OCaml 4.04, so Bisect
+   cannot use this recent version of Cmdliner. The 4.04 constraint itself is
+   only due to ppxlib.
+
+   So, suppress the deprecation warnings. *)
+module Term =
+struct
+  include Cmdliner.Term
+
+  let eval_choice = Cmdliner.Term.eval_choice [@ocaml.warning "-3"]
+  let exit = Cmdliner.Term.exit [@ocaml.warning "-3"]
+  let info = Cmdliner.Term.info [@ocaml.warning "-3"]
+end
+
 module Arg = Cmdliner.Arg
 
 
