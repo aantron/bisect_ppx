@@ -46,6 +46,28 @@
           <span class="summary-indicator"></span>
           <div class="directory">
           <span class="meter">
+            <span class="covered" style="width: 50%"></span>
+          </span>
+          <span class="percentage">50% <span class="stats">(1 / 2)</span></span>
+          <span class="dirname">baz/</span>
+          </div>
+          </summary>
+        <div>
+          <span class="summary-indicator"></span>
+          <span class="meter">
+            <span class="covered" style="width: 50%"></span>
+          </span>
+          <span class="percentage">50% <span class="stats">(1 / 2)</span></span>
+          <a href="baz/baz.ml.html">
+            <span class="dirname">baz/</span>baz.ml
+          </a>
+        </div>
+        </details>
+        <details open="">
+          <summary>
+          <span class="summary-indicator"></span>
+          <div class="directory">
+          <span class="meter">
             <span class="covered" style="width: 83%"></span>
           </span>
           <span class="percentage">83% <span class="stats">(5 / 6)</span></span>
@@ -92,28 +114,6 @@
           <span class="percentage">100% <span class="stats">(2 / 2)</span></span>
           <a href="foo/foo.ml.html">
             <span class="dirname">foo/</span>foo.ml
-          </a>
-        </div>
-        </details>
-        <details open="">
-          <summary>
-          <span class="summary-indicator"></span>
-          <div class="directory">
-          <span class="meter">
-            <span class="covered" style="width: 50%"></span>
-          </span>
-          <span class="percentage">50% <span class="stats">(1 / 2)</span></span>
-          <span class="dirname">baz/</span>
-          </div>
-          </summary>
-        <div>
-          <span class="summary-indicator"></span>
-          <span class="meter">
-            <span class="covered" style="width: 50%"></span>
-          </span>
-          <span class="percentage">50% <span class="stats">(1 / 2)</span></span>
-          <a href="baz/baz.ml.html">
-            <span class="dirname">baz/</span>baz.ml
           </a>
         </div>
         </details>
