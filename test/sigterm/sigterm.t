@@ -29,5 +29,5 @@ data when terminating normally:
   $ dune exec ./normal.exe
   $ bisect-ppx-report summary --verbose
   Info: found *.coverage files in './'
-  Coverage: 0/0 (0.00%)
+  Coverage: 0/0 (100.00%)
   $ rm bisect*.coverage
