@@ -16,6 +16,7 @@ scratch/
 # Editor files.
 *~
 .vscode/
+*.swp
 
 # Pollution from the usage tests.
 *.coverage
