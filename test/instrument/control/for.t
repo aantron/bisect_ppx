@@ -42,19 +42,19 @@ Recursive instrumentation of subexpressions.
     for
       _index =
         for _i = 0 to 1 do
-          ___bisect_visit___ 3;
+          ___bisect_visit___ 0;
           ()
         done;
         0
       to for _i = 0 to 1 do
-           ___bisect_visit___ 2;
+           ___bisect_visit___ 1;
            ()
          done;
          1
     do
-      ___bisect_visit___ 1;
+      ___bisect_visit___ 3;
       for _i = 0 to 1 do
-        ___bisect_visit___ 0;
+        ___bisect_visit___ 2;
         ()
       done
     done
@@ -70,9 +70,9 @@ Subexpressions not in tail position.
   > EOF
   let _ =
     for
-      _index = ___bisect_post_visit___ 3 (int_of_string "0")
-      to ___bisect_post_visit___ 2 (int_of_string "1")
+      _index = ___bisect_post_visit___ 0 (int_of_string "0")
+      to ___bisect_post_visit___ 1 (int_of_string "1")
     do
-      ___bisect_visit___ 1;
-      ___bisect_post_visit___ 0 (print_endline "foo")
+      ___bisect_visit___ 3;
+      ___bisect_post_visit___ 2 (print_endline "foo")
     done

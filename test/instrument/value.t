@@ -23,8 +23,8 @@ No instrumentation is inserted into expressions that are (syntactic) values.
     x
   
   let _ =
-    let _x = ___bisect_post_visit___ 1 (print_endline "foo") in
-    ___bisect_post_visit___ 0 (print_endline "bar")
+    let _x = ___bisect_post_visit___ 0 (print_endline "foo") in
+    ___bisect_post_visit___ 1 (print_endline "bar")
   
   let _ =
    fun () ->
@@ -212,9 +212,9 @@ No instrumentation is inserted into expressions that are (syntactic) values.
   
   let _ =
     let module Foo = struct
-      let () = ___bisect_post_visit___ 1 (print_endline "foo")
+      let () = ___bisect_post_visit___ 0 (print_endline "foo")
     end in
-    ___bisect_post_visit___ 0 (print_endline "bar")
+    ___bisect_post_visit___ 1 (print_endline "bar")
   
   let _ =
    fun () ->

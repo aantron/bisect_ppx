@@ -27,16 +27,16 @@ Recursive instrumentation of subexpressions.
   >   ((bool_of_string "true") & (bool_of_string "false")) [@ocaml.warning "-3"]
   > EOF
   let _ =
-    ___bisect_post_visit___ 2 (bool_of_string "true")
+    ___bisect_post_visit___ 0 (bool_of_string "true")
     &&
-    (___bisect_visit___ 1;
-     ___bisect_post_visit___ 0 (bool_of_string "false"))
+    (___bisect_visit___ 2;
+     ___bisect_post_visit___ 1 (bool_of_string "false"))
   
   let _ =
-    (___bisect_post_visit___ 5 (bool_of_string "true")
+    (___bisect_post_visit___ 3 (bool_of_string "true")
     &
-    (___bisect_visit___ 4;
-     ___bisect_post_visit___ 3 (bool_of_string "false")))
+    (___bisect_visit___ 5;
+     ___bisect_post_visit___ 4 (bool_of_string "false")))
     [@ocaml.warning "-3"]
 
 
@@ -58,7 +58,7 @@ The second subexpression is not post-instrumented if it is in tail position.
   > EOF
   let f _ =
     ___bisect_visit___ 2;
-    ___bisect_post_visit___ 1 (bool_of_string "true")
+    ___bisect_post_visit___ 0 (bool_of_string "true")
     &&
-    (___bisect_visit___ 0;
+    (___bisect_visit___ 1;
      bool_of_string "false")

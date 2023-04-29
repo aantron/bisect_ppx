@@ -23,14 +23,14 @@ Recursive instrumentation of subexpressions.
   let _ =
     while
       while true do
-        ___bisect_visit___ 2;
+        ___bisect_visit___ 0;
         ()
       done;
       true
     do
-      ___bisect_visit___ 1;
+      ___bisect_visit___ 2;
       while true do
-        ___bisect_visit___ 0;
+        ___bisect_visit___ 1;
         ()
       done
     done
@@ -42,7 +42,7 @@ Subexpressions not in tail position.
   > let _ = while bool_of_string "true" do print_endline "foo" done
   > EOF
   let _ =
-    while ___bisect_post_visit___ 2 (bool_of_string "true") do
-      ___bisect_visit___ 1;
-      ___bisect_post_visit___ 0 (print_endline "foo")
+    while ___bisect_post_visit___ 0 (bool_of_string "true") do
+      ___bisect_visit___ 2;
+      ___bisect_post_visit___ 1 (print_endline "foo")
     done
