@@ -5,7 +5,7 @@
 
 
 class instrumenter : object
-   inherit Ppxlib.Ast_traverse.map_with_expansion_context
+   inherit Ppxlib.Ast_traverse.map_with_expansion_context_and_errors
 
    method transform_impl_file:
       Ppxlib.Expansion_context.Base.t ->

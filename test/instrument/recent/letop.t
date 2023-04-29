@@ -23,9 +23,9 @@ Subexpressions instrumented recursively.
     x
   
   let _ =
-    let* () = ___bisect_post_visit___ 7 (print_endline "foo")
-    and* () = ___bisect_post_visit___ 6 (print_endline "bar") in
-    ___bisect_visit___ 5;
-    let* () = ___bisect_post_visit___ 4 (print_endline "baz") in
-    ___bisect_visit___ 3;
+    let* () = ___bisect_post_visit___ 3 (print_endline "foo")
+    and* () = ___bisect_post_visit___ 4 (print_endline "bar") in
+    ___bisect_visit___ 7;
+    let* () = ___bisect_post_visit___ 5 (print_endline "baz") in
+    ___bisect_visit___ 6;
     return ()

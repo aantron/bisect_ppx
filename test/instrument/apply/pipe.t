@@ -14,8 +14,8 @@ Subexpressions instrumented recursively.
   > EOF
   let _ =
     ___bisect_post_visit___ 2
-      ( ___bisect_post_visit___ 1 (String.trim "") |> fun s ->
-        ___bisect_visit___ 0;
+      ( ___bisect_post_visit___ 0 (String.trim "") |> fun s ->
+        ___bisect_visit___ 1;
         String.trim s )
 
 

@@ -65,8 +65,8 @@ Recursive instrumentation of subexpressions.
     if ___bisect_post_visit___ 3 (bool_of_string "true") then (
       ___bisect_visit___ 0;
       true)
-    else if ___bisect_post_visit___ 2 (bool_of_string "false") then (
-      ___bisect_visit___ 1;
+    else if ___bisect_post_visit___ 1 (bool_of_string "false") then (
+      ___bisect_visit___ 2;
       true)
     else false
   
@@ -74,8 +74,8 @@ Recursive instrumentation of subexpressions.
     if ___bisect_post_visit___ 7 (bool_of_string "true") then (
       ___bisect_visit___ 4;
       true)
-    else if ___bisect_post_visit___ 6 (bool_of_string "false") then (
-      ___bisect_visit___ 5;
+    else if ___bisect_post_visit___ 5 (bool_of_string "false") then (
+      ___bisect_visit___ 6;
       true)
     else false
 

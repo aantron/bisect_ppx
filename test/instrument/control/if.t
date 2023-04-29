@@ -24,26 +24,26 @@ Recursive instrumentation of subexpressions.
   let _ =
     if
       if true then (
-        ___bisect_visit___ 7;
-        true)
-      else (
-        ___bisect_visit___ 6;
-        false)
-    then (
-      ___bisect_visit___ 5;
-      if true then (
-        ___bisect_visit___ 4;
-        true)
-      else (
-        ___bisect_visit___ 3;
-        false))
-    else (
-      ___bisect_visit___ 2;
-      if true then (
         ___bisect_visit___ 1;
         true)
       else (
         ___bisect_visit___ 0;
+        false)
+    then (
+      ___bisect_visit___ 7;
+      if true then (
+        ___bisect_visit___ 3;
+        true)
+      else (
+        ___bisect_visit___ 2;
+        false))
+    else (
+      ___bisect_visit___ 6;
+      if true then (
+        ___bisect_visit___ 5;
+        true)
+      else (
+        ___bisect_visit___ 4;
         false))
 
 
@@ -83,10 +83,10 @@ tail position iff the whole if-expression is in tail position.
   let _ =
     if bool_of_string "true" then (
       ___bisect_visit___ 3;
-      ___bisect_post_visit___ 2 (print_endline "foo"))
+      ___bisect_post_visit___ 0 (print_endline "foo"))
     else (
-      ___bisect_visit___ 1;
-      ___bisect_post_visit___ 0 (print_endline "bar"))
+      ___bisect_visit___ 2;
+      ___bisect_post_visit___ 1 (print_endline "bar"))
   
   let _ =
    fun () ->
