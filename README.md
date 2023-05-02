@@ -450,6 +450,7 @@ A small sample of projects using Bisect_ppx:
 <!-- Sort OCaml and Reason first if Bisect_ppx usage is merged. -->
 
 - Core tools
+  - [Dune][dune] &nbsp; ([report](https://coveralls.io/github/ocaml/dune))
   - [Lwt][lwt] &nbsp; ([report](https://coveralls.io/github/ocsigen/lwt))
   - [Odoc][odoc]
   - [ocamlformat][ocamlformat]
@@ -474,6 +475,7 @@ A small sample of projects using Bisect_ppx:
   - [snarky](https://github.com/o1-labs/snarky)
   - [comby](https://github.com/comby-tools/comby) &nbsp; ([report](https://coveralls.io/github/comby-tools/comby?branch=master))
 
+[dune]: https://github.com/ocaml/dune#readme
 [lwt]: https://github.com/ocsigen/lwt
 [odoc]: https://github.com/ocaml/odoc
 [ocaml]: https://github.com/ocaml/ocaml/pull/8874
