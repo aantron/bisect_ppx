@@ -854,27 +854,28 @@ struct
           if case_should_not_be_instrumented case then
             case::exception_cases
           else
-          let case =
-            match rotate_or_patterns_to_top loc p with
-            | [] ->
-              insert_instrumentation points
-                case
-                (fun e -> instrument_expr points e)
-            | [(location_trace, _)] ->
-              insert_instrumentation points
-                case
-                (instrumentation_for_location_trace points location_trace)
-            | rotated_cases ->
-              let nested_match =
-                rotated_cases
-                |> List.map (fun (trace, p) -> trace, drop_exception_patterns p)
-                |> generate_nested_match points loc
-              in
-              insert_instrumentation points
-                {case with pc_lhs = alias_exceptions loc p}
-                (fun e -> [%expr [%e nested_match]; [%e e]])
-          in
-          case::exception_cases
+            let case =
+              match rotate_or_patterns_to_top loc p with
+              | [] ->
+                insert_instrumentation points
+                  case
+                  (fun e -> instrument_expr points e)
+              | [(location_trace, _)] ->
+                insert_instrumentation points
+                  case
+                  (instrumentation_for_location_trace points location_trace)
+              | rotated_cases ->
+                let nested_match =
+                  rotated_cases
+                  |> List.map (fun (trace, p) ->
+                    trace, drop_exception_patterns p)
+                  |> generate_nested_match points loc
+                in
+                insert_instrumentation points
+                  {case with pc_lhs = alias_exceptions loc p}
+                  (fun e -> [%expr [%e nested_match]; [%e e]])
+            in
+            case::exception_cases
       in
 
       value_cases, exception_cases, functions, need_binding, index + 1
