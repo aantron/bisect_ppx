@@ -80,3 +80,30 @@ Non-coverage attributes are preserved uninstrumented.
   let _ = () [@@foo print_endline "bar"]
   
   let _ = () [@foo print_endline "bar"]
+
+
+Or-pattern coverage is suppressed for cases with [@coverage off].
+
+  $ bash test.sh <<'EOF'
+  > let () =
+  >   match `A with
+  >   | `A | `B -> () [@coverage off]
+  >   | `C | `D -> ()
+  >   | exception Not_found | exception Exit -> () [@coverage off]
+  > EOF
+  let () =
+    match `A with
+    | (exception Not_found) | (exception Exit) -> () [@coverage off]
+    | `A | `B -> () [@coverage off]
+    | (`C | `D) as ___bisect_matched_value___ ->
+        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
+           ___bisect_matched_value___
+         with
+        | `C ->
+            ___bisect_visit___ 0;
+            ()
+        | `D ->
+            ___bisect_visit___ 1;
+            ()
+        | _ -> ());
+        ()

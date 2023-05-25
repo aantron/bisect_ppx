@@ -380,10 +380,12 @@ struct
 
       So, without further ado, here is the function that does all this magic: *)
 
-  let is_assert_false_or_refutation (case : Parsetree.case) =
+  let case_should_not_be_instrumented (case : Parsetree.case) =
     match case.pc_rhs with
     | [%expr assert false] -> true
     | {pexp_desc = Pexp_unreachable; _} -> true
+    | {pexp_attributes}
+      when Coverage_attributes.has_off_attribute pexp_attributes -> true
     | _ -> false
 
   let insert_instrumentation points (case : Parsetree.case) f =
@@ -810,7 +812,7 @@ struct
         | Some p ->
           let loc = p.ppat_loc in
           let case = {case with pc_lhs = p} in
-          if is_assert_false_or_refutation case then
+          if case_should_not_be_instrumented case then
             case::value_cases, need_binding
           else
             let case, need_binding =
@@ -849,6 +851,9 @@ struct
         | Some p ->
           let loc = p.Parsetree.ppat_loc in
           let case = {case with pc_lhs = p} in
+          if case_should_not_be_instrumented case then
+            case::exception_cases
+          else
           let case =
             match rotate_or_patterns_to_top loc p with
             | [] ->
