@@ -48,3 +48,21 @@ instrumented.
         | _ -> ());
         ()
     | `C | `D -> assert false
+
+
+assert false exception cases don't get instrumented.
+
+  $ bash ../test.sh <<'EOF'
+  > let _ =
+  >   match `A with
+  >   | `A -> ()
+  >   | exception Not_found -> assert false
+  >   | exception Invalid_argument _ | exception Exit -> assert false
+  > EOF
+  let _ =
+    match `A with
+    | exception Not_found -> assert false
+    | (exception Invalid_argument _) | (exception Exit) -> assert false
+    | `A ->
+        ___bisect_visit___ 0;
+        ()
