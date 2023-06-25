@@ -86,7 +86,11 @@ let list_coverage_files files_on_command_line coverage_search_paths =
   end;
 
   if all_coverage_files = [] then
-    Util.fatal "no *.coverage files found"
+    let line_1 = "no *.coverage files found"
+    and line_2 = "Hint: is the code under test linked into the test suite?"
+    and line_3 = "Hint: did the tests run?"
+    in
+    Util.fatal "%s" (String.concat "\n" [line_1; line_2; line_3])
   else
     all_coverage_files
 
