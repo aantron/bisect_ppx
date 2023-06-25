@@ -109,8 +109,12 @@ let file_channel () =
 let reset_counters =
   Common.reset_counters
 
-let dump_counters_exn =
-  Common.write_runtime_data
+let dump_counters_exn channel =
+  Common.coverage
+  |> Lazy.force
+  |> Common.write_coverage
+  |> output_string channel;
+  flush channel
 
 let dump () =
   match Sys.backend_type with

@@ -35,6 +35,9 @@ type coverage = (string, instrumented_file) Hashtbl.t
     for each of its source files. The runtime and reporter both index the
     statistics by source file name. *)
 
+val coverage : coverage Lazy.t
+(** The accumulated coverage statistics. *)
+
 val coverage_file_identifier : string
 (** A string written at the beginning of each [bisect*.coverage] files. Provides
     a sanity check for the reporter that it is reading a [bisect*.coverage]
@@ -65,12 +68,8 @@ val register_file :
 
 (** {1 [.coverage] output} *)
 
-val write_runtime_coverage : coverage -> out_channel -> unit
-(** Writes the [coverage] to the given output channel. *)
-
-val write_runtime_data : out_channel -> unit
-(** Writes the current accumulated coverage data (of type {!coverage}) to the
-    given output channel. *)
+val write_coverage : coverage -> string
+(** Converts the given coverage data to string. *)
 
 val runtime_data_to_string : unit -> string option
 (** Same as {!write_runtime_data}, but writes the output to a string instead.
