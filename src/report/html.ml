@@ -339,8 +339,9 @@ let output_for_source_file
     let lines, line_count =
       let rec read number acc =
         let start_ofs = pos_in in_channel in
-        try
-          let line = input_line in_channel in
+        match input_line in_channel with
+        | exception End_of_file -> List.rev acc, number - 1
+        | line ->
           let end_ofs = pos_in in_channel in
           let before, after = Util.split (fun (o, _) -> o < end_ofs) !pts in
           pts := after;
@@ -353,8 +354,6 @@ let output_for_source_file
               before
           in
           read (number + 1) ((number, line', visited, unvisited)::acc)
-
-        with End_of_file -> List.rev acc, number - 1
       in
       read 1 []
     in
