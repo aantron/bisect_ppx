@@ -62,6 +62,12 @@ let coverage : coverage Lazy.t =
   lazy (Hashtbl.create 17)
 
 let register_file ~filename ~points =
+  let filename =
+    if Filename.check_suffix filename ".re.ml" then
+      Filename.chop_suffix filename ".ml"
+    else
+      filename
+  in
   let counts = Array.make (Array.length points) 0 in
   let coverage = Lazy.force coverage in
   if not (Hashtbl.mem coverage filename) then
