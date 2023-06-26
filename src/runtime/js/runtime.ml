@@ -4,6 +4,48 @@
 
 
 
+(* Code based on Melange, inherited from BuckleScript:
+
+   https://github.com/melange-re/melange/blob/da421be55e755096403425ed3c260486deab61f3/jscomp/others/node_fs.ml *)
+module Node =
+struct
+  module Fs =
+  struct
+    external openSync :
+      string ->
+      ([ `Read [@as "r"]
+      | `Read_write [@as "r+"]
+      | `Read_write_sync [@as "rs+"]
+      | `Write [@as "w"]
+      | `Write_fail_if_exists [@as "wx"]
+      | `Write_read [@as "w+"]
+      | `Write_read_fail_if_exists [@as "wx+"]
+      | `Append [@as "a"]
+      | `Append_fail_if_exists [@as "ax"]
+      | `Append_read [@as "a+"]
+      | `Append_read_fail_if_exists [@as "ax+"] ]
+      [@string]) ->
+      unit = "openSync"
+      [@@module "fs"]
+
+    type encoding = [
+      | `hex
+      | `utf8
+      | `ascii
+      | `latin1
+      | `base64
+      | `ucs2
+      | `base64
+      | `binary
+      | `utf16le
+    ]
+
+    external writeFileSync : string -> string -> encoding -> unit =
+      "writeFileSync"
+      [@@val] [@@module "fs"]
+  end
+end
+
 let get_coverage_data =
   Bisect_common.runtime_data_to_string
 
