@@ -744,9 +744,11 @@ struct
 
   let rec make_function loc body = function
     | [] ->
-      Exp.fun_ ~loc Ppxlib.Nolabel None [%pat? ()] body
+      Exp.fun_
+        ~loc Ppxlib.Nolabel None [%pat? ()] body
     | x::rest ->
-      Exp.fun_ ~loc Ppxlib.Nolabel None (Pat.var ~loc x) (make_function loc body rest)
+      Exp.fun_
+        ~loc Ppxlib.Nolabel None (Pat.var ~loc x) (make_function loc body rest)
 
   let instrument_cases
       points ?(use_aliases = false) (cases : Parsetree.case list) =
@@ -995,8 +997,11 @@ struct
             let points = [%e points_data] in
             let `Visit visit =
               Bisect.Runtime.register_file
-                ~bisect_file:[%e bisect_file] ~bisect_silent:[%e bisect_silent]
-                ~filename:[%e filename] ~points ~bisect_sigterm:[%e bisect_sigterm]
+                ~bisect_file:[%e bisect_file]
+                ~bisect_silent:[%e bisect_silent]
+                ~filename:[%e filename]
+                ~points
+                ~bisect_sigterm:[%e bisect_sigterm]
             in
             visit
         ]
