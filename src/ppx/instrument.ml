@@ -384,7 +384,7 @@ struct
     match case.pc_rhs with
     | [%expr assert false] -> true
     | {pexp_desc = Pexp_unreachable; _} -> true
-    | {pexp_attributes}
+    | {pexp_attributes; _}
       when Coverage_attributes.has_off_attribute pexp_attributes -> true
     | _ -> false
 
@@ -496,7 +496,7 @@ struct
         recur ~enclosing_loc p'
         |> List.map (fun (location_trace, p'') ->
           (location_trace,
-          Pat.mk ~loc ~attrs Pat.(Ppat_construct (c, Some (ts, p'')))))
+          Pat.mk ~loc ~attrs (Ppat_construct (c, Some (ts, p'')))))
 
       | Ppat_variant (c, Some p') ->
         recur ~enclosing_loc p'
