@@ -1,13 +1,12 @@
 diff -ru src/common/bisect_common.ml _self/meta_bisect_ppx/src/common/bisect_common.ml
 --- src/common/bisect_common.ml
 +++ _self/meta_bisect_ppx/src/common/bisect_common.ml
-@@ -95,5 +95,5 @@
-   Random.State.make_self_init () [@coverage off]
- 
+@@ -110,4 +110,4 @@
  let random_filename ~prefix =
--  Printf.sprintf "%s%09d.coverage"
-+  Printf.sprintf "%s%09d.meta"
-     prefix (abs (Random.State.int prng 1000000000))
+   prefix ^
+   (string_of_int (abs (Random.State.int prng 1000000000))) ^
+-  ".coverage"
++  ".meta"
 diff -ru src/common/dune _self/meta_bisect_ppx/src/common/dune
 --- src/common/dune
 +++ _self/meta_bisect_ppx/src/common/dune
@@ -42,15 +41,15 @@ diff -ru src/ppx/dune _self/meta_bisect_ppx/src/ppx/dune
 diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
 --- src/ppx/instrument.ml
 +++ _self/meta_bisect_ppx/src/ppx/instrument.ml
-@@ -986,7 +986,7 @@
+@@ -996,7 +996,7 @@
            let ___bisect_visit___ =
              let points = [%e points_data] in
              let `Visit visit =
 -              Bisect.Runtime.register_file
 +              Meta_bisect.Runtime.register_file
-                 ~bisect_file:[%e bisect_file] ~bisect_silent:[%e bisect_silent]
-                 ~filename:[%e filename] ~points
-             in
+                 ~bisect_file:[%e bisect_file]
+                 ~bisect_silent:[%e bisect_silent]
+                 ~filename:[%e filename]
 diff -ru src/report/cobertura.ml _self/meta_bisect_ppx/src/report/cobertura.ml
 --- src/report/cobertura.ml
 +++ _self/meta_bisect_ppx/src/report/cobertura.ml
@@ -106,6 +105,18 @@ diff -ru src/report/input.mli _self/meta_bisect_ppx/src/report/input.mli
  (* This file is part of Bisect_ppx, released under the MIT license. See
     LICENSE.md for details, or visit
     https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
+diff -ru src/report/merge.ml _self/meta_bisect_ppx/src/report/merge.ml
+--- src/report/merge.ml
++++ _self/meta_bisect_ppx/src/report/merge.ml
+@@ -7,7 +7,7 @@
+   let coverage =
+     Input.load_coverage
+       ~coverage_files ~coverage_paths ~expect:[] ~do_not_expect:[]
+-    |> Bisect_common.write_coverage
++    |> Meta_bisect_common.write_coverage
+   in
+   let () = Util.mkdirs (Filename.dirname to_file) in
+   let oc = open_out to_file in
 diff -ru src/report/text.ml _self/meta_bisect_ppx/src/report/text.ml
 --- src/report/text.ml
 +++ _self/meta_bisect_ppx/src/report/text.ml
@@ -138,7 +149,7 @@ diff -ru src/runtime/native/runtime.ml _self/meta_bisect_ppx/src/runtime/native/
  
  let default_bisect_file = ref "bisect"
  
-@@ -76,8 +76,17 @@
+@@ -88,8 +88,17 @@
      in
      create_file 100
  
