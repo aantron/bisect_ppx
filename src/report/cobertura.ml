@@ -21,23 +21,27 @@ type package = {
   classes : class_ list;
 }
 
+type packages = {
+  packages : package list;
+}
+
 type cobertura = {
   lines_valid : int;
   lines_covered : int;
   line_rate : float;
   sources : string list;
-  package : package;
+  packages : packages;
 }
 
 let pp_list pp fmt =
   List.iter (fun x -> pp fmt x; Format.pp_print_string fmt "\n")
 
 let pp_line fmt {number; hits} =
-  Format.fprintf fmt "          <line number=\"%d\" hits=\"%d\"/>" number hits
+  Format.fprintf fmt "            <line number=\"%d\" hits=\"%d\"/>" number hits
 
 let pp_lines fmt lines =
   let open Format in
-  fprintf fmt "        <lines>\n%a        </lines>\n"
+  fprintf fmt "          <lines>\n%a          </lines>\n"
     (pp_list pp_line) lines
 
 let pp_class_ fmt {name; line_rate; lines} =
@@ -49,14 +53,14 @@ let pp_class_ fmt {name; line_rate; lines} =
       line_rate
   in
   fprintf fmt
-    "      <class %s>\n%a      </class>"
+    "        <class %s>\n%a        </class>"
     class_infos
     pp_lines lines
 
 let pp_classes fmt classes =
   let open Format in
   fprintf fmt
-    "    <classes>\n%a    </classes>\n"
+    "      <classes>\n%a      </classes>\n"
     (pp_list pp_class_) classes
 
 let pp_package fmt {name; line_rate; classes} =
@@ -66,9 +70,14 @@ let pp_package fmt {name; line_rate; classes} =
       name
       line_rate
   in
-  fprintf fmt "  <package %s>\n%a  </package>\n"
+  fprintf fmt "    <package %s>\n%a    </package>"
     package_infos
     pp_classes classes
+
+let pp_packages fmt ({packages} : packages) =
+  let open Format in
+  fprintf fmt "  <packages>\n%a  </packages>\n"
+    (pp_list pp_package) packages
 
 let pp_source fmt source =
   Format.fprintf fmt "    <source>%s</source>" source
@@ -79,7 +88,7 @@ let pp_sources fmt sources =
     "  <sources>\n%a  </sources>\n"
     (pp_list pp_source) sources
 
-let pp_cobertura fmt ({sources; package; _} as cobertura) =
+let pp_cobertura fmt ({sources; packages; _} as cobertura) =
   let open Format in
   let cobertura_infos {lines_valid; lines_covered; line_rate; _} =
     sprintf
@@ -92,7 +101,7 @@ let pp_cobertura fmt ({sources; package; _} as cobertura) =
     "<?xml version=\"1.0\" ?>\n<coverage %s>\n%a%a</coverage>"
     (cobertura_infos cobertura)
     pp_sources sources
-    pp_package package
+    pp_packages packages
 
 let line_rate (visited, total) =
   float_of_int visited /. float_of_int total
@@ -151,16 +160,19 @@ let package ~counts ~resolver ~coverage =
   let line_rate = line_rate !counts in
   {name = "."; line_rate; classes}
 
+let packages ~packages = {packages}
+
 let cobertura ~resolver ~coverage =
   let counts = ref (0, 0) in
   let package = package ~counts ~resolver ~coverage in
+  let packages = packages ~packages:[package] in
   let sources = ["."] in
   let rate = line_rate !counts in
   {
     lines_valid = snd !counts;
     lines_covered = fst !counts;
     line_rate = rate;
-    package;
+    packages;
     sources;
   }
 
