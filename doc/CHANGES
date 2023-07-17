@@ -1,3 +1,25 @@
+Version 2.8.3 (2023-07-17):
+---------------------------
+
+  Additions
+
+  - ppxlib 0.28.0 and higher compatibility (#413).
+  - ReScript 10 support (#405, reported by Quinn Dougherty).
+  - ReScript 11 support (#422).
+
+  Bugs fixed
+
+  - Show sources of .re files in HTML view when build system is Dune (#404,
+    reported by Konstantin Olkhovskiy).
+  - Respect [@coverage off] in or-patterns (#414, reported by Nora Sandler).
+  - Add <packages> to Cobertura format (#420, Maxim Grankin).
+  - Stack overflow in HTML generation (#421, Allan Blanchard).
+
+  Changes
+
+  - Prebuilt binaries for npm are now built on Ubuntu 20.04 and macOS 11. They
+    were previously built on Ubuntu 18.04 and macOS 10.
+
 Version 2.8.2 (2023-04-13):
 ---------------------------
 
