@@ -179,17 +179,23 @@ let html =
       info ["tree"] ~doc:
         ("Generate collapsible directory tree with per-directory summaries."))
   in
+  let sort_by_stats =
+    Arg.(value @@ flag @@
+      info ["sort-by-stats"] ~doc:
+        ("Sort reported files by increasing values of coverage stats."))
+  in
 
   let call_with_labels
       to_directory title tab_size theme coverage_files coverage_paths
-      source_paths ignore_missing_files expect do_not_expect tree =
+      source_paths ignore_missing_files expect do_not_expect tree sort_by_stats =
     Html.output
       ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
-      ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree
+      ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree ~sort_by_stats
   in
   Term.(const set_verbose $ verbose $ const call_with_labels $ to_directory
     $ title $ tab_size $ theme $ coverage_files 0 $ coverage_paths
-    $ source_paths $ ignore_missing_files $ expect $ do_not_expect $ tree),
+    $ source_paths $ ignore_missing_files $ expect $ do_not_expect $ tree
+    $ sort_by_stats),
   term_info "html" ~doc:"Generate HTML report locally."
     ~man:[
       `S "USAGE EXAMPLE";
