@@ -56,9 +56,10 @@ end = struct
 
   let rec flatten files =
     files
-    |> List.concat_map (function
+    |> List.map (function
       | (File _) as f -> [ f ]
       | Directory (_, files, _) -> flatten files)
+    |> List.concat
 end
 
 let output_html_index ~tree ~sort_by_stats title theme filename files =
