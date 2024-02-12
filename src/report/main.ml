@@ -182,15 +182,17 @@ let html =
   let sort_by_stats =
     Arg.(value @@ flag @@
       info ["sort-by-stats"] ~doc:
-        ("Sort reported files by increasing values of coverage stats."))
+        ("Sort files in order of increasing coverage stats."))
   in
 
   let call_with_labels
       to_directory title tab_size theme coverage_files coverage_paths
-      source_paths ignore_missing_files expect do_not_expect tree sort_by_stats =
+      source_paths ignore_missing_files expect do_not_expect tree
+      sort_by_stats =
     Html.output
       ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
-      ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree ~sort_by_stats
+      ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree
+      ~sort_by_stats
   in
   Term.(const set_verbose $ verbose $ const call_with_labels $ to_directory
     $ title $ tab_size $ theme $ coverage_files 0 $ coverage_paths

@@ -31,15 +31,12 @@ type index_element =
   | File of index_file
   | Directory of (string * index_element list * (int * int))
 
-module Index_element : sig
-  type t = index_element
-
-  val sort_by_stats : t list -> t list
-
-  val flatten : t list -> t list
-end = struct
-  type t = index_element
-
+module Index_element :
+sig
+  val sort_by_stats : index_element list -> index_element list
+  val flatten : index_element list -> index_element list
+end =
+struct
   let percentage = function
     | File (_, _, stat) -> percentage stat
     | Directory (_, _, stat) -> percentage stat
@@ -51,13 +48,14 @@ end = struct
     files
     |> List.map (function
       | (File _) as f -> f
-      | Directory (name, files, stats) -> Directory (name, sort_by_stats files, stats))
+      | Directory (name, files, stats) ->
+        Directory (name, sort_by_stats files, stats))
     |> List.sort compare_by_stat
 
   let rec flatten files =
     files
     |> List.map (function
-      | (File _) as f -> [ f ]
+      | (File _) as f -> [f]
       | Directory (_, files, _) -> flatten files)
     |> List.concat
 end
@@ -171,8 +169,9 @@ let output_html_index ~tree ~sort_by_stats title theme filename files =
 
     let files =
       match sort_by_stats, tree with
-      | false, (false|true) -> files
-      | true, false -> files |> Index_element.flatten |> Index_element.sort_by_stats
+      | false, _ -> files
+      | true, false ->
+        files |> Index_element.flatten |> Index_element.sort_by_stats
       | true, true -> files |> Index_element.sort_by_stats
     in
 
@@ -539,7 +538,8 @@ let output_string_to_separate_file content filename =
 
 let output
     ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
-    ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree ~sort_by_stats =
+    ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree
+    ~sort_by_stats =
 
   (* Read all the [.coverage] files and get per-source file visit counts. *)
   let coverage =
