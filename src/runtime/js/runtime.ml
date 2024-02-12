@@ -13,20 +13,20 @@ struct
   struct
     external openSync :
       string ->
-      ([ `Read [@as "r"]
-      | `Read_write [@as "r+"]
-      | `Read_write_sync [@as "rs+"]
-      | `Write [@as "w"]
-      | `Write_fail_if_exists [@as "wx"]
-      | `Write_read [@as "w+"]
-      | `Write_read_fail_if_exists [@as "wx+"]
-      | `Append [@as "a"]
-      | `Append_fail_if_exists [@as "ax"]
-      | `Append_read [@as "a+"]
-      | `Append_read_fail_if_exists [@as "ax+"] ]
-      [@string]) ->
+      ([ `Read [@mel.as "r"]
+      | `Read_write [@mel.as "r+"]
+      | `Read_write_sync [@mel.as "rs+"]
+      | `Write [@mel.as "w"]
+      | `Write_fail_if_exists [@mel.as "wx"]
+      | `Write_read [@mel.as "w+"]
+      | `Write_read_fail_if_exists [@mel.as "wx+"]
+      | `Append [@mel.as "a"]
+      | `Append_fail_if_exists [@mel.as "ax"]
+      | `Append_read [@mel.as "a+"]
+      | `Append_read_fail_if_exists [@mel.as "ax+"] ]
+      [@mel.string]) ->
       unit = "openSync"
-      [@@module "fs"]
+      [@@mel.module "fs"]
 
     type encoding = [
       | `hex
@@ -42,7 +42,7 @@ struct
 
     external writeFileSync : string -> string -> encoding -> unit =
       "writeFileSync"
-      [@@val] [@@module "fs"]
+      [@@mel.module "fs"]
   end
 end
 
@@ -70,7 +70,7 @@ let write_coverage_data () =
 let reset_coverage_data =
   Bisect_common.reset_counters
 
-let node_at_exit = [%bs.raw {|
+let node_at_exit: (unit -> unit) -> unit = [%mel.raw {|
   function (callback) {
     if (typeof process !== 'undefined' && typeof process.on !== 'undefined')
       process.on("exit", callback);
