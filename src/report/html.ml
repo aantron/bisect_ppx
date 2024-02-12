@@ -31,7 +31,36 @@ type index_element =
   | File of index_file
   | Directory of (string * index_element list * (int * int))
 
-let output_html_index ~tree title theme filename files =
+module Index_element :
+sig
+  val sort_by_stats : index_element list -> index_element list
+  val flatten : index_element list -> index_element list
+end =
+struct
+  let percentage = function
+    | File (_, _, stat) -> percentage stat
+    | Directory (_, _, stat) -> percentage stat
+
+  let compare_by_stat e1 e2 =
+    compare (percentage e1, e1) (percentage e2, e2)
+
+  let rec sort_by_stats files =
+    files
+    |> List.map (function
+      | (File _) as f -> f
+      | Directory (name, files, stats) ->
+        Directory (name, sort_by_stats files, stats))
+    |> List.sort compare_by_stat
+
+  let rec flatten files =
+    files
+    |> List.map (function
+      | (File _) as f -> [f]
+      | Directory (_, files, _) -> flatten files)
+    |> List.concat
+end
+
+let output_html_index ~tree ~sort_by_stats title theme filename files =
   Util.info "Writing index file...";
 
   let add_stats (visited, total) (visited', total') =
@@ -137,6 +166,14 @@ let output_html_index ~tree title theme filename files =
     let write format = Printf.fprintf channel format in
 
     let (files, stats) = collate files in
+
+    let files =
+      match sort_by_stats, tree with
+      | false, _ -> files
+      | true, false ->
+        files |> Index_element.flatten |> Index_element.sort_by_stats
+      | true, true -> files |> Index_element.sort_by_stats
+    in
 
     let overall_coverage =
       Printf.sprintf "%.02f%%" (floor ((percentage stats) *. 100.) /. 100.) in
@@ -501,7 +538,8 @@ let output_string_to_separate_file content filename =
 
 let output
     ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
-    ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree =
+    ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree
+    ~sort_by_stats =
 
   (* Read all the [.coverage] files and get per-source file visit counts. *)
   let coverage =
@@ -535,6 +573,7 @@ let output
   (* Write the coverage report landing page. *)
   output_html_index
     ~tree
+    ~sort_by_stats
     title
     theme
     (Filename.concat to_directory "index.html")

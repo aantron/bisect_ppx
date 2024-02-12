@@ -16,4 +16,5 @@ val output :
   expect:string list ->
   do_not_expect:string list ->
   tree:bool ->
+  sort_by_stats:bool ->
     unit
