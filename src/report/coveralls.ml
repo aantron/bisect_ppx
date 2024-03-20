@@ -149,6 +149,7 @@ type ci = [
   | `CircleCI
   | `Travis
   | `GitHub
+  | `GitLab
 ]
 
 module CI :
@@ -169,22 +170,26 @@ struct
     environment_variable "CIRCLECI" "true" `CircleCI @@ fun () ->
     environment_variable "TRAVIS" "true" `Travis @@ fun () ->
     environment_variable "GITHUB_ACTIONS" "true" `GitHub @@ fun () ->
+    environment_variable "GITLAB_CI" "true" `GitLab @@ fun () ->
     None
 
   let pretty_name = function
     | `CircleCI -> "CircleCI"
     | `Travis -> "Travis"
     | `GitHub -> "GitHub Actions"
+    | `GitLab -> "GitLab CI"
 
   let name_in_report = function
     | `CircleCI -> "circleci"
     | `Travis -> "travis-ci"
     | `GitHub -> "github"
+    | `GitLab -> "gitlab"
 
   let job_id_variable = function
     | `CircleCI -> "CIRCLE_BUILD_NUM"
     | `Travis -> "TRAVIS_JOB_ID"
     | `GitHub -> "GITHUB_RUN_NUMBER"
+    | `GitLab -> "CI_JOB_ID"
 end
 
 type coverage_service = [
@@ -220,12 +225,14 @@ struct
     match ci, service with
     | `CircleCI, `Coveralls -> Some "CIRCLE_PULL_REQUEST"
     | `GitHub, `Coveralls -> Some "PULL_REQUEST_NUMBER"
+    | `GitLab, `Coveralls -> Some "CI_EXTERNAL_PULL_REQUEST_IID"
     | _ -> None
 
   let needs_repo_token ci service =
     match ci, service with
     | `CircleCI, `Coveralls -> true
     | `GitHub, `Coveralls -> true
+    | `GitLab, `Coveralls -> true
     | _ -> false
 
   let repo_token_variables = function
@@ -236,6 +243,7 @@ struct
     match ci, service with
     | `CircleCI, `Coveralls -> true
     | `GitHub, `Coveralls -> true
+    | `GitLab, `Coveralls -> true
     | _ -> false
 end
 
