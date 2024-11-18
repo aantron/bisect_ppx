@@ -1,11 +1,24 @@
-# Bisect_ppx &nbsp; [![Coverage][coveralls-img]][coveralls]
+<h1 align="center">
+<img alt="Bisect_ppx" src="https://raw.githubusercontent.com/aantron/bisect_ppx/logo/doc/logo.png" width="200">
+</img>
+<br>
+Bisect_ppx
+</h1>
 
-[**Bisect_ppx**][self] is a code coverage tool for OCaml and Reason. It helps
-you test thoroughly by showing what's **not** tested.
+<br><br>
 
-[![Bisect_ppx usage example][sample]][gh-pages-report]
+**Bisect_ppx** is a code coverage tool for OCaml. It helps you test
+thoroughly by showing what's **not** tested. You can browse the report seen
+in the demo below [online here][gh-pages-report].
 
-You can browse the report seen above [online here][gh-pages-report].
+<br><br>
+
+<p align="center">
+<a href="http://aantron.github.io/bisect_ppx/demo/">
+<img alt="Bisect_ppx usage example" src="https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif">
+</img>
+</a>
+</p>
 
 [self]: https://github.com/aantron/bisect_ppx
 [sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
@@ -14,9 +27,9 @@ You can browse the report seen above [online here][gh-pages-report].
 
 
 
-<br>
+<br><br>
 
-#### Table of contents
+## Table of contents
 
 - [**Usage**](#Usage)
   - [**Dune**](#Dune) &nbsp; ([starter repo][dune-repo], [report][dune-report])
