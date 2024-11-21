@@ -1,0 +1,7 @@
+(library
+ (name bisect)
+ (modes melange)
+ (public_name bisect_ppx.runtime_melange)
+ (synopsis "Bisect_ppx runtime library for Melange")
+ (libraries bisect_common melange)
+ (preprocess (pps melange.ppx)))

@@ -1,4 +1,5 @@
 (library
  (name bisect_common)
+ (modes :standard melange)
  (public_name bisect_ppx.common)
  (synopsis "Bisect_ppx internal functions (internal)"))
