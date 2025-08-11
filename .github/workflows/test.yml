@@ -7,8 +7,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-        - ubuntu-20.04
-        - macos-11
+        - ubuntu-22.04
+        - macos-13
         # Build binaries on older systems to require lower versions of libc and
         # other system libraries.
 
