@@ -1,2 +1,2 @@
 (cram
- (deps ../test.sh))
+  (deps ../test.sh (package bisect_ppx)))

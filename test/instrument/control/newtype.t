@@ -12,7 +12,8 @@ Recursive instrumentation of subexpression.
   > let _ = fun (type _t) -> fun x -> x
   > EOF
   let _ =
-    fun (type _t) x ->
+   fun (type _t) ->
+    fun x ->
      ___bisect_visit___ 0;
      x
 
