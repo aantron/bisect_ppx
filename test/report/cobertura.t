@@ -16,7 +16,7 @@
     <packages>
       <package name="." line-rate="0.333333">
         <classes>
-          <class name="test.ml" filename="test.ml" line-rate="0.333333">
+          <class name="Test" filename="test.ml" line-rate="0.333333">
             <lines>
               <line number="2" hits="1"/>
               <line number="5" hits="0"/>

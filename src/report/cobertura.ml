@@ -11,6 +11,7 @@ type line = {
 
 type class_ = {
   name : string;
+  filename: string;
   line_rate : float;
   lines : line list;
 }
@@ -44,12 +45,12 @@ let pp_lines fmt lines =
   fprintf fmt "          <lines>\n%a          </lines>\n"
     (pp_list pp_line) lines
 
-let pp_class_ fmt {name; line_rate; lines} =
+let pp_class_ fmt {name; filename; line_rate; lines} =
   let open Format in
   let class_infos =
     Format.sprintf "name=\"%s\" filename=\"%s\" line-rate=\"%f\""
       name
-      name
+      filename
       line_rate
   in
   fprintf fmt
@@ -116,6 +117,12 @@ let update_counts counts line_counts =
 let line line hits =
   {number = line; hits}
 
+let module_name_of_filename filename =
+  filename
+  |> Filename.basename
+  |> Filename.chop_extension
+  |> String.capitalize_ascii
+
 let classes ~global_counts resolver coverage : class_ list =
   let class_ {Bisect_common.filename; points; counts} =
     match resolver ~filename with
@@ -145,7 +152,8 @@ let classes ~global_counts resolver coverage : class_ list =
         |> List.rev
       in
 
-      Some {name = filename; line_rate; lines}
+      let name = module_name_of_filename filename in
+      Some {name; filename; line_rate; lines}
   in
 
   Hashtbl.fold (fun _ file acc ->
