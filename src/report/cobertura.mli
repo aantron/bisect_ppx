@@ -10,6 +10,7 @@ val output :
   coverage_paths:string list ->
   source_paths:string list ->
   ignore_missing_files:bool ->
+  package_name:string ->
   expect:string list ->
   do_not_expect:string list ->
     unit
