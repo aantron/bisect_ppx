@@ -163,16 +163,16 @@ let classes ~global_counts resolver coverage : class_ list =
     coverage
     []
 
-let package ~counts ~resolver ~coverage =
+let package ~package_name ~counts ~resolver ~coverage =
   let classes = classes ~global_counts:counts resolver coverage in
   let line_rate = line_rate !counts in
-  {name = "."; line_rate; classes}
+  {name = package_name; line_rate; classes}
 
 let packages ~packages = {packages}
 
-let cobertura ~resolver ~coverage =
+let cobertura ~package_name ~resolver ~coverage =
   let counts = ref (0, 0) in
-  let package = package ~counts ~resolver ~coverage in
+  let package = package ~package_name ~counts ~resolver ~coverage in
   let packages = packages ~packages:[package] in
   let sources = ["."] in
   let rate = line_rate !counts in
@@ -186,14 +186,14 @@ let cobertura ~resolver ~coverage =
 
 let output
     ~to_file ~coverage_files ~coverage_paths ~source_paths ~ignore_missing_files
-    ~expect ~do_not_expect =
+    ~package_name ~expect ~do_not_expect =
 
   let coverage =
     Input.load_coverage
       ~coverage_files ~coverage_paths ~expect ~do_not_expect in
   let resolver =
     Util.find_source_file ~source_roots:source_paths ~ignore_missing_files in
-  let cobertura = cobertura ~resolver ~coverage in
+  let cobertura = cobertura ~package_name ~resolver ~coverage in
   let () = Util.mkdirs (Filename.dirname to_file) in
   let oc =
     try open_out to_file

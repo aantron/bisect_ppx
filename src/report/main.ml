@@ -244,16 +244,22 @@ let text =
 
 
 let cobertura =
+  let package_name =
+    Arg.(value @@ opt string "." @@
+      info ["package"] ~docv:"STRING" ~doc:
+      "Package name to include in the Cobertura XML report.")
+  in
+
   let call_with_labels
       to_file coverage_files coverage_paths source_paths ignore_missing_files
-      expect do_not_expect =
+      package_name expect do_not_expect =
     Cobertura.output
       ~to_file ~coverage_files ~coverage_paths ~source_paths
-      ~ignore_missing_files ~expect ~do_not_expect
+      ~ignore_missing_files ~package_name ~expect ~do_not_expect
   in
   Term.(const set_verbose $ verbose $ const call_with_labels $ to_file
     $ coverage_files 1 $ coverage_paths $ source_paths $ ignore_missing_files
-    $ expect $ do_not_expect),
+    $ package_name $ expect $ do_not_expect),
   term_info "cobertura" ~doc:"Generate Cobertura XML report"
 
 
