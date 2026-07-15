@@ -1,1 +1,6 @@
-(dirs (:standard \ js))
+(dirs
+ (:standard \ js))
+
+(cram
+ (deps
+  (package bisect_ppx)))

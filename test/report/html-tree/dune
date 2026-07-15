@@ -1,3 +1,7 @@
 (cram
- (deps test_tree.ml (source_tree foo) (source_tree baz))
+ (deps
+  test_tree.ml
+  (source_tree foo)
+  (source_tree baz)
+  (package bisect_ppx))
  (alias compatible))
