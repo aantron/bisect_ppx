@@ -179,15 +179,17 @@ No instrumentation is inserted into expressions that are (syntactic) values.
   > EOF
   let _ = let module Foo = struct  end in 0
   let _ =
-  let module Foo =
+  let
+  module Foo =
   struct let () = ___bisect_post_visit___ 0 (print_endline "foo") end in
   ___bisect_post_visit___ 1 (print_endline "bar")
   let _ =
   fun () ->
   ___bisect_visit___ 3;
-  (let module Foo =
-  struct let () = ___bisect_post_visit___ 2 (print_endline "foo") end in
-  print_endline "bar")
+  (let
+  module Foo =
+  struct let () = ___bisect_post_visit___ 2 (print_endline "foo") end
+  in print_endline "bar")
 
 
   $ bash test.sh <<'EOF'
