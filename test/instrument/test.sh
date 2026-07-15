@@ -43,6 +43,12 @@ then
   DELIMITERS=1
 fi
 
+if [ "$VERBOSE" == "1" ]; then
+  ocamlopt test.ml -dsource -stop-after typing
+fi
+
 dune build ./test.bc --instrument-with bisect_ppx 2>&1 \
 | sanitize $DELIMITERS \
-| ocamlformat --name test.ml -
+
+
+
