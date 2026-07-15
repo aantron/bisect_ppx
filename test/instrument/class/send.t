@@ -4,13 +4,8 @@ Send instrumented.
   > let _ = (object method foo = () end)#foo
   > EOF
   let _ =
-    ___bisect_post_visit___ 1
-      (object
-         method foo =
-           ___bisect_visit___ 0;
-           ()
-      end)
-        #foo
+  ___bisect_post_visit___ 1
+  (object method foo = ___bisect_visit___ 0; () end)#foo
 
 
 Not instrumented in tail position.
@@ -19,14 +14,9 @@ Not instrumented in tail position.
   > let _ = fun () -> (object method foo = () end)#foo
   > EOF
   let _ =
-   fun () ->
-    ___bisect_visit___ 1;
-    (object
-       method foo =
-         ___bisect_visit___ 0;
-         ()
-    end)
-      #foo
+  fun () ->
+  ___bisect_visit___ 1;
+  (object method foo = (___bisect_visit___ 0; ()) end)#foo
 
 
 Not instrumented inside a surrounding application expression.
@@ -35,11 +25,5 @@ Not instrumented inside a surrounding application expression.
   > let _ = (object method foo () = () end)#foo ()
   > EOF
   let _ =
-    ___bisect_post_visit___ 1
-      ((object
-          method foo () =
-            ___bisect_visit___ 0;
-            ()
-       end)
-         #foo
-         ())
+  ___bisect_post_visit___ 1
+  ((object method foo () = ___bisect_visit___ 0; () end)#foo ())

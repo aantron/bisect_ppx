@@ -6,12 +6,7 @@ Method "entry point" instrumented.
   >     method foo = ()
   >   end
   > EOF
-  let _ =
-    object
-      method foo =
-        ___bisect_visit___ 0;
-        ()
-    end
+  let _ = object method foo = ___bisect_visit___ 0; () end
 
 
 Instrumentation is inserted into nested abstractions.
@@ -24,17 +19,10 @@ Instrumentation is inserted into nested abstractions.
   >   end
   > EOF
   let _ =
-    object
-      method foo () () =
-        ___bisect_visit___ 0;
-        ()
-  
-      method bar =
-        function
-        | () ->
-            ___bisect_visit___ 1;
-            ()
-    end
+  object
+  method foo () () = ___bisect_visit___ 0; ()
+  method bar = function | () -> (___bisect_visit___ 1; ())
+  end
 
 
 Subexpressions instrumented recursively.
@@ -47,13 +35,10 @@ Subexpressions instrumented recursively.
   >   end
   > EOF
   let _ =
-    object
-      val foo = ___bisect_post_visit___ 0 (print_endline "foo")
-  
-      method bar =
-        ___bisect_visit___ 1;
-        print_endline "bar"
-    end
+  object
+  val foo = ___bisect_post_visit___ 0 (print_endline "foo")
+  method bar = ___bisect_visit___ 1; print_endline "bar"
+  end
 
 
 Virtual method preserved.
@@ -64,10 +49,7 @@ Virtual method preserved.
   >   method virtual bar : unit
   > end
   > EOF
-  class virtual foo =
-    object
-      method virtual bar : unit
-    end
+  class virtual foo = object method virtual  bar : unit end
 
 
 Polymorphic type annotations preserved.
@@ -80,13 +62,8 @@ Polymorphic type annotations preserved.
   >   end
   > EOF
   let _ =
-    object
-      method foo : 'a. unit =
-        ___bisect_visit___ 0;
-        ()
-  
-      method bar : 'a. 'a -> unit =
-        fun _ ->
-          ___bisect_visit___ 1;
-          ()
-    end
+  object
+  method foo : 'a . unit= ___bisect_visit___ 0; ()
+  method bar : 'a . 'a -> unit=
+  ___bisect_visit___ 2; (fun _ -> ___bisect_visit___ 1; ())
+  end

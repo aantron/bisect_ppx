@@ -8,10 +8,9 @@ Attributes can suppress instrumentation in an expression subtree.
   >     ignore
   > EOF
   let _ =
-    if true then fun [@coverage off] () -> print_endline "foo"
-    else (
-      ___bisect_visit___ 0;
-      ignore)
+  if true
+  then ((fun () -> print_endline "foo")[@coverage off])
+  else (___bisect_visit___ 0; ignore)
 
 
 Suppression works even across a transition out of the expression language.
@@ -21,12 +20,7 @@ Suppression works even across a transition out of the expression language.
   >   (let module Foo = struct let _bar = fun () -> () end in
   >   ()) [@coverage off]
   > EOF
-  let _ =
-    (let module Foo = struct
-       let _bar () = ()
-     end in
-    ())
-    [@coverage off]
+  let _ = ((let module Foo = struct let _bar () = () end in ())[@coverage off])
 
 
 Attributes can suppress instrumentation of a structure item.
@@ -35,7 +29,7 @@ Attributes can suppress instrumentation of a structure item.
   > let f () = ()
   >   [@@coverage off]
   > EOF
-  let f () = () [@@coverage off]
+  let f () = ()[@@coverage off]
 
 
 Attributes can suppress instrumentation of a range of structure items.
@@ -47,14 +41,9 @@ Attributes can suppress instrumentation of a range of structure items.
   > let g () = ()
   > EOF
   [@@@coverage off]
-  
   let f () = ()
-  
   [@@@coverage on]
-  
-  let g () =
-    ___bisect_visit___ 0;
-    ()
+  let g () = ___bisect_visit___ 0; ()
 
 
 Attributes can suppress coverage in a file.
@@ -76,10 +65,8 @@ Non-coverage attributes are preserved uninstrumented.
   > let _ = () [@foo print_endline "bar"]
   > EOF
   [@@@foo print_endline "bar"]
-  
-  let _ = () [@@foo print_endline "bar"]
-  
-  let _ = () [@foo print_endline "bar"]
+  let _ = ()[@@foo print_endline "bar"]
+  let _ = ((())[@foo print_endline "bar"])
 
 
 Or-pattern coverage is suppressed for cases with [@coverage off].
@@ -92,18 +79,13 @@ Or-pattern coverage is suppressed for cases with [@coverage off].
   >   | exception Not_found | exception Exit -> () [@coverage off]
   > EOF
   let () =
-    match `A with
-    | (exception Not_found) | (exception Exit) -> () [@coverage off]
-    | `A | `B -> () [@coverage off]
-    | (`C | `D) as ___bisect_matched_value___ ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
-           ___bisect_matched_value___
-         with
-        | `C ->
-            ___bisect_visit___ 0;
-            ()
-        | `D ->
-            ___bisect_visit___ 1;
-            ()
-        | _ -> ());
-        ()
+  match `A with
+  | exception Not_found | exception Exit -> ((())[@coverage off])
+  | `A | `B -> ((())[@coverage off])
+  | `C | `D as ___bisect_matched_value___ ->
+  ((((match ___bisect_matched_value___ with
+  | `C -> (___bisect_visit___ 0; ())
+  | `D -> (___bisect_visit___ 1; ())
+  | _ -> ()))
+  [@ocaml.warning "-4-8-9-11-26-27-28-33"]);
+  ())

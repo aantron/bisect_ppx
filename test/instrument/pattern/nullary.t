@@ -5,11 +5,7 @@ Wildcard.
   >   match () with
   >   | _ -> ()
   > EOF
-  let _ =
-    match () with
-    | _ ->
-        ___bisect_visit___ 0;
-        ()
+  let _ = match () with | _ -> (___bisect_visit___ 0; ())
 
 
 Variable.
@@ -19,11 +15,7 @@ Variable.
   >   match () with
   >   | x -> x
   > EOF
-  let _ =
-    match () with
-    | x ->
-        ___bisect_visit___ 0;
-        x
+  let _ = match () with | x -> (___bisect_visit___ 0; x)
 
 
 Nullary constructor.
@@ -33,11 +25,7 @@ Nullary constructor.
   >   match () with
   >   | () -> ()
   > EOF
-  let _ =
-    match () with
-    | () ->
-        ___bisect_visit___ 0;
-        ()
+  let _ = match () with | () -> (___bisect_visit___ 0; ())
 
 
 Constant.
@@ -49,13 +37,9 @@ Constant.
   >   | _ -> ()
   > EOF
   let _ =
-    match 0 with
-    | 0 ->
-        ___bisect_visit___ 0;
-        ()
-    | _ ->
-        ___bisect_visit___ 1;
-        ()
+  match 0 with
+  | 0 -> (___bisect_visit___ 0; ())
+  | _ -> (___bisect_visit___ 1; ())
 
 
 Interval.
@@ -67,13 +51,9 @@ Interval.
   >   | _ -> ()
   > EOF
   let _ =
-    match 'a' with
-    | 'a' .. 'z' ->
-        ___bisect_visit___ 0;
-        ()
-    | _ ->
-        ___bisect_visit___ 1;
-        ()
+  match 'a' with
+  | 'a'..'z' -> (___bisect_visit___ 0; ())
+  | _ -> (___bisect_visit___ 1; ())
 
 
 Nullary polymorphic variand.
@@ -83,15 +63,11 @@ Nullary polymorphic variand.
   >   match `A with
   >   | `A -> ()
   > EOF
-  let _ =
-    match `A with
-    | `A ->
-        ___bisect_visit___ 0;
-        ()
+  let _ = match `A with | `A -> (___bisect_visit___ 0; ())
 
 
 Polymorphic variant type name.
-
+$ export VERBOSE=1
   $ bash ../test.sh <<'EOF'
   > type t = [ `A ]
   > let _ =
@@ -99,14 +75,9 @@ Polymorphic variant type name.
   >   | #t -> ()
   > EOF
   type t = [ `A ]
-  
-  let _ =
-    match `A with
-    | #t ->
-        ___bisect_visit___ 0;
-        ()
+  let _ = match `A with | #t -> (___bisect_visit___ 0; ())
 
-
+  $ unset VERBOSE
 Module.
 
   $ bash ../test.sh <<'EOF'
@@ -115,10 +86,7 @@ Module.
   >   match (module List : L) with
   >   | (module L) -> ()
   > EOF
-  module type L = module type of List
-  
+  module type L  = module type of List
   let _ =
-    match (module List : L) with
-    | (module L) ->
-        ___bisect_visit___ 0;
-        ()
+  match ((module List) : (module L)) with
+  | (module L)  -> (___bisect_visit___ 0; ())

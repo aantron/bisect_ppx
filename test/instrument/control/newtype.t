@@ -11,11 +11,7 @@ Recursive instrumentation of subexpression.
   $ bash ../test.sh <<'EOF'
   > let _ = fun (type _t) -> fun x -> x
   > EOF
-  let _ =
-   fun (type _t) ->
-    fun x ->
-     ___bisect_visit___ 0;
-     x
+  let _ = fun (type _t) -> fun x -> ___bisect_visit___ 0; x
 
 
 Subexpression in tail position iff whole expression is in tail position.
@@ -27,8 +23,5 @@ Subexpression in tail position iff whole expression is in tail position.
   >   fun (type _t) -> print_endline "foo"
   > EOF
   let _ = fun (type _t) -> ___bisect_post_visit___ 0 (print_endline "foo")
-  
   let _ =
-   fun () ->
-    ___bisect_visit___ 1;
-    fun (type _t) -> print_endline "foo"
+  fun () -> ___bisect_visit___ 1; (fun (type _t) -> print_endline "foo")

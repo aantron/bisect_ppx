@@ -11,10 +11,7 @@ Not instrumented when in tail position.
   $ bash ../test.sh <<'EOF'
   > let _ = fun () -> print_endline "foo"
   > EOF
-  let _ =
-   fun () ->
-    ___bisect_visit___ 0;
-    print_endline "foo"
+  let _ = fun () -> ___bisect_visit___ 0; print_endline "foo"
 
 
 Arguments instrumented recursively.
@@ -23,8 +20,8 @@ Arguments instrumented recursively.
   > let _ = String.trim (String.trim "foo")
   > EOF
   let _ =
-    ___bisect_post_visit___ 1
-      (String.trim (___bisect_post_visit___ 0 (String.trim "foo")))
+  ___bisect_post_visit___ 1
+  (String.trim (___bisect_post_visit___ 0 (String.trim "foo")))
 
 
 Function position instrumented recursively.
@@ -33,7 +30,8 @@ Function position instrumented recursively.
   > let _ = (List.map ignore) []
   > EOF
   let _ =
-    ___bisect_post_visit___ 0 ((___bisect_post_visit___ 0 (List.map ignore)) [])
+  ___bisect_post_visit___ 0
+  ((___bisect_post_visit___ 0 (List.map ignore)) [])
 
 
 Multiple arguments don't produce nested instrumentation.
@@ -59,5 +57,4 @@ Instrumentation suppressed if all arguments labeled.
   > let _ = ListLabels.iter ~f:ignore
   > EOF
   [@@@ocaml.warning "-5"]
-  
   let _ = ListLabels.iter ~f:ignore

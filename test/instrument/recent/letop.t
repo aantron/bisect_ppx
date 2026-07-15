@@ -10,22 +10,12 @@ Subexpressions instrumented recursively.
   >   let* () = print_endline "baz" in
   >   return ()
   > EOF
-  let ( let* ) x f =
-    ___bisect_visit___ 0;
-    f x
-  
-  let ( and* ) x y =
-    ___bisect_visit___ 1;
-    (x, y)
-  
-  let return x =
-    ___bisect_visit___ 2;
-    x
-  
+  let ( let* ) x f = ___bisect_visit___ 0; f x
+  let ( and* ) x y = ___bisect_visit___ 1; (x, y)
+  let return x = ___bisect_visit___ 2; x
   let _ =
-    let* () = ___bisect_post_visit___ 3 (print_endline "foo")
-    and* () = ___bisect_post_visit___ 4 (print_endline "bar") in
-    ___bisect_visit___ 7;
-    let* () = ___bisect_post_visit___ 5 (print_endline "baz") in
-    ___bisect_visit___ 6;
-    return ()
+  let* () = ___bisect_post_visit___ 3 (print_endline "foo")
+  and* () = ___bisect_post_visit___ 4 (print_endline "bar") in
+  ___bisect_visit___ 7;
+  (let* () = ___bisect_post_visit___ 5 (print_endline "baz")
+  in ___bisect_visit___ 6; return ())

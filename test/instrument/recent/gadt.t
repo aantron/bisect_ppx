@@ -6,26 +6,22 @@ GADT. See https://github.com/aantron/bisect_ppx/issues/325.
   >   match x with
   >   | A | B -> ()
   > EOF
-  type _ t = A : unit t | B : bool t
-  
+  type _ t =
+  | A: unit t
+  | B: bool t
   let f : type a. a t -> unit =
-   fun x ->
-    ___bisect_visit___ 2;
-    match x with
-    | ___bisect_matched_value___ -> (
-        match ___bisect_matched_value___ with
-        | A | B ->
-            (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
-               ___bisect_matched_value___
-             with
-            | A ->
-                ___bisect_visit___ 0;
-                ()
-            | B ->
-                ___bisect_visit___ 1;
-                ()
-            | _ -> ());
-            ())
+  fun x ->
+  ___bisect_visit___ 2;
+  (match x with
+  | ___bisect_matched_value___ ->
+  (match ___bisect_matched_value___ with
+  | A | B ->
+  ((((match ___bisect_matched_value___ with
+  | A -> (___bisect_visit___ 0; ())
+  | B -> (___bisect_visit___ 1; ())
+  | _ -> ()))
+  [@ocaml.warning "-4-8-9-11-26-27-28-33"]);
+  ())))
 
 
 With function.
@@ -35,20 +31,16 @@ With function.
   > let f : type a. a t -> unit = function
   >   | A | B -> ()
   > EOF
-  type _ t = A : unit t | B : bool t
-  
+  type _ t =
+  | A: unit t
+  | B: bool t
   let f : type a. a t -> unit =
-   fun ___bisect_matched_value___ ->
-    match ___bisect_matched_value___ with
-    | A | B ->
-        (match[@ocaml.warning "-4-8-9-11-26-27-28-33"]
-           ___bisect_matched_value___
-         with
-        | A ->
-            ___bisect_visit___ 0;
-            ()
-        | B ->
-            ___bisect_visit___ 1;
-            ()
-        | _ -> ());
-        ()
+  fun ___bisect_matched_value___ ->
+  match ___bisect_matched_value___ with
+  | A | B ->
+  ((((match ___bisect_matched_value___ with
+  | A -> (___bisect_visit___ 0; ())
+  | B -> (___bisect_visit___ 1; ())
+  | _ -> ()))
+  [@ocaml.warning "-4-8-9-11-26-27-28-33"]);
+  ())

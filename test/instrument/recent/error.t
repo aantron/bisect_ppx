@@ -60,15 +60,17 @@ is still emitted for the user's code.
   File "test.ml", line 4, characters 4-7:
   4 |   | {a} | {a} -> a
           ^^^
-  Error (warning 9): the following labels are not bound in this record pattern:
-  b
-  Either bind these labels explicitly or add '; _' to the pattern.
+  Error (warning 9): the following labels are not bound
+    in this record pattern: b.
+    Either bind these labels explicitly or add ; _ to the pattern.
+  
   File "test.ml", line 4, characters 10-13:
   4 |   | {a} | {a} -> a
                 ^^^
-  Error (warning 9): the following labels are not bound in this record pattern:
-  b
-  Either bind these labels explicitly or add '; _' to the pattern.
+  Error (warning 9): the following labels are not bound
+    in this record pattern: b.
+    Either bind these labels explicitly or add ; _ to the pattern.
+  
   File "test.ml", line 4, characters 10-13:
   4 |   | {a} | {a} -> a
                 ^^^
